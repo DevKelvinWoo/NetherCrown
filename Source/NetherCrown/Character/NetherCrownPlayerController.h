@@ -1,0 +1,35 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "GameFramework/PlayerController.h"
+#include "NetherCrownPlayerController.generated.h"
+
+class UInputAction;
+class UInputMappingContext;
+
+UCLASS()
+class NETHERCROWN_API ANetherCrownPlayerController : public APlayerController
+{
+	GENERATED_BODY()
+
+protected:
+	virtual void SetupInputComponent() override;
+
+private:
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> MoveAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> LookAtAction{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputMappingContext> MappingContext{};
+
+	void AddIMCAndBindAction();
+
+	UFUNCTION()
+	void MoveCharacter(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void LookAtCharacter(const FInputActionValue& InActionValue);
+};
