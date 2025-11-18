@@ -22,6 +22,8 @@ private:
 	TObjectPtr<UInputAction> MoveAction{};
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputAction> LookAtAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> JumpAction{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> MappingContext{};
@@ -32,4 +34,6 @@ private:
 	void MoveCharacter(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void LookAtCharacter(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void JumpCharacter(const FInputActionValue& InActionValue);
 };

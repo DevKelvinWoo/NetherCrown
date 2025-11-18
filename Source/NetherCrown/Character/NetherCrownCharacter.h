@@ -20,6 +20,7 @@ public:
 
 	void MoveCharacter(const FInputActionValue& Value);
 	void LookAtCharacter(const FInputActionValue& Value);
+	void JumpCharacter(const FInputActionValue& Value);
 
 protected:
 	virtual void BeginPlay() override;

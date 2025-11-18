@@ -78,3 +78,15 @@ void ANetherCrownCharacter::LookAtCharacter(const FInputActionValue& Value)
 		AddControllerPitchInput(MovementVector.Y);
 	}
 }
+
+void ANetherCrownCharacter::JumpCharacter(const FInputActionValue& Value)
+{
+	if (Value.IsNonZero())
+	{
+		const bool bJumpActionInput{ Value.Get<bool>() };
+		if (bJumpActionInput)
+		{
+			Jump();
+		}
+	}
+}
