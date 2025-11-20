@@ -36,4 +36,6 @@ private:
 	void LookAtCharacter(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void JumpCharacter(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void HandleOnMoveActionCompleted();
 };

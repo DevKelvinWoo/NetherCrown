@@ -21,11 +21,21 @@ public:
 	void MoveCharacter(const FInputActionValue& Value);
 	void LookAtCharacter(const FInputActionValue& Value);
 	void JumpCharacter(const FInputActionValue& Value);
+	void HandleOnMoveActionCompleted();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsPressedMoveKey() const { return bPressedMoveKey;}
+
+	UFUNCTION(BlueprintCallable)
+	bool IsHardLanding() const { return bIsHardLanding; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	virtual void Landed(const FHitResult& Hit) override;
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -34,5 +44,21 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USpringArmComponent> MainSpringArmComponent{};
 
+	UPROPERTY(Replicated)
+	bool bPressedMoveKey{ false };
+
+	UPROPERTY(Replicated)
+	bool bIsHardLanding{ false };
+
+	UFUNCTION(Server, Unreliable)
+	void Server_SetPressedMoveKey(const bool InbPressedMoveKey);
+
+	UFUNCTION(Server, Unreliable)
+	void Server_SetIsHardLanding(const bool InbIsHardLanding);
+
 	void SetCharacterDefaultMovementValues();
+
+	const FVector CalculateHitPointToGround();
+
+	FVector HitPointToGroundWhenJumpStart{};
 };

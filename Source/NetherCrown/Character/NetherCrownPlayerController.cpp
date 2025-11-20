@@ -31,6 +31,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	}
 
 	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::MoveCharacter);
+	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ThisClass::HandleOnMoveActionCompleted);
 	EnhancedPlayerInputComponent->BindAction(LookAtAction, ETriggerEvent::Triggered, this, &ThisClass::LookAtCharacter);
 	EnhancedPlayerInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::JumpCharacter);
 }
@@ -41,7 +42,7 @@ void ANetherCrownPlayerController::MoveCharacter(const FInputActionValue& InActi
 	if (!ensureAlways(NetherCrownCharacter))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-		
+
 		return;
 	}
 
@@ -54,7 +55,7 @@ void ANetherCrownPlayerController::LookAtCharacter(const FInputActionValue& InAc
 	if (!ensureAlways(NetherCrownCharacter))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-		
+
 		return;
 	}
 
@@ -67,9 +68,22 @@ void ANetherCrownPlayerController::JumpCharacter(const FInputActionValue& InActi
 	if (!ensureAlways(NetherCrownCharacter))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-		
+
 		return;
 	}
 
 	NetherCrownCharacter->JumpCharacter(InActionValue);
+}
+
+void ANetherCrownPlayerController::HandleOnMoveActionCompleted()
+{
+	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
+	if (!ensureAlways(NetherCrownCharacter))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
+
+		return;
+	}
+
+	NetherCrownCharacter->HandleOnMoveActionCompleted();
 }
