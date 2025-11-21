@@ -19,10 +19,13 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	MainSpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("MainSpringArmComponent"));
 	MainSpringArmComponent->SetupAttachment(RootComponent);
 	MainSpringArmComponent->bUsePawnControlRotation = true;
+	MainSpringArmComponent->TargetArmLength = 435.f;
+	MainSpringArmComponent->TargetOffset = FVector(0.f, 0.f, 200.f);
 
 	MainCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("MainCameraComponent"));
 	MainCameraComponent->SetupAttachment(MainSpringArmComponent);
 	MainCameraComponent->bUsePawnControlRotation = false;
+	MainCameraComponent->SetRelativeRotation(FRotator(-25.f, 0.f, 0.f));
 
 	SetCharacterDefaultMovementValues();
 }
@@ -30,7 +33,6 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 void ANetherCrownCharacter::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void ANetherCrownCharacter::Tick(float DeltaTime)
@@ -84,6 +86,9 @@ void ANetherCrownCharacter::SetCharacterDefaultMovementValues()
 	check(MovementComponent);
 
 	MovementComponent->bOrientRotationToMovement = true;
+	MovementComponent->MaxAcceleration = 1000.f;
+	MovementComponent->BrakingDecelerationWalking = 1200.f;
+	MovementComponent->bUseSeparateBrakingFriction = true;
 }
 
 const FVector ANetherCrownCharacter::CalculateHitPointToGround()
