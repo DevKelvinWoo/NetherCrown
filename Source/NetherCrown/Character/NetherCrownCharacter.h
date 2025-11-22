@@ -48,6 +48,8 @@ private:
 
 	void CheckIsHardLandingAndSetTimer();
 
+	void BlockInputWhenHardLanding() const;
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> MainCameraComponent{};
 

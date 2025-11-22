@@ -7,7 +7,6 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
-#include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
 ANetherCrownCharacter::ANetherCrownCharacter()
 {
@@ -59,9 +58,12 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
+	//@NOTE  : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Server와 Client 둘 다에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
 	if (HasAuthority() || IsLocallyControlled())
 	{
 		CheckIsHardLandingAndSetTimer();
+
+		BlockInputWhenHardLanding();
 	}
 }
 
@@ -106,6 +108,11 @@ void ANetherCrownCharacter::SetCharacterDefaultMovementValues() const
 void ANetherCrownCharacter::ResetHardLandingState()
 {
 	bIsHardLanding = false;
+
+	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
+	check(MovementComponent);
+
+	MovementComponent->SetMovementMode(MOVE_Walking);
 }
 
 void ANetherCrownCharacter::CheckIsHardLandingAndSetTimer()
@@ -118,9 +125,23 @@ void ANetherCrownCharacter::CheckIsHardLandingAndSetTimer()
 	const double MinHardLandHeight{ CharacterDefaultSetting->MinHardLandingHeight };
 	bIsHardLanding = DistanceBetweenLandHitPoints > MinHardLandHeight;
 
+	//@NOTE  : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Client단에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
 	const float ResetDelay = CharacterDefaultSetting->RecoveryResetDelayTime;
 	GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
 	GetWorldTimerManager().SetTimer(TimerHandle_ResetHardLanding, this, &ANetherCrownCharacter::ResetHardLandingState, ResetDelay, false);
+}
+
+void ANetherCrownCharacter::BlockInputWhenHardLanding() const
+{
+	check(Controller);
+
+	if (bIsHardLanding)
+	{
+		UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
+		check(MovementComponent);
+
+		MovementComponent->DisableMovement();
+	}
 }
 
 void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
