@@ -5,8 +5,9 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
+#include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
 ANetherCrownCharacter::ANetherCrownCharacter()
 {
@@ -38,11 +39,6 @@ void ANetherCrownCharacter::BeginPlay()
 void ANetherCrownCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	if (!(GetCharacterMovement()->IsFalling()))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't move character to falling"));
-	}
 }
 
 void ANetherCrownCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -55,19 +51,40 @@ void ANetherCrownCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimePro
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, bPressedMoveKey);
+	DOREPLIFETIME(ThisClass, bIsHardLanding);
+	DOREPLIFETIME(ThisClass, HitPointToGroundWhenJumpStart);
 }
 
 void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	const FVector& HitPointToGroundWhenLanded{ CalculateHitPointToGround() };
-	const FVector& DistanceBetweenLandHitPoints{ HitPointToGroundWhenJumpStart - HitPointToGroundWhenLanded };
-	const double Distance{ DistanceBetweenLandHitPoints.Length() };
+	if (HasAuthority() || IsLocallyControlled())
+	{
+		CheckIsHardLandingAndSetTimer();
+	}
+}
 
-	constexpr double MinHardLandHeight{ 50.0 };
-	const bool IsHardLanding{ Distance > MinHardLandHeight };
-	Server_SetIsHardLanding(IsHardLanding);
+void ANetherCrownCharacter::OnJumped_Implementation()
+{
+	Super::OnJumped_Implementation();
+
+	if (HasAuthority())
+	{
+		bIsHardLanding = false;
+		HitPointToGroundWhenJumpStart = GetActorLocation();
+	}
+}
+
+void ANetherCrownCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode)
+{
+	Super::OnMovementModeChanged(PrevMovementMode, PreviousCustomMode);
+
+	if (HasAuthority() && GetCharacterMovement()->IsFalling())
+	{
+		bIsHardLanding = false;
+		HitPointToGroundWhenJumpStart = GetActorLocation();
+	}
 }
 
 void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool InbPressedMoveKey)
@@ -75,12 +92,7 @@ void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool I
 	bPressedMoveKey = InbPressedMoveKey;
 }
 
-void ANetherCrownCharacter::Server_SetIsHardLanding_Implementation(const bool InbIsHardLanding)
-{
-	bIsHardLanding = InbIsHardLanding;
-}
-
-void ANetherCrownCharacter::SetCharacterDefaultMovementValues()
+void ANetherCrownCharacter::SetCharacterDefaultMovementValues() const
 {
 	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
 	check(MovementComponent);
@@ -91,38 +103,32 @@ void ANetherCrownCharacter::SetCharacterDefaultMovementValues()
 	MovementComponent->bUseSeparateBrakingFriction = true;
 }
 
-const FVector ANetherCrownCharacter::CalculateHitPointToGround()
+void ANetherCrownCharacter::ResetHardLandingState()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
+	bIsHardLanding = false;
+}
 
-	const FVector& LineTraceStartLocation{ GetActorLocation() };
-	constexpr float LineTraceLength{ 2000.f };
-	const FVector& LineTraceDirection{ GetActorUpVector() * -1.f };
-	const FVector& LineTraceEndLocation{ LineTraceStartLocation + LineTraceDirection * LineTraceLength };
+void ANetherCrownCharacter::CheckIsHardLandingAndSetTimer()
+{
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSetting);
 
-	FHitResult HitResult;
+	const double DistanceBetweenLandHitPoints{ HitPointToGroundWhenJumpStart.Z - GetActorLocation().Z };
 
-	FCollisionQueryParams Params;
-	Params.AddIgnoredActor(this);
+	const double MinHardLandHeight{ CharacterDefaultSetting->MinHardLandingHeight };
+	bIsHardLanding = DistanceBetweenLandHitPoints > MinHardLandHeight;
 
-	const bool bHit{ GetWorld()->LineTraceSingleByChannel(
-	HitResult, LineTraceStartLocation, LineTraceDirection, ECC_Visibility, Params
-	)};
-
-	if (bHit)
-	{
-		return HitResult.ImpactPoint;
-	}
-
-	return FVector::ZeroVector;
+	const float ResetDelay = CharacterDefaultSetting->RecoveryResetDelayTime;
+	GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
+	GetWorldTimerManager().SetTimer(TimerHandle_ResetHardLanding, this, &ANetherCrownCharacter::ResetHardLandingState, ResetDelay, false);
 }
 
 void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 {
+	check(Controller);
+
 	Server_SetPressedMoveKey(true);
 
-	check(Controller);
 	if (Value.IsNonZero())
 	{
 		const FVector2D& MovementVector{ Value.Get<FVector2D>() };
@@ -151,8 +157,6 @@ void ANetherCrownCharacter::LookAtCharacter(const FInputActionValue& Value)
 
 void ANetherCrownCharacter::JumpCharacter(const FInputActionValue& Value)
 {
-	HitPointToGroundWhenJumpStart = CalculateHitPointToGround();
-
 	if (Value.IsNonZero())
 	{
 		const bool bJumpActionInput{ Value.Get<bool>() };

@@ -34,10 +34,20 @@ protected:
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
 	virtual void Landed(const FHitResult& Hit) override;
+	virtual void OnJumped_Implementation() override;
+	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
 private:
+	UFUNCTION(Server, Unreliable)
+	void Server_SetPressedMoveKey(const bool InbPressedMoveKey);
+
+	void SetCharacterDefaultMovementValues() const;
+
+	void ResetHardLandingState();
+
+	void CheckIsHardLandingAndSetTimer();
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> MainCameraComponent{};
 
@@ -50,15 +60,8 @@ private:
 	UPROPERTY(Replicated)
 	bool bIsHardLanding{ false };
 
-	UFUNCTION(Server, Unreliable)
-	void Server_SetPressedMoveKey(const bool InbPressedMoveKey);
-
-	UFUNCTION(Server, Unreliable)
-	void Server_SetIsHardLanding(const bool InbIsHardLanding);
-
-	void SetCharacterDefaultMovementValues();
-
-	const FVector CalculateHitPointToGround();
-
+	UPROPERTY(Replicated)
 	FVector HitPointToGroundWhenJumpStart{};
+
+	FTimerHandle TimerHandle_ResetHardLanding;
 };
