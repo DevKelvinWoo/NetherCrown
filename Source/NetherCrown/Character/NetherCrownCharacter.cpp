@@ -5,8 +5,12 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
+#include "Sound/SoundCue.h"
 
 ANetherCrownCharacter::ANetherCrownCharacter()
 {
@@ -75,6 +79,12 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 	{
 		bIsHardLanding = false;
 		HitPointToGroundWhenJumpStart = GetActorLocation();
+	}
+	else
+	{
+		//FNetherCrownUtilManager로 옮겨서 호출하기
+		USoundCue* JumpSoundCue{ FNetherCrownUtilManager::GetSoundCueByGameplayTag(NetherCrownTags::Sound_Character_JumpStart) };
+		UGameplayStatics::PlaySound2D(this, JumpSoundCue);
 	}
 }
 
