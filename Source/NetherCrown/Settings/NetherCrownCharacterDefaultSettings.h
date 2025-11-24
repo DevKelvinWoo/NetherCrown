@@ -6,8 +6,6 @@
 #include "Engine/DeveloperSettings.h"
 #include "NetherCrownCharacterDefaultSettings.generated.h"
 
-class UDataTable;
-
 UCLASS()
 class NETHERCROWN_API UNetherCrownCharacterDefaultSettings : public UDeveloperSettings
 {
