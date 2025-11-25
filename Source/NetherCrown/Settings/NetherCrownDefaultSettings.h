@@ -8,12 +8,12 @@
 
 class UDataTable;
 
-UCLASS()
+UCLASS(config = Game, defaultconfig, meta = (DisplayName = "NetherCrown Default Settings"))
 class NETHERCROWN_API UNetherCrownDefaultSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Config, EditAnywhere)
 	TSoftObjectPtr<UDataTable> CharacterSoundDT;
 };

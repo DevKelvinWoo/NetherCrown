@@ -25,6 +25,8 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	MainSpringArmComponent->bUsePawnControlRotation = true;
 	MainSpringArmComponent->TargetArmLength = 435.f;
 	MainSpringArmComponent->TargetOffset = FVector(0.f, 0.f, 200.f);
+	MainSpringArmComponent->bEnableCameraLag = true;
+	MainSpringArmComponent->CameraLagSpeed = 7.f;
 
 	MainCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("MainCameraComponent"));
 	MainCameraComponent->SetupAttachment(MainSpringArmComponent);
@@ -63,11 +65,16 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 	Super::Landed(Hit);
 
 	//@NOTE  : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Server와 Client 둘 다에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
-	if (HasAuthority() || IsLocallyControlled())
+	const bool bShouldHandleLocally = HasAuthority() || IsLocallyControlled();
+	if (bShouldHandleLocally)
 	{
 		CheckIsHardLandingAndSetTimer();
-
 		BlockInputWhenHardLanding();
+
+		if (!HasAuthority() && bIsHardLanding)
+		{
+			FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, NetherCrownTags::Sound_Character_HardLand);
+		}
 	}
 }
 
@@ -82,9 +89,7 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 	}
 	else
 	{
-		//FNetherCrownUtilManager로 옮겨서 호출하기
-		USoundCue* JumpSoundCue{ FNetherCrownUtilManager::GetSoundCueByGameplayTag(NetherCrownTags::Sound_Character_JumpStart) };
-		UGameplayStatics::PlaySound2D(this, JumpSoundCue);
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, NetherCrownTags::Sound_Character_JumpStart);
 	}
 }
 

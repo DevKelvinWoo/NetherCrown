@@ -6,15 +6,15 @@
 #include "Engine/DeveloperSettings.h"
 #include "NetherCrownCharacterDefaultSettings.generated.h"
 
-UCLASS()
+UCLASS(config = Game, defaultconfig, meta = (DisplayName = "NetherCrown Character Settings"))
 class NETHERCROWN_API UNetherCrownCharacterDefaultSettings : public UDeveloperSettings
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Config, EditAnywhere)
 	float MinHardLandingHeight{ 200.f };
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(Config, EditAnywhere)
 	float RecoveryResetDelayTime{ 1.f };
 };

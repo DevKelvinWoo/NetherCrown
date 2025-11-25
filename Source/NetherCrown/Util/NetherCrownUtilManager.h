@@ -11,4 +11,5 @@ class FNetherCrownUtilManager
 {
 public:
 	static USoundCue* GetSoundCueByGameplayTag(const FGameplayTag& SoundTag);
+	static void PlaySound2DByGameplayTag(UObject* WorldContextObject, const FGameplayTag& SoundTag);
 };

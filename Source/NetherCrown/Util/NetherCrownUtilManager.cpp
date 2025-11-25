@@ -2,6 +2,7 @@
 
 #include "NetherCrownUtilManager.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "NetherCrown/Data/NetherCrownSoundData.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "Sound/SoundCue.h"
@@ -38,4 +39,18 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 		return nullptr;
 	}
 	return FoundedSoundData->SoundCue.LoadSynchronous();
+}
+
+void FNetherCrownUtilManager::PlaySound2DByGameplayTag(UObject* WorldContextObject, const FGameplayTag& SoundTag)
+{
+	check(WorldContextObject);
+
+	USoundCue* SoundCue{ GetSoundCueByGameplayTag(SoundTag) };
+	if (!ensureAlways(SoundCue))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No SoundCue in %hs"), __FUNCTION__);
+		return;
+	}
+
+	UGameplayStatics::PlaySound2D(WorldContextObject, SoundCue);
 }
