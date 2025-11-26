@@ -5,12 +5,11 @@
 #include "Camera/CameraComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
-#include "Sound/SoundCue.h"
 
 ANetherCrownCharacter::ANetherCrownCharacter()
 {
@@ -34,6 +33,8 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	MainCameraComponent->SetRelativeRotation(FRotator(-25.f, 0.f, 0.f));
 
 	SetCharacterDefaultMovementValues();
+
+	NetherCrownBasicAttackComponent = CreateDefaultSubobject<UNetherCrownBasicAttackComponent>(TEXT("BasicAttackComponent"));
 }
 
 void ANetherCrownCharacter::BeginPlay()
@@ -206,4 +207,17 @@ void ANetherCrownCharacter::JumpCharacter(const FInputActionValue& Value)
 void ANetherCrownCharacter::HandleOnMoveActionCompleted()
 {
 	Server_SetPressedMoveKey(false);
+}
+
+void ANetherCrownCharacter::RequestBasicAttack(const FInputActionValue& Value)
+{
+	if (Value.IsNonZero())
+	{
+		const bool bBasicAttackActionInput{ Value.Get<bool>() };
+		if (bBasicAttackActionInput)
+		{
+			check(NetherCrownBasicAttackComponent);
+			NetherCrownBasicAttackComponent->RequestBasicAttack();
+		}
+	}
 }

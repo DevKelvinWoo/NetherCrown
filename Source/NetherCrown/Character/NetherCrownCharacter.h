@@ -10,6 +10,8 @@
 class USpringArmComponent;
 class UCameraComponent;
 
+class UNetherCrownBasicAttackComponent;
+
 UCLASS()
 class NETHERCROWN_API ANetherCrownCharacter : public ACharacter
 {
@@ -22,12 +24,15 @@ public:
 	void LookAtCharacter(const FInputActionValue& Value);
 	void JumpCharacter(const FInputActionValue& Value);
 	void HandleOnMoveActionCompleted();
+	void RequestBasicAttack(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}
 
 	UFUNCTION(BlueprintCallable)
 	bool IsHardLanding() const { return bIsHardLanding; }
+
+	UNetherCrownBasicAttackComponent* GetBasicAttackComponent() const { return NetherCrownBasicAttackComponent; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -55,6 +60,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USpringArmComponent> MainSpringArmComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownBasicAttackComponent> NetherCrownBasicAttackComponent{};
 
 	UPROPERTY(Replicated)
 	bool bPressedMoveKey{ false };

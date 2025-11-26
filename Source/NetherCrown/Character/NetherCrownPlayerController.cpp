@@ -25,15 +25,18 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 
 	EnhancedInputLocalPlayerSubSystem->AddMappingContext(MappingContext, 0);
 
-	if (!ensureAlways(MappingContext && MoveAction && LookAtAction && JumpAction))
+	if (!ensureAlways(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't add Mapping Context and InputActions in %hs"), __FUNCTION__);
+
+		return;
 	}
 
 	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::MoveCharacter);
 	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ThisClass::HandleOnMoveActionCompleted);
 	EnhancedPlayerInputComponent->BindAction(LookAtAction, ETriggerEvent::Triggered, this, &ThisClass::LookAtCharacter);
 	EnhancedPlayerInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::JumpCharacter);
+	EnhancedPlayerInputComponent->BindAction(AttackBasicAction, ETriggerEvent::Started, this, &ThisClass::RequestBasicAttack);
 }
 
 void ANetherCrownPlayerController::MoveCharacter(const FInputActionValue& InActionValue)
@@ -86,4 +89,17 @@ void ANetherCrownPlayerController::HandleOnMoveActionCompleted()
 	}
 
 	NetherCrownCharacter->HandleOnMoveActionCompleted();
+}
+
+void ANetherCrownPlayerController::RequestBasicAttack(const FInputActionValue& InActionValue)
+{
+	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
+	if (!ensureAlways(NetherCrownCharacter))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
+
+		return;
+	}
+
+	NetherCrownCharacter->RequestBasicAttack(InActionValue);
 }

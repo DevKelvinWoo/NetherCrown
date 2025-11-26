@@ -24,6 +24,8 @@ private:
 	TObjectPtr<UInputAction> LookAtAction{};
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputAction> JumpAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> AttackBasicAction{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> MappingContext{};
@@ -38,4 +40,6 @@ private:
 	void JumpCharacter(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void HandleOnMoveActionCompleted();
+	UFUNCTION()
+	void RequestBasicAttack(const FInputActionValue& InActionValue);
 };
