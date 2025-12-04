@@ -30,10 +30,7 @@ private:
 	void PlayAndJumpToComboMontageSection(const FName* SectionName) const;
 
 	UFUNCTION(Server, Reliable)
-	void Server_PlayAndJumpToComboMontageSection();
-
-	UFUNCTION(Server, Reliable)
-	void Server_PlayNextComboSection();
+	void Server_PlayAndJumpToComboMontageSection(const bool bIsFirstAttack);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAndJumpToComboMontageSection(const FName& SectionName);
