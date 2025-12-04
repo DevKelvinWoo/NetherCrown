@@ -10,4 +10,11 @@ UCLASS()
 class NETHERCROWN_API UNetherCrownCharacterAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
+
+public:
+	UFUNCTION()
+	void AnimNotify_ComboEnable();
+
+	UFUNCTION()
+	void AnimNotify_ComboDisable();
 };

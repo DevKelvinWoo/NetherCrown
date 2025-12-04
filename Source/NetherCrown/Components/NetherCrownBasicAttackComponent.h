@@ -19,9 +19,6 @@ public:
 	void EnableComboWindow();
 	void DisableComboAndPlayQueuedComboWindow();
 
-protected:
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
 private:
 	void CalculateNextComboCount();
 
@@ -29,14 +26,11 @@ private:
 
 	void PlayAndJumpToComboMontageSection(const FName* SectionName) const;
 
-	UFUNCTION(Server, Reliable)
-	void Server_PlayAndJumpToComboMontageSection(const bool bIsFirstAttack);
-
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAndJumpToComboMontageSection(const FName& SectionName);
 
 	UFUNCTION(Server, Reliable)
-	void Server_SetCanInputFirstAttack(const bool InbCanInputFirstAttack);
+	void Server_RequestBasicAttack();
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};
@@ -49,6 +43,5 @@ private:
 	bool bCanQueueNextCombo{ false };
 	bool bHasQueuedNextCombo{ false };
 
-	UPROPERTY(Replicated)
 	bool bCanInputFirstAttack{ true };
 };

@@ -1,3 +1,66 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownCharacterAnimInstance.h"
+
+#include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
+
+void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
+{
+	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
+	if (!(IsValid(OwningCharacter)))
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* MeshComp{ OwningCharacter->GetMesh() };
+	if (!(IsValid(MeshComp)))
+	{
+		return;
+	}
+
+	if (!(IsValid(MeshComp)))
+	{
+		return;
+	}
+
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter->GetBasicAttackComponent() };
+	if (!(IsValid(BasicAttackComponent)))
+	{
+		return;
+	}
+
+	if (!OwningCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	BasicAttackComponent->EnableComboWindow();}
+
+void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
+{
+	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
+	if (!(IsValid(OwningCharacter)))
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* MeshComp{ OwningCharacter->GetMesh() };
+	if (!(IsValid(MeshComp)))
+	{
+		return;
+	}
+
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter->GetBasicAttackComponent() };
+	if (!(IsValid(BasicAttackComponent)))
+	{
+		return;
+	}
+
+	if (!OwningCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	BasicAttackComponent->DisableComboAndPlayQueuedComboWindow();
+}

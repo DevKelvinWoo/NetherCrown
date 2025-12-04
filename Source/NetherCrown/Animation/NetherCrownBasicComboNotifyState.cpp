@@ -9,6 +9,8 @@ void UNetherCrownBasicComboNotifyState::NotifyBegin(USkeletalMeshComponent* Mesh
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
+	StartTime = MeshComp->GetWorld()->GetTimeSeconds();
+
 	if (!(IsValid(MeshComp)))
 	{
 		return;
@@ -26,11 +28,21 @@ void UNetherCrownBasicComboNotifyState::NotifyBegin(USkeletalMeshComponent* Mesh
 		return;
 	}
 
+	if (!OwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	BasicAttackComponent->EnableComboWindow();
 }
 
 void UNetherCrownBasicComboNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
+	float EndTime = MeshComp->GetWorld()->GetTimeSeconds();
+	float Duration = EndTime - StartTime;
+
+	UE_LOG(LogTemp, Warning, TEXT("Notify Duration: %f"), Duration);
+
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 
 	if (!(IsValid(MeshComp)))
@@ -46,6 +58,11 @@ void UNetherCrownBasicComboNotifyState::NotifyEnd(USkeletalMeshComponent* MeshCo
 
 	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter->GetBasicAttackComponent() };
 	if (!(IsValid(BasicAttackComponent)))
+	{
+		return;
+	}
+
+	if (!OwnerCharacter->HasAuthority())
 	{
 		return;
 	}

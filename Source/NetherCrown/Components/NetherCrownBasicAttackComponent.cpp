@@ -6,14 +6,12 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 
-void UNetherCrownBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 {
-	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
-
-	DOREPLIFETIME(ThisClass, bCanInputFirstAttack);
+	Server_RequestBasicAttack();
 }
 
-void UNetherCrownBasicAttackComponent::RequestBasicAttack()
+void UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Implementation()
 {
 	if (bCanQueueNextCombo)
 	{
@@ -27,38 +25,21 @@ void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 
 void UNetherCrownBasicAttackComponent::StartAttackBasic()
 {
-	Server_SetCanInputFirstAttack(false);
 	bCanInputFirstAttack = false;
 
-	Server_PlayAndJumpToComboMontageSection(true);
-}
-
-void UNetherCrownBasicAttackComponent::Server_PlayAndJumpToComboMontageSection_Implementation(const bool bIsFirstAttack)
-{
 	if (ComboMontageSectionMap.IsEmpty())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
 		return;
 	}
 
-	if (!bIsFirstAttack)
-	{
-		CalculateNextComboCount();
-	}
-
-	const int32 ComboIndex{ bIsFirstAttack ? 1 : CurrentComboCount };
-	const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(ComboIndex) };
+	const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(1) };
 	Multicast_PlayAndJumpToComboMontageSection(*FirstComboMontageSectionName);
 }
 
 void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSection_Implementation(const FName& SectionName)
 {
 	PlayAndJumpToComboMontageSection(&SectionName);
-}
-
-void UNetherCrownBasicAttackComponent::Server_SetCanInputFirstAttack_Implementation(const bool InbCanInputFirstAttack)
-{
-	bCanInputFirstAttack = InbCanInputFirstAttack;
 }
 
 void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FName* SectionName) const
@@ -93,26 +74,51 @@ void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 {
 	const int32 MaxComboCount{ ComboMontageSectionMap.Num() };
 	CurrentComboCount = CurrentComboCount + 1 > MaxComboCount ? 1 : ++CurrentComboCount;
+
+	UE_LOG(LogTemp, Warning, TEXT("ComboCount : %d"), CurrentComboCount);
 }
 
 void UNetherCrownBasicAttackComponent::EnableComboWindow()
 {
-	bCanQueueNextCombo = true;
+	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
+	AActor* Owner{ GetOwner() };
+	check(Owner);
+
+	if (Owner->HasAuthority())
+	{
+		bCanQueueNextCombo = true;
+	}
 }
 
 void UNetherCrownBasicAttackComponent::DisableComboAndPlayQueuedComboWindow()
 {
-	bCanQueueNextCombo = false;
+	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
+	AActor* Owner{ GetOwner() };
+	check(Owner);
 
-	if (!bHasQueuedNextCombo)
+	if (Owner->HasAuthority())
 	{
-		bCanInputFirstAttack = true;
+		bCanQueueNextCombo = false;
 
-		return;
+		if (!bHasQueuedNextCombo)
+		{
+			CurrentComboCount = 1;
+			bCanInputFirstAttack = true;
+
+			return;
+		}
+
+		CalculateNextComboCount();
+
+		bHasQueuedNextCombo = false;
+
+		if (ComboMontageSectionMap.IsEmpty())
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
+			return;
+		}
+
+		const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
+		Multicast_PlayAndJumpToComboMontageSection(*FirstComboMontageSectionName);
 	}
-
-	bHasQueuedNextCombo = false;
-
-	Server_PlayAndJumpToComboMontageSection(false);
-	//Server_PlayNextComboSection();
 }
