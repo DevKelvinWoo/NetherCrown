@@ -13,11 +13,17 @@ class NETHERCROWN_API UNetherCrownBasicAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayBasicAttackAnim, const bool);
+
 public:
 	void RequestBasicAttack();
 
 	void EnableComboWindow();
 	void DisableComboAndPlayQueuedComboWindow();
+
+	void SetCanAttack(const bool InbCanAttack) { bCanAttack = InbCanAttack; }
+
+	FOnPlayBasicAttackAnim& GetOnStartOrStopBasicAttack() { return OnPlayBasicAttackAnim; }
 
 private:
 	void CalculateNextComboCount();
@@ -42,6 +48,8 @@ private:
 
 	bool bCanQueueNextCombo{ false };
 	bool bHasQueuedNextCombo{ false };
-
 	bool bCanInputFirstAttack{ true };
+	bool bCanAttack{ true };
+
+	FOnPlayBasicAttackAnim OnPlayBasicAttackAnim;
 };

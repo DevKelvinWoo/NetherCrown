@@ -13,6 +13,11 @@ void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 
 void UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Implementation()
 {
+	if (!bCanAttack)
+	{
+		return;
+	}
+
 	if (bCanQueueNextCombo)
 	{
 		bHasQueuedNextCombo = true;
@@ -68,6 +73,8 @@ void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FN
 	NetherCrownCharacterAnimInstance->Montage_Play(BasicAttackAnimMontage);
 	NetherCrownCharacterAnimInstance->Montage_JumpToSection(*SectionName);
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
+
+	OnPlayBasicAttackAnim.Broadcast(true);
 }
 
 void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
@@ -104,6 +111,8 @@ void UNetherCrownBasicAttackComponent::DisableComboAndPlayQueuedComboWindow()
 		{
 			CurrentComboCount = 1;
 			bCanInputFirstAttack = true;
+
+			OnPlayBasicAttackAnim.Broadcast(false);
 
 			return;
 		}

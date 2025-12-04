@@ -55,6 +55,8 @@ private:
 
 	void BlockInputWhenHardLanding() const;
 
+	void HandleOnStartOrStopBasicAttack(const bool bIsAnimPlay);
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> MainCameraComponent{};
 

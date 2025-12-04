@@ -40,6 +40,9 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 void ANetherCrownCharacter::BeginPlay()
 {
 	Super::BeginPlay();
+
+	check(NetherCrownBasicAttackComponent);
+	NetherCrownBasicAttackComponent->GetOnStartOrStopBasicAttack().AddUObject(this, &ThisClass::HandleOnStartOrStopBasicAttack);
 }
 
 void ANetherCrownCharacter::Tick(float DeltaTime)
@@ -69,6 +72,9 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 	const bool bShouldHandleLocally = HasAuthority() || IsLocallyControlled();
 	if (bShouldHandleLocally)
 	{
+		check(NetherCrownBasicAttackComponent);
+		NetherCrownBasicAttackComponent->SetCanAttack(true);
+
 		CheckIsHardLandingAndSetTimer();
 		BlockInputWhenHardLanding();
 
@@ -85,6 +91,9 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 
 	if (HasAuthority())
 	{
+		check(NetherCrownBasicAttackComponent);
+		NetherCrownBasicAttackComponent->SetCanAttack(false);
+
 		bIsHardLanding = false;
 		HitPointToGroundWhenJumpStart = GetActorLocation();
 	}
@@ -158,6 +167,14 @@ void ANetherCrownCharacter::BlockInputWhenHardLanding() const
 
 		MovementComponent->DisableMovement();
 	}
+}
+
+void ANetherCrownCharacter::HandleOnStartOrStopBasicAttack(const bool bIsAnimPlay)
+{
+	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
+	check(MovementComponent);
+
+	bIsAnimPlay ? MovementComponent->DisableMovement() : MovementComponent->SetMovementMode(MOVE_Walking);
 }
 
 void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
