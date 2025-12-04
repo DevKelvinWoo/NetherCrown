@@ -44,6 +44,11 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 void FNetherCrownUtilManager::PlaySound2DByGameplayTag(UObject* WorldContextObject, const FGameplayTag& SoundTag)
 {
 	check(WorldContextObject);
+	UWorld* World = WorldContextObject->GetWorld();
+	if (World && World->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
 
 	USoundCue* SoundCue{ GetSoundCueByGameplayTag(SoundTag) };
 	if (!ensureAlways(SoundCue))

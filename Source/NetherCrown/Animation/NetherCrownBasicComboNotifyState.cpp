@@ -9,20 +9,8 @@ void UNetherCrownBasicComboNotifyState::NotifyBegin(USkeletalMeshComponent* Mesh
 {
 	Super::NotifyBegin(MeshComp, Animation, TotalDuration, EventReference);
 
-	StartTime = MeshComp->GetWorld()->GetTimeSeconds();
-
-	if (!(IsValid(MeshComp)))
-	{
-		return;
-	}
-
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(MeshComp->GetOwner() )};
-	if (!(IsValid(OwnerCharacter)))
-	{
-		return;
-	}
-
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter->GetBasicAttackComponent() };
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(MeshComp ? MeshComp->GetOwner() : nullptr)};
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter ? OwnerCharacter->GetBasicAttackComponent() : nullptr };
 	if (!(IsValid(BasicAttackComponent)))
 	{
 		return;
@@ -38,25 +26,10 @@ void UNetherCrownBasicComboNotifyState::NotifyBegin(USkeletalMeshComponent* Mesh
 
 void UNetherCrownBasicComboNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	float EndTime = MeshComp->GetWorld()->GetTimeSeconds();
-	float Duration = EndTime - StartTime;
-
-	UE_LOG(LogTemp, Warning, TEXT("Notify Duration: %f"), Duration);
-
 	Super::NotifyEnd(MeshComp, Animation, EventReference);
 
-	if (!(IsValid(MeshComp)))
-	{
-		return;
-	}
-
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(MeshComp->GetOwner() )};
-	if (!(IsValid(OwnerCharacter)))
-	{
-		return;
-	}
-
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter->GetBasicAttackComponent() };
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(MeshComp ? MeshComp->GetOwner() : nullptr) };
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter ? OwnerCharacter->GetBasicAttackComponent() : nullptr };
 	if (!(IsValid(BasicAttackComponent)))
 	{
 		return;

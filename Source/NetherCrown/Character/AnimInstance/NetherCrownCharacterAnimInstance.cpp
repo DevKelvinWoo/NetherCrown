@@ -8,23 +8,7 @@
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
 {
 	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	if (!(IsValid(OwningCharacter)))
-	{
-		return;
-	}
-
-	USkeletalMeshComponent* MeshComp{ OwningCharacter->GetMesh() };
-	if (!(IsValid(MeshComp)))
-	{
-		return;
-	}
-
-	if (!(IsValid(MeshComp)))
-	{
-		return;
-	}
-
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter->GetBasicAttackComponent() };
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter ? OwningCharacter->GetBasicAttackComponent() : nullptr};
 	if (!(IsValid(BasicAttackComponent)))
 	{
 		return;
@@ -40,18 +24,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
 {
 	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	if (!(IsValid(OwningCharacter)))
-	{
-		return;
-	}
-
-	USkeletalMeshComponent* MeshComp{ OwningCharacter->GetMesh() };
-	if (!(IsValid(MeshComp)))
-	{
-		return;
-	}
-
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter->GetBasicAttackComponent() };
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter ? OwningCharacter->GetBasicAttackComponent() : nullptr };
 	if (!(IsValid(BasicAttackComponent)))
 	{
 		return;
