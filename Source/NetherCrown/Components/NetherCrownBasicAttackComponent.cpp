@@ -2,8 +2,16 @@
 
 #include "NetherCrownBasicAttackComponent.h"
 #include "Animation/AnimMontage.h"
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
+
+void UNetherCrownBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, bCanInputFirstAttack);
+}
 
 void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 {
@@ -19,21 +27,46 @@ void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 
 void UNetherCrownBasicAttackComponent::StartAttackBasic()
 {
-	if (!bCanInputFirstAttack)
-	{
-		return;
-	}
-
+	Server_SetCanInputFirstAttack(false);
 	bCanInputFirstAttack = false;
 
+	Server_PlayAndJumpToComboMontageSection();
+}
+
+void UNetherCrownBasicAttackComponent::Server_PlayAndJumpToComboMontageSection_Implementation()
+{
 	if (ComboMontageSectionMap.IsEmpty())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
 		return;
 	}
 
-	const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(1) };
-	PlayAndJumpToComboMontageSection(FirstComboMontageSectionName);
+	const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
+	Multicast_PlayAndJumpToComboMontageSection(*FirstComboMontageSectionName);
+}
+
+void UNetherCrownBasicAttackComponent::Server_PlayNextComboSection_Implementation()
+{
+	if (ComboMontageSectionMap.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
+		return;
+	}
+
+	CalculateNextComboCount();
+
+	const FName* NextComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
+	Multicast_PlayAndJumpToComboMontageSection(*NextComboMontageSectionName);
+}
+
+void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSection_Implementation(const FName& SectionName)
+{
+	PlayAndJumpToComboMontageSection(&SectionName);
+}
+
+void UNetherCrownBasicAttackComponent::Server_SetCanInputFirstAttack_Implementation(const bool InbCanInputFirstAttack)
+{
+	bCanInputFirstAttack = InbCanInputFirstAttack;
 }
 
 void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FName* SectionName) const
@@ -61,6 +94,7 @@ void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FN
 
 	NetherCrownCharacterAnimInstance->Montage_Play(BasicAttackAnimMontage);
 	NetherCrownCharacterAnimInstance->Montage_JumpToSection(*SectionName);
+	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 }
 
 void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
@@ -87,15 +121,5 @@ void UNetherCrownBasicAttackComponent::DisableComboAndPlayQueuedComboWindow()
 
 	bHasQueuedNextCombo = false;
 
-	if (ComboMontageSectionMap.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
-		return;
-	}
-
-	CalculateNextComboCount();
-
-	const FName* NextComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
-	PlayAndJumpToComboMontageSection(NextComboMontageSectionName);
-	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
+	Server_PlayNextComboSection();
 }
