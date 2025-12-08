@@ -81,8 +81,6 @@ void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 {
 	const int32 MaxComboCount{ ComboMontageSectionMap.Num() };
 	CurrentComboCount = CurrentComboCount + 1 > MaxComboCount ? 1 : ++CurrentComboCount;
-
-	UE_LOG(LogTemp, Warning, TEXT("ComboCount : %d"), CurrentComboCount);
 }
 
 void UNetherCrownBasicAttackComponent::EnableComboWindow()

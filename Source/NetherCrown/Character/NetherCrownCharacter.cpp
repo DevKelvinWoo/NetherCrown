@@ -6,7 +6,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
+
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
+#include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
@@ -35,6 +37,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	SetCharacterDefaultMovementValues();
 
 	NetherCrownBasicAttackComponent = CreateDefaultSubobject<UNetherCrownBasicAttackComponent>(TEXT("BasicAttackComponent"));
+	NetherCrownEquipComponent = CreateDefaultSubobject<UNetherCrownEquipComponent>(TEXT("EquipComponent"));
 }
 
 void ANetherCrownCharacter::BeginPlay()
@@ -235,6 +238,19 @@ void ANetherCrownCharacter::RequestBasicAttack(const FInputActionValue& Value)
 		{
 			check(NetherCrownBasicAttackComponent);
 			NetherCrownBasicAttackComponent->RequestBasicAttack();
+		}
+	}
+}
+
+void ANetherCrownCharacter::EquipCharacter(const FInputActionValue& Value)
+{
+	if (Value.IsNonZero())
+	{
+		const bool bEquipKeyInput{ Value.Get<bool>() };
+		if (bEquipKeyInput)
+		{
+			check(NetherCrownEquipComponent);
+			NetherCrownEquipComponent->EquipWeapon();
 		}
 	}
 }

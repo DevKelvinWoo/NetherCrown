@@ -26,6 +26,8 @@ private:
 	TObjectPtr<UInputAction> JumpAction{};
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputAction> AttackBasicAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> EquipAction{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> MappingContext{};
@@ -42,4 +44,6 @@ private:
 	void HandleOnMoveActionCompleted();
 	UFUNCTION()
 	void RequestBasicAttack(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void EquipCharacter(const FInputActionValue& InActionValue);
 };
