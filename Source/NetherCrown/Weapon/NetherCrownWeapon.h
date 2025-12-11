@@ -18,6 +18,8 @@ class NETHERCROWN_API ANetherCrownWeapon : public AActor
 public:
 	ANetherCrownWeapon();
 
+	void DisableEquipSphereCollision() const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

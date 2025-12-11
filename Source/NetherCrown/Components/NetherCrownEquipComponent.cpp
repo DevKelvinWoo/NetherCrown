@@ -3,6 +3,7 @@
 #include "NetherCrownEquipComponent.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 UNetherCrownEquipComponent::UNetherCrownEquipComponent()
@@ -32,6 +33,37 @@ void UNetherCrownEquipComponent::TickComponent(float DeltaTime, ELevelTick TickT
 
 void UNetherCrownEquipComponent::Server_EquipWeapon_Implementation()
 {
+	if (bCanEquip)
+	{
+		AttachWeapon();
+		Multicast_PlayEquipAnimation();
+
+		OnEquipWeapon.Broadcast(true);
+	}
+}
+
+void UNetherCrownEquipComponent::Multicast_PlayEquipAnimation_Implementation()
+{
+	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	const USkeletalMeshComponent* OwnerCharacterMesh{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr };
+	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr};
+	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ Cast<UNetherCrownCharacterAnimInstance>(AnimInstance) };
+	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
+	{
+		return;
+	}
+
+	UAnimMontage* EquipAnimMontage{ EquipAnimMontageSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(EquipAnimMontage)))
+	{
+		return;
+	}
+
+	NetherCrownCharacterAnimInstance->Montage_Play(EquipAnimMontage);
+}
+
+void UNetherCrownEquipComponent::AttachWeapon()
+{
 	ANetherCrownWeapon* EquipableWeapon{ EquipableWeaponWeak.Get() };
 	if (!IsValid(EquipableWeapon))
 	{
@@ -40,7 +72,12 @@ void UNetherCrownEquipComponent::Server_EquipWeapon_Implementation()
 	}
 
 	EquipedWeapon = EquipableWeapon;
-	EquipableWeaponWeak->Reset();
+	EquipedWeapon->DisableEquipSphereCollision();
+
+	if (EquipableWeaponWeak.IsValid())
+	{
+		EquipableWeaponWeak->Reset();
+	}
 
 	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
 	USkeletalMeshComponent* OwnerCharacterMesh{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr };

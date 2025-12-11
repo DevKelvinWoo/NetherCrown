@@ -77,3 +77,9 @@ void ANetherCrownWeapon::SetEquipComponentSetting(AActor* OtherActor, const bool
 	EquipComponent->SetCanEquip(bCanEquip);
 	bCanEquip ? EquipComponent->SetEquipableWeapon(this) : EquipComponent->SetEquipableWeapon(nullptr);
 }
+
+void ANetherCrownWeapon::DisableEquipSphereCollision() const
+{
+	check(WeaponEquipSphereComponent);
+	WeaponEquipSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}

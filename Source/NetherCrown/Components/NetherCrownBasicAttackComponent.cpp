@@ -1,8 +1,9 @@
 ﻿// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownBasicAttackComponent.h"
+
+#include "NetherCrownEquipComponent.h"
 #include "Animation/AnimMontage.h"
-#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 
@@ -75,6 +76,33 @@ void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FN
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 
 	OnPlayBasicAttackAnim.Broadcast(true);
+}
+
+void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeapon)
+{
+	if (GetOwner()->HasAuthority())
+	{
+		bCanAttack = bEquipWeapon;
+	}
+}
+
+void UNetherCrownBasicAttackComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	if (!ensureAlways(IsValid(EquipComponent)))
+	{
+		return;
+	}
+
+	EquipComponent->GetOnEquipWeapon().AddUObject(this, &ThisClass::HandleOnEquipWeapon);
 }
 
 void UNetherCrownBasicAttackComponent::CalculateNextComboCount()

@@ -25,6 +25,9 @@ public:
 
 	FOnPlayBasicAttackAnim& GetOnStartOrStopBasicAttack() { return OnPlayBasicAttackAnim; }
 
+protected:
+	virtual void BeginPlay() override;
+
 private:
 	void CalculateNextComboCount();
 
@@ -38,6 +41,8 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_RequestBasicAttack();
 
+	void HandleOnEquipWeapon(const bool bEquipWeapon);
+
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};
 
@@ -49,7 +54,7 @@ private:
 	bool bCanQueueNextCombo{ false };
 	bool bHasQueuedNextCombo{ false };
 	bool bCanInputFirstAttack{ true };
-	bool bCanAttack{ true };
+	bool bCanAttack{ false };
 
 	FOnPlayBasicAttackAnim OnPlayBasicAttackAnim;
 };

@@ -6,12 +6,16 @@
 #include "Components/ActorComponent.h"
 #include "NetherCrownEquipComponent.generated.h"
 
+class UAnimMontage;
+
 class ANetherCrownWeapon;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownEquipComponent : public UActorComponent
 {
 	GENERATED_BODY()
+
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipWeapon, const bool);
 
 public:
 	UNetherCrownEquipComponent();
@@ -21,6 +25,8 @@ public:
 
 	void EquipWeapon();
 
+	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -28,6 +34,11 @@ protected:
 private:
 	UFUNCTION(Server, Reliable)
 	void Server_EquipWeapon();
+
+	UFUNCTION(NetMulticast, Reliable) //Unreliable 시 패킷 손실로 애니메이션 출력이 안됨
+	void Multicast_PlayEquipAnimation();
+
+	void AttachWeapon();
 
 	bool bCanEquip{ false };
 
@@ -38,4 +49,9 @@ private:
 
 	UPROPERTY()
 	FName WeaponSocketName{ TEXT("WeaponSocket") };
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UAnimMontage> EquipAnimMontageSoft{};
+
+	FOnEquipWeapon OnEquipWeapon;
 };
