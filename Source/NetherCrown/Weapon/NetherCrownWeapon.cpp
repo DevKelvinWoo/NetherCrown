@@ -11,8 +11,10 @@ ANetherCrownWeapon::ANetherCrownWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
+
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshComponent"));
-	RootComponent = WeaponMeshComponent;
+	WeaponMeshComponent->SetupAttachment(RootComponent);
 
 	WeaponHitBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponHitBoxComponent"));
 	WeaponHitBoxComponent->SetupAttachment(RootComponent);

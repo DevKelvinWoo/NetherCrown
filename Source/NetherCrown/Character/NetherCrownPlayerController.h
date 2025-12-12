@@ -28,6 +28,8 @@ private:
 	TObjectPtr<UInputAction> AttackBasicAction{};
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputAction> EquipAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> ChangeWeaponAction{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> MappingContext{};
@@ -46,4 +48,6 @@ private:
 	void RequestBasicAttack(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void EquipCharacter(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void ChangeWeapon(const FInputActionValue& InActionValue);
 };

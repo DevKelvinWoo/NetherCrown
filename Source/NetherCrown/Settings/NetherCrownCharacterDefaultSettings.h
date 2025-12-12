@@ -17,4 +17,13 @@ public:
 
 	UPROPERTY(Config, EditAnywhere)
 	float RecoveryResetDelayTime{ 1.f };
+
+	UPROPERTY(Config, EditAnywhere)
+	FName EquipWeaponSocketName{ TEXT("WeaponSocket") };
+
+	UPROPERTY(Config, EditAnywhere)
+	FName StowWeaponSocketLName{ TEXT("StowWeaponSocketL") };
+
+	UPROPERTY(Config, EditAnywhere)
+	FName WeaponHandleSocketRName{ TEXT("StowWeaponSocketR") };
 };

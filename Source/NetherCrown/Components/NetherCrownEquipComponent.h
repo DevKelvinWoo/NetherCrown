@@ -10,6 +10,13 @@ class UAnimMontage;
 
 class ANetherCrownWeapon;
 
+UENUM()
+enum class EStowWeaponPosition : uint8
+{
+	Left,
+	Right
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownEquipComponent : public UActorComponent
 {
@@ -24,6 +31,7 @@ public:
 	void SetEquipableWeapon(ANetherCrownWeapon* InEquipableWeapon);
 
 	void EquipWeapon();
+	void ChangeWeapon();
 
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
 
@@ -35,10 +43,16 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_EquipWeapon();
 
+	UFUNCTION(Server, Reliable)
+	void Server_ChangeWeapon();
+
 	UFUNCTION(NetMulticast, Reliable) //Unreliable 시 패킷 손실로 애니메이션 출력이 안됨
 	void Multicast_PlayEquipAnimation();
 
-	void AttachWeapon();
+	void AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const;
+	void EquipOrStowWeapon();
+
+	void StowCurrentWeapon();
 
 	bool bCanEquip{ false };
 
@@ -47,11 +61,10 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownWeapon> EquipedWeapon{};
 
-	UPROPERTY()
-	FName WeaponSocketName{ TEXT("WeaponSocket") };
-
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> EquipAnimMontageSoft{};
+
+	TArray<TPair<EStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
 
 	FOnEquipWeapon OnEquipWeapon;
 };

@@ -27,6 +27,7 @@ public:
 	void HandleOnMoveActionCompleted();
 	void RequestBasicAttack(const FInputActionValue& Value);
 	void EquipCharacter(const FInputActionValue& Value);
+	void ChangeWeapon(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}

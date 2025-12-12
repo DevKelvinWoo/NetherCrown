@@ -254,3 +254,16 @@ void ANetherCrownCharacter::EquipCharacter(const FInputActionValue& Value)
 		}
 	}
 }
+
+void ANetherCrownCharacter::ChangeWeapon(const FInputActionValue& Value)
+{
+	if (Value.IsNonZero())
+	{
+		const bool bEquipKeyInput{ Value.Get<bool>() };
+		if (bEquipKeyInput)
+		{
+			check(NetherCrownEquipComponent);
+			NetherCrownEquipComponent->ChangeWeapon();
+		}
+	}
+}
