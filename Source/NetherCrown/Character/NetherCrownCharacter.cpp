@@ -250,7 +250,7 @@ void ANetherCrownCharacter::EquipCharacter(const FInputActionValue& Value)
 		if (bEquipKeyInput)
 		{
 			check(NetherCrownEquipComponent);
-			NetherCrownEquipComponent->EquipWeapon();
+			NetherCrownEquipComponent->EquipOrStowWeapon();
 		}
 	}
 }

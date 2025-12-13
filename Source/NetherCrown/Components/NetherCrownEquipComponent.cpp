@@ -27,9 +27,9 @@ void UNetherCrownEquipComponent::SetEquipableWeapon(ANetherCrownWeapon* InEquipa
 	EquipableWeaponWeak = MakeWeakObjectPtr(InEquipableWeapon);
 }
 
-void UNetherCrownEquipComponent::EquipWeapon()
+void UNetherCrownEquipComponent::EquipOrStowWeapon()
 {
-	Server_EquipWeapon();
+	Server_EquipOrStowWeapon();
 }
 
 void UNetherCrownEquipComponent::ChangeWeapon()
@@ -39,36 +39,14 @@ void UNetherCrownEquipComponent::ChangeWeapon()
 
 void UNetherCrownEquipComponent::Server_ChangeWeapon_Implementation()
 {
-	if (StowWeaponContainer.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("StowWeaponContainer is Empty %hs"), __FUNCTION__);
-		return;
-	}
-
-	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSettings);
-
-	TPair<EStowWeaponPosition, ANetherCrownWeapon*> ChangeTargetWeaponPair{ StowWeaponContainer[0] };
-	StowWeaponContainer.RemoveAt(0);
-
-	const FName& WeaponSocketName{ CharacterDefaultSettings->EquipWeaponSocketName };
-	AttachWeaponToCharacterMesh(ChangeTargetWeaponPair.Value, WeaponSocketName);
-
-	const EStowWeaponPosition ChangeTargetWeaponPosition{ ChangeTargetWeaponPair.Key };
-	FName StowSocketName{};
-	ChangeTargetWeaponPosition == EStowWeaponPosition::Left ? StowSocketName = CharacterDefaultSettings->StowWeaponSocketLName : StowSocketName = CharacterDefaultSettings->WeaponHandleSocketRName;
-	AttachWeaponToCharacterMesh(EquipedWeapon, StowSocketName);
-
-	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquipedWeapon });
-
-	EquipedWeapon = ChangeTargetWeaponPair.Value;
+	ChangeWeaponInternal();
 }
 
-void UNetherCrownEquipComponent::Server_EquipWeapon_Implementation()
+void UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Implementation()
 {
 	if (bCanEquip)
 	{
-		EquipOrStowWeapon();
+		EquipOrStowWeaponInternal();
 		Multicast_PlayEquipAnimation();
 
 		OnEquipWeapon.Broadcast(true);
@@ -107,7 +85,7 @@ void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon*
 	TargetWeapon->AttachToComponent(OwnerCharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponSocketName);
 }
 
-void UNetherCrownEquipComponent::EquipOrStowWeapon()
+void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 {
 	ANetherCrownWeapon* EquipableWeapon{ EquipableWeaponWeak.Get() };
 	if (!IsValid(EquipableWeapon))
@@ -134,6 +112,33 @@ void UNetherCrownEquipComponent::EquipOrStowWeapon()
 
 	const FName& EquipWeaponSocketName{ CharacterDefaultSettings->EquipWeaponSocketName };
 	AttachWeaponToCharacterMesh(EquipedWeapon, EquipWeaponSocketName);
+}
+
+void UNetherCrownEquipComponent::ChangeWeaponInternal()
+{
+	if (StowWeaponContainer.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("StowWeaponContainer is Empty %hs"), __FUNCTION__);
+		return;
+	}
+
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSettings);
+
+	TPair<EStowWeaponPosition, ANetherCrownWeapon*> ChangeTargetWeaponPair{ StowWeaponContainer[0] };
+	StowWeaponContainer.RemoveAt(0);
+
+	const FName& WeaponSocketName{ CharacterDefaultSettings->EquipWeaponSocketName };
+	AttachWeaponToCharacterMesh(ChangeTargetWeaponPair.Value, WeaponSocketName);
+
+	const EStowWeaponPosition ChangeTargetWeaponPosition{ ChangeTargetWeaponPair.Key };
+	FName StowSocketName{};
+	ChangeTargetWeaponPosition == EStowWeaponPosition::Left ? StowSocketName = CharacterDefaultSettings->StowWeaponSocketLName : StowSocketName = CharacterDefaultSettings->WeaponHandleSocketRName;
+	AttachWeaponToCharacterMesh(EquipedWeapon, StowSocketName);
+
+	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquipedWeapon });
+
+	EquipedWeapon = ChangeTargetWeaponPair.Value;
 }
 
 void UNetherCrownEquipComponent::StowCurrentWeapon()

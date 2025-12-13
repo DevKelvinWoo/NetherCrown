@@ -30,7 +30,7 @@ public:
 	void SetCanEquip(const bool bInCanEquip) { bCanEquip = bInCanEquip; }
 	void SetEquipableWeapon(ANetherCrownWeapon* InEquipableWeapon);
 
-	void EquipWeapon();
+	void EquipOrStowWeapon();
 	void ChangeWeapon();
 
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
@@ -41,7 +41,7 @@ protected:
 
 private:
 	UFUNCTION(Server, Reliable)
-	void Server_EquipWeapon();
+	void Server_EquipOrStowWeapon();
 
 	UFUNCTION(Server, Reliable)
 	void Server_ChangeWeapon();
@@ -50,7 +50,9 @@ private:
 	void Multicast_PlayEquipAnimation();
 
 	void AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const;
-	void EquipOrStowWeapon();
+
+	void EquipOrStowWeaponInternal();
+	void ChangeWeaponInternal();
 
 	void StowCurrentWeapon();
 
