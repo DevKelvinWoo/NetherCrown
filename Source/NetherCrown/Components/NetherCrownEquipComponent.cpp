@@ -5,6 +5,8 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 UNetherCrownEquipComponent::UNetherCrownEquipComponent()
@@ -47,13 +49,13 @@ void UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Implementation()
 	if (bCanEquip)
 	{
 		EquipOrStowWeaponInternal();
-		Multicast_PlayEquipAnimation();
+		Multicast_PlayEquipAnimationAndSound();
 
 		OnEquipWeapon.Broadcast(true);
 	}
 }
 
-void UNetherCrownEquipComponent::Multicast_PlayEquipAnimation_Implementation()
+void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementation()
 {
 	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
 	const USkeletalMeshComponent* OwnerCharacterMesh{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr };
@@ -71,6 +73,8 @@ void UNetherCrownEquipComponent::Multicast_PlayEquipAnimation_Implementation()
 	}
 
 	NetherCrownCharacterAnimInstance->Montage_Play(EquipAnimMontage);
+
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), NetherCrownTags::Sound_Character_EquipWeapon);
 }
 
 void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const
@@ -139,6 +143,8 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquipedWeapon });
 
 	EquipedWeapon = ChangeTargetWeaponPair.Value;
+
+	Multicast_PlayEquipAnimationAndSound();
 }
 
 void UNetherCrownEquipComponent::StowCurrentWeapon()

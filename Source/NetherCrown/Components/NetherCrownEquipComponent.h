@@ -47,7 +47,7 @@ private:
 	void Server_ChangeWeapon();
 
 	UFUNCTION(NetMulticast, Reliable) //Unreliable 시 패킷 손실로 애니메이션 출력이 안됨
-	void Multicast_PlayEquipAnimation();
+	void Multicast_PlayEquipAnimationAndSound();
 
 	void AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const;
 
