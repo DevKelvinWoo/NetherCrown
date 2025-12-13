@@ -59,7 +59,8 @@ private:
 
 	void BlockInputWhenHardLanding() const;
 
-	void HandleOnStartOrStopBasicAttack(const bool bIsAnimPlay);
+	//@NOTE : 만약 공격도 막아야 한다면 두 가지 버전의 함수를 오버로딩하자 (공격 + 움직임 제한, 움직임만 제한)
+	void SetEnableCharacterControl(const bool bEnableMovement) const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> MainCameraComponent{};

@@ -39,6 +39,14 @@ void UNetherCrownEquipComponent::ChangeWeapon()
 	Server_ChangeWeapon();
 }
 
+void UNetherCrownEquipComponent::NotifyEquipEndOrStart(const bool bEquipEnd) const
+{
+	if (GetOwner()->HasAuthority())
+	{
+		OnEquipEndOrStart.Broadcast(bEquipEnd);
+	}
+}
+
 void UNetherCrownEquipComponent::Server_ChangeWeapon_Implementation()
 {
 	ChangeWeaponInternal();

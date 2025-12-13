@@ -17,4 +17,10 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_ComboDisable();
+
+	UFUNCTION()
+	void AnimNotify_EquipStart();
+
+	UFUNCTION()
+	void AnimNotify_EquipEnd();
 };

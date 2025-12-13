@@ -13,7 +13,7 @@ class NETHERCROWN_API UNetherCrownBasicAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnPlayBasicAttackAnim, const bool);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStopOrStartBasicAttackAnim, const bool);
 
 public:
 	void RequestBasicAttack();
@@ -23,7 +23,7 @@ public:
 
 	void SetCanAttack(const bool InbCanAttack) { bCanAttack = InbCanAttack; }
 
-	FOnPlayBasicAttackAnim& GetOnStartOrStopBasicAttack() { return OnPlayBasicAttackAnim; }
+	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -56,5 +56,5 @@ private:
 	bool bCanInputFirstAttack{ true };
 	bool bCanAttack{ false };
 
-	FOnPlayBasicAttackAnim OnPlayBasicAttackAnim;
+	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
 };

@@ -23,6 +23,7 @@ class NETHERCROWN_API UNetherCrownEquipComponent : public UActorComponent
 	GENERATED_BODY()
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipWeapon, const bool);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipEndOrStart, const bool)
 
 public:
 	UNetherCrownEquipComponent();
@@ -33,7 +34,10 @@ public:
 	void EquipOrStowWeapon();
 	void ChangeWeapon();
 
+	void NotifyEquipEndOrStart(const bool bEquipEnd) const;
+
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
+	FOnEquipEndOrStart& GetOnEquipEndOrStart() { return OnEquipEndOrStart; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -69,4 +73,5 @@ private:
 	TArray<TPair<EStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
 
 	FOnEquipWeapon OnEquipWeapon;
+	FOnEquipEndOrStart OnEquipEndOrStart;
 };

@@ -45,7 +45,10 @@ void ANetherCrownCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	check(NetherCrownBasicAttackComponent);
-	NetherCrownBasicAttackComponent->GetOnStartOrStopBasicAttack().AddUObject(this, &ThisClass::HandleOnStartOrStopBasicAttack);
+	NetherCrownBasicAttackComponent->GetOnStopOrStartBasicAttack().AddUObject(this, &ThisClass::SetEnableCharacterControl);
+
+	check(NetherCrownEquipComponent);
+	NetherCrownEquipComponent->GetOnEquipEndOrStart().AddUObject(this, &ThisClass::SetEnableCharacterControl);
 }
 
 void ANetherCrownCharacter::Tick(float DeltaTime)
@@ -172,12 +175,12 @@ void ANetherCrownCharacter::BlockInputWhenHardLanding() const
 	}
 }
 
-void ANetherCrownCharacter::HandleOnStartOrStopBasicAttack(const bool bIsAnimPlay)
+void ANetherCrownCharacter::SetEnableCharacterControl(const bool bEnableMovement) const
 {
 	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
 	check(MovementComponent);
 
-	bIsAnimPlay ? MovementComponent->DisableMovement() : MovementComponent->SetMovementMode(MOVE_Walking);
+	bEnableMovement ? MovementComponent->SetMovementMode(MOVE_Walking) : MovementComponent->DisableMovement();
 }
 
 void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)

@@ -75,7 +75,7 @@ void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FN
 	NetherCrownCharacterAnimInstance->Montage_JumpToSection(*SectionName);
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 
-	OnPlayBasicAttackAnim.Broadcast(true);
+	OnStopOrStartBasicAttackAnim.Broadcast(false);
 }
 
 void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeapon)
@@ -138,7 +138,7 @@ void UNetherCrownBasicAttackComponent::DisableComboAndPlayQueuedComboWindow()
 			CurrentComboCount = 1;
 			bCanInputFirstAttack = true;
 
-			OnPlayBasicAttackAnim.Broadcast(false);
+			OnStopOrStartBasicAttackAnim.Broadcast(true);
 
 			return;
 		}
