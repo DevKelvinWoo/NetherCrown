@@ -116,7 +116,6 @@ void UNetherCrownWeaponTraceComponent::DetectWeaponHit()
 	for (ANetherCrownEnemy* HitEnemy : HitEnemies)
 	{
 		//Server로 HitEnemy Damage를 줘야함, 위 로직은 Client에서 정확하게 실행됨
-		HitEnemy->TestHP -= 100;
-		//@TODO : Delegate호출 후 ApplyDamage?
+		//ServerRPC로 UGameplayStatics::ApplyDamage()를 줘야함, 서버에서 ApplyDamage가 호출되면 TakeDamage도 서버에서 수행됨
 	}
 }
