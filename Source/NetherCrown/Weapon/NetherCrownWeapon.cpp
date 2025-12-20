@@ -2,10 +2,12 @@
 
 #include "NetherCrownWeapon.h"
 
+#include "NetherCrownWeaponTraceComponent.h"
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 ANetherCrownWeapon::ANetherCrownWeapon()
 {
@@ -22,14 +24,30 @@ ANetherCrownWeapon::ANetherCrownWeapon()
 	WeaponEquipSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("WeaponEquipSphereComponent"));
 	WeaponEquipSphereComponent->SetupAttachment(RootComponent);
 
+	WeaponTraceComponent = CreateDefaultSubobject<UNetherCrownWeaponTraceComponent>(TEXT("WeaponTraceComponent"));
+
 	bNetLoadOnClient = true;
 	bReplicates = true;
 	SetReplicatingMovement(true);
 }
 
+void ANetherCrownWeapon::SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) const
+{
+	check(WeaponTraceComponent);
+	WeaponTraceComponent->SetWeaponHitTraceEnable(bEnableWeaponHitTrace);
+}
+
+void ANetherCrownWeapon::InitWeaponTraceComponentSettings() const
+{
+	check(WeaponTraceComponent && WeaponMeshComponent);
+	WeaponTraceComponent->InitWeaponTraceComponentSettings(WeaponMeshComponent->GetSocketLocation("TraceEnd"));
+}
+
 void ANetherCrownWeapon::BeginPlay()
 {
 	Super::BeginPlay();
+
+	WeaponData = FNetherCrownUtilManager::GetWeaponDataByGameplayTag(WeaponTag);
 
 	check(WeaponEquipSphereComponent);
 	WeaponEquipSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereBeginOverlap);

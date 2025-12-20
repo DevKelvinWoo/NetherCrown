@@ -21,7 +21,7 @@ void UNetherCrownBasicComboNotifyState::NotifyBegin(USkeletalMeshComponent* Mesh
 		return;
 	}
 
-	BasicAttackComponent->EnableComboWindow();
+	BasicAttackComponent->HandleEnableComboWindow();
 }
 
 void UNetherCrownBasicComboNotifyState::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
@@ -40,5 +40,5 @@ void UNetherCrownBasicComboNotifyState::NotifyEnd(USkeletalMeshComponent* MeshCo
 		return;
 	}
 
-	BasicAttackComponent->DisableComboAndPlayQueuedComboWindow();
+	BasicAttackComponent->HandleDisableComboWindow();
 }

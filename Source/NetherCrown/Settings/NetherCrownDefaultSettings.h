@@ -16,4 +16,7 @@ class NETHERCROWN_API UNetherCrownDefaultSettings : public UDeveloperSettings
 public:
 	UPROPERTY(Config, EditAnywhere)
 	TSoftObjectPtr<UDataTable> CharacterSoundDT;
+
+	UPROPERTY(Config, EditAnywhere)
+	TSoftObjectPtr<UDataTable> WeaponDT;
 };

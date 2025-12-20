@@ -4,6 +4,7 @@
 
 #include "Kismet/GameplayStatics.h"
 #include "NetherCrown/Data/NetherCrownSoundData.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "Sound/SoundCue.h"
 
@@ -33,6 +34,13 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 		return Row->SoundTag == SoundTag;
 	});
 
+	if (!FoundSoundData)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No Found SoundDataTable in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
 	FNetherCrownSoundData* FoundedSoundData = *FoundSoundData;
 	if (!FoundedSoundData)
 	{
@@ -58,4 +66,45 @@ void FNetherCrownUtilManager::PlaySound2DByGameplayTag(UObject* WorldContextObje
 	}
 
 	UGameplayStatics::PlaySound2D(WorldContextObject, SoundCue);
+}
+
+UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag)
+{
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
+	const UDataTable* WeaponDT{ DefaultSettings->WeaponDT.LoadSynchronous() };
+	if (!ensureAlways(IsValid(WeaponDT)))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No WeaponDataTable in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	TArray<FNetherCrownWeaponDataTableRow*> OutRows{};
+	WeaponDT->GetAllRows<FNetherCrownWeaponDataTableRow>(TEXT("WeaponTag"), OutRows);
+	if (OutRows.IsEmpty())
+	{
+		return nullptr;
+	}
+
+	FNetherCrownWeaponDataTableRow** FoundWeaponDataTableRow{ OutRows.FindByPredicate([&WeaponTag](FNetherCrownWeaponDataTableRow* WeaponDataTableRow)
+	{
+		return WeaponTag == WeaponDataTableRow->WeaponTag;
+	}) };
+
+	if (!FoundWeaponDataTableRow)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No Found WeaponDataTable in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	FNetherCrownWeaponDataTableRow* FoundedWeaponDataTableRow = *FoundWeaponDataTableRow;
+	if (!FoundedWeaponDataTableRow)
+	{
+		return nullptr;
+	}
+
+	return FoundedWeaponDataTableRow->WeaponData.LoadSynchronous();
 }

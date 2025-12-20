@@ -3,12 +3,16 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
 #include "NetherCrownWeapon.generated.h"
 
+class UNetherCrownWeaponTraceComponent;
 class UBoxComponent;
 class USphereComponent;
 class USkeletalMeshComponent;
+
+class UNetherCrownWeaponData;
 
 UCLASS()
 class NETHERCROWN_API ANetherCrownWeapon : public AActor
@@ -19,6 +23,11 @@ public:
 	ANetherCrownWeapon();
 
 	void DisableEquipSphereCollision() const;
+
+	USkeletalMeshComponent* GetWeaponMeshComponent() const { return WeaponMeshComponent; }
+
+	void SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) const;
+	void InitWeaponTraceComponentSettings() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -41,4 +50,13 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USphereComponent> WeaponEquipSphereComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownWeaponTraceComponent> WeaponTraceComponent{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UNetherCrownWeaponData> WeaponData{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag WeaponTag{};
 };

@@ -36,12 +36,15 @@ public:
 
 	void NotifyEquipEndOrStart(const bool bEquipEnd) const;
 
+	const ANetherCrownWeapon* GetEquippedWeapon() { return EquippedWeapon; }
+
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
 	FOnEquipEndOrStart& GetOnEquipEndOrStart() { return OnEquipEndOrStart; }
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	UFUNCTION(Server, Reliable)
@@ -64,8 +67,8 @@ private:
 
 	TWeakObjectPtr<ANetherCrownWeapon> EquipableWeaponWeak{};
 
-	UPROPERTY(Transient)
-	TObjectPtr<ANetherCrownWeapon> EquipedWeapon{};
+	UPROPERTY(Transient, Replicated)
+	TObjectPtr<ANetherCrownWeapon> EquippedWeapon{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> EquipAnimMontageSoft{};

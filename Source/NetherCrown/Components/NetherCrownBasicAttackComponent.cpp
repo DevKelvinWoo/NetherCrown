@@ -6,6 +6,7 @@
 #include "Animation/AnimMontage.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
+#include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 {
@@ -76,6 +77,31 @@ void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FN
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 
 	OnStopOrStartBasicAttackAnim.Broadcast(false);
+	SetEquippedWeaponTraceEnable(true);
+}
+
+void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool bEnable) const
+{
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	if (!ensureAlways(IsValid(EquipComponent)))
+	{
+		return;
+	}
+
+	const ANetherCrownWeapon* EquippedWeapon{ EquipComponent->GetEquippedWeapon() };
+	if (!ensureAlways(IsValid(EquippedWeapon)))
+	{
+		return;
+	}
+
+	EquippedWeapon->SetWeaponHitTraceEnable(bEnable);
+	EquippedWeapon->InitWeaponTraceComponentSettings();
 }
 
 void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeapon)
@@ -111,7 +137,7 @@ void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 	CurrentComboCount = CurrentComboCount + 1 > MaxComboCount ? 1 : ++CurrentComboCount;
 }
 
-void UNetherCrownBasicAttackComponent::EnableComboWindow()
+void UNetherCrownBasicAttackComponent::HandleEnableComboWindow()
 {
 	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
 	AActor* Owner{ GetOwner() };
@@ -123,7 +149,7 @@ void UNetherCrownBasicAttackComponent::EnableComboWindow()
 	}
 }
 
-void UNetherCrownBasicAttackComponent::DisableComboAndPlayQueuedComboWindow()
+void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 {
 	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
 	AActor* Owner{ GetOwner() };
@@ -135,6 +161,8 @@ void UNetherCrownBasicAttackComponent::DisableComboAndPlayQueuedComboWindow()
 
 		if (!bHasQueuedNextCombo)
 		{
+			SetEquippedWeaponTraceEnable(false);
+
 			CurrentComboCount = 1;
 			bCanInputFirstAttack = true;
 
@@ -153,7 +181,7 @@ void UNetherCrownBasicAttackComponent::DisableComboAndPlayQueuedComboWindow()
 			return;
 		}
 
-		const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
-		Multicast_PlayAndJumpToComboMontageSection(*FirstComboMontageSectionName);
+		const FName* CurrentComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
+		Multicast_PlayAndJumpToComboMontageSection(*CurrentComboMontageSectionName);
 	}
 }

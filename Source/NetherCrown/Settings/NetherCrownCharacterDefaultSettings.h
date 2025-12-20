@@ -26,4 +26,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere)
 	FName WeaponHandleSocketRName{ TEXT("StowWeaponSocketR") };
+
+	UPROPERTY(Config, EditAnywhere)
+	FName WeaponTraceSocketName{ TEXT("TraceEnd") };
 };

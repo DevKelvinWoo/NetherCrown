@@ -11,4 +11,10 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_HardLand, "Sound.Character.HardLand", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_EquipWeapon, "Sound.Character.EquipWeapon", "");
 #pragma endregion
+
+#pragma region Weapon
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon, "Weapon", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon_Weapon1, "Weapon.Weapon1", "");
+#pragma endregion
+
 }

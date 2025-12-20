@@ -12,4 +12,9 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Character_HardLand);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Character_EquipWeapon);
 #pragma endregion
+
+#pragma region Weapon
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Weapon);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Weapon_Weapon1);
+#pragma endregion
 }

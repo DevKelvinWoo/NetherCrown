@@ -15,10 +15,18 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 void ANetherCrownEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void ANetherCrownEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (HasAuthority())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Enemy HP : %d"), TestHP);
+		if (TestHP <= 0)
+		{
+			Destroy();
+		}
+	}
 }

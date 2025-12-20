@@ -20,7 +20,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
 		return;
 	}
 
-	BasicAttackComponent->EnableComboWindow();}
+	BasicAttackComponent->HandleEnableComboWindow();}
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
 {
@@ -36,7 +36,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
 		return;
 	}
 
-	BasicAttackComponent->DisableComboAndPlayQueuedComboWindow();
+	BasicAttackComponent->HandleDisableComboWindow();
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_EquipStart()

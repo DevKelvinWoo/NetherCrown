@@ -2,6 +2,7 @@
 
 #include "NetherCrownEquipComponent.h"
 
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
@@ -12,6 +13,8 @@
 UNetherCrownEquipComponent::UNetherCrownEquipComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	SetIsReplicatedByDefault(true);
 }
 
 void UNetherCrownEquipComponent::BeginPlay()
@@ -22,6 +25,13 @@ void UNetherCrownEquipComponent::BeginPlay()
 void UNetherCrownEquipComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UNetherCrownEquipComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, EquippedWeapon);
 }
 
 void UNetherCrownEquipComponent::SetEquipableWeapon(ANetherCrownWeapon* InEquipableWeapon)
@@ -106,13 +116,13 @@ void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 		return;
 	}
 
-	if (IsValid(EquipedWeapon))
+	if (IsValid(EquippedWeapon))
 	{
 		StowCurrentWeapon();
 	}
 
-	EquipedWeapon = EquipableWeapon;
-	EquipedWeapon->DisableEquipSphereCollision();
+	EquippedWeapon = EquipableWeapon;
+	EquippedWeapon->DisableEquipSphereCollision();
 
 	if (EquipableWeaponWeak.IsValid())
 	{
@@ -123,7 +133,7 @@ void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 	check(CharacterDefaultSettings);
 
 	const FName& EquipWeaponSocketName{ CharacterDefaultSettings->EquipWeaponSocketName };
-	AttachWeaponToCharacterMesh(EquipedWeapon, EquipWeaponSocketName);
+	AttachWeaponToCharacterMesh(EquippedWeapon, EquipWeaponSocketName);
 }
 
 void UNetherCrownEquipComponent::ChangeWeaponInternal()
@@ -146,11 +156,11 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 	const EStowWeaponPosition ChangeTargetWeaponPosition{ ChangeTargetWeaponPair.Key };
 	FName StowSocketName{};
 	ChangeTargetWeaponPosition == EStowWeaponPosition::Left ? StowSocketName = CharacterDefaultSettings->StowWeaponSocketLName : StowSocketName = CharacterDefaultSettings->WeaponHandleSocketRName;
-	AttachWeaponToCharacterMesh(EquipedWeapon, StowSocketName);
+	AttachWeaponToCharacterMesh(EquippedWeapon, StowSocketName);
 
-	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquipedWeapon });
+	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquippedWeapon });
 
-	EquipedWeapon = ChangeTargetWeaponPair.Value;
+	EquippedWeapon = ChangeTargetWeaponPair.Value;
 
 	Multicast_PlayEquipAnimationAndSound();
 }
@@ -173,7 +183,7 @@ void UNetherCrownEquipComponent::StowCurrentWeapon()
 		StowWeaponSocketName = CharacterDefaultSettings->WeaponHandleSocketRName;
 	}
 
-	AttachWeaponToCharacterMesh(EquipedWeapon, StowWeaponSocketName);
+	AttachWeaponToCharacterMesh(EquippedWeapon, StowWeaponSocketName);
 
-	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ StowWeaponPosition, EquipedWeapon });
+	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ StowWeaponPosition, EquippedWeapon });
 }

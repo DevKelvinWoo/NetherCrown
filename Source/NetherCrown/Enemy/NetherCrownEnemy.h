@@ -16,6 +16,9 @@ class NETHERCROWN_API ANetherCrownEnemy : public ACharacter
 public:
 	ANetherCrownEnemy();
 
+	//@NOTE : Test variable -> Need to remove soon...
+	int32 TestHP{ 200 };
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

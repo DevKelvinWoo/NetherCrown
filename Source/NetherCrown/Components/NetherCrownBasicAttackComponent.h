@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "NetherCrownBasicAttackComponent.generated.h"
 
+class ANetherCrownWeapon;
 class UAnimMontage;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -18,8 +19,8 @@ class NETHERCROWN_API UNetherCrownBasicAttackComponent : public UActorComponent
 public:
 	void RequestBasicAttack();
 
-	void EnableComboWindow();
-	void DisableComboAndPlayQueuedComboWindow();
+	void HandleEnableComboWindow();
+	void HandleDisableComboWindow();
 
 	void SetCanAttack(const bool InbCanAttack) { bCanAttack = InbCanAttack; }
 
@@ -34,6 +35,8 @@ private:
 	void StartAttackBasic();
 
 	void PlayAndJumpToComboMontageSection(const FName* SectionName) const;
+
+	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAndJumpToComboMontageSection(const FName& SectionName);
