@@ -46,6 +46,8 @@ private:
 
 	void HandleOnEquipWeapon(const bool bEquipWeapon);
 
+	int32 CalculateBasicAttackDamage() const;
+
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};
 

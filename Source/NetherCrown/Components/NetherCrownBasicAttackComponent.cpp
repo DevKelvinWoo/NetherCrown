@@ -112,6 +112,12 @@ void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeap
 	}
 }
 
+int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
+{
+	//Character의 Stat의 공격력, 현재 장착중인 Weapon의 공격력 & 방어구 관통력을 조합해서 데미지를 계산한다
+	return 0;
+}
+
 void UNetherCrownBasicAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();

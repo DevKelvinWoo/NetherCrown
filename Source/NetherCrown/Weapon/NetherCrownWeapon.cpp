@@ -7,6 +7,7 @@
 #include "Components/SphereComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
+#include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 ANetherCrownWeapon::ANetherCrownWeapon()
@@ -40,7 +41,12 @@ void ANetherCrownWeapon::SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrac
 void ANetherCrownWeapon::InitWeaponTraceComponentSettings() const
 {
 	check(WeaponTraceComponent && WeaponMeshComponent);
-	WeaponTraceComponent->InitWeaponTraceComponentSettings(WeaponMeshComponent->GetSocketLocation("TraceEnd"));
+
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings = GetDefault<UNetherCrownCharacterDefaultSettings>();
+	check(CharacterDefaultSettings);
+
+	const FName& TraceSocketName = CharacterDefaultSettings->WeaponTraceSocketName;
+	WeaponTraceComponent->InitWeaponTraceComponentSettings(WeaponMeshComponent->GetSocketLocation(TraceSocketName));
 }
 
 void ANetherCrownWeapon::BeginPlay()
