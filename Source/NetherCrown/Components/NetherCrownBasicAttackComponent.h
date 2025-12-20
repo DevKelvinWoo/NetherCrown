@@ -26,6 +26,8 @@ public:
 
 	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
 
+	void ApplyDamageToHitEnemy(AActor* HitEnemy);
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -43,6 +45,12 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void Server_RequestBasicAttack();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ApplyDamageToHitEnemy(AActor* HitEnemy);
+
+	UFUNCTION()
+	void ApplyDamageInternal(AActor* HitEnemy) const;
 
 	void HandleOnEquipWeapon(const bool bEquipWeapon);
 

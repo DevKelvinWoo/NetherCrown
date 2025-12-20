@@ -3,9 +3,13 @@
 #include "NetherCrownBasicAttackComponent.h"
 
 #include "NetherCrownEquipComponent.h"
+#include "NetherCrownPlayerStatComponent.h"
 #include "Animation/AnimMontage.h"
+#include "Kismet/GameplayStatics.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
+#include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 void UNetherCrownBasicAttackComponent::RequestBasicAttack()
@@ -104,6 +108,16 @@ void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool b
 	EquippedWeapon->InitWeaponTraceComponentSettings();
 }
 
+void UNetherCrownBasicAttackComponent::Server_ApplyDamageToHitEnemy_Implementation(AActor* HitEnemy)
+{
+	ApplyDamageInternal(HitEnemy);
+}
+
+void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) const
+{
+	UGameplayStatics::ApplyDamage(HitEnemy, CalculateBasicAttackDamage(), GetOwner()->GetInstigatorController(), GetOwner(), UDamageType::StaticClass());
+}
+
 void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeapon)
 {
 	if (GetOwner()->HasAuthority())
@@ -114,8 +128,45 @@ void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeap
 
 int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 {
-	//Character의 Stat의 공격력, 현재 장착중인 Weapon의 공격력 & 방어구 관통력을 조합해서 데미지를 계산한다
-	return 0;
+	//@NOTE : Character의 Stat의 공격력, 현재 장착중인 Weapon의 공격력을 이용하여 데미지 계산을 한다
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return 0;
+	}
+
+	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(OwnerCharacter->GetPlayerState()) };
+	check(OwnerPlayerState);
+
+	const UNetherCrownPlayerStatComponent* OwnerChracterStatComponent{ OwnerPlayerState->GetNetherCrownPlayerStatComponent() };
+	if (!ensureAlways(IsValid(OwnerChracterStatComponent)))
+	{
+		return 0;
+	}
+
+	const FNetherCrownPlayerStatData& StatData{ OwnerChracterStatComponent->GetPlayerStatData() };
+	const int32 AttackDamage{ StatData.AttackDamage };
+
+	const UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	if (!ensureAlways(IsValid(EquipComponent)))
+	{
+		return 0;
+	}
+
+	const UNetherCrownWeaponData* EquippedWeaponData{ EquipComponent->GetEquippedWeaponData() };
+	const int32 WeaponAttackDamage{ EquippedWeaponData ? EquippedWeaponData->WeaponAttackDamage : 0 };
+
+	return AttackDamage + WeaponAttackDamage;
+}
+
+void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy)
+{
+	if (!IsValid(HitEnemy))
+	{
+		return;
+	}
+
+	Server_ApplyDamageToHitEnemy(HitEnemy);
 }
 
 void UNetherCrownBasicAttackComponent::BeginPlay()

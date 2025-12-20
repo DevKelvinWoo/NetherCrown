@@ -13,6 +13,9 @@ class NETHERCROWN_API ANetherCrownPlayerState : public APlayerState
 {
 	GENERATED_BODY()
 
+public:
+	UNetherCrownPlayerStatComponent* GetNetherCrownPlayerStatComponent() const { return NetherCrownPlayerStatComponent; }
+
 protected:
 	ANetherCrownPlayerState();
 

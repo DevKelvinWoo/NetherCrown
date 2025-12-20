@@ -29,6 +29,8 @@ public:
 	void SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) const;
 	void InitWeaponTraceComponentSettings() const;
 
+	const UNetherCrownWeaponData* GetWeaponData() const { return WeaponData; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -41,6 +43,9 @@ private:
 	void HandleOnEquipSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	void SetEquipComponentSetting(AActor* OtherActor, const bool bCanEquip);
+
+	UFUNCTION()
+	void HandleOnHitEnemy(AActor* HitEnemy) const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent{};

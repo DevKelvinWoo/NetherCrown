@@ -6,6 +6,7 @@
 #include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
@@ -58,6 +59,9 @@ void ANetherCrownWeapon::BeginPlay()
 	check(WeaponEquipSphereComponent);
 	WeaponEquipSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereBeginOverlap);
 	WeaponEquipSphereComponent->OnComponentEndOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereEndOverlap);
+
+	check(WeaponTraceComponent);
+	WeaponTraceComponent->GetOnHitEnemy().AddUObject(this, &ThisClass::HandleOnHitEnemy);
 }
 
 void ANetherCrownWeapon::Tick(float DeltaTime)
@@ -69,6 +73,11 @@ void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* On
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
 	const FHitResult& SweepResult)
 {
+	if (!(OtherActor->IsA<ANetherCrownCharacter>()))
+	{
+		return;
+	}
+
 	//Server/Client 둘 다 호출
 	if (HasAuthority())
 	{
@@ -79,6 +88,11 @@ void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* On
 void ANetherCrownWeapon::HandleOnEquipSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
 	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
+	if (!(OtherActor->IsA<ANetherCrownCharacter>()))
+	{
+		return;
+	}
+
 	//Server/Client 둘 다 호출
 	if (HasAuthority())
 	{
@@ -89,19 +103,44 @@ void ANetherCrownWeapon::HandleOnEquipSphereEndOverlap(UPrimitiveComponent* Over
 void ANetherCrownWeapon::SetEquipComponentSetting(AActor* OtherActor, const bool bCanEquip)
 {
 	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(OtherActor) };
-	if (!IsValid(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(NetherCrownCharacter)))
 	{
 		return;
 	}
 
 	UNetherCrownEquipComponent* EquipComponent{ NetherCrownCharacter->GetEquipComponent() };
-	if (!IsValid(EquipComponent))
+	if (!ensureAlways(IsValid(EquipComponent)))
 	{
 		return;
 	}
 
 	EquipComponent->SetCanEquip(bCanEquip);
 	bCanEquip ? EquipComponent->SetEquipableWeapon(this) : EquipComponent->SetEquipableWeapon(nullptr);
+}
+
+void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy) const
+{
+	if (!IsValid(HitEnemy))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HitEnemy is invalid %hs"), __FUNCTION__);
+		return;
+	}
+
+	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("OwnerCharacter is invalid %hs"), __FUNCTION__);
+		return;
+	}
+
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter->GetBasicAttackComponent() };
+	if (!ensureAlways(IsValid(BasicAttackComponent)))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BasicAttackComponent is invalid %hs"), __FUNCTION__);
+		return;
+	}
+
+	BasicAttackComponent->ApplyDamageToHitEnemy(HitEnemy);
 }
 
 void ANetherCrownWeapon::DisableEquipSphereCollision() const

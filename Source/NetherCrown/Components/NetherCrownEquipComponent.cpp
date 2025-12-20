@@ -57,6 +57,17 @@ void UNetherCrownEquipComponent::NotifyEquipEndOrStart(const bool bEquipEnd) con
 	}
 }
 
+const UNetherCrownWeaponData* UNetherCrownEquipComponent::GetEquippedWeaponData() const
+{
+	if (!IsValid(EquippedWeapon))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Equipped weapon is invalid. Returning nullptr. %hs"), __FUNCTION__);
+		return nullptr;
+	}
+
+	return EquippedWeapon->GetWeaponData();
+}
+
 void UNetherCrownEquipComponent::Server_ChangeWeapon_Implementation()
 {
 	ChangeWeaponInternal();
@@ -104,6 +115,7 @@ void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon*
 		return;
 	}
 
+	TargetWeapon->SetOwner(OwnerCharacter);
 	TargetWeapon->AttachToComponent(OwnerCharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponSocketName);
 }
 

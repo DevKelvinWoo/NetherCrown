@@ -68,11 +68,17 @@ void UNetherCrownWeaponTraceComponent::DetectWeaponHit()
 		return;
 	}
 
+	AActor* Owner{ GetOwner() };
+	if (!Owner || Owner->HasAuthority())
+	{
+		return;
+	}
+
 	const FVector& CurrentEndLocation{ WeaponMesh->GetSocketLocation(WeaponTraceSocketName) };
 
 	TArray<FHitResult> HitResults{};
 	FCollisionQueryParams Params{};
-	Params.AddIgnoredActor(GetOwner());
+	Params.AddIgnoredActor(Owner);
 
 	for (const ANetherCrownEnemy* HitEnemy : HitIgnoreEnemies)
 	{
@@ -115,7 +121,8 @@ void UNetherCrownWeaponTraceComponent::DetectWeaponHit()
 
 	for (ANetherCrownEnemy* HitEnemy : HitEnemies)
 	{
-		//Server로 HitEnemy Damage를 줘야함, 위 로직은 Client에서 정확하게 실행됨
-		//ServerRPC로 UGameplayStatics::ApplyDamage()를 줘야함, 서버에서 ApplyDamage가 호출되면 TakeDamage도 서버에서 수행됨
+		//@NOTE : Server로 HitEnemy Damage를 줘야함, 위 공격 감지로직은 Client에서 정확하게 실행됨
+		//@NOTE : ServerRPC로 UGameplayStatics::ApplyDamage()를 줘야함, 서버에서 ApplyDamage가 호출되면 TakeDamage도 서버에서 수행됨
+		OnHitEnemy.Broadcast(HitEnemy);
 	}
 }

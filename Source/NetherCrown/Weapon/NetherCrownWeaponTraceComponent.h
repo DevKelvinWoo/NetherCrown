@@ -15,11 +15,15 @@ class NETHERCROWN_API UNetherCrownWeaponTraceComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnHitEnemy, AActor*);
+
 public:
 	UNetherCrownWeaponTraceComponent();
 
 	void SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) { bIsTraceEnabled = bEnableWeaponHitTrace; }
 	void InitWeaponTraceComponentSettings(const FVector& InLastEndLocation);
+
+	FOnHitEnemy& GetOnHitEnemy() { return OnHitEnemy; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -46,4 +50,6 @@ private:
 
 	UPROPERTY(Replicated)
 	TArray<TObjectPtr<ANetherCrownEnemy>> HitIgnoreEnemies{}; //TSet은 Replicate X
+
+	FOnHitEnemy OnHitEnemy;
 };

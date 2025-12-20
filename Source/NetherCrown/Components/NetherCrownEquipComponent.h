@@ -6,6 +6,7 @@
 #include "Components/ActorComponent.h"
 #include "NetherCrownEquipComponent.generated.h"
 
+class UNetherCrownWeaponData;
 class UAnimMontage;
 
 class ANetherCrownWeapon;
@@ -36,7 +37,8 @@ public:
 
 	void NotifyEquipEndOrStart(const bool bEquipEnd) const;
 
-	const ANetherCrownWeapon* GetEquippedWeapon() { return EquippedWeapon; }
+	const ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+	const UNetherCrownWeaponData* GetEquippedWeaponData() const;
 
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
 	FOnEquipEndOrStart& GetOnEquipEndOrStart() { return OnEquipEndOrStart; }
