@@ -11,11 +11,9 @@ UNetherCrownPlayerStatComponent::UNetherCrownPlayerStatComponent()
 void UNetherCrownPlayerStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
 }
 
 void UNetherCrownPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-
 }

@@ -51,9 +51,6 @@ private:
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent{};
 
 	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UBoxComponent> WeaponHitBoxComponent{};
-
-	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USphereComponent> WeaponEquipSphereComponent{};
 
 	UPROPERTY(EditDefaultsOnly)

@@ -3,7 +3,6 @@
 #include "NetherCrownWeapon.h"
 
 #include "NetherCrownWeaponTraceComponent.h"
-#include "Components/BoxComponent.h"
 #include "Components/SphereComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
@@ -19,9 +18,6 @@ ANetherCrownWeapon::ANetherCrownWeapon()
 
 	WeaponMeshComponent = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("WeaponMeshComponent"));
 	WeaponMeshComponent->SetupAttachment(RootComponent);
-
-	WeaponHitBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("WeaponHitBoxComponent"));
-	WeaponHitBoxComponent->SetupAttachment(RootComponent);
 
 	WeaponEquipSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("WeaponEquipSphereComponent"));
 	WeaponEquipSphereComponent->SetupAttachment(RootComponent);
