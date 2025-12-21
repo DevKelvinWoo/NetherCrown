@@ -54,7 +54,7 @@ class NETHERCROWN_API UNetherCrownPlayerStatComponent : public UActorComponent
 public:
 	UNetherCrownPlayerStatComponent();
 
-	FNetherCrownPlayerStatData GetPlayerStatData() const { return PlayerStatData; }
+	const FNetherCrownPlayerStatData& GetPlayerStatData() const { return PlayerStatData; }
 
 protected:
 	virtual void BeginPlay() override;

@@ -161,6 +161,18 @@ int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 
 void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy)
 {
+	AActor* OwnerActor = GetOwner();
+	ANetherCrownCharacter* OwnerCharacter = Cast<ANetherCrownCharacter>(OwnerActor);
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	if (!OwnerCharacter->IsLocallyControlled()) //@NOTE : SimulatedProxy Role Character의 실행 방지
+	{
+		return;
+	}
+
 	if (!IsValid(HitEnemy))
 	{
 		return;

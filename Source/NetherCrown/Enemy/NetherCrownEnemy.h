@@ -6,7 +6,10 @@
 #include "GameFramework/Character.h"
 #include "NetherCrownEnemy.generated.h"
 
+class UNetherCrownEnemyStatComponent;
 class UCapsuleComponent;
+
+class ANetherCrownCharacter;
 
 UCLASS()
 class NETHERCROWN_API ANetherCrownEnemy : public ACharacter
@@ -16,15 +19,17 @@ class NETHERCROWN_API ANetherCrownEnemy : public ACharacter
 public:
 	ANetherCrownEnemy();
 
-	//@NOTE : Test variable -> Need to remove soon...
-	int32 TestHP{ 200 };
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 private:
+	void ProcessIncomingDamage(const ANetherCrownCharacter* DamageCauser, float DamageAmount);
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCapsuleComponent> EnemyHitBoxComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownEnemyStatComponent> EnemyStatComponent{};
 };
