@@ -6,8 +6,10 @@
 #include "Components/ActorComponent.h"
 #include "NetherCrownBasicAttackComponent.generated.h"
 
-class ANetherCrownWeapon;
 class UAnimMontage;
+class UCameraShakeBase;
+
+class ANetherCrownWeapon;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownBasicAttackComponent : public UActorComponent
@@ -56,11 +58,16 @@ private:
 
 	int32 CalculateBasicAttackDamage() const;
 
+	void PlayHitImpactCameraShake() const;
+
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<int32, FName> ComboMontageSectionMap{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UCameraShakeBase> ApplyDamageCameraShakeClass{};
 
 	int32 CurrentComboCount{ 1 };
 

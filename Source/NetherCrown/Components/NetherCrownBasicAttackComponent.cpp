@@ -7,6 +7,7 @@
 #include "Animation/AnimMontage.h"
 #include "Kismet/GameplayStatics.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
@@ -159,6 +160,23 @@ int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 	return AttackDamage + WeaponAttackDamage;
 }
 
+void UNetherCrownBasicAttackComponent::PlayHitImpactCameraShake() const
+{
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	ANetherCrownPlayerController* OwnerPlayerController{ Cast<ANetherCrownPlayerController>(OwnerCharacter->GetController()) };
+	check(OwnerPlayerController);
+
+	APlayerCameraManager* CameraManager{ OwnerPlayerController->PlayerCameraManager };
+	check(CameraManager);
+
+	CameraManager->StartCameraShake(ApplyDamageCameraShakeClass, 1.0f);
+}
+
 void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy)
 {
 	AActor* OwnerActor = GetOwner();
@@ -177,6 +195,8 @@ void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy)
 	{
 		return;
 	}
+
+	PlayHitImpactCameraShake();
 
 	Server_ApplyDamageToHitEnemy(HitEnemy);
 }

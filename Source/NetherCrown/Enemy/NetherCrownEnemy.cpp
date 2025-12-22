@@ -78,6 +78,6 @@ void ANetherCrownEnemy::ProcessIncomingDamage(const ANetherCrownCharacter* Damag
 	UE_LOG(LogTemp, Warning, TEXT("FinalDamage : %d"), FinalDamage);
 	if (EnemyStatData.EnemyHP <= 0)
 	{
-		Destroy(); //@NOTE : Temp Code
+		//Destroy(); //@NOTE : Temp Code
 	}
 }
