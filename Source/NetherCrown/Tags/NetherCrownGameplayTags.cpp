@@ -7,10 +7,13 @@ namespace NetherCrownTags
 {
 #pragma region Sound
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character, "Sound.Character", "");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_JumpStart, "Sound.Character.JumpStart", "");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_HardLand, "Sound.Character.HardLand", "");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_EquipWeapon, "Sound.Character.EquipWeapon", "");
-	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_BasicAttack, "Sound.Character.BasicAttack", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_Knight_JumpStart, "Sound.Character.Knight.JumpStart", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_Knight_HardLand, "Sound.Character.Knight.HardLand", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_Knight_EquipWeapon, "Sound.Character.Knight.EquipWeapon", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_Knight_BasicAttackGrunt, "Sound.Character.Knight.BasicAttackGrunt", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_Knight_SwingWeapon, "Sound.Character.Knight.SwingWeapon", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_HurtGrunt, "Sound.Enemy.HurtGrunt", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_HurtImpact, "Sound.Enemy.HurtImpact", "");
 #pragma endregion
 
 #pragma region Weapon

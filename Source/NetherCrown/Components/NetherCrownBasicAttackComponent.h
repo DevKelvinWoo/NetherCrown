@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 #include "NetherCrownBasicAttackComponent.generated.h"
 
@@ -10,6 +11,16 @@ class UAnimMontage;
 class UCameraShakeBase;
 
 class ANetherCrownWeapon;
+
+USTRUCT()
+struct FNetherCrownBasicAttackComponentTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag BasicAttackGruntSoundTag{};
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownBasicAttackComponent : public UActorComponent
@@ -38,7 +49,7 @@ private:
 
 	void StartAttackBasic();
 
-	void PlayAndJumpToComboMontageSection(const FName* SectionName) const;
+	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName) const;
 
 	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
 
@@ -59,6 +70,7 @@ private:
 	int32 CalculateBasicAttackDamage() const;
 
 	void PlayHitImpactCameraShake() const;
+	void PlayBasicAttackSounds() const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};
@@ -75,6 +87,9 @@ private:
 	bool bHasQueuedNextCombo{ false };
 	bool bCanInputFirstAttack{ true };
 	bool bCanAttack{ false };
+
+	UPROPERTY(EditDefaultsOnly)
+	FNetherCrownBasicAttackComponentTagData BasicAttackComponentTagData{};
 
 	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
 };

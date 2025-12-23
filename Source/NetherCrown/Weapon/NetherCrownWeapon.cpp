@@ -50,7 +50,7 @@ void ANetherCrownWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	WeaponData = FNetherCrownUtilManager::GetWeaponDataByGameplayTag(WeaponTag);
+	WeaponData = FNetherCrownUtilManager::GetWeaponDataByGameplayTag(WeaponTagData.WeaponTag);
 
 	check(WeaponEquipSphereComponent);
 	WeaponEquipSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereBeginOverlap);

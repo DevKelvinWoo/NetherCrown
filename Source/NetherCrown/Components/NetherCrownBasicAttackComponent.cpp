@@ -11,7 +11,27 @@
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
+
+void UNetherCrownBasicAttackComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	if (!ensureAlways(IsValid(EquipComponent)))
+	{
+		return;
+	}
+
+	EquipComponent->GetOnEquipWeapon().AddUObject(this, &ThisClass::HandleOnEquipWeapon);
+}
 
 void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 {
@@ -51,10 +71,10 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 
 void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSection_Implementation(const FName& SectionName)
 {
-	PlayAndJumpToComboMontageSection(&SectionName);
+	PlayAttackSoundAndJumpToComboMontageSection(&SectionName);
 }
 
-void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FName* SectionName) const
+void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName) const
 {
 	if (!SectionName)
 	{
@@ -83,6 +103,8 @@ void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FN
 
 	OnStopOrStartBasicAttackAnim.Broadcast(false);
 	SetEquippedWeaponTraceEnable(true);
+
+	PlayBasicAttackSounds();
 }
 
 void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool bEnable) const
@@ -177,6 +199,26 @@ void UNetherCrownBasicAttackComponent::PlayHitImpactCameraShake() const
 	CameraManager->StartCameraShake(ApplyDamageCameraShakeClass, 1.0f);
 }
 
+void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
+{
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetOwner(), BasicAttackComponentTagData.BasicAttackGruntSoundTag);
+
+	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	if (!ensureAlways(EquipComponent))
+	{
+		return;
+	}
+
+	const FGameplayTag& SwingWeaponSoundTag{ EquipComponent->GetEquippedWeaponTagData().WeaponSwingSound };
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetOwner(), SwingWeaponSoundTag);
+}
+
 void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy)
 {
 	AActor* OwnerActor = GetOwner();
@@ -199,25 +241,6 @@ void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy)
 	PlayHitImpactCameraShake();
 
 	Server_ApplyDamageToHitEnemy(HitEnemy);
-}
-
-void UNetherCrownBasicAttackComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
-	{
-		return;
-	}
-
-	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
-	if (!ensureAlways(IsValid(EquipComponent)))
-	{
-		return;
-	}
-
-	EquipComponent->GetOnEquipWeapon().AddUObject(this, &ThisClass::HandleOnEquipWeapon);
 }
 
 void UNetherCrownBasicAttackComponent::CalculateNextComboCount()

@@ -14,6 +14,19 @@ class USkeletalMeshComponent;
 
 class UNetherCrownWeaponData;
 
+USTRUCT()
+struct FNetherCrownWeaponTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag WeaponTag{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag WeaponSwingSound{};
+};
+
 UCLASS()
 class NETHERCROWN_API ANetherCrownWeapon : public AActor
 {
@@ -30,6 +43,8 @@ public:
 	void InitWeaponTraceComponentSettings() const;
 
 	const UNetherCrownWeaponData* GetWeaponData() const { return WeaponData; }
+
+	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -60,5 +75,7 @@ private:
 	TObjectPtr<UNetherCrownWeaponData> WeaponData{};
 
 	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag WeaponTag{};
+	FNetherCrownWeaponTagData WeaponTagData{};
+
+
 };

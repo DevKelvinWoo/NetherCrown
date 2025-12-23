@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
 #include "NetherCrownEquipComponent.generated.h"
 
@@ -10,12 +11,23 @@ class UNetherCrownWeaponData;
 class UAnimMontage;
 
 class ANetherCrownWeapon;
+struct FNetherCrownWeaponTagData;
 
 UENUM()
 enum class EStowWeaponPosition : uint8
 {
 	Left,
 	Right
+};
+
+USTRUCT()
+struct FNetherCrownEquipComponentTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag EquipSoundTag{};
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -39,6 +51,8 @@ public:
 
 	const ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 	const UNetherCrownWeaponData* GetEquippedWeaponData() const;
+
+	const FNetherCrownWeaponTagData& GetEquippedWeaponTagData() const;
 
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
 	FOnEquipEndOrStart& GetOnEquipEndOrStart() { return OnEquipEndOrStart; }
@@ -74,6 +88,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> EquipAnimMontageSoft{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FNetherCrownEquipComponentTagData EquipComponentTagData{};
 
 	TArray<TPair<EStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
 

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
 #include "NetherCrownCharacter.generated.h"
@@ -12,6 +13,19 @@ class UCameraComponent;
 
 class UNetherCrownBasicAttackComponent;
 class UNetherCrownEquipComponent;
+
+USTRUCT()
+struct FNetherCrownCharacterTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag JumpStartSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag HardLandingSoundTag{};
+};
 
 UCLASS()
 class NETHERCROWN_API ANetherCrownCharacter : public ACharacter
@@ -82,6 +96,9 @@ private:
 
 	UPROPERTY(Replicated)
 	FVector HitPointToGroundWhenJumpStart{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FNetherCrownCharacterTagData CharacterTagData{};
 
 	FTimerHandle TimerHandle_ResetHardLanding;
 };

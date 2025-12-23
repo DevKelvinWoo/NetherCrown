@@ -7,6 +7,7 @@
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 ANetherCrownEnemy::ANetherCrownEnemy()
 {
@@ -30,28 +31,26 @@ void ANetherCrownEnemy::Tick(float DeltaTime)
 
 float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
+	//@NOTE : This function is only executed by server RPC
 	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	const ANetherCrownCharacter* NetherCrownCharacter = Cast<ANetherCrownCharacter>(DamageCauser);
-	if (!ensureAlways(IsValid(NetherCrownCharacter)))
-	{
-		return 0.f;
-	}
+	Multicast_PlayTakeDamageSound();
 
-	ProcessIncomingDamage(NetherCrownCharacter, ResultDamage);
+	ProcessIncomingDamage(DamageCauser, ResultDamage);
 
 	return ResultDamage;
 }
 
-void ANetherCrownEnemy::ProcessIncomingDamage(const ANetherCrownCharacter* DamageCauser, float DamageAmount)
+void ANetherCrownEnemy::ProcessIncomingDamage(const AActor* DamageCauser, float DamageAmount)
 {
-	//@NOTE : This function is only executed by server
-	if (!ensureAlways(IsValid(DamageCauser)))
+	//@NOTE : This function is only executed by server RPC
+	const ANetherCrownCharacter* NetherCrownCharacter = Cast<ANetherCrownCharacter>(DamageCauser);
+	if (!ensureAlways(IsValid(NetherCrownCharacter)))
 	{
 		return;
 	}
 
-	UNetherCrownEquipComponent* EquipComponent{ DamageCauser->GetEquipComponent() };
+	UNetherCrownEquipComponent* EquipComponent{ NetherCrownCharacter->GetEquipComponent() };
 	if (!ensureAlways(IsValid(EquipComponent)))
 	{
 		return;
@@ -80,4 +79,15 @@ void ANetherCrownEnemy::ProcessIncomingDamage(const ANetherCrownCharacter* Damag
 	{
 		//Destroy(); //@NOTE : Temp Code
 	}
+}
+
+void ANetherCrownEnemy::PlayTakeDamageSound()
+{
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtGruntSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtImpactSoundTag);
+}
+
+void ANetherCrownEnemy::Multicast_PlayTakeDamageSound_Implementation()
+{
+	PlayTakeDamageSound();
 }

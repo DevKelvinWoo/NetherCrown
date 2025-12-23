@@ -6,7 +6,6 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
-#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
@@ -68,6 +67,11 @@ const UNetherCrownWeaponData* UNetherCrownEquipComponent::GetEquippedWeaponData(
 	return EquippedWeapon->GetWeaponData();
 }
 
+const FNetherCrownWeaponTagData& UNetherCrownEquipComponent::GetEquippedWeaponTagData() const
+{
+	return EquippedWeapon->GetWeaponTagData();
+}
+
 void UNetherCrownEquipComponent::Server_ChangeWeapon_Implementation()
 {
 	ChangeWeaponInternal();
@@ -103,7 +107,10 @@ void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementa
 
 	NetherCrownCharacterAnimInstance->Montage_Play(EquipAnimMontage);
 
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), NetherCrownTags::Sound_Character_EquipWeapon);
+	if (OwnerCharacter->IsLocallyControlled())
+	{
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), EquipComponentTagData.EquipSoundTag);
+	}
 }
 
 void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const

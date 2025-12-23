@@ -10,7 +10,6 @@
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
-#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 ANetherCrownCharacter::ANetherCrownCharacter()
@@ -86,7 +85,7 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 
 		if (!HasAuthority() && bIsHardLanding)
 		{
-			FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, NetherCrownTags::Sound_Character_HardLand);
+			FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, CharacterTagData.HardLandingSoundTag);
 		}
 	}
 }
@@ -105,7 +104,7 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 	}
 	else
 	{
-		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, NetherCrownTags::Sound_Character_JumpStart);
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, CharacterTagData.JumpStartSoundTag);
 	}
 }
 
