@@ -60,7 +60,7 @@ private:
 	void SetEquipComponentSetting(AActor* OtherActor, const bool bCanEquip);
 
 	UFUNCTION()
-	void HandleOnHitEnemy(AActor* HitEnemy) const;
+	void HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLocation) const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent{};
@@ -76,6 +76,4 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownWeaponTagData WeaponTagData{};
-
-
 };

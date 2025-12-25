@@ -114,7 +114,7 @@ void ANetherCrownWeapon::SetEquipComponentSetting(AActor* OtherActor, const bool
 	bCanEquip ? EquipComponent->SetEquipableWeapon(this) : EquipComponent->SetEquipableWeapon(nullptr);
 }
 
-void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy) const
+void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLocation) const
 {
 	if (!IsValid(HitEnemy))
 	{
@@ -136,7 +136,7 @@ void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy) const
 		return;
 	}
 
-	BasicAttackComponent->ApplyDamageToHitEnemy(HitEnemy);
+	BasicAttackComponent->ApplyDamageToHitEnemy(HitEnemy, HitLocation);
 }
 
 void ANetherCrownWeapon::DisableEquipSphereCollision() const

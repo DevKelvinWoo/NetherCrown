@@ -31,11 +31,6 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
 		return;
 	}
 
-	if (!OwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
 	BasicAttackComponent->HandleDisableComboWindow();
 }
 
@@ -61,4 +56,21 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_EquipEnd()
 	}
 
 	EquipComponent->NotifyEquipEndOrStart(true);
+}
+
+void UNetherCrownCharacterAnimInstance::AnimNotify_HitTraceEnable()
+{
+	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter ? OwningCharacter->GetBasicAttackComponent() : nullptr };
+	if (!(IsValid(BasicAttackComponent)))
+	{
+		return;
+	}
+
+	if (!OwningCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	BasicAttackComponent->HandleEnableHitTrace();
 }

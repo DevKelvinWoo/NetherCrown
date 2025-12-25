@@ -16,6 +16,11 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_HurtImpact, "Sound.Enemy.HurtImpact", "");
 #pragma endregion
 
+#pragma region Effect
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight, "Effect.Knight", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_BasicAttackImpact, "Effect.Knight.BasicAttackImpact", "");
+#pragma endregion
+
 #pragma region Weapon
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon, "Weapon", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon_Weapon1, "Weapon.Weapon1", "");

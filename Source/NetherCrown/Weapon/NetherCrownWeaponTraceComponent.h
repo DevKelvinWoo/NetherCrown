@@ -15,7 +15,7 @@ class NETHERCROWN_API UNetherCrownWeaponTraceComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnHitEnemy, AActor*);
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnHitEnemy, AActor*, const FVector&);
 
 public:
 	UNetherCrownWeaponTraceComponent();

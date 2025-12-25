@@ -19,4 +19,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere)
 	TSoftObjectPtr<UDataTable> WeaponDT;
+
+	UPROPERTY(Config, EditAnywhere)
+	TSoftObjectPtr<UDataTable> EffectDT;
 };

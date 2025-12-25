@@ -6,14 +6,21 @@
 #include "GameplayTagContainer.h"
 
 class USoundCue;
+class UNiagaraSystem;
 
 class UNetherCrownWeaponData;
 
 class FNetherCrownUtilManager
 {
 public:
+	//Sound
 	static USoundCue* GetSoundCueByGameplayTag(const FGameplayTag& SoundTag);
 	static void PlaySound2DByGameplayTag(UObject* WorldContextObject, const FGameplayTag& SoundTag);
 
+	//WeaponData
 	static UNetherCrownWeaponData* GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag);
+
+	//Effect
+	static UNiagaraSystem* GetNiagaraSystemByGameplayTag(const FGameplayTag& EffectTag);
+	static void SpawnNiagaraSystemByGameplayTag(UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform);
 };

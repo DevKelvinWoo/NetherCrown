@@ -20,6 +20,9 @@ struct FNetherCrownBasicAttackComponentTagData
 public:
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag BasicAttackGruntSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag BasicAttackImpactEffectTag{};
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -34,12 +37,13 @@ public:
 
 	void HandleEnableComboWindow();
 	void HandleDisableComboWindow();
+	void HandleEnableHitTrace();
 
 	void SetCanAttack(const bool InbCanAttack) { bCanAttack = InbCanAttack; }
 
 	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
 
-	void ApplyDamageToHitEnemy(AActor* HitEnemy);
+	void ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation);
 
 protected:
 	virtual void BeginPlay() override;
@@ -62,6 +66,12 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_ApplyDamageToHitEnemy(AActor* HitEnemy);
 
+	UFUNCTION(Server, Reliable)
+	void Server_SpawnHitImpactEffect(const FVector& HitLocation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHitImpactEffect(const FVector& HitLocation);
+
 	UFUNCTION()
 	void ApplyDamageInternal(AActor* HitEnemy) const;
 
@@ -71,6 +81,7 @@ private:
 
 	void PlayHitImpactCameraShake() const;
 	void PlayBasicAttackSounds() const;
+	void SpawnHitImpactEffect(const FVector& HitLocation) const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};

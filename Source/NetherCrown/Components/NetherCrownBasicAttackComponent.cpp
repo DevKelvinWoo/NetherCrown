@@ -102,7 +102,7 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 
 	OnStopOrStartBasicAttackAnim.Broadcast(false);
-	SetEquippedWeaponTraceEnable(true);
+	//SetEquippedWeaponTraceEnable(true);
 
 	PlayBasicAttackSounds();
 }
@@ -134,6 +134,16 @@ void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool b
 void UNetherCrownBasicAttackComponent::Server_ApplyDamageToHitEnemy_Implementation(AActor* HitEnemy)
 {
 	ApplyDamageInternal(HitEnemy);
+}
+
+void UNetherCrownBasicAttackComponent::Server_SpawnHitImpactEffect_Implementation(const FVector& HitLocation)
+{
+	Multicast_PlayHitImpactEffect(HitLocation);
+}
+
+void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactEffect_Implementation(const FVector& HitLocation)
+{
+	SpawnHitImpactEffect(HitLocation);
 }
 
 void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) const
@@ -219,7 +229,17 @@ void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetOwner(), SwingWeaponSoundTag);
 }
 
-void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy)
+void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLocation) const
+{
+	FTransform SpawnTransform{};
+	SpawnTransform.SetLocation(HitLocation);
+	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
+	SpawnTransform.SetScale3D(FVector(1.0f));
+
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(GetOwner(), BasicAttackComponentTagData.BasicAttackImpactEffectTag, SpawnTransform);
+}
+
+void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation)
 {
 	AActor* OwnerActor = GetOwner();
 	ANetherCrownCharacter* OwnerCharacter = Cast<ANetherCrownCharacter>(OwnerActor);
@@ -240,6 +260,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy)
 
 	PlayHitImpactCameraShake();
 
+	Server_SpawnHitImpactEffect(HitLocation);
 	Server_ApplyDamageToHitEnemy(HitEnemy);
 }
 
@@ -296,4 +317,11 @@ void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 		const FName* CurrentComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
 		Multicast_PlayAndJumpToComboMontageSection(*CurrentComboMontageSectionName);
 	}
+
+	SetEquippedWeaponTraceEnable(false);
+}
+
+void UNetherCrownBasicAttackComponent::HandleEnableHitTrace()
+{
+	SetEquippedWeaponTraceEnable(true);
 }

@@ -3,10 +3,13 @@
 #include "NetherCrownUtilManager.h"
 
 #include "Kismet/GameplayStatics.h"
+#include "NetherCrown/Data/NetherCrownEffectData.h"
 #include "NetherCrown/Data/NetherCrownSoundData.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "Sound/SoundCue.h"
+#include "NiagaraSystem.h"
+#include "NiagaraFunctionLibrary.h"
 
 USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag& SoundTag)
 {
@@ -29,24 +32,24 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 	TArray<FNetherCrownSoundData*> OutRows{};
 	SoundDT->GetAllRows<FNetherCrownSoundData>(TEXT("SoundTag"), OutRows);
 
-	FNetherCrownSoundData** FoundSoundData = OutRows.FindByPredicate([&SoundTag](FNetherCrownSoundData* Row)
+	FNetherCrownSoundData** FoundSoundDataRow = OutRows.FindByPredicate([&SoundTag](FNetherCrownSoundData* Row)
 	{
 		return Row->SoundTag == SoundTag;
 	});
 
-	if (!FoundSoundData)
+	if (!FoundSoundDataRow)
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No Found SoundDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
 
-	FNetherCrownSoundData* FoundedSoundData = *FoundSoundData;
-	if (!FoundedSoundData)
+	FNetherCrownSoundData* FoundSoundData = *FoundSoundDataRow;
+	if (!FoundSoundData)
 	{
 		return nullptr;
 	}
-	return FoundedSoundData->SoundCue.LoadSynchronous();
+	return FoundSoundData->SoundCue.LoadSynchronous();
 }
 
 void FNetherCrownUtilManager::PlaySound2DByGameplayTag(UObject* WorldContextObject, const FGameplayTag& SoundTag)
@@ -100,11 +103,57 @@ UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(cons
 		return nullptr;
 	}
 
-	FNetherCrownWeaponDataTableRow* FoundedWeaponDataTableRow = *FoundWeaponDataTableRow;
-	if (!FoundedWeaponDataTableRow)
+	FNetherCrownWeaponDataTableRow* FoundWeaponData = *FoundWeaponDataTableRow;
+	if (!FoundWeaponData)
 	{
 		return nullptr;
 	}
 
-	return FoundedWeaponDataTableRow->WeaponData.LoadSynchronous();
+	return FoundWeaponData->WeaponData.LoadSynchronous();
+}
+
+UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGameplayTag& EffectTag)
+{
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
+	const UDataTable* EffectDT{ DefaultSettings->EffectDT.LoadSynchronous() };
+	if (!ensureAlways(IsValid(EffectDT)))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No EffectDataTable in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	TArray<FNetherCrownEffectData*> OutRows{};
+	EffectDT->GetAllRows<FNetherCrownEffectData>(TEXT("EffectTag"), OutRows);
+
+	FNetherCrownEffectData** FoundEffectDataRow{ OutRows.FindByPredicate([&EffectTag](FNetherCrownEffectData* EffectData)
+	{
+		return EffectData->EffectTag == EffectTag;
+	}) };
+
+	FNetherCrownEffectData* FoundEffectData = *FoundEffectDataRow;
+	if (!FoundEffectData)
+	{
+		return nullptr;
+	}
+
+	return FoundEffectData->EffectNiagaraSystem.LoadSynchronous();
+}
+
+void FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform)
+{
+	if (!ensureAlways(WorldContextObject))
+	{
+		return;
+	}
+
+	UNiagaraSystem* NiagaraSystem{ GetNiagaraSystemByGameplayTag(EffectTag) };
+	if (!ensureAlways(IsValid(NiagaraSystem)))
+	{
+		return;
+	}
+
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(WorldContextObject, NiagaraSystem,SpawnTransform.GetLocation(), SpawnTransform.GetRotation().Rotator(), SpawnTransform.GetScale3D());
 }

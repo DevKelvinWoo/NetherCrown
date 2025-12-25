@@ -8,7 +8,7 @@
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
-#define TRACE_DEBUG 0
+#define TRACE_DEBUG 1
 
 UNetherCrownWeaponTraceComponent::UNetherCrownWeaponTraceComponent()
 {
@@ -109,20 +109,21 @@ void UNetherCrownWeaponTraceComponent::DetectWeaponHit()
 		return;
 	}
 
-	TArray<ANetherCrownEnemy*> HitEnemies{};
+	TMap<ANetherCrownEnemy*, FVector> HitInfoMap{};
 	for(const FHitResult& Hit : HitResults)
 	{
 		if (ANetherCrownEnemy* HitEnemy = Cast<ANetherCrownEnemy>(Hit.GetActor()))
 		{
-			HitEnemies.AddUnique(HitEnemy);
+			HitInfoMap.Add(HitEnemy, Hit.ImpactPoint);
 			HitIgnoreEnemies.AddUnique(HitEnemy);
 		}
 	}
 
-	for (ANetherCrownEnemy* HitEnemy : HitEnemies)
+	for (const TPair<ANetherCrownEnemy*, FVector>& HitInfo : HitInfoMap)
 	{
 		//@NOTE : Server로 HitEnemy Damage를 줘야함, 위 공격 감지로직은 Client에서 정확하게 실행됨
 		//@NOTE : ServerRPC로 UGameplayStatics::ApplyDamage()를 줘야함, 서버에서 ApplyDamage가 호출되면 TakeDamage도 서버에서 수행됨
-		OnHitEnemy.Broadcast(HitEnemy);
+
+		OnHitEnemy.Broadcast(HitInfo.Key, HitInfo.Value);
 	}
 }

@@ -23,4 +23,7 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_EquipEnd();
+
+	UFUNCTION()
+	void AnimNotify_HitTraceEnable();
 };
