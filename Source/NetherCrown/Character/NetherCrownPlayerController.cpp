@@ -25,7 +25,8 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 
 	EnhancedInputLocalPlayerSubSystem->AddMappingContext(MappingContext, 0);
 
-	if (!ensureAlways(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction && EquipAction && ChangeWeaponAction))
+	if (!ensureAlways(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction && EquipAction && ChangeWeaponAction
+					&& QSkillAction))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't add Mapping Context and InputActions in %hs"), __FUNCTION__);
 
@@ -39,6 +40,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	EnhancedPlayerInputComponent->BindAction(AttackBasicAction, ETriggerEvent::Started, this, &ThisClass::RequestBasicAttack);
 	EnhancedPlayerInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ThisClass::EquipCharacter);
 	EnhancedPlayerInputComponent->BindAction(ChangeWeaponAction, ETriggerEvent::Started, this, &ThisClass::ChangeWeapon);
+	EnhancedPlayerInputComponent->BindAction(QSkillAction, ETriggerEvent::Started, this, &ThisClass::ActiveQSkill);
 }
 
 void ANetherCrownPlayerController::MoveCharacter(const FInputActionValue& InActionValue)
@@ -130,4 +132,9 @@ void ANetherCrownPlayerController::ChangeWeapon(const FInputActionValue& InActio
 	}
 
 	NetherCrownCharacter->ChangeWeapon(InActionValue);
+}
+
+void ANetherCrownPlayerController::ActiveQSkill(const FInputActionValue& InActionValue)
+{
+
 }

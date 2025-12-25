@@ -9,6 +9,7 @@
 
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
+#include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -37,6 +38,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 
 	NetherCrownBasicAttackComponent = CreateDefaultSubobject<UNetherCrownBasicAttackComponent>(TEXT("BasicAttackComponent"));
 	NetherCrownEquipComponent = CreateDefaultSubobject<UNetherCrownEquipComponent>(TEXT("EquipComponent"));
+	NetherCrownSkillComponent = CreateDefaultSubobject<UNetherCrownSkillComponent>(TEXT("SkillComponent"));
 }
 
 void ANetherCrownCharacter::BeginPlay()
@@ -266,6 +268,18 @@ void ANetherCrownCharacter::ChangeWeapon(const FInputActionValue& Value)
 		{
 			check(NetherCrownEquipComponent);
 			NetherCrownEquipComponent->ChangeWeapon();
+		}
+	}
+}
+
+void ANetherCrownCharacter::ActiveQSkill(const FInputActionValue& Value)
+{
+	if (Value.IsNonZero())
+	{
+		const bool bActiveQSkillInput{ Value.Get<bool>() };
+		if (bActiveQSkillInput)
+		{
+			//@TODO : Skillcomponent에서 Skill Active필요
 		}
 	}
 }

@@ -30,6 +30,8 @@ private:
 	TObjectPtr<UInputAction> EquipAction{};
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputAction> ChangeWeaponAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> QSkillAction{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> MappingContext{};
@@ -50,4 +52,6 @@ private:
 	void EquipCharacter(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void ChangeWeapon(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void ActiveQSkill(const FInputActionValue& InActionValue);
 };

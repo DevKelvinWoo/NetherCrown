@@ -13,6 +13,7 @@ class UCameraComponent;
 
 class UNetherCrownBasicAttackComponent;
 class UNetherCrownEquipComponent;
+class UNetherCrownSkillComponent;
 
 USTRUCT()
 struct FNetherCrownCharacterTagData
@@ -42,6 +43,7 @@ public:
 	void RequestBasicAttack(const FInputActionValue& Value);
 	void EquipCharacter(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
+	void ActiveQSkill(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}
@@ -87,6 +89,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNetherCrownEquipComponent> NetherCrownEquipComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownSkillComponent> NetherCrownSkillComponent{};
 
 	UPROPERTY(Replicated)
 	bool bPressedMoveKey{ false };
