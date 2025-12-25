@@ -279,7 +279,8 @@ void ANetherCrownCharacter::ActiveQSkill(const FInputActionValue& Value)
 		const bool bActiveQSkillInput{ Value.Get<bool>() };
 		if (bActiveQSkillInput)
 		{
-			//@TODO : Skillcomponent에서 Skill Active필요
+			check(NetherCrownSkillComponent);
+			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillEnum::QSkill);
 		}
 	}
 }

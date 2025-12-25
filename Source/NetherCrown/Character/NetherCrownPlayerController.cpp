@@ -136,5 +136,13 @@ void ANetherCrownPlayerController::ChangeWeapon(const FInputActionValue& InActio
 
 void ANetherCrownPlayerController::ActiveQSkill(const FInputActionValue& InActionValue)
 {
+	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
+	if (!ensureAlways(NetherCrownCharacter))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
 
+		return;
+	}
+
+	NetherCrownCharacter->ActiveQSkill(InActionValue);
 }

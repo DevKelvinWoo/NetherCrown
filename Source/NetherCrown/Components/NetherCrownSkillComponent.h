@@ -4,17 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrownSkillComponent.generated.h"
-
-UENUM()
-enum class EMyEnum : uint8
-{
-	QSkill,
-	WSkill,
-	ESkill,
-	RSkill,
-	ShiftSkill
-};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
@@ -24,12 +15,16 @@ class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
 public:
 	UNetherCrownSkillComponent();
 
+	void ActiveSkill(const ENetherCrownSkillEnum SkillEnum);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
-	//SkillUObject 클래스와 이 클래스를 이용해서 NewObject를 하는 함수
-	//enum class에 맞춰서 해당 skill을 active하는 함수
-	//Skill UObject parent class 생성
+	UPROPERTY(EditDefaultsOnly)
+	TArray<TSubclassOf<UNetherCrownSkillObject>> SkillObjectClasses{};
+
+	UPROPERTY()
+	TMap<ENetherCrownSkillEnum, UNetherCrownSkillObject*> SkillObjects{};
 };
