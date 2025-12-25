@@ -15,16 +15,18 @@ class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
 public:
 	UNetherCrownSkillComponent();
 
-	void ActiveSkill(const ENetherCrownSkillEnum SkillEnum);
+	void ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	void ConstructSkillObjects();
+
 	UPROPERTY(EditDefaultsOnly)
 	TArray<TSubclassOf<UNetherCrownSkillObject>> SkillObjectClasses{};
 
 	UPROPERTY()
-	TMap<ENetherCrownSkillEnum, UNetherCrownSkillObject*> SkillObjects{};
+	TMap<ENetherCrownSkillKeyEnum, UNetherCrownSkillObject*> SkillObjects{};
 };

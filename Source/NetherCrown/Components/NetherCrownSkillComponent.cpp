@@ -2,14 +2,17 @@
 
 #include "NetherCrownSkillComponent.h"
 
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Skill/NetherCrownSkillObject.h"
 
 UNetherCrownSkillComponent::UNetherCrownSkillComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+
+	SetIsReplicatedByDefault(true);
 }
 
-void UNetherCrownSkillComponent::ActiveSkill(const ENetherCrownSkillEnum SkillEnum)
+void UNetherCrownSkillComponent::ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
 	if (SkillObjects.IsEmpty())
 	{
@@ -17,7 +20,7 @@ void UNetherCrownSkillComponent::ActiveSkill(const ENetherCrownSkillEnum SkillEn
 		return;
 	}
 
-	UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(SkillEnum) };
+	UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(SkillKeyEnum) };
 	if (!ensureAlways(IsValid(FoundSkillObject)))
 	{
 		return;
@@ -30,20 +33,33 @@ void UNetherCrownSkillComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	for (TSubclassOf<UNetherCrownSkillObject> SkillObjectClass : SkillObjectClasses)
-	{
-		UNetherCrownSkillObject* SkillObject{ NewObject<UNetherCrownSkillObject>(SkillObjectClass) };
-		if (!ensureAlways(IsValid(SkillObject)))
-		{
-			continue;
-		}
-
-		const ENetherCrownSkillEnum SkillEnum{ SkillObject->GetSkillEnum() };
-		SkillObjects.Add(SkillEnum, SkillObject);
-	}
+	ConstructSkillObjects();
 }
 
 void UNetherCrownSkillComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+}
+
+void UNetherCrownSkillComponent::ConstructSkillObjects()
+{
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	for (TSubclassOf<UNetherCrownSkillObject> SkillObjectClass : SkillObjectClasses)
+	{
+		UNetherCrownSkillObject* SkillObject{ NewObject<UNetherCrownSkillObject>(this, SkillObjectClass) };
+		if (!ensureAlways(IsValid(SkillObject)))
+		{
+			continue;
+		}
+
+		SkillObject->SetSkillOwnerCharacter(OwnerCharacter);
+
+		const ENetherCrownSkillKeyEnum SkillEnum{ SkillObject->GetSkillEnum() };
+		SkillObjects.Add(SkillEnum, SkillObject);
+	}
 }

@@ -4,10 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrownSkillObject.generated.h"
 
+class UAnimMontage;
+
+class ANetherCrownCharacter;
+
 UENUM()
-enum class ENetherCrownSkillEnum : uint8
+enum class ENetherCrownSkillKeyEnum : uint8
 {
 	QSkill,
 	WSkill,
@@ -16,17 +21,25 @@ enum class ENetherCrownSkillEnum : uint8
 	ShiftSkill
 };
 
-UCLASS()
+UCLASS(Abstract)
 class NETHERCROWN_API UNetherCrownSkillObject : public UObject
 {
 	GENERATED_BODY()
 
 public:
-	ENetherCrownSkillEnum GetSkillEnum() const { return SkillEnum; }
-
 	virtual void ActiveSkill() {};
+
+	ENetherCrownSkillKeyEnum GetSkillEnum() const { return SkillKeyEnum; }
+
+	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter) { SkillOwnerCharacterWeak = MakeWeakObjectPtr(SkillOwnerCharacter); }
+
+protected:
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
+
+	TWeakObjectPtr<ANetherCrownCharacter> SkillOwnerCharacterWeak{};
 
 private:
 	UPROPERTY(EditDefaultsOnly)
-	ENetherCrownSkillEnum SkillEnum{};
+	ENetherCrownSkillKeyEnum SkillKeyEnum{};
 };

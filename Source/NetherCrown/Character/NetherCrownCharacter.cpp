@@ -280,7 +280,7 @@ void ANetherCrownCharacter::ActiveQSkill(const FInputActionValue& Value)
 		if (bActiveQSkillInput)
 		{
 			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillEnum::QSkill);
+			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::QSkill);
 		}
 	}
 }
