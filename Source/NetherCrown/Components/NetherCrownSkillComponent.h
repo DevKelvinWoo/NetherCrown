@@ -17,6 +17,8 @@ public:
 
 	void ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
+	void SetActiveSkillSlowPlayRate(const bool bBeginSlow);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -44,4 +46,7 @@ private:
 
 	UPROPERTY(ReplicatedUsing=OnRep_ReplicatedSkillObjects)
 	TArray<TObjectPtr<UNetherCrownSkillObject>> ReplicatedSkillObjects;
+
+	UPROPERTY(Replicated)
+	ENetherCrownSkillKeyEnum ActiveSkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
 };

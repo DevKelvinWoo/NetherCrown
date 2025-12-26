@@ -7,12 +7,12 @@ void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay() const
 {
 	Super::ExecuteSkillGameplay();
 
-	//@NOTE : Only gameplay logic
+	//@NOTE : Only gameplay logic (server)
 }
 
 void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics() const
 {
 	Super::PlaySkillCosmetics();
 
-	//@NOTE : Only cometics logic
+	//@NOTE : Only cometics logic (all client)
 }

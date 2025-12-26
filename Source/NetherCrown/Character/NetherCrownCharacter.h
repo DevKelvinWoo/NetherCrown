@@ -53,6 +53,7 @@ public:
 
 	UNetherCrownBasicAttackComponent* GetBasicAttackComponent() const { return NetherCrownBasicAttackComponent; }
 	UNetherCrownEquipComponent* GetEquipComponent() const { return NetherCrownEquipComponent; }
+	UNetherCrownSkillComponent* GetSkillComponent() const { return NetherCrownSkillComponent; }
 
 protected:
 	virtual void BeginPlay() override;

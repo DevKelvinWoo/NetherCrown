@@ -5,6 +5,7 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
+#include "NetherCrown/Components/NetherCrownSkillComponent.h"
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
 {
@@ -73,4 +74,38 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_HitTraceEnable()
 	}
 
 	BasicAttackComponent->HandleEnableHitTrace();
+}
+
+void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowBegin()
+{
+	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
+	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
+	if (!(IsValid(SkillComponent)))
+	{
+		return;
+	}
+
+	if (OwningCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	SkillComponent->SetActiveSkillSlowPlayRate(true);
+}
+
+void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowEnd()
+{
+	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
+	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
+	if (!(IsValid(SkillComponent)))
+	{
+		return;
+	}
+
+	if (OwningCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	SkillComponent->SetActiveSkillSlowPlayRate(false);
 }

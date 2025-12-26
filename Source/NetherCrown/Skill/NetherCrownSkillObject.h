@@ -14,6 +14,7 @@ class ANetherCrownCharacter;
 UENUM()
 enum class ENetherCrownSkillKeyEnum : uint8
 {
+	None,
 	QSkill,
 	WSkill,
 	ESkill,
@@ -34,6 +35,11 @@ public:
 	virtual void PlaySkillCosmetics() const;
 	virtual void ExecuteSkillGameplay() const {};
 
+	void SetSkillMontageSlowPlayRate(float InPlayRate) const;
+
+	float GetSkillMontageBeginSlowPlayRate() const { return SkillMontageBeginSlowPlayRate; }
+	float GetSkillMontageEndSlowPlayRate() const { return SkillMontageEndSlowPlayRate; }
+
 protected:
 	//@NOTE : To Replicate UObject
 	virtual bool IsSupportedForNetworking() const override { return true; }
@@ -48,4 +54,10 @@ protected:
 private:
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	ENetherCrownSkillKeyEnum SkillKeyEnum{};
+
+	UPROPERTY(EditDefaultsOnly, Replicated)
+	float SkillMontageBeginSlowPlayRate{ 0.5f };
+
+	UPROPERTY(EditDefaultsOnly, Replicated)
+	float SkillMontageEndSlowPlayRate{ 1.f };
 };

@@ -11,6 +11,8 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 
 	DOREPLIFETIME(ThisClass, SkillKeyEnum);
 	DOREPLIFETIME(ThisClass, SkillOwnerCharacterWeak);
+	DOREPLIFETIME(ThisClass, SkillMontageBeginSlowPlayRate);
+	DOREPLIFETIME(ThisClass, SkillMontageEndSlowPlayRate);
 }
 
 void UNetherCrownSkillObject::PlaySkillCosmetics() const
@@ -36,4 +38,24 @@ void UNetherCrownSkillObject::PlaySkillCosmetics() const
 	}
 
 	NetherCrownCharacterAnimInstance->Montage_Play(SkillAnimMontage);
+}
+
+void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) const
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter ? SkillOwnerCharacter->GetMesh() : nullptr };
+	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{};
+	NetherCrownCharacterAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownCharacterAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
+	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
+	{
+		return;
+	}
+
+	UAnimMontage* SkillAnimMontage{ SkillAnimMontageSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(SkillAnimMontage)))
+	{
+		return;
+	}
+
+	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(SkillAnimMontage, InPlayRate);
 }

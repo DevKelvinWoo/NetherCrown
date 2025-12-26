@@ -20,6 +20,24 @@ void UNetherCrownSkillComponent::ActiveSkill(const ENetherCrownSkillKeyEnum Skil
 	Server_ActiveSkill(SkillKeyEnum);
 }
 
+void UNetherCrownSkillComponent::SetActiveSkillSlowPlayRate(const bool bBeginSlow)
+{
+	if (SkillObjects.IsEmpty())
+	{
+		return;
+	}
+
+	UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(ActiveSkillKeyEnum) };
+	if (!IsValid(FoundSkillObject))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ActiveSkillKeyEnum is Invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	const float SkillPlayRate{ bBeginSlow ? FoundSkillObject->GetSkillMontageBeginSlowPlayRate() : FoundSkillObject->GetSkillMontageEndSlowPlayRate() };
+	FoundSkillObject->SetSkillMontageSlowPlayRate(SkillPlayRate);
+}
+
 void UNetherCrownSkillComponent::BeginPlay()
 {
 	Super::BeginPlay();
@@ -55,6 +73,7 @@ void UNetherCrownSkillComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, ReplicatedSkillObjects);
+	DOREPLIFETIME(ThisClass, ActiveSkillKeyEnum);
 }
 
 void UNetherCrownSkillComponent::ConstructSkillObjects()
@@ -101,6 +120,8 @@ void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENether
 	{
 		return;
 	}
+
+	ActiveSkillKeyEnum = SkillKeyEnum;
 
 	FoundSkillObject->ExecuteSkillGameplay();
 	Multicast_PlaySkillCosmetics(FoundSkillObject);

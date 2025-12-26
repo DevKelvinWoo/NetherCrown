@@ -26,4 +26,10 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_HitTraceEnable();
+
+	UFUNCTION()
+	void AnimNotify_SkillSlowBegin();
+
+	UFUNCTION()
+	void AnimNotify_SkillSlowEnd();
 };
