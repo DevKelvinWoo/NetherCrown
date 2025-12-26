@@ -21,12 +21,27 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	virtual bool ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags) override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
 	void ConstructSkillObjects();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlaySkillCosmetics(const UNetherCrownSkillObject* FoundSkillObject);
+
+	UFUNCTION()
+	void OnRep_ReplicatedSkillObjects();
 
 	UPROPERTY(EditDefaultsOnly)
 	TArray<TSubclassOf<UNetherCrownSkillObject>> SkillObjectClasses{};
 
 	UPROPERTY()
 	TMap<ENetherCrownSkillKeyEnum, UNetherCrownSkillObject*> SkillObjects{};
+
+	UPROPERTY(ReplicatedUsing=OnRep_ReplicatedSkillObjects)
+	TArray<TObjectPtr<UNetherCrownSkillObject>> ReplicatedSkillObjects;
 };
