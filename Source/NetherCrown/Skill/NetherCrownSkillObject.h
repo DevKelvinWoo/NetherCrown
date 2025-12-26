@@ -34,8 +34,6 @@ public:
 	virtual void PlaySkillCosmetics() const;
 	virtual void ExecuteSkillGameplay() const {};
 
-	//@TODO : virtual함수로 스킬의 서버로직 (데미지 등)을 구현하는 함수 선언 후 자식에서 구현
-
 protected:
 	//@NOTE : To Replicate UObject
 	virtual bool IsSupportedForNetworking() const override { return true; }
