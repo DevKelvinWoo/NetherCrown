@@ -25,6 +25,17 @@ void UNetherCrownSkillSkyFallSlash::StartSkillCameraCurveTimer()
 	const UWorld* World{ GetWorld() };
 	check(World);
 
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (!SkillOwnerCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	World->GetTimerManager().SetTimer(
 		SkillCameraCurveTimerHandle,
 		this,
@@ -43,6 +54,11 @@ void UNetherCrownSkillSkyFallSlash::ApplySkillCameraCurveFloat()
 	if (!ensureAlways(IsValid(SkillCameraCurveFloat)) || !ensureAlways(IsValid(World)) || !ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		World->GetTimerManager().ClearTimer(SkillCameraCurveTimerHandle);
+		return;
+	}
+
+	if (!SkillOwnerCharacter->IsLocallyControlled())
+	{
 		return;
 	}
 

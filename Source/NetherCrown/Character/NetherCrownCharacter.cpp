@@ -43,11 +43,8 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 
 void ANetherCrownCharacter::SetSpringArmZOffset(float InSpringArmZOffset) const
 {
-	if (IsLocallyControlled() && !HasAuthority())
-	{
-		check(MainSpringArmComponent);
-		MainSpringArmComponent->TargetOffset.Z = InSpringArmZOffset;
-	}
+	check(MainSpringArmComponent);
+	MainSpringArmComponent->TargetOffset.Z = InSpringArmZOffset;
 }
 
 void ANetherCrownCharacter::BeginPlay()

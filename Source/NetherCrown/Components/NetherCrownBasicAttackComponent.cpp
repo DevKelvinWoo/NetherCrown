@@ -102,7 +102,6 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 
 	OnStopOrStartBasicAttackAnim.Broadcast(false);
-	//SetEquippedWeaponTraceEnable(true);
 
 	PlayBasicAttackSounds();
 }

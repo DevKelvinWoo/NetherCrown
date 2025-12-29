@@ -8,7 +8,7 @@
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
-#define TRACE_DEBUG 1
+#define TRACE_DEBUG 0
 
 UNetherCrownWeaponTraceComponent::UNetherCrownWeaponTraceComponent()
 {
