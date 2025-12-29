@@ -33,7 +33,7 @@ private:
 	void Server_ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlaySkillCosmetics(const UNetherCrownSkillObject* FoundSkillObject);
+	void Multicast_PlaySkillCosmetics(UNetherCrownSkillObject* FoundSkillObject);
 
 	UFUNCTION()
 	void OnRep_ReplicatedSkillObjects();

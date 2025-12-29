@@ -41,6 +41,15 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownSkillComponent = CreateDefaultSubobject<UNetherCrownSkillComponent>(TEXT("SkillComponent"));
 }
 
+void ANetherCrownCharacter::SetSpringArmZOffset(float InSpringArmZOffset) const
+{
+	if (IsLocallyControlled() && !HasAuthority())
+	{
+		check(MainSpringArmComponent);
+		MainSpringArmComponent->TargetOffset.Z = InSpringArmZOffset;
+	}
+}
+
 void ANetherCrownCharacter::BeginPlay()
 {
 	Super::BeginPlay();

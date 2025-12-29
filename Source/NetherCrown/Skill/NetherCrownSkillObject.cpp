@@ -4,6 +4,7 @@
 
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
+#include "TimerManager.h"
 
 void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -15,7 +16,7 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, SkillMontageEndSlowPlayRate);
 }
 
-void UNetherCrownSkillObject::PlaySkillCosmetics() const
+void UNetherCrownSkillObject::PlaySkillCosmetics()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))

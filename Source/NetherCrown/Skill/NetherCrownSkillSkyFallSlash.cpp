@@ -10,9 +10,53 @@ void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay() const
 	//@NOTE : Only gameplay logic (server)
 }
 
-void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics() const
+void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics()
 {
 	Super::PlaySkillCosmetics();
 
 	//@NOTE : Only cometics logic (all client)
+	StartSkillCameraCurveTimer();
+}
+
+void UNetherCrownSkillSkyFallSlash::StartSkillCameraCurveTimer()
+{
+	ElapsedTime = 0.f;
+
+	const UWorld* World{ GetWorld() };
+	check(World);
+
+	World->GetTimerManager().SetTimer(
+		SkillCameraCurveTimerHandle,
+		this,
+		&ThisClass::ApplySkillCameraCurveFloat,
+		0.015f,
+		true,
+		0.f
+	);
+}
+
+void UNetherCrownSkillSkyFallSlash::ApplySkillCameraCurveFloat()
+{
+	const UWorld* World{ GetWorld() };
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	const UCurveFloat* SkillCameraCurveFloat{ SkillCameraCurveFloatSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(SkillCameraCurveFloat)) || !ensureAlways(IsValid(World)) || !ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		World->GetTimerManager().ClearTimer(SkillCameraCurveTimerHandle);
+		return;
+	}
+
+	ElapsedTime += 1.f;
+
+	float MinTime{};
+	float MaxTime{};
+	SkillCameraCurveFloat->GetTimeRange(MinTime, MaxTime);
+
+	if (ElapsedTime > MaxTime)
+	{
+		World->GetTimerManager().ClearTimer(SkillCameraCurveTimerHandle);
+		return;
+	}
+
+	SkillOwnerCharacter->SetSpringArmZOffset(SkillCameraCurveFloat->GetFloatValue(ElapsedTime));
 }

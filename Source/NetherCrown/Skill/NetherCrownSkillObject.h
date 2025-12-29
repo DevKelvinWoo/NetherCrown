@@ -32,7 +32,7 @@ public:
 
 	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter) { SkillOwnerCharacterWeak = MakeWeakObjectPtr(SkillOwnerCharacter); }
 
-	virtual void PlaySkillCosmetics() const;
+	virtual void PlaySkillCosmetics();
 	virtual void ExecuteSkillGameplay() const {};
 
 	void SetSkillMontageSlowPlayRate(float InPlayRate) const;

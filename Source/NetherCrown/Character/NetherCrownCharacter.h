@@ -55,6 +55,8 @@ public:
 	UNetherCrownEquipComponent* GetEquipComponent() const { return NetherCrownEquipComponent; }
 	UNetherCrownSkillComponent* GetSkillComponent() const { return NetherCrownSkillComponent; }
 
+	void SetSpringArmZOffset(float InSpringArmZOffset) const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;

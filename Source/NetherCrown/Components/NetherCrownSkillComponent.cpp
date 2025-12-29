@@ -115,7 +115,7 @@ void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENether
 		return;
 	}
 
-	const UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(SkillKeyEnum) };
+	UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(SkillKeyEnum) };
 	if (!ensureAlways(IsValid(FoundSkillObject)))
 	{
 		return;
@@ -127,7 +127,7 @@ void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENether
 	Multicast_PlaySkillCosmetics(FoundSkillObject);
 }
 
-void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(const UNetherCrownSkillObject* FoundSkillObject)
+void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNetherCrownSkillObject* FoundSkillObject)
 {
 	FoundSkillObject->PlaySkillCosmetics();
 }
