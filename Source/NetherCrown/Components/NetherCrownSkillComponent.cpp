@@ -98,6 +98,7 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 		}
 
 		SkillObject->SetSkillOwnerCharacter(OwnerCharacter);
+		SkillObject->InitSkillObject();
 
 		//@NOTE : Server에서만 SkillObjects, ReplicatedSkillObjects를 구축한다
 		//이때 ReplicatedSkillObjects는 Replicate가 되기 때문에 OnRep_ReplicatedSKillObjects가 호출된다 (클라에서)
@@ -135,12 +136,21 @@ void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNe
 void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()
 {
 	//@NOTE : Client에서 Server로부터 replicate된 ReplicatedSkillObjects를 이용하여 실제 사용한 SkillObjects를 채운다
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
 	SkillObjects.Empty();
 
 	for (UNetherCrownSkillObject* Obj : ReplicatedSkillObjects)
 	{
 		if (IsValid(Obj))
 		{
+			Obj->SetSkillOwnerCharacter(OwnerCharacter);
+			Obj->InitSkillObject();
+
 			SkillObjects.Add(Obj->GetSkillEnum(), Obj);
 		}
 	}

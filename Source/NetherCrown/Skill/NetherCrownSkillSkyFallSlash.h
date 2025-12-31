@@ -8,12 +8,15 @@
 
 class UCurveFloat;
 
+class ANetherCrownEnemy;
+
 UCLASS(Blueprintable)
 class NETHERCROWN_API UNetherCrownSkillSkyFallSlash : public UNetherCrownSkillObject
 {
 	GENERATED_BODY()
 
 protected:
+	virtual void InitSkillObject() override;
 	virtual void ExecuteSkillGameplay() const override;
 	virtual void PlaySkillCosmetics() override;
 
@@ -21,9 +24,19 @@ private:
 	void ApplySkillCameraCurveFloat();
 	void StartSkillCameraCurveTimer();
 
+	void HandleOnHitSkyFallSlashSkill();
+	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;
+
 	FTimerHandle SkillCameraCurveTimerHandle;
 	float ElapsedTime{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UCurveFloat> SkillCameraCurveFloatSoft{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
+
+	const float SkillDetectingSphereRadius{ 225.f };
+	const double SkillDetectingThresholdDegrees{ 45.0 };
+	const FVector SkillKnockBackVector{ FVector(1200.f, 0.f, 0.f) };
 };

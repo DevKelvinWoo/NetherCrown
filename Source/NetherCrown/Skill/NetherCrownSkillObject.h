@@ -28,6 +28,8 @@ class NETHERCROWN_API UNetherCrownSkillObject : public UObject
 	GENERATED_BODY()
 
 public:
+	virtual void InitSkillObject() {};
+
 	ENetherCrownSkillKeyEnum GetSkillEnum() const { return SkillKeyEnum; }
 
 	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter) { SkillOwnerCharacterWeak = MakeWeakObjectPtr(SkillOwnerCharacter); }
@@ -44,6 +46,9 @@ protected:
 	//@NOTE : To Replicate UObject
 	virtual bool IsSupportedForNetworking() const override { return true; }
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	//CC
+	void ApplyKnockBackToTarget(ACharacter* TargetCharacter, const FVector& KnockBackVector);
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};

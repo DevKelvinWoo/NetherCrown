@@ -16,6 +16,19 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, SkillMontageEndSlowPlayRate);
 }
 
+void UNetherCrownSkillObject::ApplyKnockBackToTarget(ACharacter* TargetCharacter, const FVector& KnockBackVector)
+{
+	if (!ensureAlways(IsValid(TargetCharacter)))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("TargetCharacter is valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	TargetCharacter->LaunchCharacter(KnockBackVector, true, true);
+
+	//@TODO : CC기 구조 설계가 되면 여기서 CC Enum값을 셋팅한다
+}
+
 void UNetherCrownSkillObject::PlaySkillCosmetics()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
