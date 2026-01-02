@@ -46,6 +46,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayTakeDamageSound();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayTakeDamageAnimation();
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCapsuleComponent> EnemyHitBoxComponent{};
 

@@ -3,6 +3,7 @@
 
 #include "NetherCrownSkillSkyFallSlash.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
@@ -111,7 +112,10 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 		{
 			ApplyKnockBackToTarget(DetectedEnemy, SkillKnockBackVector);
 
+			//UGameplayStatics::ApplyDamage()
 			//@NOTE : Play and Spawn VFX and SoundEffect
+			//아래 호출은 제거되어야 할 수 있음 이미 TakeDamage에서 처리하고 있는 로직임
+			//CC기 관련 애니메이션 출력을 어떻게 할지 결정해야 함
 			Multicast_PlayEnemyHitSoundAndPlayImpactEffect(DetectedEnemy);
 		}
 	}

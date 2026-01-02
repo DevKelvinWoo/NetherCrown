@@ -2,6 +2,7 @@
 
 #include "NetherCrownEnemy.h"
 
+#include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
@@ -40,6 +41,7 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	Multicast_PlayTakeDamageSound();
+	Multicast_PlayTakeDamageAnimation();
 
 	ProcessIncomingDamage(DamageCauser, ResultDamage);
 
@@ -84,6 +86,24 @@ void ANetherCrownEnemy::ProcessIncomingDamage(const AActor* DamageCauser, float 
 	{
 		//Destroy(); //@NOTE : Temp Code
 	}
+}
+
+void ANetherCrownEnemy::Multicast_PlayTakeDamageAnimation_Implementation()
+{
+	UAnimMontage* TakeDamageAnimMontage{ TakeDamageAnimMontageSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(TakeDamageAnimMontage)))
+	{
+		return;
+	}
+
+	const USkeletalMeshComponent* SkeletalMeshComponent{ GetMesh() };
+	UNetherCrownEnemyAnimInstance* EnemyAnimInstance{ SkeletalMeshComponent ? Cast<UNetherCrownEnemyAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr };
+	if (!ensureAlways(IsValid(EnemyAnimInstance)))
+	{
+		return;
+	}
+
+	EnemyAnimInstance->Montage_Play(TakeDamageAnimMontage);
 }
 
 void ANetherCrownEnemy::PlayTakeDamageSound() const
