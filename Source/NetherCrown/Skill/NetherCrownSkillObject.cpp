@@ -6,7 +6,11 @@
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "TimerManager.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
+#include "NetherCrown/Components/NetherCrownEquipComponent.h"
+#include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -87,6 +91,41 @@ void UNetherCrownSkillObject::PlaySkillHitImpactEffect(const ANetherCrownEnemy* 
 	{
 		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, SkillEffectTagData.SkillHitImpactEffectTag, TargetEnemy->GetActorTransform());
 	}
+}
+
+int32 UNetherCrownSkillObject::CalculatePhysicalSkillDamage() const
+{
+	//Character의 Stat + Weapon의 Damage + SkillDamage
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return 0;
+	}
+
+	const ANetherCrownPlayerState* PlayerState{ Cast<ANetherCrownPlayerState>(SkillOwnerCharacter->GetPlayerState()) };
+	if (!ensureAlways(IsValid(PlayerState)))
+	{
+		return 0;
+	}
+
+	const UNetherCrownPlayerStatComponent* PlayerStatComponent{ PlayerState->GetNetherCrownPlayerStatComponent() };
+	if (!ensureAlways(IsValid(PlayerStatComponent)))
+	{
+		return 0;
+	}
+
+	const int32 PlayerStatAttackDamage{ PlayerStatComponent->GetPlayerStatData().AttackDamage };
+	const int32 SkillDamage{ SkillData.SkillDamage };
+
+	UNetherCrownEquipComponent* EquipComponent{ SkillOwnerCharacter->GetEquipComponent() };
+	if (!ensureAlways(IsValid(EquipComponent)))
+	{
+		return 0;
+	}
+
+	const int32 EquippedWeaponDamage { EquipComponent->GetEquippedWeaponData()->WeaponAttackDamage };
+	const int32 ResultSkillDamage{ EquippedWeaponDamage + SkillDamage + PlayerStatAttackDamage };
+	return ResultSkillDamage;
 }
 
 void UNetherCrownSkillObject::PlaySkillCosmetics()

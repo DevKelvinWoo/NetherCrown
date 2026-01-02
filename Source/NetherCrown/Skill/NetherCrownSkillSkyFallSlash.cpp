@@ -112,13 +112,13 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 		{
 			ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::KNOCK_BACK, KnockBackDuration);
 
-			UNetherCrownCrowdControlComponent* CrowdControlComponent{ DetectedEnemy->GetCrowdControlComponent() };
+			const UNetherCrownCrowdControlComponent* CrowdControlComponent{ DetectedEnemy->GetCrowdControlComponent() };
 			if (IsValid(CrowdControlComponent))
 			{
 				CrowdControlComponent->KnockBack(SkillKnockBackVector);
 			}
 
-			UGameplayStatics::ApplyDamage(DetectedEnemy, 100.f, SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
+			UGameplayStatics::ApplyDamage(DetectedEnemy, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
 
 			//@NOTE : Skill Hit Sound is played by TakeDamage function, So only Spawn VFX
 			Multicast_SpawnSkillImpactEffect(DetectedEnemy);

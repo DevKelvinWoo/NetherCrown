@@ -14,6 +14,28 @@ class ANetherCrownCharacter;
 class ANetherCrownEnemy;
 
 USTRUCT()
+struct FNetherCrownSkillData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	FString SkillName{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FString SkillDescription{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UTexture2D> SkillIconTextureSoft{};
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 SkillDamage{ 100 };
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 SkillCooldown{ 5 };
+};
+
+USTRUCT()
 struct FNetherCrownSkillEffectTagData
 {
 	GENERATED_BODY()
@@ -72,6 +94,8 @@ protected:
 	void PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const;
 	void PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
 
+	int32 CalculatePhysicalSkillDamage() const;
+
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
 
@@ -80,6 +104,9 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownSkillEffectTagData SkillEffectTagData{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FNetherCrownSkillData SkillData{};
 
 private:
 	UPROPERTY(EditDefaultsOnly, Replicated)

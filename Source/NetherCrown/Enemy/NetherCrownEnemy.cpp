@@ -48,12 +48,12 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	check(CrowdControlComponent);
 	Multicast_PlayTakeDamageAnimation(CrowdControlComponent->GetCrowdControlType());
 
-	ProcessIncomingDamage(DamageCauser, ResultDamage);
+	ProcessIncomingPhysicalDamage(DamageCauser, ResultDamage);
 
 	return ResultDamage;
 }
 
-void ANetherCrownEnemy::ProcessIncomingDamage(const AActor* DamageCauser, float DamageAmount)
+void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount)
 {
 	//@NOTE : This function is only executed by server RPC
 	const ANetherCrownCharacter* NetherCrownCharacter = Cast<ANetherCrownCharacter>(DamageCauser);

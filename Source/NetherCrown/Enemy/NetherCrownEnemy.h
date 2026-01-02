@@ -46,7 +46,7 @@ protected:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 private:
-	void ProcessIncomingDamage(const AActor* DamageCauser, float DamageAmount);
+	void ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayTakeDamageSound();
