@@ -22,5 +22,5 @@ public:
 
 	//Effect
 	static UNiagaraSystem* GetNiagaraSystemByGameplayTag(const FGameplayTag& EffectTag);
-	static void SpawnNiagaraSystemByGameplayTag(UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform);
+	static void SpawnNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform);
 };

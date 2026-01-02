@@ -5,9 +5,10 @@
 
 #include "Kismet/KismetSystemLibrary.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
-#include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+
+#define DEBUG_SPHERE 0
 
 void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 {
@@ -87,28 +88,33 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 		return;
 	}
 
+	if (SkillOwnerCharacter->IsLocallyControlled())
+	{
+		ANetherCrownPlayerController* SkillOwnerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };
+		APlayerCameraManager* CameraManager{ SkillOwnerController ? SkillOwnerController->PlayerCameraManager : nullptr };
+		if (!ensureAlways(IsValid(CameraManager)))
+		{
+			return;
+		}
+
+		CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
+	}
+
+	if (!SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	for (AActor* DetectedActor : DetectedActors)
 	{
 		if (ANetherCrownEnemy* DetectedEnemy = Cast<ANetherCrownEnemy>(DetectedActor))
 		{
 			ApplyKnockBackToTarget(DetectedEnemy, SkillKnockBackVector);
-			PlayEnemyHitSound(DetectedEnemy);
+
+			//@NOTE : Play and Spawn VFX and SoundEffect
+			Multicast_PlayEnemyHitSoundAndPlayImpactEffect(DetectedEnemy);
 		}
 	}
-
-	if (!SkillOwnerCharacter->IsLocallyControlled())
-	{
-		return;
-	}
-
-	ANetherCrownPlayerController* SkillOwnerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };
-	APlayerCameraManager* CameraManager{ SkillOwnerController ? SkillOwnerController->PlayerCameraManager : nullptr };
-	if (!ensureAlways(IsValid(CameraManager)))
-	{
-		return;
-	}
-
-	CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
 }
 
 const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetectedTargets() const
@@ -132,7 +138,9 @@ const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetected
 	const bool bDetectEnemy{ UKismetSystemLibrary::SphereOverlapActors(this, DetectSphereLocation,
 		SkillDetectingSphereRadius, ObjectTypes, ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors) };
 
+#if DEBUG_SPHERE
 	UKismetSystemLibrary::DrawDebugSphere(this, DetectSphereLocation, SkillDetectingSphereRadius, 16, FColor::Red, 10.f);
+#endif
 
 	if (!bDetectEnemy)
 	{

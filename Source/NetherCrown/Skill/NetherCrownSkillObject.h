@@ -12,6 +12,16 @@ class UAnimMontage;
 class ANetherCrownCharacter;
 class ANetherCrownEnemy;
 
+USTRUCT()
+struct FNetherCrownSkillEffectTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag SkillHitImpactEffectTag{};
+};
+
 UENUM()
 enum class ENetherCrownSkillKeyEnum : uint8
 {
@@ -48,16 +58,27 @@ protected:
 	virtual bool IsSupportedForNetworking() const override { return true; }
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	//@NOTE : To call RPC function in UObject
+	virtual int32 GetFunctionCallspace(UFunction* Function, FFrame* Stack) override;
+	virtual bool CallRemoteFunction(UFunction* Function, void* Parms, struct FOutParmRec* OutParms, FFrame* Stack) override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayEnemyHitSoundAndPlayImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
+
 	//CC
 	void ApplyKnockBackToTarget(ACharacter* TargetCharacter, const FVector& KnockBackVector);
 
 	void PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const;
+	void PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
 
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> SkillOwnerCharacterWeak{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FNetherCrownSkillEffectTagData SkillEffectTagData{};
 
 private:
 	UPROPERTY(EditDefaultsOnly, Replicated)

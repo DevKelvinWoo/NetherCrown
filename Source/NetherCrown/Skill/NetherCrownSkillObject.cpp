@@ -6,6 +6,7 @@
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "TimerManager.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -15,6 +16,37 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, SkillOwnerCharacterWeak);
 	DOREPLIFETIME(ThisClass, SkillMontageBeginSlowPlayRate);
 	DOREPLIFETIME(ThisClass, SkillMontageEndSlowPlayRate);
+}
+
+int32 UNetherCrownSkillObject::GetFunctionCallspace(UFunction* Function, FFrame* Stack)
+{
+	// Outer가 있으면 Outer의 callspace를 사용
+	if (UObject* Outer = GetOuter())
+	{
+		return Outer->GetFunctionCallspace(Function, Stack);
+	}
+	return FunctionCallspace::Local;
+}
+
+bool UNetherCrownSkillObject::CallRemoteFunction(UFunction* Function, void* Parms, struct FOutParmRec* OutParms, FFrame* Stack)
+{
+	// Outer (Component)를 통해 RPC 라우팅
+	if (AActor* Owner = GetTypedOuter<AActor>())
+	{
+		UNetDriver* NetDriver = Owner->GetNetDriver();
+		if (NetDriver)
+		{
+			NetDriver->ProcessRemoteFunction(Owner, Function, Parms, OutParms, Stack, this);
+			return true;
+		}
+	}
+	return false;
+}
+
+void UNetherCrownSkillObject::Multicast_PlayEnemyHitSoundAndPlayImpactEffect_Implementation(const ANetherCrownEnemy* TargetEnemy) const
+{
+	PlayEnemyHitSound(TargetEnemy);
+	PlaySkillHitImpactEffect(TargetEnemy);
 }
 
 void UNetherCrownSkillObject::ApplyKnockBackToTarget(ACharacter* TargetCharacter, const FVector& KnockBackVector)
@@ -49,6 +81,14 @@ void UNetherCrownSkillObject::PlayEnemyHitSound(const ANetherCrownEnemy* TargetE
 	}
 
 	TargetEnemy->PlayTakeDamageSound();
+}
+
+void UNetherCrownSkillObject::PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const
+{
+	if (SkillEffectTagData.SkillHitImpactEffectTag.IsValid())
+	{
+		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, SkillEffectTagData.SkillHitImpactEffectTag, TargetEnemy->GetActorTransform());
+	}
 }
 
 void UNetherCrownSkillObject::PlaySkillCosmetics()

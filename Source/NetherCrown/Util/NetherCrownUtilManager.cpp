@@ -142,7 +142,7 @@ UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGa
 	return FoundEffectData->EffectNiagaraSystem.LoadSynchronous();
 }
 
-void FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform)
+void FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform)
 {
 	if (!ensureAlways(WorldContextObject))
 	{
