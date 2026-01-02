@@ -33,6 +33,8 @@ class NETHERCROWN_API ANetherCrownEnemy : public ACharacter
 public:
 	ANetherCrownEnemy();
 
+	void PlayTakeDamageSound() const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -40,8 +42,6 @@ protected:
 
 private:
 	void ProcessIncomingDamage(const AActor* DamageCauser, float DamageAmount);
-
-	void PlayTakeDamageSound();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayTakeDamageSound();

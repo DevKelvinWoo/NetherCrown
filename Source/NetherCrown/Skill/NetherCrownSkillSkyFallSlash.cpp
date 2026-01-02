@@ -87,17 +87,18 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 		return;
 	}
 
-	if (!SkillOwnerCharacter->IsLocallyControlled())
-	{
-		return;
-	}
-
 	for (AActor* DetectedActor : DetectedActors)
 	{
 		if (ANetherCrownEnemy* DetectedEnemy = Cast<ANetherCrownEnemy>(DetectedActor))
 		{
 			ApplyKnockBackToTarget(DetectedEnemy, SkillKnockBackVector);
+			PlayEnemyHitSound(DetectedEnemy);
 		}
+	}
+
+	if (!SkillOwnerCharacter->IsLocallyControlled())
+	{
+		return;
 	}
 
 	ANetherCrownPlayerController* SkillOwnerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };

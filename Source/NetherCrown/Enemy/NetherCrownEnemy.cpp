@@ -17,11 +17,16 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 	EnemyHitBoxComponent->SetupAttachment(RootComponent);
 
 	EnemyStatComponent = CreateDefaultSubobject<UNetherCrownEnemyStatComponent>(TEXT("EnemyStatComponent"));
+
+	bNetLoadOnClient = true;
+	bReplicates = true;
 }
 
 void ANetherCrownEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetReplicateMovement(true);
 }
 
 void ANetherCrownEnemy::Tick(float DeltaTime)
@@ -81,7 +86,7 @@ void ANetherCrownEnemy::ProcessIncomingDamage(const AActor* DamageCauser, float 
 	}
 }
 
-void ANetherCrownEnemy::PlayTakeDamageSound()
+void ANetherCrownEnemy::PlayTakeDamageSound() const
 {
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtGruntSoundTag);
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtImpactSoundTag);

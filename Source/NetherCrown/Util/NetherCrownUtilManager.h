@@ -15,7 +15,7 @@ class FNetherCrownUtilManager
 public:
 	//Sound
 	static USoundCue* GetSoundCueByGameplayTag(const FGameplayTag& SoundTag);
-	static void PlaySound2DByGameplayTag(UObject* WorldContextObject, const FGameplayTag& SoundTag);
+	static void PlaySound2DByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& SoundTag);
 
 	//WeaponData
 	static UNetherCrownWeaponData* GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag);

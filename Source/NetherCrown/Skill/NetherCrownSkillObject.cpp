@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "TimerManager.h"
+#include "NetherCrown/Enemy/NetherCrownEnemy.h"
 
 void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -18,6 +19,17 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 
 void UNetherCrownSkillObject::ApplyKnockBackToTarget(ACharacter* TargetCharacter, const FVector& KnockBackVector)
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (!SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	if (!ensureAlways(IsValid(TargetCharacter)))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("TargetCharacter is valid %hs"), __FUNCTION__);
@@ -27,6 +39,16 @@ void UNetherCrownSkillObject::ApplyKnockBackToTarget(ACharacter* TargetCharacter
 	TargetCharacter->LaunchCharacter(KnockBackVector, true, true);
 
 	//@TODO : CC기 구조 설계가 되면 여기서 CC Enum값을 셋팅한다
+}
+
+void UNetherCrownSkillObject::PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const
+{
+	if (!ensureAlways(IsValid(TargetEnemy)))
+	{
+		return;
+	}
+
+	TargetEnemy->PlayTakeDamageSound();
 }
 
 void UNetherCrownSkillObject::PlaySkillCosmetics()

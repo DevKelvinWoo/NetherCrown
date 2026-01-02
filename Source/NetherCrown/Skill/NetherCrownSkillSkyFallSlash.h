@@ -38,5 +38,5 @@ private:
 
 	const float SkillDetectingSphereRadius{ 225.f };
 	const double SkillDetectingThresholdDegrees{ 45.0 };
-	const FVector SkillKnockBackVector{ FVector(1200.f, 0.f, 0.f) };
+	const FVector SkillKnockBackVector{ FVector(1400.f, 0.f, 0.f) };
 };

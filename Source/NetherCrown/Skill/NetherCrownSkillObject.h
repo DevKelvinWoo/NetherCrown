@@ -10,6 +10,7 @@
 class UAnimMontage;
 
 class ANetherCrownCharacter;
+class ANetherCrownEnemy;
 
 UENUM()
 enum class ENetherCrownSkillKeyEnum : uint8
@@ -49,6 +50,8 @@ protected:
 
 	//CC
 	void ApplyKnockBackToTarget(ACharacter* TargetCharacter, const FVector& KnockBackVector);
+
+	void PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};

@@ -52,7 +52,7 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 	return FoundSoundData->SoundCue.LoadSynchronous();
 }
 
-void FNetherCrownUtilManager::PlaySound2DByGameplayTag(UObject* WorldContextObject, const FGameplayTag& SoundTag)
+void FNetherCrownUtilManager::PlaySound2DByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& SoundTag)
 {
 	check(WorldContextObject);
 	UWorld* World = WorldContextObject->GetWorld();
