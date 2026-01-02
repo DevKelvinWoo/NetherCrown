@@ -8,6 +8,7 @@
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
+#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
@@ -39,6 +40,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownBasicAttackComponent = CreateDefaultSubobject<UNetherCrownBasicAttackComponent>(TEXT("BasicAttackComponent"));
 	NetherCrownEquipComponent = CreateDefaultSubobject<UNetherCrownEquipComponent>(TEXT("EquipComponent"));
 	NetherCrownSkillComponent = CreateDefaultSubobject<UNetherCrownSkillComponent>(TEXT("SkillComponent"));
+	NetherCrownCrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
 }
 
 void ANetherCrownCharacter::SetSpringArmZOffset(float InSpringArmZOffset) const

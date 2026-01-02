@@ -63,10 +63,10 @@ protected:
 	virtual bool CallRemoteFunction(UFunction* Function, void* Parms, struct FOutParmRec* OutParms, FFrame* Stack) override;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayEnemyHitSoundAndPlayImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
+	void Multicast_SpawnSkillImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
 
 	//CC
-	void ApplyKnockBackToTarget(ACharacter* TargetCharacter, const FVector& KnockBackVector);
+	void ApplyKnockBackToTarget(ANetherCrownEnemy* TargetEnemy, const FVector& KnockBackVector, const float KnockBackDuration);
 
 	void PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const;
 	void PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;

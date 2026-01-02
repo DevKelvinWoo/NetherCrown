@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "TimerManager.h"
+#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -43,13 +44,12 @@ bool UNetherCrownSkillObject::CallRemoteFunction(UFunction* Function, void* Parm
 	return false;
 }
 
-void UNetherCrownSkillObject::Multicast_PlayEnemyHitSoundAndPlayImpactEffect_Implementation(const ANetherCrownEnemy* TargetEnemy) const
+void UNetherCrownSkillObject::Multicast_SpawnSkillImpactEffect_Implementation(const ANetherCrownEnemy* TargetEnemy) const
 {
-	PlayEnemyHitSound(TargetEnemy);
 	PlaySkillHitImpactEffect(TargetEnemy);
 }
 
-void UNetherCrownSkillObject::ApplyKnockBackToTarget(ACharacter* TargetCharacter, const FVector& KnockBackVector)
+void UNetherCrownSkillObject::ApplyKnockBackToTarget(ANetherCrownEnemy* TargetEnemy, const FVector& KnockBackVector, const float KnockBackDuration)
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -62,15 +62,14 @@ void UNetherCrownSkillObject::ApplyKnockBackToTarget(ACharacter* TargetCharacter
 		return;
 	}
 
-	if (!ensureAlways(IsValid(TargetCharacter)))
+	if (!ensureAlways(IsValid(TargetEnemy)))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("TargetCharacter is valid %hs"), __FUNCTION__);
 		return;
 	}
 
-	TargetCharacter->LaunchCharacter(KnockBackVector, true, true);
-
-	//@TODO : CC기 구조 설계가 되면 여기서 CC Enum값을 셋팅한다
+	TargetEnemy->LaunchCharacter(KnockBackVector, true, true);
+	TargetEnemy->ApplyCrowdControl(ENetherCrownCrowdControlType::KNOCK_BACK, KnockBackDuration);
 }
 
 void UNetherCrownSkillObject::PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const

@@ -8,6 +8,7 @@
 #include "InputActionValue.h"
 #include "NetherCrownCharacter.generated.h"
 
+class UNetherCrownCrowdControlComponent;
 class USpringArmComponent;
 class UCameraComponent;
 
@@ -95,6 +96,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNetherCrownSkillComponent> NetherCrownSkillComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownCrowdControlComponent> NetherCrownCrowdControlComponent{};
 
 	UPROPERTY(Replicated)
 	bool bPressedMoveKey{ false };

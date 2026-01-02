@@ -83,7 +83,7 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 		return;
 	}
 
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
@@ -110,13 +110,12 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 	{
 		if (ANetherCrownEnemy* DetectedEnemy = Cast<ANetherCrownEnemy>(DetectedActor))
 		{
-			ApplyKnockBackToTarget(DetectedEnemy, SkillKnockBackVector);
+			ApplyKnockBackToTarget(DetectedEnemy, SkillKnockBackVector, KnockBackDuration);
 
-			//UGameplayStatics::ApplyDamage()
-			//@NOTE : Play and Spawn VFX and SoundEffect
-			//아래 호출은 제거되어야 할 수 있음 이미 TakeDamage에서 처리하고 있는 로직임
-			//CC기 관련 애니메이션 출력을 어떻게 할지 결정해야 함
-			Multicast_PlayEnemyHitSoundAndPlayImpactEffect(DetectedEnemy);
+			UGameplayStatics::ApplyDamage(DetectedEnemy, 100.f, SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
+
+			//@NOTE : Skill Hit Sound is played by TakeDamage function, So only Spawn VFX
+			Multicast_SpawnSkillImpactEffect(DetectedEnemy);
 		}
 	}
 }

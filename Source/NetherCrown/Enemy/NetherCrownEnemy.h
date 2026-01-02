@@ -5,12 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
+#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrownEnemy.generated.h"
 
-class UNetherCrownEnemyStatComponent;
 class UCapsuleComponent;
 
 class ANetherCrownCharacter;
+class UNetherCrownEnemyStatComponent;
 
 USTRUCT()
 struct FNetherCrownEnemyTagData
@@ -35,6 +36,8 @@ public:
 
 	void PlayTakeDamageSound() const;
 
+	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -54,6 +57,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNetherCrownEnemyStatComponent> EnemyStatComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownCrowdControlComponent> CrowdControlComponent{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> TakeDamageAnimMontageSoft{};
