@@ -44,7 +44,9 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
 	Multicast_PlayTakeDamageSound();
-	Multicast_PlayTakeDamageAnimation();
+
+	check(CrowdControlComponent);
+	Multicast_PlayTakeDamageAnimation(CrowdControlComponent->GetCrowdControlType());
 
 	ProcessIncomingDamage(DamageCauser, ResultDamage);
 
@@ -91,10 +93,9 @@ void ANetherCrownEnemy::ProcessIncomingDamage(const AActor* DamageCauser, float 
 	}
 }
 
-void ANetherCrownEnemy::Multicast_PlayTakeDamageAnimation_Implementation()
+void ANetherCrownEnemy::Multicast_PlayTakeDamageAnimation_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
-	const ENetherCrownCrowdControlType CrowdControlType{ CrowdControlComponent->GetCrowdControlType() };
-	if (CrowdControlType != ENetherCrownCrowdControlType::NONE)
+	if (InCrowdControlType != ENetherCrownCrowdControlType::NONE)
 	{
 		return;
 	}

@@ -29,16 +29,17 @@ void UNetherCrownCrowdControlComponent::GetLifetimeReplicatedProps(TArray<class 
 	DOREPLIFETIME(ThisClass, CrowdControlType);
 }
 
-void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implementation()
+void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
-	PlayCrowdControlAnim();
+	PlayCrowdControlAnim(InCrowdControlType);
 }
 
 void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime)
 {
 	//@NOTE : Only called by server
 	CrowdControlType = InCrowdControlType;
-	Multicast_PlayCrowdControlAnim();
+
+	Multicast_PlayCrowdControlAnim(InCrowdControlType);
 
 	UWorld* World{ GetWorld() };
 	check(World);
@@ -46,14 +47,25 @@ void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrow
 	World->GetTimerManager().SetTimer(CrowdControlTimerHandle, this, &ThisClass::ClearCrowdControl, DurationTime, false);
 }
 
+void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector) const
+{
+	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	OwnerCharacter->LaunchCharacter(KnockBackVector, true, true);
+}
+
 void UNetherCrownCrowdControlComponent::ClearCrowdControl()
 {
 	CrowdControlType = ENetherCrownCrowdControlType::NONE;
 }
 
-void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim()
+void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType)
 {
-	if (CrowdControlType == ENetherCrownCrowdControlType::NONE)
+	if (InCrowdControlType == ENetherCrownCrowdControlType::NONE)
 	{
 		return;
 	}
@@ -63,7 +75,7 @@ void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim()
 		return;
 	}
 
-	TSoftObjectPtr<UAnimMontage>* CrowdControlAnimMontageSoft{ CrowdControlAnimMap.Find(CrowdControlType) };
+	TSoftObjectPtr<UAnimMontage>* CrowdControlAnimMontageSoft{ CrowdControlAnimMap.Find(InCrowdControlType) };
 	UAnimMontage* FoundCrowdControlAnimMontage{ CrowdControlAnimMontageSoft->LoadSynchronous() };
 	if (!ensureAlways(IsValid(FoundCrowdControlAnimMontage)))
 	{

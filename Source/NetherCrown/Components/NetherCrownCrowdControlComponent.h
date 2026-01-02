@@ -26,6 +26,8 @@ public:
 	ENetherCrownCrowdControlType GetCrowdControlType() const { return CrowdControlType; }
 	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime);
 
+	void KnockBack(const FVector& KnockBackVector) const;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
@@ -34,11 +36,11 @@ protected:
 
 private:
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayCrowdControlAnim();
+	void Multicast_PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	void ClearCrowdControl();
 
-	void PlayCrowdControlAnim();
+	void PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	FTimerHandle CrowdControlTimerHandle{};
 

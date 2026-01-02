@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrownSkillObject.generated.h"
 
 class UAnimMontage;
@@ -66,7 +67,7 @@ protected:
 	void Multicast_SpawnSkillImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
 
 	//CC
-	void ApplyKnockBackToTarget(ANetherCrownEnemy* TargetEnemy, const FVector& KnockBackVector, const float KnockBackDuration);
+	void ApplyCrowdControlToTarget(ANetherCrownEnemy* TargetEnemy, const ENetherCrownCrowdControlType InCrowdControlType, const float CrowdControlDuration);
 
 	void PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const;
 	void PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;

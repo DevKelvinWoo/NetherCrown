@@ -38,6 +38,8 @@ public:
 
 	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime);
 
+	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return CrowdControlComponent; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
@@ -50,7 +52,7 @@ private:
 	void Multicast_PlayTakeDamageSound();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayTakeDamageAnimation();
+	void Multicast_PlayTakeDamageAnimation(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCapsuleComponent> EnemyHitBoxComponent{};

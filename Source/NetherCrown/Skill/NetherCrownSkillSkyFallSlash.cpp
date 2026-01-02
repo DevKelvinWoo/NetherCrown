@@ -110,7 +110,13 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 	{
 		if (ANetherCrownEnemy* DetectedEnemy = Cast<ANetherCrownEnemy>(DetectedActor))
 		{
-			ApplyKnockBackToTarget(DetectedEnemy, SkillKnockBackVector, KnockBackDuration);
+			ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::KNOCK_BACK, KnockBackDuration);
+
+			UNetherCrownCrowdControlComponent* CrowdControlComponent{ DetectedEnemy->GetCrowdControlComponent() };
+			if (IsValid(CrowdControlComponent))
+			{
+				CrowdControlComponent->KnockBack(SkillKnockBackVector);
+			}
 
 			UGameplayStatics::ApplyDamage(DetectedEnemy, 100.f, SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
 
