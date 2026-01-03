@@ -12,12 +12,16 @@ class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStopOrStartSkill, const bool);
+
 public:
 	UNetherCrownSkillComponent();
 
 	void ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 	void SetActiveSkillSlowPlayRate(const bool bBeginSlow);
+
+	FOnStopOrStartSkill& GetOnStopOrStartSkill() { return OnStopOrStartSkill; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -49,4 +53,6 @@ private:
 
 	UPROPERTY(Replicated)
 	ENetherCrownSkillKeyEnum ActiveSkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
+
+	FOnStopOrStartSkill OnStopOrStartSkill;
 };

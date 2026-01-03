@@ -26,6 +26,7 @@ public:
 	ENetherCrownCrowdControlType GetCrowdControlType() const { return CrowdControlType; }
 	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime);
 
+	//@NOTE : CC Implements
 	void KnockBack(const FVector& KnockBackVector) const;
 
 protected:

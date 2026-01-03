@@ -109,3 +109,37 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowEnd()
 
 	SkillComponent->SetActiveSkillSlowPlayRate(false);
 }
+
+void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
+{
+	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
+	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
+	if (!(IsValid(SkillComponent)))
+	{
+		return;
+	}
+
+	if (!OwningCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	SkillComponent->GetOnStopOrStartSkill().Broadcast(false);
+}
+
+void UNetherCrownCharacterAnimInstance::AnimNotify_SkillEnd()
+{
+	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
+	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
+	if (!(IsValid(SkillComponent)))
+	{
+		return;
+	}
+
+	if (!OwningCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	SkillComponent->GetOnStopOrStartSkill().Broadcast(true);
+}

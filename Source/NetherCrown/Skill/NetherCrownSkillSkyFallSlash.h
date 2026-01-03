@@ -24,20 +24,34 @@ private:
 	void ApplySkillCameraCurveFloat();
 	void StartSkillCameraCurveTimer();
 
+	void StartSkillArmMaterialParameterCurveTimer();
+	void ApplySkillArmMaterialParameterCurveFloat();
+
 	void HandleOnHitSkyFallSlashSkill();
 	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;
 
-	FTimerHandle SkillCameraCurveTimerHandle;
-	float ElapsedTime{};
+	FTimerHandle SkillCameraCurveTimerHandle{};
+	float SkillCameraCurveElapsedTime{ 0.f };
+
+	FTimerHandle SkillArmMaterialCurveTimerHandle{};
+	float SkillArmMaterialCurveElapsedTime{ 0.f };
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UCurveFloat> SkillCameraCurveFloatSoft{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UCurveFloat> SkillArmMaterialCurveFloatSoft{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
 
 	const float SkillDetectingSphereRadius{ 225.f };
 	const double SkillDetectingThresholdDegrees{ 45.0 };
-	const FVector SkillKnockBackVector{ FVector(2400.f, 0.f, 0.f) };
+	const FVector SkillKnockBackVector{ FVector(-2400.f, 0.f, 0.f) };
 	const float KnockBackDuration{ 1.f };
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> ArmMaterialInstanceDynamic{};
+
+	const FName ArmMaterialScalarParameterName{ "SkyFallSlashAlpha" };
 };

@@ -2,11 +2,12 @@
 
 #include "NetherCrownSkillComponent.h"
 
-#include "AssetDefinitionAssetInfo.h"
+#include "NetherCrownEquipComponent.h"
 #include "Engine/ActorChannel.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Skill/NetherCrownSkillObject.h"
+#include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 UNetherCrownSkillComponent::UNetherCrownSkillComponent()
 {
@@ -110,6 +111,13 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 
 void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter ? OwnerCharacter->GetEquipComponent() : nullptr };
+	if (!ensureAlways(IsValid(EquipComponent)) || !IsValid(EquipComponent->GetEquippedWeapon()))
+	{
+		return;
+	}
+
 	if (SkillObjects.IsEmpty())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("SkillObjects is Empty in %hs"), __FUNCTION__);

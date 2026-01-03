@@ -58,6 +58,9 @@ void ANetherCrownCharacter::BeginPlay()
 
 	check(NetherCrownEquipComponent);
 	NetherCrownEquipComponent->GetOnEquipEndOrStart().AddUObject(this, &ThisClass::SetEnableCharacterControl);
+
+	check(NetherCrownSkillComponent);
+	NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetEnableCharacterControl);
 }
 
 void ANetherCrownCharacter::Tick(float DeltaTime)

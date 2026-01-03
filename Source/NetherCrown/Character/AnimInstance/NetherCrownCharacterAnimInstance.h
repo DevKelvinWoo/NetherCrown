@@ -32,4 +32,10 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_SkillSlowEnd();
+
+	UFUNCTION()
+	void AnimNotify_SkillStart();
+
+	UFUNCTION()
+	void AnimNotify_SkillEnd();
 };
