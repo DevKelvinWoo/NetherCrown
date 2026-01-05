@@ -21,6 +21,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Knight);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Knight_BasicAttackImpact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_SkyFallSlash_Impact);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_ShieldMastery);
 #pragma endregion
 
 #pragma region Weapon

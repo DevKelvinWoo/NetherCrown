@@ -31,13 +31,7 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 
 	NetherCrownKnightAnimInstance->GetOnHitSkyFallSlashSkill().AddUObject(this, &ThisClass::HandleOnHitSkyFallSlashSkill);
 
-	constexpr int32 ArmMaterialIndex{ 1 };
-
-	ArmMaterialInstanceDynamic = SkeletalMeshComponent ? SkeletalMeshComponent->CreateDynamicMaterialInstance(ArmMaterialIndex) : nullptr;
-	if (!ensureAlways(IsValid(ArmMaterialInstanceDynamic)))
-	{
-		return;
-	}
+	CreateArmMaterialInstanceDynamic();
 }
 
 void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay()
@@ -225,6 +219,25 @@ const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetected
 	}
 
 	return DetectedEnemies;
+}
+
+void UNetherCrownSkillSkyFallSlash::CreateArmMaterialInstanceDynamic()
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+
+	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
+	constexpr int32 ArmMaterialIndex{ 1 };
+
+	ArmMaterialInstanceDynamic = SkeletalMeshComponent ? SkeletalMeshComponent->CreateDynamicMaterialInstance(ArmMaterialIndex) : nullptr;
+	if (!ensureAlways(IsValid(ArmMaterialInstanceDynamic)))
+	{
+		return;
+	}
 }
 
 void UNetherCrownSkillSkyFallSlash::ApplySkillCameraCurveFloat()

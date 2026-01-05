@@ -182,7 +182,7 @@ void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) cons
 
 void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 {
-	UWorld* World{ GetWorld() };
+	const UWorld* World{ GetWorld() };
 	check(World);
 
 	FTimerHandle SkillCoolDownTimerHandle{};

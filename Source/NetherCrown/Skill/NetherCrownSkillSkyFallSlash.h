@@ -30,6 +30,8 @@ private:
 	void HandleOnHitSkyFallSlashSkill();
 	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;
 
+	void CreateArmMaterialInstanceDynamic();
+
 	FTimerHandle SkillCameraCurveTimerHandle{};
 	float SkillCameraCurveElapsedTime{ 0.f };
 
