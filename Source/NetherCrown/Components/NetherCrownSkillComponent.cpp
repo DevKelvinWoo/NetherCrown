@@ -154,6 +154,11 @@ void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENether
 		return;
 	}
 
+	if (!FoundSkillObject->CanActiveSkill())
+	{
+		return;
+	}
+
 	ActiveSkillKeyEnum = SkillKeyEnum;
 
 	FoundSkillObject->ExecuteSkillGameplay();

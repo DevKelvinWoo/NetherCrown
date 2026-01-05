@@ -40,7 +40,7 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 	}
 }
 
-void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay() const
+void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay()
 {
 	Super::ExecuteSkillGameplay();
 

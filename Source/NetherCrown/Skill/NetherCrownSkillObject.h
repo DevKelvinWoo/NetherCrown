@@ -69,12 +69,17 @@ public:
 	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter) { SkillOwnerCharacterWeak = MakeWeakObjectPtr(SkillOwnerCharacter); }
 
 	virtual void PlaySkillCosmetics();
-	virtual void ExecuteSkillGameplay() const {};
+	virtual void ExecuteSkillGameplay();
 
 	void SetSkillMontageSlowPlayRate(float InPlayRate) const;
 
 	float GetSkillMontageBeginSlowPlayRate() const { return SkillMontageBeginSlowPlayRate; }
 	float GetSkillMontageEndSlowPlayRate() const { return SkillMontageEndSlowPlayRate; }
+
+	void StartSkillCoolDownTimer();
+	void StopSkillCoolDownTimer();
+
+	bool CanActiveSkill() const { return bCanActiveSkill; }
 
 protected:
 	//@NOTE : To Replicate UObject
@@ -117,4 +122,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	float SkillMontageEndSlowPlayRate{ 1.f };
+
+	UPROPERTY(EditDefaultsOnly, Replicated)
+	bool bCanActiveSkill{ true };
+
+	UPROPERTY(EditDefaultsOnly, Replicated)
+	int32 SkillCoolDown{ 3 };
 };

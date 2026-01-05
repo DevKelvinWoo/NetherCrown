@@ -21,6 +21,8 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, SkillOwnerCharacterWeak);
 	DOREPLIFETIME(ThisClass, SkillMontageBeginSlowPlayRate);
 	DOREPLIFETIME(ThisClass, SkillMontageEndSlowPlayRate);
+	DOREPLIFETIME(ThisClass, SkillCoolDown);
+	DOREPLIFETIME(ThisClass, bCanActiveSkill);
 }
 
 int32 UNetherCrownSkillObject::GetFunctionCallspace(UFunction* Function, FFrame* Stack)
@@ -153,6 +155,11 @@ void UNetherCrownSkillObject::PlaySkillCosmetics()
 	NetherCrownCharacterAnimInstance->Montage_Play(SkillAnimMontage);
 }
 
+void UNetherCrownSkillObject::ExecuteSkillGameplay()
+{
+	StartSkillCoolDownTimer();
+}
+
 void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) const
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
@@ -171,4 +178,20 @@ void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) cons
 	}
 
 	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(SkillAnimMontage, InPlayRate);
+}
+
+void UNetherCrownSkillObject::StartSkillCoolDownTimer()
+{
+	UWorld* World{ GetWorld() };
+	check(World);
+
+	FTimerHandle SkillCoolDownTimerHandle{};
+	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, SkillCoolDown, false);
+
+	bCanActiveSkill = false;
+}
+
+void UNetherCrownSkillObject::StopSkillCoolDownTimer()
+{
+	bCanActiveSkill = true;
 }
