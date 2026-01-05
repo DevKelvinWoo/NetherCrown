@@ -41,6 +41,8 @@ public:
 
 	void SetCanAttack(const bool InbCanAttack) { bCanAttack = InbCanAttack; }
 
+	bool IsAttacking() const { return bIsAttacking; }
+
 	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
 
 	void ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation);
@@ -53,7 +55,7 @@ private:
 
 	void StartAttackBasic();
 
-	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName) const;
+	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName);
 
 	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
 
@@ -98,6 +100,7 @@ private:
 	bool bHasQueuedNextCombo{ false };
 	bool bCanInputFirstAttack{ true };
 	bool bCanAttack{ false };
+	bool bIsAttacking{ false };
 
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownBasicAttackComponentTagData BasicAttackComponentTagData{};

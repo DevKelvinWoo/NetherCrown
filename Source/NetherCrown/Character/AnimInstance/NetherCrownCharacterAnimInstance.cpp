@@ -124,6 +124,11 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
 		return;
 	}
 
+	if (UNetherCrownBasicAttackComponent* BasicAttackComponent = OwningCharacter->GetBasicAttackComponent())
+	{
+		BasicAttackComponent->SetCanAttack(false);
+	}
+
 	SkillComponent->GetOnStopOrStartSkill().Broadcast(false);
 }
 
@@ -139,6 +144,11 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillEnd()
 	if (!OwningCharacter->HasAuthority())
 	{
 		return;
+	}
+
+	if (UNetherCrownBasicAttackComponent* BasicAttackComponent = OwningCharacter->GetBasicAttackComponent())
+	{
+		BasicAttackComponent->SetCanAttack(true);
 	}
 
 	SkillComponent->GetOnStopOrStartSkill().Broadcast(true);

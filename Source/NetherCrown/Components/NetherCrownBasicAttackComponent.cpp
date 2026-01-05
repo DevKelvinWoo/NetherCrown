@@ -74,7 +74,7 @@ void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSectio
 	PlayAttackSoundAndJumpToComboMontageSection(&SectionName);
 }
 
-void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName) const
+void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName)
 {
 	if (!SectionName)
 	{
@@ -96,6 +96,8 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	{
 		return;
 	}
+
+	bIsAttacking = true;
 
 	NetherCrownCharacterAnimInstance->Montage_Play(BasicAttackAnimMontage);
 	NetherCrownCharacterAnimInstance->Montage_JumpToSection(*SectionName);
@@ -289,6 +291,7 @@ void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 
 	if (Owner->HasAuthority())
 	{
+		bIsAttacking = false;
 		bCanQueueNextCombo = false;
 
 		if (!bHasQueuedNextCombo)

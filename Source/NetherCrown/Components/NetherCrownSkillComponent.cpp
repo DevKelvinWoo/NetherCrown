@@ -2,8 +2,10 @@
 
 #include "NetherCrownSkillComponent.h"
 
+#include "NetherCrownBasicAttackComponent.h"
 #include "NetherCrownEquipComponent.h"
 #include "Engine/ActorChannel.h"
+#include "GameFramework/PawnMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Skill/NetherCrownSkillObject.h"
@@ -37,6 +39,30 @@ void UNetherCrownSkillComponent::SetActiveSkillSlowPlayRate(const bool bBeginSlo
 
 	const float SkillPlayRate{ bBeginSlow ? FoundSkillObject->GetSkillMontageBeginSlowPlayRate() : FoundSkillObject->GetSkillMontageEndSlowPlayRate() };
 	FoundSkillObject->SetSkillMontageSlowPlayRate(SkillPlayRate);
+}
+
+bool UNetherCrownSkillComponent::CanActiveSkill() const
+{
+	const  ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter ? OwnerCharacter->GetBasicAttackComponent() : nullptr };
+	if (!ensureAlways(IsValid(BasicAttackComponent)) || BasicAttackComponent->IsAttacking())
+	{
+		return false;
+	}
+
+	const UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter ? OwnerCharacter->GetEquipComponent() : nullptr };
+	if (!ensureAlways(IsValid(EquipComponent)) || !IsValid(EquipComponent->GetEquippedWeapon()))
+	{
+		return false;
+	}
+
+	const UPawnMovementComponent* MovementComponent{ OwnerCharacter->GetMovementComponent() };
+	if (!ensureAlways(IsValid(MovementComponent)) || MovementComponent->IsFalling())
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void UNetherCrownSkillComponent::BeginPlay()
@@ -111,9 +137,7 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 
 void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter ? OwnerCharacter->GetEquipComponent() : nullptr };
-	if (!ensureAlways(IsValid(EquipComponent)) || !IsValid(EquipComponent->GetEquippedWeapon()))
+	if (!CanActiveSkill())
 	{
 		return;
 	}
