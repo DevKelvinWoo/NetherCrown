@@ -15,6 +15,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Character_Knight_SwingWeapon);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Enemy_HurtGrunt);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Enemy_HurtImpact);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Shield_On);
 #pragma endregion
 
 #pragma region Effect

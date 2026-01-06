@@ -3,9 +3,20 @@
 
 #include "NetherCrownPlayerStatComponent.h"
 
+#include "Net/UnrealNetwork.h"
+
 UNetherCrownPlayerStatComponent::UNetherCrownPlayerStatComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
+
+	SetIsReplicatedByDefault(true);
+}
+
+void UNetherCrownPlayerStatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, PlayerStatData);
 }
 
 void UNetherCrownPlayerStatComponent::BeginPlay()
@@ -13,7 +24,12 @@ void UNetherCrownPlayerStatComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UNetherCrownPlayerStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	PlayerStatData.ShieldValue += InShieldValue;
+}
+
+void UNetherCrownPlayerStatComponent::ClearPlayerShield()
+{
+	PlayerStatData.ShieldValue = 0;
 }

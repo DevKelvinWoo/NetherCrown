@@ -22,8 +22,16 @@ private:
 	void ActiveShieldEffectAndActor();
 	void DeactivateShieldEffectAndActor();
 
+	void PlayShieldOnSound() const;
+
+	void AddPlayerShieldAndSetShieldEndTimer(int32 InShieldValue) const;
+	void ClearPlayerShield() const;
+
 	UPROPERTY(EditDefaultsOnly)
 	int32 ShieldDuration{ 10 };
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 ShieldValue{ 50 };
 
 	UPROPERTY(EditDefaultsOnly)
 	FName ShieldEffectSocketName{ TEXT("root") };

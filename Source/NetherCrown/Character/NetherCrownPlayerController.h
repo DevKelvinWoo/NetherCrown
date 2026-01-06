@@ -14,8 +14,12 @@ class NETHERCROWN_API ANetherCrownPlayerController : public APlayerController
 {
 	GENERATED_BODY()
 
+public:
+	ANetherCrownPlayerController();
+
 protected:
 	virtual void SetupInputComponent() override;
+	virtual void Tick(float DeltaTime) override;
 
 private:
 	UPROPERTY(EditDefaultsOnly)

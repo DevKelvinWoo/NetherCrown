@@ -6,11 +6,21 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 
+ANetherCrownPlayerController::ANetherCrownPlayerController()
+{
+	PrimaryActorTick.bCanEverTick = true;
+}
+
 void ANetherCrownPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
 	AddIMCAndBindAction();
+}
+
+void ANetherCrownPlayerController::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
 }
 
 void ANetherCrownPlayerController::AddIMCAndBindAction()

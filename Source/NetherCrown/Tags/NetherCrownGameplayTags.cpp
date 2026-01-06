@@ -14,6 +14,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_Knight_SwingWeapon, "Sound.Character.Knight.SwingWeapon", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_HurtGrunt, "Sound.Enemy.HurtGrunt", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_HurtImpact, "Sound.Enemy.HurtImpact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Shield_On, "Sound.Shield.On", "");
 #pragma endregion
 
 #pragma region Effect

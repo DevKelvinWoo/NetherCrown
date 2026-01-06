@@ -44,6 +44,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	int32 MagicPower{ 10 };
+
+	UPROPERTY(EditAnywhere)
+	int32 ShieldValue{ 0 };
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -56,11 +59,14 @@ public:
 
 	const FNetherCrownPlayerStatData& GetPlayerStatData() const { return PlayerStatData; }
 
+	void AddPlayerShield(int32 InShieldValue);
+	void ClearPlayerShield();
+
 protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Replicated)
 	FNetherCrownPlayerStatData PlayerStatData{};
 };

@@ -5,6 +5,8 @@
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NiagaraComponent.h"
+#include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
+#include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "SkillActors/NetherCrownShield.h"
 
 void UNetherCrownShieldMastery::PlaySkillCosmetics()
@@ -12,13 +14,14 @@ void UNetherCrownShieldMastery::PlaySkillCosmetics()
 	Super::PlaySkillCosmetics();
 
 	ActiveShieldEffectAndActor();
+	PlayShieldOnSound();
 }
 
 void UNetherCrownShieldMastery::ExecuteSkillGameplay()
 {
 	Super::ExecuteSkillGameplay();
 
-	//@TODO : 실제 쉴드를 부여하는 로직 추가 필요
+	AddPlayerShieldAndSetShieldEndTimer(ShieldValue);
 }
 
 void UNetherCrownShieldMastery::ActiveShieldEffectAndActor()
@@ -70,4 +73,64 @@ void UNetherCrownShieldMastery::DeactivateShieldEffectAndActor()
 	}
 
 	HandledShieldMasteryActor->DestroyShield();
+}
+
+void UNetherCrownShieldMastery::PlayShieldOnSound() const
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->IsLocallyControlled())
+	{
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), NetherCrownTags::Sound_Shield_On);
+	}
+}
+
+void UNetherCrownShieldMastery::AddPlayerShieldAndSetShieldEndTimer(int32 InShieldValue) const
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	ANetherCrownPlayerState* PlayerState{ Cast<ANetherCrownPlayerState>(SkillOwnerCharacter->GetPlayerState()) };
+	if (!ensureAlways(IsValid(PlayerState)))
+	{
+		return;
+	}
+
+	UNetherCrownPlayerStatComponent* PlayerStatComponent{ PlayerState->GetNetherCrownPlayerStatComponent() };
+	check(PlayerStatComponent);
+
+	PlayerStatComponent->AddPlayerShield(InShieldValue);
+
+	const UWorld* World{ GetWorld() };
+	check(World);
+
+	FTimerHandle ShieldMasteryEndTimerHandle{};
+	World->GetTimerManager().SetTimer(ShieldMasteryEndTimerHandle, this, &ThisClass::ClearPlayerShield, ShieldDuration, false);
+}
+
+void UNetherCrownShieldMastery::ClearPlayerShield() const
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	ANetherCrownPlayerState* PlayerState{ Cast<ANetherCrownPlayerState>(SkillOwnerCharacter->GetPlayerState()) };
+	if (!ensureAlways(IsValid(PlayerState)))
+	{
+		return;
+	}
+
+	UNetherCrownPlayerStatComponent* PlayerStatComponent{ PlayerState->GetNetherCrownPlayerStatComponent() };
+	check(PlayerStatComponent);
+
+	PlayerStatComponent->ClearPlayerShield();
 }
