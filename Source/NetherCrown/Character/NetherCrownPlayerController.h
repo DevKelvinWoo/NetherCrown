@@ -38,6 +38,8 @@ private:
 	TObjectPtr<UInputAction> QSkillAction{};
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputAction> ESkillAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> RSkillAction{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> MappingContext{};
@@ -62,4 +64,6 @@ private:
 	void ActiveQSkill(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void ActiveESkill(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void ActiveRSkill(const FInputActionValue& InActionValue);
 };

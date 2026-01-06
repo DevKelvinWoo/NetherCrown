@@ -46,6 +46,7 @@ public:
 	void ChangeWeapon(const FInputActionValue& Value);
 	void ActiveQSkill(const FInputActionValue& Value);
 	void ActiveESkill(const FInputActionValue& Value);
+	void ActiveRSkill(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}

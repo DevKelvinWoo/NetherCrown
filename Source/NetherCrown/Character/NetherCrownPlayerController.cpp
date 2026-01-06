@@ -36,7 +36,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	EnhancedInputLocalPlayerSubSystem->AddMappingContext(MappingContext, 0);
 
 	if (!ensureAlways(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction && EquipAction && ChangeWeaponAction
-					&& QSkillAction && ESkillAction))
+					&& QSkillAction && ESkillAction && RSkillAction))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("Can't add Mapping Context and InputActions in %hs"), __FUNCTION__);
 
@@ -52,6 +52,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	EnhancedPlayerInputComponent->BindAction(ChangeWeaponAction, ETriggerEvent::Started, this, &ThisClass::ChangeWeapon);
 	EnhancedPlayerInputComponent->BindAction(QSkillAction, ETriggerEvent::Started, this, &ThisClass::ActiveQSkill);
 	EnhancedPlayerInputComponent->BindAction(ESkillAction, ETriggerEvent::Started, this, &ThisClass::ActiveESkill);
+	EnhancedPlayerInputComponent->BindAction(RSkillAction, ETriggerEvent::Started, this, &ThisClass::ActiveRSkill);
 }
 
 void ANetherCrownPlayerController::MoveCharacter(const FInputActionValue& InActionValue)
@@ -169,4 +170,17 @@ void ANetherCrownPlayerController::ActiveESkill(const FInputActionValue& InActio
 	}
 
 	NetherCrownCharacter->ActiveESkill(InActionValue);
+}
+
+void ANetherCrownPlayerController::ActiveRSkill(const FInputActionValue& InActionValue)
+{
+	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
+	if (!ensureAlways(NetherCrownCharacter))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
+
+		return;
+	}
+
+	NetherCrownCharacter->ActiveRSkill(InActionValue);
 }

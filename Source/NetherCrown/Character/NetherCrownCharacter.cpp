@@ -303,3 +303,16 @@ void ANetherCrownCharacter::ActiveESkill(const FInputActionValue& Value)
 		}
 	}
 }
+
+void ANetherCrownCharacter::ActiveRSkill(const FInputActionValue& Value)
+{
+	if (Value.IsNonZero())
+	{
+		const bool bActiveRSkillInput{ Value.Get<bool>() };
+		if (bActiveRSkillInput)
+		{
+			check(NetherCrownSkillComponent);
+			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::RSkill);
+		}
+	}
+}

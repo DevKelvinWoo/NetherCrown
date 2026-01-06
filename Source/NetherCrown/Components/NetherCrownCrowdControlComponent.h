@@ -13,6 +13,7 @@ enum class ENetherCrownCrowdControlType : uint8
 {
 	NONE,
 	KNOCK_BACK,
+	FROZEN,
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))

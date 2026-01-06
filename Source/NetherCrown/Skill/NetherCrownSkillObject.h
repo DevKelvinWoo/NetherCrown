@@ -50,7 +50,6 @@ enum class ENetherCrownSkillKeyEnum : uint8
 {
 	None,
 	QSkill,
-	WSkill,
 	ESkill,
 	RSkill,
 	ShiftSkill
