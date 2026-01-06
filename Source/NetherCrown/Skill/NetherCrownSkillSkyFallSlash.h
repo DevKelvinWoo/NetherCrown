@@ -44,6 +44,12 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UCurveFloat> SkillArmMaterialCurveFloatSoft{};
 
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> CachedSkillCameraCurveFloat{};
+
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> CachedSkillArmMaterialCurveFloat{};
+
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
 
@@ -55,5 +61,5 @@ private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> ArmMaterialInstanceDynamic{};
 
-	const FName ArmMaterialScalarParameterName{ "SkyFallSlashAlpha" };
+	const FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
 };

@@ -7,7 +7,7 @@
 
 UNetherCrownCrowdControlComponent::UNetherCrownCrowdControlComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -15,11 +15,6 @@ UNetherCrownCrowdControlComponent::UNetherCrownCrowdControlComponent()
 void UNetherCrownCrowdControlComponent::BeginPlay()
 {
 	Super::BeginPlay();
-}
-
-void UNetherCrownCrowdControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UNetherCrownCrowdControlComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

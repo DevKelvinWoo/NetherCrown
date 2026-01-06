@@ -7,7 +7,7 @@
 
 ANetherCrownPlayerState::ANetherCrownPlayerState()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	NetherCrownPlayerStatComponent = CreateDefaultSubobject<UNetherCrownPlayerStatComponent>(TEXT("CharacterStatComponent"));
 }

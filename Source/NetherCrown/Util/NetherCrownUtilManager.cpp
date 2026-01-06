@@ -157,3 +157,19 @@ void FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(const UObject* Wor
 
 	UNiagaraFunctionLibrary::SpawnSystemAtLocation(WorldContextObject, NiagaraSystem,SpawnTransform.GetLocation(), SpawnTransform.GetRotation().Rotator(), SpawnTransform.GetScale3D());
 }
+
+UNiagaraComponent* FNetherCrownUtilManager::AttachNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, USceneComponent* AttachComponent, const FName AttachSocketName)
+{
+	if (!ensureAlways(WorldContextObject))
+	{
+		return nullptr;
+	}
+
+	UNiagaraSystem* NiagaraSystem{ GetNiagaraSystemByGameplayTag(EffectTag) };
+	if (!ensureAlways(IsValid(NiagaraSystem)))
+	{
+		return nullptr;
+	}
+
+	return UNiagaraFunctionLibrary::SpawnSystemAttached(NiagaraSystem, AttachComponent, AttachSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
+}

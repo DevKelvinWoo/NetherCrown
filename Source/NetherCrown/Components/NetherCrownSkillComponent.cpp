@@ -13,7 +13,7 @@
 
 UNetherCrownSkillComponent::UNetherCrownSkillComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -70,11 +70,6 @@ void UNetherCrownSkillComponent::BeginPlay()
 	Super::BeginPlay();
 
 	ConstructSkillObjects();
-}
-
-void UNetherCrownSkillComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 bool UNetherCrownSkillComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)

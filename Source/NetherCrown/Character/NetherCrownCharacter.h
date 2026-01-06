@@ -45,6 +45,7 @@ public:
 	void EquipCharacter(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
 	void ActiveQSkill(const FInputActionValue& Value);
+	void ActiveESkill(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}
@@ -60,7 +61,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Landed(const FHitResult& Hit) override;

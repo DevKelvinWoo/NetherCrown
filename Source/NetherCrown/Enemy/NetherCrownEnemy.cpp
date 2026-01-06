@@ -13,7 +13,7 @@
 
 ANetherCrownEnemy::ANetherCrownEnemy()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	EnemyHitBoxComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("EnemyHitBoxComponent"));
 	EnemyHitBoxComponent->SetupAttachment(RootComponent);
@@ -31,11 +31,6 @@ void ANetherCrownEnemy::BeginPlay()
 	Super::BeginPlay();
 
 	SetReplicateMovement(true);
-}
-
-void ANetherCrownEnemy::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

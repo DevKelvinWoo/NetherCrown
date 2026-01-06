@@ -32,6 +32,8 @@ private:
 	TObjectPtr<UInputAction> ChangeWeaponAction{};
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputAction> QSkillAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> ESkillAction{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> MappingContext{};
@@ -54,4 +56,6 @@ private:
 	void ChangeWeapon(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void ActiveQSkill(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void ActiveESkill(const FInputActionValue& InActionValue);
 };

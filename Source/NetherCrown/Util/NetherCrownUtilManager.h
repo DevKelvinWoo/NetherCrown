@@ -7,6 +7,7 @@
 
 class USoundCue;
 class UNiagaraSystem;
+class UNiagaraComponent;
 
 class UNetherCrownWeaponData;
 
@@ -23,4 +24,5 @@ public:
 	//Effect
 	static UNiagaraSystem* GetNiagaraSystemByGameplayTag(const FGameplayTag& EffectTag);
 	static void SpawnNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform);
+	static UNiagaraComponent* AttachNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, USceneComponent* AttachComponent, const FName AttachSocketName);
 };

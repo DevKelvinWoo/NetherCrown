@@ -32,6 +32,9 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 	NetherCrownKnightAnimInstance->GetOnHitSkyFallSlashSkill().AddUObject(this, &ThisClass::HandleOnHitSkyFallSlashSkill);
 
 	CreateArmMaterialInstanceDynamic();
+
+	CachedSkillArmMaterialCurveFloat = SkillArmMaterialCurveFloatSoft.LoadSynchronous();
+	CachedSkillCameraCurveFloat = SkillCameraCurveFloatSoft.LoadSynchronous();
 }
 
 void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay()
@@ -97,9 +100,10 @@ void UNetherCrownSkillSkyFallSlash::StartSkillArmMaterialParameterCurveTimer()
 void UNetherCrownSkillSkyFallSlash::ApplySkillArmMaterialParameterCurveFloat()
 {
 	const UWorld* World{ GetWorld() };
+	check(World);
+
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	const UCurveFloat* SkillArmMaterialCurveFloat{ SkillArmMaterialCurveFloatSoft.LoadSynchronous() };
-	if (!ensureAlways(IsValid(SkillArmMaterialCurveFloat)) || !ensureAlways(IsValid(World)) || !ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedSkillArmMaterialCurveFloat)) || !ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		World->GetTimerManager().ClearTimer(SkillArmMaterialCurveTimerHandle);
 		return;
@@ -109,7 +113,7 @@ void UNetherCrownSkillSkyFallSlash::ApplySkillArmMaterialParameterCurveFloat()
 
 	float MinTime{};
 	float MaxTime{};
-	SkillArmMaterialCurveFloat->GetTimeRange(MinTime, MaxTime);
+	CachedSkillArmMaterialCurveFloat->GetTimeRange(MinTime, MaxTime);
 
 	if (SkillArmMaterialCurveElapsedTime > MaxTime)
 	{
@@ -117,7 +121,7 @@ void UNetherCrownSkillSkyFallSlash::ApplySkillArmMaterialParameterCurveFloat()
 		return;
 	}
 
-	const float ArmMaterialCurveFloatValue{ SkillArmMaterialCurveFloat->GetFloatValue(SkillArmMaterialCurveElapsedTime) };
+	const float ArmMaterialCurveFloatValue{ CachedSkillArmMaterialCurveFloat->GetFloatValue(SkillArmMaterialCurveElapsedTime) };
 	ArmMaterialInstanceDynamic->SetScalarParameterValue(ArmMaterialScalarParameterName, ArmMaterialCurveFloatValue);
 }
 
@@ -243,9 +247,10 @@ void UNetherCrownSkillSkyFallSlash::CreateArmMaterialInstanceDynamic()
 void UNetherCrownSkillSkyFallSlash::ApplySkillCameraCurveFloat()
 {
 	const UWorld* World{ GetWorld() };
+	check(World);
+
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	const UCurveFloat* SkillCameraCurveFloat{ SkillCameraCurveFloatSoft.LoadSynchronous() };
-	if (!ensureAlways(IsValid(SkillCameraCurveFloat)) || !ensureAlways(IsValid(World)) || !ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedSkillCameraCurveFloat)) || !ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		World->GetTimerManager().ClearTimer(SkillCameraCurveTimerHandle);
 		return;
@@ -260,7 +265,7 @@ void UNetherCrownSkillSkyFallSlash::ApplySkillCameraCurveFloat()
 
 	float MinTime{};
 	float MaxTime{};
-	SkillCameraCurveFloat->GetTimeRange(MinTime, MaxTime);
+	CachedSkillCameraCurveFloat->GetTimeRange(MinTime, MaxTime);
 
 	if (SkillCameraCurveElapsedTime > MaxTime)
 	{
@@ -268,5 +273,5 @@ void UNetherCrownSkillSkyFallSlash::ApplySkillCameraCurveFloat()
 		return;
 	}
 
-	SkillOwnerCharacter->SetSpringArmZOffset(SkillCameraCurveFloat->GetFloatValue(SkillCameraCurveElapsedTime));
+	SkillOwnerCharacter->SetSpringArmZOffset(CachedSkillCameraCurveFloat->GetFloatValue(SkillCameraCurveElapsedTime));
 }

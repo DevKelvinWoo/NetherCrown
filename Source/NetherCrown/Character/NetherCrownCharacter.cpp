@@ -16,7 +16,7 @@
 
 ANetherCrownCharacter::ANetherCrownCharacter()
 {
-	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bCanEverTick = false;
 
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -61,11 +61,6 @@ void ANetherCrownCharacter::BeginPlay()
 
 	check(NetherCrownSkillComponent);
 	NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetEnableCharacterControl);
-}
-
-void ANetherCrownCharacter::Tick(float DeltaTime)
-{
-	Super::Tick(DeltaTime);
 }
 
 void ANetherCrownCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -292,6 +287,19 @@ void ANetherCrownCharacter::ActiveQSkill(const FInputActionValue& Value)
 		{
 			check(NetherCrownSkillComponent);
 			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::QSkill);
+		}
+	}
+}
+
+void ANetherCrownCharacter::ActiveESkill(const FInputActionValue& Value)
+{
+	if (Value.IsNonZero())
+	{
+		const bool bActiveESkillInput{ Value.Get<bool>() };
+		if (bActiveESkillInput)
+		{
+			check(NetherCrownSkillComponent);
+			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::ESkill);
 		}
 	}
 }
