@@ -29,6 +29,7 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 		return;
 	}
 
+	NetherCrownKnightAnimInstance->GetOnHitSkyFallSlashSkill().RemoveAll(this);
 	NetherCrownKnightAnimInstance->GetOnHitSkyFallSlashSkill().AddUObject(this, &ThisClass::HandleOnHitSkyFallSlashSkill);
 
 	CreateArmMaterialInstanceDynamic();
@@ -127,12 +128,6 @@ void UNetherCrownSkillSkyFallSlash::ApplySkillArmMaterialParameterCurveFloat()
 
 void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 {
-	const TArray<AActor*> DetectedActors{ GetSkillDetectedTargets() };
-	if (DetectedActors.IsEmpty())
-	{
-		return;
-	}
-
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
@@ -153,6 +148,13 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 
 	if (!SkillOwnerCharacter->HasAuthority())
 	{
+		return;
+	}
+
+	const TArray<AActor*> DetectedActors{ GetSkillDetectedTargets() };
+	if (DetectedActors.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HandleOnHitSkyFallSlashSkill - DetectedActors is empty"));
 		return;
 	}
 
