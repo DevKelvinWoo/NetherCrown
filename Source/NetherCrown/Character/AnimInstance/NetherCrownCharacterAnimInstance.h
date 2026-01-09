@@ -38,4 +38,13 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_SkillEnd();
+
+	UFUNCTION()
+	void AnimNotify_SetCharacterMovementFly();
+
+	UFUNCTION()
+	void AnimNotify_SetCharacterMovementWalk();
+
+	UFUNCTION()
+	void AnimNotify_SkillCameraShake();
 };

@@ -7,3 +7,8 @@ void UNetherCrownKnightAnimInstance::AnimNotify_HitSkyFallSlashSkill()
 {
 	OnHitSkyFallSlashSkill.Broadcast();
 }
+
+void UNetherCrownKnightAnimInstance::AnimNotify_HitFrozenTempestSkill()
+{
+	OnHitFrozenTempestSkill.Broadcast();
+}

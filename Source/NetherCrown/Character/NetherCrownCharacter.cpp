@@ -49,6 +49,12 @@ void ANetherCrownCharacter::SetSpringArmZOffset(float InSpringArmZOffset) const
 	MainSpringArmComponent->TargetOffset.Z = InSpringArmZOffset;
 }
 
+void ANetherCrownCharacter::SetSpringArmLength(float InSpringArmLength) const
+{
+	check(MainSpringArmComponent);
+	MainSpringArmComponent->TargetArmLength = InSpringArmLength;
+}
+
 void ANetherCrownCharacter::BeginPlay()
 {
 	Super::BeginPlay();

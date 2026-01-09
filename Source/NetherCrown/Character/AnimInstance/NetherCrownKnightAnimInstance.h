@@ -12,13 +12,19 @@ class NETHERCROWN_API UNetherCrownKnightAnimInstance : public UNetherCrownCharac
 	GENERATED_BODY()
 
 	DECLARE_MULTICAST_DELEGATE(FOnHitSkyFallSlashSkill);
+	DECLARE_MULTICAST_DELEGATE(FOnHitFrozenTempestSkill);
 
 public:
 	UFUNCTION()
 	void AnimNotify_HitSkyFallSlashSkill();
 
+	UFUNCTION()
+	void AnimNotify_HitFrozenTempestSkill();
+
 	FOnHitSkyFallSlashSkill& GetOnHitSkyFallSlashSkill() { return OnHitSkyFallSlashSkill; }
+	FOnHitFrozenTempestSkill& GetOnHitFrozenTempestSkill() { return OnHitFrozenTempestSkill; }
 
 private:
 	FOnHitSkyFallSlashSkill OnHitSkyFallSlashSkill;
+	FOnHitFrozenTempestSkill OnHitFrozenTempestSkill;
 };

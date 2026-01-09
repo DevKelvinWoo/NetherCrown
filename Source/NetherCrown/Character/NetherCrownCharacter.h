@@ -59,6 +59,7 @@ public:
 	UNetherCrownSkillComponent* GetSkillComponent() const { return NetherCrownSkillComponent; }
 
 	void SetSpringArmZOffset(float InSpringArmZOffset) const;
+	void SetSpringArmLength(float InSpringArmLength) const;
 
 protected:
 	virtual void BeginPlay() override;
