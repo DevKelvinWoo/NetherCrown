@@ -36,6 +36,8 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	void InitLoadData();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
 
@@ -45,6 +47,14 @@ private:
 	void ClearCrowdControl();
 
 	void PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
+
+	FTimerHandle FrozenTargetOverlayMaterialEndTimerHandle{};
+	void StartFrozenTargetOverlayMaterialEndTimer();
+	void ApplyFrozenTargetOverlayEndMaterial();
+	float FrozenTargetOverlayMaterialElapsedTime{ 0.f };
+
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> CachedFrozenTargetOverlayMaterialEndCurveFloat{};
 
 	FTimerHandle CrowdControlTimerHandle{};
 

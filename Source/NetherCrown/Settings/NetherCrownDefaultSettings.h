@@ -7,6 +7,7 @@
 #include "NetherCrownDefaultSettings.generated.h"
 
 class UDataTable;
+class UCurveFloat;
 
 UCLASS(config = Game, defaultconfig, meta = (DisplayName = "NetherCrown Default Settings"))
 class NETHERCROWN_API UNetherCrownDefaultSettings : public UDeveloperSettings
@@ -31,4 +32,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere)
 	float FrozenTempestTargetMaterialAlpha{ 0.85f };
+
+	UPROPERTY(Config, EditAnywhere)
+	TSoftObjectPtr<UCurveFloat> TargetOverlayMaterialEndCurveFloatSoft{};
 };
