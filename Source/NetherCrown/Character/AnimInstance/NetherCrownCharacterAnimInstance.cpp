@@ -178,8 +178,3 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementWalk()
 
 	CharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
 }
-
-void UNetherCrownCharacterAnimInstance::AnimNotify_SkillCameraShake()
-{
-
-}

@@ -23,6 +23,12 @@ private:
 	void StartSkillCameraZoomCurveTimer();
 	void ApplySkillCameraZoomCurveFloat();
 
+	void StartCharacterOverlayMaterialStartTimer();
+	void ApplyCharacterOverlayStartMaterial();
+
+	void StartCharacterOverlayMaterialEndTimer();
+	void ApplyCharacterOverlayEndMaterial();
+
 	void HandleOnHitFrozenTempestSkill();
 
 	void PlayChargeCameraShake();
@@ -31,6 +37,18 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UCurveVector> SkillCameraZoomCurveVectorSoft{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UCurveFloat> CharacterOverlayMaterialStartCurveFloatSoft{};
+
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> CachedCharacterOverlayMaterialStartCurveFloat{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UCurveFloat> CharacterOverlayMaterialEndCurveFloatSoft{};
+
+	UPROPERTY()
+	TObjectPtr<UCurveFloat> CachedCharacterOverlayMaterialEndCurveFloat{};
 
 	UPROPERTY()
 	TObjectPtr<UCurveVector> CachedSkillCameraZoomCurveVector{};
@@ -43,6 +61,10 @@ private:
 
 	FTimerHandle SkillCameraZoomCurveTimerHandle{};
 	float SkillCameraZoomCurveElapsedTime{ 0.f };
+
+	FTimerHandle CharacterOverlayMaterialStartTimerHandle{};
+	FTimerHandle CharacterOverlayMaterialEndTimerHandle{};
+	float CharacterOverlayMaterialElapsedTime{ 0.f };
 
 	UPROPERTY(EditDefaultsOnly)
 	float SkillDetectingSphereRadius{ 500.f };

@@ -7,6 +7,7 @@
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 
 void UNetherCrownFrozenTempest::InitSkillObject()
 {
@@ -33,6 +34,8 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 	{
 		CachedSkillCameraZoomCurveVector = SkillCameraZoomCurveVectorSoft.LoadSynchronous();
 		CachedFrozenTempestTargetOverlayMaterial = FrozenTempestTargetOverlayMaterialSoft.LoadSynchronous();
+		CachedCharacterOverlayMaterialStartCurveFloat = CharacterOverlayMaterialStartCurveFloatSoft.LoadSynchronous();
+		CachedCharacterOverlayMaterialEndCurveFloat = CharacterOverlayMaterialEndCurveFloatSoft.LoadSynchronous();
 	}
 }
 
@@ -57,6 +60,7 @@ void UNetherCrownFrozenTempest::PlaySkillCosmetics()
 	}
 
 	StartSkillCameraZoomCurveTimer();
+	StartCharacterOverlayMaterialStartTimer();
 	PlayChargeCameraShake();
 }
 
@@ -105,6 +109,124 @@ void UNetherCrownFrozenTempest::ApplySkillCameraZoomCurveFloat()
 	SkillOwnerCharacter->SetSpringArmZOffset(SkillCameraZoomCurveFloatValue.Z);
 }
 
+void UNetherCrownFrozenTempest::StartCharacterOverlayMaterialStartTimer()
+{
+	const UWorld* World{ GetWorld() };
+	check(World);
+
+	CharacterOverlayMaterialElapsedTime = 0.f;
+
+	World->GetTimerManager().SetTimer(CharacterOverlayMaterialStartTimerHandle, this, &ThisClass::ApplyCharacterOverlayStartMaterial, 0.01f, true, 0.f);
+}
+
+void UNetherCrownFrozenTempest::ApplyCharacterOverlayStartMaterial()
+{
+	const UWorld* World{ GetWorld() };
+	check(World);
+
+	if (!ensureAlways(IsValid(CachedCharacterOverlayMaterialStartCurveFloat)))
+	{
+		World->GetTimerManager().ClearTimer(CharacterOverlayMaterialStartTimerHandle);
+		return;
+	}
+
+	CharacterOverlayMaterialElapsedTime += 0.01f;
+
+	float Min{};
+	float Max{};
+	CachedCharacterOverlayMaterialStartCurveFloat->GetTimeRange(Min, Max);
+
+	if (CharacterOverlayMaterialElapsedTime > Max)
+	{
+		World->GetTimerManager().ClearTimer(CharacterOverlayMaterialStartTimerHandle);
+		return;
+	}
+
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		World->GetTimerManager().ClearTimer(CharacterOverlayMaterialStartTimerHandle);
+		return;
+	}
+
+	UMaterialInstanceDynamic* DMI{ UMaterialInstanceDynamic::Create(CachedFrozenTempestTargetOverlayMaterial, SkillOwnerCharacter) };
+	if (!IsValid(DMI))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ApplyCharacterOverlayMaterial - UMaterialInstanceDynamic::Create failed"));
+		return;
+	}
+
+	USkeletalMeshComponent* SkillOwnerMeshComponent{ SkillOwnerCharacter->GetMesh() };
+	check(SkillOwnerMeshComponent);
+
+	SkillOwnerMeshComponent->SetOverlayMaterial(DMI);
+
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
+	const float CharacterOverlayMaterialAlpha{ CachedCharacterOverlayMaterialStartCurveFloat->GetFloatValue(CharacterOverlayMaterialElapsedTime) };
+	DMI->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
+}
+
+void UNetherCrownFrozenTempest::StartCharacterOverlayMaterialEndTimer()
+{
+	const UWorld* World{ GetWorld() };
+	check(World);
+
+	CharacterOverlayMaterialElapsedTime = 0.f;
+
+	World->GetTimerManager().SetTimer(CharacterOverlayMaterialEndTimerHandle, this, &ThisClass::ApplyCharacterOverlayEndMaterial, 0.01f, true, 0.f);
+}
+
+void UNetherCrownFrozenTempest::ApplyCharacterOverlayEndMaterial()
+{
+	const UWorld* World{ GetWorld() };
+	check(World);
+
+	if (!ensureAlways(IsValid(CachedCharacterOverlayMaterialEndCurveFloat)))
+	{
+		World->GetTimerManager().ClearTimer(CharacterOverlayMaterialEndTimerHandle);
+		return;
+	}
+
+	CharacterOverlayMaterialElapsedTime += 0.01f;
+
+	float Min{};
+	float Max{};
+	CachedCharacterOverlayMaterialEndCurveFloat->GetTimeRange(Min, Max);
+
+	if (CharacterOverlayMaterialElapsedTime > Max)
+	{
+		World->GetTimerManager().ClearTimer(CharacterOverlayMaterialEndTimerHandle);
+		return;
+	}
+
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		World->GetTimerManager().ClearTimer(CharacterOverlayMaterialEndTimerHandle);
+		return;
+	}
+
+	USkeletalMeshComponent* SkillOwnerMeshComponent{ SkillOwnerCharacter->GetMesh() };
+	check(SkillOwnerMeshComponent);
+
+	UMaterialInstanceDynamic* Dynm = Cast<UMaterialInstanceDynamic>(SkillOwnerMeshComponent->GetOverlayMaterial());
+	if (!IsValid(Dynm))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ApplyCharacterOverlayEndMaterial - Cannot cast dynamic material"));
+		return;
+	}
+
+	SkillOwnerMeshComponent->SetOverlayMaterial(Dynm);
+
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
+	const float CharacterOverlayMaterialAlpha{ CachedCharacterOverlayMaterialEndCurveFloat->GetFloatValue(CharacterOverlayMaterialElapsedTime) };
+	Dynm->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
+}
+
 void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
@@ -123,6 +245,11 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 		}
 
 		CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
+	}
+
+	if (!SkillOwnerCharacter->HasAuthority())
+	{
+		StartCharacterOverlayMaterialEndTimer();
 	}
 
 	const TArray<ANetherCrownEnemy*> DetectedEnemies{ GetSkillDetectedTargets() };
