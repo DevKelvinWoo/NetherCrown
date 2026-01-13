@@ -207,18 +207,18 @@ void UNetherCrownCrowdControlComponent::ApplyFrozenTargetOverlayEndMaterial()
 	USkeletalMeshComponent* MeshComponent{ OwnerCharacter->GetMesh() };
 	check(MeshComponent);
 
-	UMaterialInstanceDynamic* Dynm = Cast<UMaterialInstanceDynamic>(MeshComponent->GetOverlayMaterial());
-	if (!IsValid(Dynm))
+	UMaterialInstanceDynamic* DynamicOverlayMaterial = Cast<UMaterialInstanceDynamic>(MeshComponent->GetOverlayMaterial());
+	if (!IsValid(DynamicOverlayMaterial))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ApplyCharacterOverlayEndMaterial - Cannot cast dynamic material"));
 		return;
 	}
 
-	MeshComponent->SetOverlayMaterial(Dynm);
+	MeshComponent->SetOverlayMaterial(DynamicOverlayMaterial);
 
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
 	const float CharacterOverlayMaterialAlpha{ CachedFrozenTargetOverlayMaterialEndCurveFloat->GetFloatValue(FrozenTargetOverlayMaterialElapsedTime) };
-	Dynm->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
+	DynamicOverlayMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
 }

@@ -6,6 +6,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
+#include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 
@@ -211,20 +212,20 @@ void UNetherCrownFrozenTempest::ApplyCharacterOverlayEndMaterial()
 	USkeletalMeshComponent* SkillOwnerMeshComponent{ SkillOwnerCharacter->GetMesh() };
 	check(SkillOwnerMeshComponent);
 
-	UMaterialInstanceDynamic* Dynm = Cast<UMaterialInstanceDynamic>(SkillOwnerMeshComponent->GetOverlayMaterial());
-	if (!IsValid(Dynm))
+	UMaterialInstanceDynamic* DynamicOverlayMaterial = Cast<UMaterialInstanceDynamic>(SkillOwnerMeshComponent->GetOverlayMaterial());
+	if (!IsValid(DynamicOverlayMaterial))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ApplyCharacterOverlayEndMaterial - Cannot cast dynamic material"));
 		return;
 	}
 
-	SkillOwnerMeshComponent->SetOverlayMaterial(Dynm);
+	SkillOwnerMeshComponent->SetOverlayMaterial(DynamicOverlayMaterial);
 
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
 	const float CharacterOverlayMaterialAlpha{ CachedCharacterOverlayMaterialEndCurveFloat->GetFloatValue(CharacterOverlayMaterialElapsedTime) };
-	Dynm->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
+	DynamicOverlayMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
 }
 
 void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
@@ -245,6 +246,14 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 		}
 
 		CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
+
+		UNetherCrownControlPPComponent* ControlPPComponent{ SkillOwnerCharacter->GetControlPPComponent() };
+		if (!ensureAlways(IsValid(ControlPPComponent)))
+		{
+			return;
+		}
+
+		ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::Frozen, SkillDuration);
 	}
 
 	if (!SkillOwnerCharacter->HasAuthority())

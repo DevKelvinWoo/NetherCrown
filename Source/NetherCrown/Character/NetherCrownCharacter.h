@@ -8,9 +8,11 @@
 #include "InputActionValue.h"
 #include "NetherCrownCharacter.generated.h"
 
+class UNetherCrownControlPPComponent;
 class UNetherCrownCrowdControlComponent;
 class USpringArmComponent;
 class UCameraComponent;
+class UPostProcessComponent;
 
 class UNetherCrownBasicAttackComponent;
 class UNetherCrownEquipComponent;
@@ -57,6 +59,7 @@ public:
 	UNetherCrownBasicAttackComponent* GetBasicAttackComponent() const { return NetherCrownBasicAttackComponent; }
 	UNetherCrownEquipComponent* GetEquipComponent() const { return NetherCrownEquipComponent; }
 	UNetherCrownSkillComponent* GetSkillComponent() const { return NetherCrownSkillComponent; }
+	UNetherCrownControlPPComponent* GetControlPPComponent() const { return NetherCrownControlPPComponent; }
 
 	void SetSpringArmZOffset(float InSpringArmZOffset) const;
 	void SetSpringArmLength(float InSpringArmLength) const;
@@ -101,6 +104,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNetherCrownCrowdControlComponent> NetherCrownCrowdControlComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UPostProcessComponent> NetherCrownPostProcessComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownControlPPComponent> NetherCrownControlPPComponent{};
 
 	UPROPERTY(Replicated)
 	bool bPressedMoveKey{ false };

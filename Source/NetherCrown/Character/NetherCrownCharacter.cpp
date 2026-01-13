@@ -3,11 +3,13 @@
 #include "NetherCrownCharacter.h"
 
 #include "Camera/CameraComponent.h"
+#include "Components/PostProcessComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
+#include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
@@ -41,6 +43,8 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownEquipComponent = CreateDefaultSubobject<UNetherCrownEquipComponent>(TEXT("EquipComponent"));
 	NetherCrownSkillComponent = CreateDefaultSubobject<UNetherCrownSkillComponent>(TEXT("SkillComponent"));
 	NetherCrownCrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
+	NetherCrownPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
+	NetherCrownControlPPComponent = CreateDefaultSubobject<UNetherCrownControlPPComponent>(TEXT("ControlPPComponent"));
 }
 
 void ANetherCrownCharacter::SetSpringArmZOffset(float InSpringArmZOffset) const
@@ -67,6 +71,9 @@ void ANetherCrownCharacter::BeginPlay()
 
 	check(NetherCrownSkillComponent);
 	NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetEnableCharacterControl);
+
+	check(NetherCrownControlPPComponent);
+	NetherCrownControlPPComponent->SetHandlingPostProcessComponent(NetherCrownPostProcessComponent);
 }
 
 void ANetherCrownCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
