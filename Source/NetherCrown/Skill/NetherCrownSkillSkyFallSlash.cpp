@@ -8,6 +8,7 @@
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 
 #define DEBUG_SPHERE 0
 
@@ -34,8 +35,11 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 
 	CreateArmMaterialInstanceDynamic();
 
-	CachedSkillArmMaterialCurveFloat = SkillArmMaterialCurveFloatSoft.LoadSynchronous();
-	CachedSkillCameraCurveFloat = SkillCameraCurveFloatSoft.LoadSynchronous();
+	if (!SkillOwnerCharacter->HasAuthority())
+	{
+		CachedSkillArmMaterialCurveFloat = SkillArmMaterialCurveFloatSoft.LoadSynchronous();
+		CachedSkillCameraCurveFloat = SkillCameraCurveFloatSoft.LoadSynchronous();
+	}
 }
 
 void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay()
@@ -50,6 +54,18 @@ void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics()
 	Super::PlaySkillCosmetics();
 
 	//@NOTE : Only cometics logic (all client)
+
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	StartSkillCameraCurveTimer();
 	StartSkillArmMaterialParameterCurveTimer();
 }
@@ -122,8 +138,11 @@ void UNetherCrownSkillSkyFallSlash::ApplySkillArmMaterialParameterCurveFloat()
 		return;
 	}
 
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
 	const float ArmMaterialCurveFloatValue{ CachedSkillArmMaterialCurveFloat->GetFloatValue(SkillArmMaterialCurveElapsedTime) };
-	ArmMaterialInstanceDynamic->SetScalarParameterValue(ArmMaterialScalarParameterName, ArmMaterialCurveFloatValue);
+	ArmMaterialInstanceDynamic->SetScalarParameterValue(DefaultSettings->SkyFallSlashArmMaterialParam, ArmMaterialCurveFloatValue);
 }
 
 void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()

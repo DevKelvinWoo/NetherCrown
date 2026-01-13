@@ -29,6 +29,7 @@ public:
 
 	//@NOTE : CC Implements
 	void KnockBack(const FVector& KnockBackVector) const;
+	void Frozen(int32 DurationTime) const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -37,6 +38,9 @@ protected:
 private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ClearCrowdControl_Cosmetics();
 
 	void ClearCrowdControl();
 

@@ -12,8 +12,6 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 {
 	Super::InitSkillObject();
 
-	CachedSkillCameraZoomCurveVector = SkillCameraZoomCurveVectorSoft.LoadSynchronous();
-
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
@@ -29,7 +27,14 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 	}
 
 	NetherCrownKnightAnimInstance->GetOnHitFrozenTempestSkill().RemoveAll(this);
-	NetherCrownKnightAnimInstance->GetOnHitFrozenTempestSkill().AddUObject(this, &ThisClass::HandleOnHitFrozenTempestSkill);}
+	NetherCrownKnightAnimInstance->GetOnHitFrozenTempestSkill().AddUObject(this, &ThisClass::HandleOnHitFrozenTempestSkill);
+
+	if (!SkillOwnerCharacter->HasAuthority())
+	{
+		CachedSkillCameraZoomCurveVector = SkillCameraZoomCurveVectorSoft.LoadSynchronous();
+		CachedFrozenTempestTargetOverlayMaterial = FrozenTempestTargetOverlayMaterialSoft.LoadSynchronous();
+	}
+}
 
 void UNetherCrownFrozenTempest::ExecuteSkillGameplay()
 {
@@ -40,7 +45,19 @@ void UNetherCrownFrozenTempest::PlaySkillCosmetics()
 {
 	Super::PlaySkillCosmetics();
 
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	StartSkillCameraZoomCurveTimer();
+	PlayChargeCameraShake();
 }
 
 void UNetherCrownFrozenTempest::StartSkillCameraZoomCurveTimer()
@@ -108,13 +125,57 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 		CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
 	}
 
-	if (!SkillOwnerCharacter->HasAuthority())
+	const TArray<ANetherCrownEnemy*> DetectedEnemies{ GetSkillDetectedTargets() };
+	if (DetectedEnemies.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("HandleOnHitFrozenTempestSkill - DetectedActors is empty"));
+		return;
+	}
+
+	for (ANetherCrownEnemy* DetectedEnemy : DetectedEnemies)
+	{
+		if (SkillOwnerCharacter->HasAuthority())
+		{
+			DetectedEnemy->ApplyCrowdControl(ENetherCrownCrowdControlType::FROZEN, SkillDuration);
+			continue;
+		}
+
+		const UNetherCrownCrowdControlComponent* CrowdControlComponent{ DetectedEnemy->GetCrowdControlComponent() };
+		if (IsValid(CrowdControlComponent))
+		{
+			if (IsValid(CachedFrozenTempestTargetOverlayMaterial))
+			{
+				USkeletalMeshComponent* DetectedEnemyMesh{ DetectedEnemy->GetMesh() };
+				check(DetectedEnemyMesh);
+
+				DetectedEnemyMesh->SetOverlayMaterial(CachedFrozenTempestTargetOverlayMaterial);
+			}
+
+			CrowdControlComponent->Frozen(SkillDuration);
+		}
+	}
+}
+
+void UNetherCrownFrozenTempest::PlayChargeCameraShake()
+{
+	const ANetherCrownCharacter* SKillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SKillOwnerCharacter)))
 	{
 		return;
 	}
 
-	TArray<ANetherCrownEnemy*> DetectedEnemies{ GetSkillDetectedTargets() };
-	//@TODO : 나온 Enemies들로 Material 적용, 움직임 막기, 애니메이션 stop 진행
+	if (!SKillOwnerCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(SKillOwnerCharacter->GetController()) };
+	check(PlayerController);
+
+	APlayerCameraManager* PlayerCameraManager{ PlayerController->PlayerCameraManager };
+	check(PlayerCameraManager);
+
+	PlayerCameraManager->StartCameraShake(SKillChargeCameraShakeBaseClass);
 }
 
 const TArray<ANetherCrownEnemy*> UNetherCrownFrozenTempest::GetSkillDetectedTargets() const
@@ -131,6 +192,10 @@ const TArray<ANetherCrownEnemy*> UNetherCrownFrozenTempest::GetSkillDetectedTarg
 	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn) };
 	const bool bDetectEnemy{ UKismetSystemLibrary::SphereOverlapActors(this, SkillOwnerCharacterLocation,
 		SkillDetectingSphereRadius, ObjectTypes, ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors) };
+
+#if 0
+	UKismetSystemLibrary::DrawDebugSphere(this, SkillOwnerCharacterLocation, SkillDetectingSphereRadius, 16, FColor::Red, 10.f);
+#endif
 
 	if (!bDetectEnemy)
 	{

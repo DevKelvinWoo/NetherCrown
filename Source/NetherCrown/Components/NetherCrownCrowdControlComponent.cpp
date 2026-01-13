@@ -4,6 +4,7 @@
 
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 
 UNetherCrownCrowdControlComponent::UNetherCrownCrowdControlComponent()
 {
@@ -36,7 +37,7 @@ void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrow
 
 	Multicast_PlayCrowdControlAnim(InCrowdControlType);
 
-	UWorld* World{ GetWorld() };
+	const UWorld* World{ GetWorld() };
 	check(World);
 
 	World->GetTimerManager().SetTimer(CrowdControlTimerHandle, this, &ThisClass::ClearCrowdControl, DurationTime, false);
@@ -53,8 +54,49 @@ void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector
 	OwnerCharacter->LaunchCharacter(KnockBackVector, true, true);
 }
 
+void UNetherCrownCrowdControlComponent::Frozen(int32 DurationTime) const
+{
+	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+	USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
+	UMaterialInterface* MaterialInterface{ SkeletalMeshComponent ? SkeletalMeshComponent->GetOverlayMaterial() : nullptr };
+	if (!ensureAlways(IsValid(MaterialInterface)))
+	{
+		return;
+	}
+
+	UMaterialInstanceDynamic* DMI{ UMaterialInstanceDynamic::Create(MaterialInterface, OwnerCharacter) };
+	if (!ensureAlways(IsValid(DMI)))
+	{
+		return;
+	}
+
+	SkeletalMeshComponent->bPauseAnims = true;
+	SkeletalMeshComponent->SetOverlayMaterial(DMI);
+
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
+	DMI->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, DefaultSettings->FrozenTempestTargetMaterialAlpha);
+}
+
+void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Implementation()
+{
+	if (CrowdControlType == ENetherCrownCrowdControlType::FROZEN)
+	{
+		ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+		USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
+		if (IsValid(SkeletalMeshComponent))
+		{
+			SkeletalMeshComponent->bPauseAnims = false;
+			SkeletalMeshComponent->SetOverlayMaterial(nullptr);
+		}
+	}
+}
+
 void UNetherCrownCrowdControlComponent::ClearCrowdControl()
 {
+	Multicast_ClearCrowdControl_Cosmetics();
+
 	CrowdControlType = ENetherCrownCrowdControlType::NONE;
 }
 
@@ -71,8 +113,13 @@ void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownC
 	}
 
 	TSoftObjectPtr<UAnimMontage>* CrowdControlAnimMontageSoft{ CrowdControlAnimMap.Find(InCrowdControlType) };
+	if (!CrowdControlAnimMontageSoft)
+	{
+		return;
+	}
+
 	UAnimMontage* FoundCrowdControlAnimMontage{ CrowdControlAnimMontageSoft->LoadSynchronous() };
-	if (!ensureAlways(IsValid(FoundCrowdControlAnimMontage)))
+	if (!(IsValid(FoundCrowdControlAnimMontage)))
 	{
 		return;
 	}

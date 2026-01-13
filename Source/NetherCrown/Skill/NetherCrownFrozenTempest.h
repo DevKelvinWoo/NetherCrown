@@ -25,6 +25,8 @@ private:
 
 	void HandleOnHitFrozenTempestSkill();
 
+	void PlayChargeCameraShake();
+
 	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;
 
 	UPROPERTY(EditDefaultsOnly)
@@ -36,8 +38,21 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<UCameraShakeBase> SKillChargeCameraShakeBaseClass{};
+
 	FTimerHandle SkillCameraZoomCurveTimerHandle{};
 	float SkillCameraZoomCurveElapsedTime{ 0.f };
 
-	const float SkillDetectingSphereRadius{ 500.f };
+	UPROPERTY(EditDefaultsOnly)
+	float SkillDetectingSphereRadius{ 500.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillDuration{ 3.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UMaterialInterface> FrozenTempestTargetOverlayMaterialSoft{};
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInterface> CachedFrozenTempestTargetOverlayMaterial{};
 };

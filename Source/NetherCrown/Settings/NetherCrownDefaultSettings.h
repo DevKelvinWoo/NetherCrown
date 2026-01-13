@@ -22,4 +22,13 @@ public:
 
 	UPROPERTY(Config, EditAnywhere)
 	TSoftObjectPtr<UDataTable> EffectDT;
+
+	UPROPERTY(Config, EditAnywhere)
+	FName FrozenTempestTargetMaterialParam{ TEXT("_VfxMix") };
+
+	UPROPERTY(Config, EditAnywhere)
+	FName SkyFallSlashArmMaterialParam{ TEXT("SkyFallSlashAlpha") };
+
+	UPROPERTY(Config, EditAnywhere)
+	float FrozenTempestTargetMaterialAlpha{ 0.85f };
 };
