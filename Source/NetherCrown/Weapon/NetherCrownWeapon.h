@@ -5,12 +5,15 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
+#include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrownWeapon.generated.h"
 
+class UNiagaraSystem;
 class UNetherCrownWeaponTraceComponent;
 class UBoxComponent;
 class USphereComponent;
 class USkeletalMeshComponent;
+class UNiagaraComponent;
 
 class UNetherCrownWeaponData;
 
@@ -46,6 +49,8 @@ public:
 
 	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 
+	void ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -75,4 +80,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownWeaponTagData WeaponTagData{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraComponent> WeaponAuraNiagaraComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>> WeaponAuraMap{};
 };

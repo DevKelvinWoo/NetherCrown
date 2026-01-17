@@ -25,6 +25,8 @@ public:
 
 	bool CanActiveSkill() const;
 
+	ENetherCrownSkillKeyEnum GetActiveSkillKeyEnum() const { return ActiveSkillKeyEnum; }
+
 protected:
 	virtual void BeginPlay() override;
 

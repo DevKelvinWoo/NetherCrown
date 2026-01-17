@@ -3,12 +3,14 @@
 #include "NetherCrownWeapon.h"
 
 #include "NetherCrownWeaponTraceComponent.h"
+#include "NiagaraComponent.h"
 #include "Components/SphereComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
+#include "NiagaraSystem.h"
 
 ANetherCrownWeapon::ANetherCrownWeapon()
 {
@@ -23,6 +25,9 @@ ANetherCrownWeapon::ANetherCrownWeapon()
 	WeaponEquipSphereComponent->SetupAttachment(RootComponent);
 
 	WeaponTraceComponent = CreateDefaultSubobject<UNetherCrownWeaponTraceComponent>(TEXT("WeaponTraceComponent"));
+
+	WeaponAuraNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponAuraNiagaraComponent"));
+	WeaponAuraNiagaraComponent->SetupAttachment(WeaponMeshComponent);
 
 	bNetLoadOnClient = true;
 	bReplicates = true;
@@ -44,6 +49,42 @@ void ANetherCrownWeapon::InitWeaponTraceComponentSettings() const
 
 	const FName& TraceSocketName = CharacterDefaultSettings->WeaponTraceSocketName;
 	WeaponTraceComponent->InitWeaponTraceComponentSettings(WeaponMeshComponent->GetSocketLocation(TraceSocketName));
+}
+
+void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const
+{
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	if (OwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	check(WeaponAuraNiagaraComponent);
+
+	if (SkillKeyEnum == ENetherCrownSkillKeyEnum::None || !bActive)
+	{
+		WeaponAuraNiagaraComponent->SetAsset(nullptr);
+		WeaponAuraNiagaraComponent->Deactivate();
+
+		return;
+	}
+
+	UNiagaraSystem* FoundWeaponAuraNiagaraSystem{ WeaponAuraMap.Find(SkillKeyEnum)->LoadSynchronous() };
+	if (!ensureAlways(FoundWeaponAuraNiagaraSystem))
+	{
+		return;
+	}
+
+	if (bActive)
+	{
+		WeaponAuraNiagaraComponent->SetAsset(FoundWeaponAuraNiagaraSystem);
+		WeaponAuraNiagaraComponent->Activate();
+	}
 }
 
 void ANetherCrownWeapon::BeginPlay()
