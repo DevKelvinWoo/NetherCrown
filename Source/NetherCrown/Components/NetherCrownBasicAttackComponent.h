@@ -60,6 +60,11 @@ private:
 	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
 
 	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_AutoTargetEnemy();
+
+	void AutoTargetEnemy() const;
+
+	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAndJumpToComboMontageSection(const FName& SectionName);
 
 	UFUNCTION(Server, Reliable)

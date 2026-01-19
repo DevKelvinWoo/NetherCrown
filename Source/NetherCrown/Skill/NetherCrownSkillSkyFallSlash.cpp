@@ -9,6 +9,7 @@
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
+#include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
 #define DEBUG_SPHERE 0
 
@@ -214,7 +215,7 @@ const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetected
 	const FVector& DetectSphereLocationOffset{ SkillOwnerCharacterForwardVector * SkillDetectingSphereRadius / 2.f };
 	DetectSphereLocation = SkillOwnerCharacterLocation + DetectSphereLocationOffset;
 
-	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn) };
+	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECC_Enemy) };
 	const bool bDetectEnemy{ UKismetSystemLibrary::SphereOverlapActors(this, DetectSphereLocation,
 		SkillDetectingSphereRadius, ObjectTypes, ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors) };
 

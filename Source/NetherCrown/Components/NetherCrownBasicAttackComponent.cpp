@@ -6,11 +6,14 @@
 #include "NetherCrownPlayerStatComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
+#include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
+#include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
@@ -35,6 +38,8 @@ void UNetherCrownBasicAttackComponent::BeginPlay()
 
 void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 {
+	AutoTargetEnemy();
+
 	Server_RequestBasicAttack();
 }
 
@@ -44,6 +49,8 @@ void UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Implementation(
 	{
 		return;
 	}
+
+	Multicast_AutoTargetEnemy();
 
 	if (bCanQueueNextCombo)
 	{
@@ -130,6 +137,54 @@ void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool b
 
 	EquippedWeapon->SetWeaponHitTraceEnable(bEnable);
 	EquippedWeapon->InitWeaponTraceComponentSettings();
+}
+
+void UNetherCrownBasicAttackComponent::Multicast_AutoTargetEnemy_Implementation()
+{
+	AutoTargetEnemy();
+}
+
+void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
+{
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	TArray<AActor*> OverlappedActors{};
+	constexpr float SphereRadius{ 130.0f };
+
+	const TArray<TEnumAsByte<EObjectTypeQuery>>& EnemyTypes{ UEngineTypes::ConvertToObjectType(ECC_Enemy) };
+	UKismetSystemLibrary::SphereOverlapActors(this, OwnerCharacter->GetActorLocation(), SphereRadius, EnemyTypes,
+		ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors);
+
+	if (OverlappedActors.IsEmpty())
+	{
+		return;
+	}
+
+	AActor* AutoTargetActor{};
+	for (AActor* OverlappedActor : OverlappedActors)
+	{
+		if (IsValid(AutoTargetActor))
+		{
+			const double DistanceToOverlappedActor{ UKismetMathLibrary::Distance2D(FVector2D(OwnerCharacter->GetActorLocation() ), FVector2D(OverlappedActor->GetActorLocation())) };
+			const double DistanceToAutoTargetActor{ UKismetMathLibrary::Distance2D(FVector2D(OwnerCharacter->GetActorLocation() ), FVector2D(AutoTargetActor->GetActorLocation())) };
+
+			if (DistanceToOverlappedActor < DistanceToAutoTargetActor)
+			{
+				AutoTargetActor = OverlappedActor;
+			}
+		}
+		else
+		{
+			AutoTargetActor = OverlappedActor;
+		}
+	}
+
+	const FRotator& AutoTargetRotation{ UKismetMathLibrary::FindLookAtRotation(OwnerCharacter->GetActorLocation(), AutoTargetActor->GetActorLocation()) };
+	OwnerCharacter->SetActorRotation(AutoTargetRotation);
 }
 
 void UNetherCrownBasicAttackComponent::Server_ApplyDamageToHitEnemy_Implementation(AActor* HitEnemy)
