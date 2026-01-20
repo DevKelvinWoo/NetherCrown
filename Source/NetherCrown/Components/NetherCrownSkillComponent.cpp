@@ -20,6 +20,7 @@ UNetherCrownSkillComponent::UNetherCrownSkillComponent()
 
 void UNetherCrownSkillComponent::ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
+	ActiveSkillKeyEnum = SkillKeyEnum;
 	Server_ActiveSkill(SkillKeyEnum);
 }
 
