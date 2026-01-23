@@ -329,3 +329,22 @@ void ANetherCrownCharacter::ActiveRSkill(const FInputActionValue& Value)
 		}
 	}
 }
+
+void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value)
+{
+	if (Value.IsNonZero())
+	{
+		const bool bActiveShiftSkillInput{ Value.Get<bool>() };
+		if (bActiveShiftSkillInput)
+		{
+			check(NetherCrownSkillComponent);
+			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::ShiftSkill);
+		}
+	}
+}
+
+bool ANetherCrownCharacter::IsEquippedWeapon() const
+{
+	check(NetherCrownEquipComponent);
+	return NetherCrownEquipComponent->GetEquippedWeapon() ? true : false;
+}

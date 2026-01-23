@@ -49,12 +49,16 @@ public:
 	void ActiveQSkill(const FInputActionValue& Value);
 	void ActiveESkill(const FInputActionValue& Value);
 	void ActiveRSkill(const FInputActionValue& Value);
+	void ActiveShiftSkill(const FInputActionValue& Value);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}
 
 	UFUNCTION(BlueprintCallable)
 	bool IsHardLanding() const { return bIsHardLanding; }
+
+	UFUNCTION(BlueprintCallable)
+	bool IsEquippedWeapon() const;
 
 	UNetherCrownBasicAttackComponent* GetBasicAttackComponent() const { return NetherCrownBasicAttackComponent; }
 	UNetherCrownEquipComponent* GetEquipComponent() const { return NetherCrownEquipComponent; }

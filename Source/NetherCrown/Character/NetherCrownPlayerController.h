@@ -40,6 +40,8 @@ private:
 	TObjectPtr<UInputAction> ESkillAction{};
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputAction> RSkillAction{};
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UInputAction> ShiftSkillAction{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UInputMappingContext> MappingContext{};
@@ -66,4 +68,6 @@ private:
 	void ActiveESkill(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void ActiveRSkill(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void ActiveShiftSkill(const FInputActionValue& InActionValue);
 };
