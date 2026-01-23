@@ -27,15 +27,15 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	MainSpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("MainSpringArmComponent"));
 	MainSpringArmComponent->SetupAttachment(RootComponent);
 	MainSpringArmComponent->bUsePawnControlRotation = true;
-	MainSpringArmComponent->TargetArmLength = 435.f;
-	MainSpringArmComponent->TargetOffset = FVector(0.f, 0.f, 200.f);
+	MainSpringArmComponent->TargetArmLength = 535.f;
+	MainSpringArmComponent->TargetOffset = FVector(0.f, 0.f, 180.f);
 	MainSpringArmComponent->bEnableCameraLag = true;
 	MainSpringArmComponent->CameraLagSpeed = 7.f;
 
 	MainCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("MainCameraComponent"));
 	MainCameraComponent->SetupAttachment(MainSpringArmComponent);
 	MainCameraComponent->bUsePawnControlRotation = false;
-	MainCameraComponent->SetRelativeRotation(FRotator(-25.f, 0.f, 0.f));
+	MainCameraComponent->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
 
 	SetCharacterDefaultMovementValues();
 
