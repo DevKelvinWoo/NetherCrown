@@ -20,7 +20,6 @@ UNetherCrownSkillComponent::UNetherCrownSkillComponent()
 
 void UNetherCrownSkillComponent::ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
-	ActiveSkillKeyEnum = SkillKeyEnum;
 	Server_ActiveSkill(SkillKeyEnum);
 }
 
@@ -155,7 +154,7 @@ void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENether
 		return;
 	}
 
-	ActiveSkillKeyEnum = SkillKeyEnum;
+	Multicast_SetActiveSkillKeyEnum(SkillKeyEnum);
 
 	FoundSkillObject->ExecuteSkillGameplay();
 	Multicast_PlaySkillCosmetics(FoundSkillObject);
@@ -164,6 +163,12 @@ void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENether
 void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNetherCrownSkillObject* FoundSkillObject)
 {
 	FoundSkillObject->PlaySkillCosmetics();
+}
+
+void UNetherCrownSkillComponent::Multicast_SetActiveSkillKeyEnum_Implementation(
+	const ENetherCrownSkillKeyEnum SkillKeyEnum)
+{
+	ActiveSkillKeyEnum = SkillKeyEnum;
 }
 
 void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()

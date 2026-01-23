@@ -42,6 +42,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillCosmetics(UNetherCrownSkillObject* FoundSkillObject);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetActiveSkillKeyEnum(const ENetherCrownSkillKeyEnum SkillKeyEnum);
+
 	UFUNCTION()
 	void OnRep_ReplicatedSkillObjects();
 
