@@ -9,6 +9,7 @@
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
+#include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
 void UNetherCrownFrozenTempest::InitSkillObject()
 {
@@ -325,7 +326,7 @@ const TArray<ANetherCrownEnemy*> UNetherCrownFrozenTempest::GetSkillDetectedTarg
 	const FVector& SkillOwnerCharacterLocation{ SkillOwnerCharacter->GetActorLocation() };
 
 	TArray<AActor*> OverlappedActors{};
-	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn) };
+	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECC_Enemy) };
 	const bool bDetectEnemy{ UKismetSystemLibrary::SphereOverlapActors(this, SkillOwnerCharacterLocation,
 		SkillDetectingSphereRadius, ObjectTypes, ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors) };
 

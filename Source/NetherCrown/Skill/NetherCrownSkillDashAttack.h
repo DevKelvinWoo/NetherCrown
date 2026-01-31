@@ -16,7 +16,41 @@ protected:
 	virtual void ExecuteSkillGameplay() override;
 
 private:
-	void DashOwnerCharacter() const;
+	TArray<AActor*> DetectDashAttackTargets() const;
 
-	const float DashVelocity{ 1000.f };
+	void StartDashAttackTimer();
+	void DashAttackToTargets();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetOwnerCharacterRotToTarget(const FRotator& InTargetRot);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DashOwnerCharacter(const FVector StartLoc, const FVector TargetVec);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetCharacterCapsuleCollisionData(const bool bStartDashAttack);
+
+	void ClearDashAttackData();
+
+	FTimerHandle DashAttackTimerHandle{};
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillDetectSphereOffset{ 750.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float EndLocationOffset{ 150.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float DashTimerRate{ 0.75f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float DashDuration{ 0.15f };
+
+	UPROPERTY(EditDefaultsOnly)
+	int32 MaxTargetNum{ 5 };
+
+	int32 CurrentTargetIndex{ 0 };
+
+	UPROPERTY()
+	TArray<AActor*> CachedTargetActors{};
 };

@@ -187,7 +187,7 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 			const UNetherCrownCrowdControlComponent* CrowdControlComponent{ DetectedEnemy->GetCrowdControlComponent() };
 			if (IsValid(CrowdControlComponent))
 			{
-				CrowdControlComponent->KnockBack(SkillKnockBackVector);
+				CrowdControlComponent->KnockBack(DetectedEnemy->GetActorForwardVector() * -SkillKnockBackDistance);
 			}
 
 			UGameplayStatics::ApplyDamage(DetectedEnemy, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
