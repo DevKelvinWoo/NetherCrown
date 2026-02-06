@@ -8,6 +8,8 @@
 #include "InputActionValue.h"
 #include "NetherCrownCharacter.generated.h"
 
+class UNetherCrownControlGhostTrailComponent;
+class UNiagaraComponent;
 class UNetherCrownControlPPComponent;
 class UNetherCrownCrowdControlComponent;
 class USpringArmComponent;
@@ -64,6 +66,7 @@ public:
 	UNetherCrownEquipComponent* GetEquipComponent() const { return NetherCrownEquipComponent; }
 	UNetherCrownSkillComponent* GetSkillComponent() const { return NetherCrownSkillComponent; }
 	UNetherCrownControlPPComponent* GetControlPPComponent() const { return NetherCrownControlPPComponent; }
+	UNetherCrownControlGhostTrailComponent* GetControlGhostTrailComponent() const { return NetherCrownControlGhostTrailComponent; }
 
 	void SetSpringArmZOffset(float InSpringArmZOffset) const;
 	void SetSpringArmLength(float InSpringArmLength) const;
@@ -114,6 +117,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNetherCrownControlPPComponent> NetherCrownControlPPComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraComponent> NetherCrownGhostTrailNiagaraComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownControlGhostTrailComponent> NetherCrownControlGhostTrailComponent{};
 
 	UPROPERTY(Replicated)
 	bool bPressedMoveKey{ false };

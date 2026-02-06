@@ -6,9 +6,12 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "NiagaraSystem.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
+#include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
 
 #define DEBUG_SPHERE 0
 
@@ -22,6 +25,16 @@ void UNetherCrownSkillDashAttack::ExecuteSkillGameplay()
 	Super::ExecuteSkillGameplay();
 
 	StartDashAttackTimer();
+}
+
+void UNetherCrownSkillDashAttack::InitSkillObject()
+{
+	Super::InitSkillObject();
+
+	if (!GhostTrailNiagaraSystemSoft.IsNull())
+	{
+		GhostTrailNiagaraSystem = GhostTrailNiagaraSystemSoft.LoadSynchronous();
+	}
 }
 
 TArray<AActor*> UNetherCrownSkillDashAttack::DetectDashAttackTargets() const
@@ -81,7 +94,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 		return;
 	}
 
-	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		ClearDashAttackData();
@@ -100,6 +113,23 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	Multicast_DashOwnerCharacter(SkillOwnerLocation, DashEndLocation); //@NOTE : Server에서만 호출 시 네트워크 복제 지연으로 끊김 발생
 }
 
+void UNetherCrownSkillDashAttack::Multicast_DeactivateDashAttackGhostTrail_Implementation()
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	UNetherCrownControlGhostTrailComponent* ControlGhostTrailComponent{ SkillOwnerCharacter->GetControlGhostTrailComponent() };
+	if (!ensureAlways(ControlGhostTrailComponent))
+	{
+		return;
+	}
+
+	ControlGhostTrailComponent->ActivateGhostTrail(false);
+}
+
 void UNetherCrownSkillDashAttack::ClearDashAttackData()
 {
 	const UWorld* World{ GetWorld() };
@@ -110,6 +140,7 @@ void UNetherCrownSkillDashAttack::ClearDashAttackData()
 
 	CurrentTargetIndex = 0;
 
+	Multicast_DeactivateDashAttackGhostTrail();
 	Multicast_SetCharacterCapsuleCollisionData(false);
 }
 
@@ -139,6 +170,30 @@ void UNetherCrownSkillDashAttack::Multicast_DashOwnerCharacter_Implementation(co
 	{
 		return;
 	}
+
+	UNetherCrownControlGhostTrailComponent* ControlGhostTrailComponent{ SkillOwnerCharacter->GetControlGhostTrailComponent() };
+	if (!ensureAlways(ControlGhostTrailComponent))
+	{
+		return;
+	}
+
+	// const USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
+	// UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{};
+	// NetherCrownCharacterAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownCharacterAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
+	// if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
+	// {
+	// 	return;
+	// }
+	//
+	// UAnimMontage* SkillAnimMontage{ SkillAnimMontageSoft.LoadSynchronous() };
+	// if (!ensureAlways(IsValid(SkillAnimMontage)))
+	// {
+	// 	return;
+	// }
+	//
+	// NetherCrownCharacterAnimInstance->Montage_Play(SkillAnimMontage);
+
+	ControlGhostTrailComponent->ActivateGhostTrail(true, GhostTrailNiagaraSystem);
 
 	if (SkillOwnerCharacter->GetCharacterMovement())
 	{

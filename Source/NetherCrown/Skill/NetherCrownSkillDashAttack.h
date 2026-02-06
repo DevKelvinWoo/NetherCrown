@@ -6,6 +6,8 @@
 #include "NetherCrownSkillObject.h"
 #include "NetherCrownSkillDashAttack.generated.h"
 
+class UNiagaraSystem;
+
 UCLASS(Blueprintable)
 class NETHERCROWN_API UNetherCrownSkillDashAttack : public UNetherCrownSkillObject
 {
@@ -14,6 +16,8 @@ class NETHERCROWN_API UNetherCrownSkillDashAttack : public UNetherCrownSkillObje
 protected:
 	virtual void PlaySkillCosmetics() override;
 	virtual void ExecuteSkillGameplay() override;
+
+	virtual void InitSkillObject() override;
 
 private:
 	TArray<AActor*> DetectDashAttackTargets() const;
@@ -30,6 +34,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCharacterCapsuleCollisionData(const bool bStartDashAttack);
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_DeactivateDashAttackGhostTrail();
+
 	void ClearDashAttackData();
 
 	FTimerHandle DashAttackTimerHandle{};
@@ -44,7 +51,7 @@ private:
 	float DashTimerRate{ 0.75f };
 
 	UPROPERTY(EditDefaultsOnly)
-	float DashDuration{ 0.15f };
+	float DashDuration{ 0.25f };
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxTargetNum{ 5 };
@@ -53,4 +60,10 @@ private:
 
 	UPROPERTY()
 	TArray<AActor*> CachedTargetActors{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UNiagaraSystem> GhostTrailNiagaraSystemSoft{};
+
+	UPROPERTY()
+	TObjectPtr<UNiagaraSystem> GhostTrailNiagaraSystem{};
 };

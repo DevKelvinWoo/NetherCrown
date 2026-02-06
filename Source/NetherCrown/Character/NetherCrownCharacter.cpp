@@ -2,6 +2,7 @@
 
 #include "NetherCrownCharacter.h"
 
+#include "NiagaraComponent.h"
 #include "Camera/CameraComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -9,6 +10,7 @@
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
+#include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
@@ -39,12 +41,16 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 
 	SetCharacterDefaultMovementValues();
 
+	NetherCrownGhostTrailNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("GhostTrailNiagaraComponent"));
+	NetherCrownGhostTrailNiagaraComponent->SetupAttachment(RootComponent);
+
 	NetherCrownBasicAttackComponent = CreateDefaultSubobject<UNetherCrownBasicAttackComponent>(TEXT("BasicAttackComponent"));
 	NetherCrownEquipComponent = CreateDefaultSubobject<UNetherCrownEquipComponent>(TEXT("EquipComponent"));
 	NetherCrownSkillComponent = CreateDefaultSubobject<UNetherCrownSkillComponent>(TEXT("SkillComponent"));
 	NetherCrownCrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
 	NetherCrownPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
 	NetherCrownControlPPComponent = CreateDefaultSubobject<UNetherCrownControlPPComponent>(TEXT("ControlPPComponent"));
+	NetherCrownControlGhostTrailComponent = CreateDefaultSubobject<UNetherCrownControlGhostTrailComponent>(TEXT("ControlGhostTrailComponent"));
 }
 
 void ANetherCrownCharacter::SetSpringArmZOffset(float InSpringArmZOffset) const
@@ -74,6 +80,9 @@ void ANetherCrownCharacter::BeginPlay()
 
 	check(NetherCrownControlPPComponent);
 	NetherCrownControlPPComponent->SetHandlingPostProcessComponent(NetherCrownPostProcessComponent);
+
+	check(NetherCrownControlGhostTrailComponent);
+	NetherCrownControlGhostTrailComponent->SetHandledGhostTrailNiagaraComponent(NetherCrownGhostTrailNiagaraComponent);
 }
 
 void ANetherCrownCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
