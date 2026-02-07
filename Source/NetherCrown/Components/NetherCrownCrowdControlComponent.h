@@ -14,6 +14,7 @@ enum class ENetherCrownCrowdControlType : uint8
 	NONE,
 	KNOCK_BACK,
 	FROZEN,
+	STUN,
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -29,7 +30,8 @@ public:
 
 	//@NOTE : CC Implements
 	void KnockBack(const FVector& KnockBackVector) const;
-	void Frozen(int32 DurationTime) const;
+	void Frozen() const;
+	void Stun() const;
 
 protected:
 	virtual void BeginPlay() override;

@@ -71,10 +71,11 @@ void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector
 	OwnerCharacter->LaunchCharacter(KnockBackVector, true, true);
 }
 
-void UNetherCrownCrowdControlComponent::Frozen(int32 DurationTime) const
+void UNetherCrownCrowdControlComponent::Frozen() const
 {
 	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
 	USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
+	UCharacterMovementComponent* MovementComponent{ OwnerCharacter ? OwnerCharacter->GetCharacterMovement() : nullptr};
 	UMaterialInterface* MaterialInterface{ SkeletalMeshComponent ? SkeletalMeshComponent->GetOverlayMaterial() : nullptr };
 	if (!ensureAlways(IsValid(MaterialInterface)))
 	{
@@ -87,6 +88,7 @@ void UNetherCrownCrowdControlComponent::Frozen(int32 DurationTime) const
 		return;
 	}
 
+	MovementComponent->DisableMovement();
 	SkeletalMeshComponent->bPauseAnims = true;
 	SkeletalMeshComponent->SetOverlayMaterial(DMI);
 
@@ -94,6 +96,17 @@ void UNetherCrownCrowdControlComponent::Frozen(int32 DurationTime) const
 	check(DefaultSettings);
 
 	DMI->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, DefaultSettings->FrozenTempestTargetMaterialAlpha);
+}
+
+void UNetherCrownCrowdControlComponent::Stun() const
+{
+	const ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+	UCharacterMovementComponent* OwnerCharacterMovementComponent{ OwnerCharacter ? OwnerCharacter->GetCharacterMovement() : nullptr};
+	check(OwnerCharacterMovementComponent);
+
+	OwnerCharacterMovementComponent->DisableMovement();
+
+	//@TODO : Stun Effect 출력 필요
 }
 
 void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Implementation()
@@ -110,6 +123,24 @@ void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Im
 		if (!OwnerCharacter->HasAuthority())
 		{
 			StartFrozenTargetOverlayMaterialEndTimer();
+		}
+
+		UCharacterMovementComponent* MovementComponent{ OwnerCharacter->GetCharacterMovement() };
+		check(MovementComponent);
+		MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+
+		USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
+		if (IsValid(SkeletalMeshComponent))
+		{
+			SkeletalMeshComponent->bPauseAnims = false;
+		}
+	}
+	else if (CrowdControlType == ENetherCrownCrowdControlType::STUN)
+	{
+		ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+		if (!ensureAlways(IsValid(OwnerCharacter)))
+		{
+			return;
 		}
 
 		UCharacterMovementComponent* MovementComponent{ OwnerCharacter->GetCharacterMovement() };

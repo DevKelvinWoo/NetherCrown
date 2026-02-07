@@ -21,7 +21,7 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, SkillOwnerCharacterWeak);
 	DOREPLIFETIME(ThisClass, SkillMontageBeginSlowPlayRate);
 	DOREPLIFETIME(ThisClass, SkillMontageEndSlowPlayRate);
-	DOREPLIFETIME(ThisClass, SkillCoolDown);
+	DOREPLIFETIME(ThisClass, SkillData);
 	DOREPLIFETIME(ThisClass, bCanActiveSkill);
 }
 
@@ -186,7 +186,7 @@ void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 	check(World);
 
 	FTimerHandle SkillCoolDownTimerHandle{};
-	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, SkillCoolDown, false);
+	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, SkillData.SkillCooldown, false);
 
 	bCanActiveSkill = false;
 }

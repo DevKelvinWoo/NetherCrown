@@ -45,6 +45,7 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
 	ProcessIncomingPhysicalDamage(DamageCauser, ResultDamage);
 
+	UE_LOG(LogTemp, Warning, TEXT("Hp : %f"), )
 	return ResultDamage;
 }
 

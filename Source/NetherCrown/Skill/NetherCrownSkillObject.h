@@ -109,7 +109,7 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownSkillEffectTagData SkillEffectTagData{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Replicated)
 	FNetherCrownSkillData SkillData{};
 
 private:
@@ -124,7 +124,4 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	bool bCanActiveSkill{ true };
-
-	UPROPERTY(EditDefaultsOnly, Replicated)
-	int32 SkillCoolDown{ 3 };
 };

@@ -288,7 +288,7 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 				DetectedEnemyMesh->SetOverlayMaterial(CachedFrozenTempestTargetOverlayMaterial);
 			}
 
-			CrowdControlComponent->Frozen(SkillDuration);
+			CrowdControlComponent->Frozen();
 		}
 	}
 }

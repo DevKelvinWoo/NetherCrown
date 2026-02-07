@@ -10,6 +10,7 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
 
@@ -75,7 +76,6 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	const UWorld* World{ GetWorld() };
 	check(World);
 
-	AActor* CurrentTargetActor{};
 	if (CachedTargetActors.IsValidIndex(CurrentTargetIndex))
 	{
 		CurrentTargetActor = CachedTargetActors[CurrentTargetIndex];
@@ -101,6 +101,8 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 		UE_LOG(LogTemp, Warning, TEXT("SkillOwnerCharacter is InValid! : %hs"), __FUNCTION__);
 		return;
 	}
+
+	World->GetTimerManager().SetTimer(DashAttackHitTimerHandle, this, &ThisClass::HitDashAttack, DashDuration, false, 0.f);
 
 	const FVector CurrentTargetLocation{ CurrentTargetActor->GetActorLocation() };
 	const FVector SkillOwnerLocation{ SkillOwnerCharacter->GetActorLocation() };
@@ -130,6 +132,29 @@ void UNetherCrownSkillDashAttack::Multicast_DeactivateDashAttackGhostTrail_Imple
 	ControlGhostTrailComponent->ActivateGhostTrail(false);
 }
 
+void UNetherCrownSkillDashAttack::Multicast_ActiveSkillHitCameraShake_Implementation() const
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority() || !(SkillOwnerCharacter->IsLocallyControlled()))
+	{
+		return;
+	}
+
+	ANetherCrownPlayerController* SkillOwnerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };
+	APlayerCameraManager* CameraManager{ SkillOwnerController ? SkillOwnerController->PlayerCameraManager : nullptr };
+	if (!ensureAlways(IsValid(CameraManager)))
+	{
+		return;
+	}
+
+	CameraManager->StartCameraShake(DashAttackHitCameraShakeClass, 1.f);
+}
+
 void UNetherCrownSkillDashAttack::PlayLoopDashAttackMontage() const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
@@ -155,13 +180,49 @@ void UNetherCrownSkillDashAttack::PlayLoopDashAttackMontage() const
 	NetherCrownCharacterAnimInstance->Montage_Play(SkillAnimMontage);
 }
 
+void UNetherCrownSkillDashAttack::HitDashAttack() const
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (!IsValid(CurrentTargetActor))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Current Target Actor is InValid! : %hs"), __FUNCTION__);
+		return;
+	}
+
+	const ANetherCrownEnemy* CurrentTargetEnemy{ Cast<ANetherCrownEnemy>(CurrentTargetActor) };
+	if (!ensureAlways(IsValid(CurrentTargetEnemy)))
+	{
+		return;
+	}
+
+	UNetherCrownCrowdControlComponent* CrowdControlComponent{ CurrentTargetEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CrowdControlComponent)))
+	{
+		return;
+	}
+
+	CrowdControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::STUN, 3.f);
+	UGameplayStatics::ApplyDamage(CurrentTargetActor, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
+
+	Multicast_SpawnSkillImpactEffect(CurrentTargetEnemy);
+	Multicast_ActiveSkillHitCameraShake();
+}
+
 void UNetherCrownSkillDashAttack::ClearDashAttackData()
 {
 	const UWorld* World{ GetWorld() };
 	check(World);
 
 	CachedTargetActors.Empty();
+	CurrentTargetActor = nullptr;
+
 	World->GetTimerManager().ClearTimer(DashAttackTimerHandle);
+	World->GetTimerManager().ClearTimer(DashAttackHitTimerHandle);
 
 	CurrentTargetIndex = 0;
 
@@ -221,7 +282,7 @@ void UNetherCrownSkillDashAttack::Multicast_DashOwnerCharacter_Implementation(co
 
 	MoveToForce->FinishVelocityParams.Mode = ERootMotionFinishVelocityMode::SetVelocity;
 	MoveToForce->FinishVelocityParams.SetVelocity = FVector::ZeroVector;
-	SkillOwnerCharacter->GetCharacterMovement()->ApplyRootMotionSource(MoveToForce);
+	SkillOwnerCharacterMovementComponent->ApplyRootMotionSource(MoveToForce);
 }
 
 void UNetherCrownSkillDashAttack::Multicast_SetOwnerCharacterRotToTarget_Implementation(const FRotator& InTargetRot)

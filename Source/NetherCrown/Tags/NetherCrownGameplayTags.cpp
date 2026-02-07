@@ -22,6 +22,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_BasicAttackImpact, "Effect.Knight.BasicAttackImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_SkyFallSlash_Impact, "Effect.SkyFallSlash.Impact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_ShieldMastery, "Effect.ShieldMastery", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_DashAttack_Impact, "Effect.DashAttack.Impact", "");
 #pragma endregion
 
 #pragma region Weapon
