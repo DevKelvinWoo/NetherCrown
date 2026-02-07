@@ -130,6 +130,31 @@ void UNetherCrownSkillDashAttack::Multicast_DeactivateDashAttackGhostTrail_Imple
 	ControlGhostTrailComponent->ActivateGhostTrail(false);
 }
 
+void UNetherCrownSkillDashAttack::PlayLoopDashAttackMontage() const
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	const USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
+	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{};
+	NetherCrownCharacterAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownCharacterAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
+	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
+	{
+		return;
+	}
+
+	UAnimMontage* SkillAnimMontage{ SkillAnimMontageSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(SkillAnimMontage)))
+	{
+		return;
+	}
+
+	NetherCrownCharacterAnimInstance->Montage_Play(SkillAnimMontage);
+}
+
 void UNetherCrownSkillDashAttack::ClearDashAttackData()
 {
 	const UWorld* World{ GetWorld() };
@@ -147,7 +172,7 @@ void UNetherCrownSkillDashAttack::ClearDashAttackData()
 void UNetherCrownSkillDashAttack::Multicast_SetCharacterCapsuleCollisionData_Implementation(const bool bStartDashAttack)
 {
 	//@NOTE : Server에서만 실행 시 Collision 변경 지연으로 살짝 부딪히는 느낌이 발생함
-	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
@@ -165,53 +190,38 @@ void UNetherCrownSkillDashAttack::Multicast_SetCharacterCapsuleCollisionData_Imp
 
 void UNetherCrownSkillDashAttack::Multicast_DashOwnerCharacter_Implementation(const FVector StartLoc, const FVector TargetVec)
 {
-	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
 	}
 
-	UNetherCrownControlGhostTrailComponent* ControlGhostTrailComponent{ SkillOwnerCharacter->GetControlGhostTrailComponent() };
+	const UNetherCrownControlGhostTrailComponent* ControlGhostTrailComponent{ SkillOwnerCharacter->GetControlGhostTrailComponent() };
 	if (!ensureAlways(ControlGhostTrailComponent))
 	{
 		return;
 	}
-
-	// const USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
-	// UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{};
-	// NetherCrownCharacterAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownCharacterAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
-	// if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
-	// {
-	// 	return;
-	// }
-	//
-	// UAnimMontage* SkillAnimMontage{ SkillAnimMontageSoft.LoadSynchronous() };
-	// if (!ensureAlways(IsValid(SkillAnimMontage)))
-	// {
-	// 	return;
-	// }
-	//
-	// NetherCrownCharacterAnimInstance->Montage_Play(SkillAnimMontage);
-
 	ControlGhostTrailComponent->ActivateGhostTrail(true, GhostTrailNiagaraSystem);
 
-	if (SkillOwnerCharacter->GetCharacterMovement())
-	{
-		//@NOTE : 힘을 가하려면 FRootMotionSource_ConstantForce로 처리, MoveToForce는 특정 지점으로 처리하는 방식
-		TSharedPtr<FRootMotionSource_MoveToForce> MoveToForce = MakeShared<FRootMotionSource_MoveToForce>();
+	PlayLoopDashAttackMontage();
 
-		MoveToForce->InstanceName = TEXT("DashAttack");
-		MoveToForce->AccumulateMode = ERootMotionAccumulateMode::Override;
-		MoveToForce->Priority = 5;
-		MoveToForce->StartLocation = StartLoc;
-		MoveToForce->TargetLocation = TargetVec;
-		MoveToForce->Duration = DashDuration;
-		MoveToForce->bRestrictSpeedToExpected = true;
+	UCharacterMovementComponent* SkillOwnerCharacterMovementComponent{ SkillOwnerCharacter->GetCharacterMovement() };
+	check(SkillOwnerCharacterMovementComponent);
 
-		MoveToForce->FinishVelocityParams.Mode = ERootMotionFinishVelocityMode::SetVelocity;
-		MoveToForce->FinishVelocityParams.SetVelocity = FVector::ZeroVector;
-		SkillOwnerCharacter->GetCharacterMovement()->ApplyRootMotionSource(MoveToForce);
-	}
+	//@NOTE : 힘을 가하려면 FRootMotionSource_ConstantForce로 처리, MoveToForce는 특정 지점으로 처리하는 방식
+	TSharedPtr<FRootMotionSource_MoveToForce> MoveToForce = MakeShared<FRootMotionSource_MoveToForce>();
+
+	MoveToForce->InstanceName = TEXT("DashAttack");
+	MoveToForce->AccumulateMode = ERootMotionAccumulateMode::Override;
+	MoveToForce->Priority = 5;
+	MoveToForce->StartLocation = StartLoc;
+	MoveToForce->TargetLocation = TargetVec;
+	MoveToForce->Duration = DashDuration;
+	MoveToForce->bRestrictSpeedToExpected = true;
+
+	MoveToForce->FinishVelocityParams.Mode = ERootMotionFinishVelocityMode::SetVelocity;
+	MoveToForce->FinishVelocityParams.SetVelocity = FVector::ZeroVector;
+	SkillOwnerCharacter->GetCharacterMovement()->ApplyRootMotionSource(MoveToForce);
 }
 
 void UNetherCrownSkillDashAttack::Multicast_SetOwnerCharacterRotToTarget_Implementation(const FRotator& InTargetRot)

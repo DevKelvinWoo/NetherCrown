@@ -37,6 +37,8 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DeactivateDashAttackGhostTrail();
 
+	void PlayLoopDashAttackMontage() const;
+
 	void ClearDashAttackData();
 
 	FTimerHandle DashAttackTimerHandle{};
@@ -51,7 +53,7 @@ private:
 	float DashTimerRate{ 0.75f };
 
 	UPROPERTY(EditDefaultsOnly)
-	float DashDuration{ 0.25f };
+	float DashDuration{ 0.2f };
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxTargetNum{ 5 };
