@@ -130,7 +130,7 @@ UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGa
 
 	FNetherCrownEffectData** FoundEffectDataRow{ OutRows.FindByPredicate([&EffectTag](FNetherCrownEffectData* EffectData)
 	{
-		return EffectData->EffectTag == EffectTag;
+		return EffectData->GetEffectTag() == EffectTag;
 	}) };
 
 	FNetherCrownEffectData* FoundEffectData = *FoundEffectDataRow;
@@ -139,7 +139,7 @@ UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGa
 		return nullptr;
 	}
 
-	return FoundEffectData->EffectNiagaraSystem.LoadSynchronous();
+	return FoundEffectData->GetEffectNiagaraSystem().LoadSynchronous();
 }
 
 void FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform)
