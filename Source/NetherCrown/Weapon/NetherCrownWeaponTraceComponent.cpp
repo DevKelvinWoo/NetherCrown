@@ -123,7 +123,14 @@ void UNetherCrownWeaponTraceComponent::DetectWeaponHit()
 	{
 		//@NOTE : Server로 HitEnemy Damage를 줘야함, 위 공격 감지로직은 Client에서 정확하게 실행됨
 		//@NOTE : ServerRPC로 UGameplayStatics::ApplyDamage()를 줘야함, 서버에서 ApplyDamage가 호출되면 TakeDamage도 서버에서 수행됨
+		Server_ReportHit(HitInfo.Key, HitInfo.Value);
+	}
+}
 
-		OnHitEnemy.Broadcast(HitInfo.Key, HitInfo.Value);
+void UNetherCrownWeaponTraceComponent::Server_ReportHit_Implementation(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation)
+{
+	if (IsValid(HitEnemy))
+	{
+		OnHitEnemy.Broadcast(HitEnemy, HitLocation);
 	}
 }

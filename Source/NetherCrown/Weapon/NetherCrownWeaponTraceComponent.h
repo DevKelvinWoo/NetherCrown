@@ -33,10 +33,13 @@ protected:
 private:
 	void DetectWeaponHit();
 
+	UFUNCTION(Server, Reliable)
+	void Server_ReportHit(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation);
+
 	UPROPERTY(Replicated)
 	bool bIsTraceEnabled{ false };
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditDefaultsOnly)
 	float TraceRadius = 10.0f;
 
 	UPROPERTY(Transient)
