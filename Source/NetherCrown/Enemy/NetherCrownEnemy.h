@@ -5,13 +5,13 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
-#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrownEnemy.generated.h"
 
 class UCapsuleComponent;
 
 class ANetherCrownCharacter;
 class UNetherCrownEnemyStatComponent;
+class UNetherCrownCrowdControlComponent;
 
 USTRUCT()
 struct FNetherCrownEnemyTagData
