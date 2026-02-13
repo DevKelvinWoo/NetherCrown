@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "NetherCrownPlayerStatComponent.generated.h"
 
+class ANetherCrownCharacter;
+
 USTRUCT()
 struct FNetherCrownPlayerStatData
 {
@@ -67,6 +69,11 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	void CacheCharacter();
+
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	FNetherCrownPlayerStatData PlayerStatData{};
+
+	UPROPERTY()
+	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 };

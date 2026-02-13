@@ -4,6 +4,7 @@
 #include "NetherCrownPlayerStatComponent.h"
 
 #include "Net/UnrealNetwork.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 
 UNetherCrownPlayerStatComponent::UNetherCrownPlayerStatComponent()
 {
@@ -19,17 +20,46 @@ void UNetherCrownPlayerStatComponent::GetLifetimeReplicatedProps(TArray<class FL
 	DOREPLIFETIME(ThisClass, PlayerStatData);
 }
 
+void UNetherCrownPlayerStatComponent::CacheCharacter()
+{
+	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
+}
+
 void UNetherCrownPlayerStatComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CacheCharacter();
 }
 
 void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
 {
+	if (!IsValid(CachedCharacter))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedCharacter is invalid."));
+		return;
+	}
+
+	if (!CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	PlayerStatData.ShieldValue += InShieldValue;
 }
 
 void UNetherCrownPlayerStatComponent::ClearPlayerShield()
 {
+	if (!IsValid(CachedCharacter))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedCharacter is invalid."));
+		return;
+	}
+
+	if (!CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	PlayerStatData.ShieldValue = 0;
 }
