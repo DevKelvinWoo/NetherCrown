@@ -49,7 +49,7 @@ void ANetherCrownWeapon::InitWeaponTraceComponentSettings() const
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings = GetDefault<UNetherCrownCharacterDefaultSettings>();
 	check(CharacterDefaultSettings);
 
-	const FName& TraceSocketName = CharacterDefaultSettings->WeaponTraceSocketName;
+	const FName& TraceSocketName = CharacterDefaultSettings->GetWeaponTraceSocketName();
 	WeaponTraceComponent->InitWeaponTraceComponentSettings(WeaponMeshComponent->GetSocketLocation(TraceSocketName));
 }
 

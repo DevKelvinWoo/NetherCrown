@@ -30,7 +30,7 @@ void UNetherCrownWeaponTraceComponent::BeginPlay()
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
 	check(CharacterDefaultSettings);
 
-	WeaponTraceSocketName = CharacterDefaultSettings->WeaponTraceSocketName;
+	WeaponTraceSocketName = CharacterDefaultSettings->GetWeaponTraceSocketName();
 
 	const ANetherCrownWeapon* OwnerWeapon{ Cast<ANetherCrownWeapon>(GetOwner()) };
 	if (!ensureAlways(IsValid(OwnerWeapon)))

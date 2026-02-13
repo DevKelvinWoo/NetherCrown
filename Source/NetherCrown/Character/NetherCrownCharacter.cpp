@@ -182,11 +182,11 @@ void ANetherCrownCharacter::CheckIsHardLandingAndSetTimer()
 
 	const double DistanceBetweenLandHitPoints{ HitPointToGroundWhenJumpStart.Z - GetActorLocation().Z };
 
-	const double MinHardLandHeight{ CharacterDefaultSetting->MinHardLandingHeight };
+	const double MinHardLandHeight{ CharacterDefaultSetting->GetMinHardLandingHeight() };
 	bIsHardLanding = DistanceBetweenLandHitPoints > MinHardLandHeight;
 
 	//@NOTE  : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Client단에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
-	const float ResetDelay = CharacterDefaultSetting->RecoveryResetDelayTime;
+	const float ResetDelay = CharacterDefaultSetting->GetRecoveryResetDelayTime();
 	GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
 	GetWorldTimerManager().SetTimer(TimerHandle_ResetHardLanding, this, &ANetherCrownCharacter::ResetHardLandingState, ResetDelay, false);
 }

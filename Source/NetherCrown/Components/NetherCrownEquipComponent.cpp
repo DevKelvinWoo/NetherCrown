@@ -147,7 +147,7 @@ void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
 	check(CharacterDefaultSettings);
 
-	const FName& EquipWeaponSocketName{ CharacterDefaultSettings->EquipWeaponSocketName };
+	const FName& EquipWeaponSocketName{ CharacterDefaultSettings->GetEquipWeaponSocketName() };
 	AttachWeaponToCharacterMesh(EquippedWeapon, EquipWeaponSocketName);
 }
 
@@ -165,12 +165,12 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 	TPair<EStowWeaponPosition, ANetherCrownWeapon*> ChangeTargetWeaponPair{ StowWeaponContainer[0] };
 	StowWeaponContainer.RemoveAt(0);
 
-	const FName& WeaponSocketName{ CharacterDefaultSettings->EquipWeaponSocketName };
+	const FName& WeaponSocketName{ CharacterDefaultSettings->GetEquipWeaponSocketName() };
 	AttachWeaponToCharacterMesh(ChangeTargetWeaponPair.Value, WeaponSocketName);
 
 	const EStowWeaponPosition ChangeTargetWeaponPosition{ ChangeTargetWeaponPair.Key };
 	FName StowSocketName{};
-	ChangeTargetWeaponPosition == EStowWeaponPosition::Left ? StowSocketName = CharacterDefaultSettings->StowWeaponSocketLName : StowSocketName = CharacterDefaultSettings->WeaponHandleSocketRName;
+	ChangeTargetWeaponPosition == EStowWeaponPosition::Left ? StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName() : StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
 	AttachWeaponToCharacterMesh(EquippedWeapon, StowSocketName);
 
 	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquippedWeapon });
@@ -190,12 +190,12 @@ void UNetherCrownEquipComponent::StowCurrentWeapon()
 	if (StowWeaponContainer.IsEmpty())
 	{
 		StowWeaponPosition = EStowWeaponPosition::Left;
-		StowWeaponSocketName = CharacterDefaultSettings->StowWeaponSocketLName;
+		StowWeaponSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName();
 	}
 	else
 	{
 		StowWeaponPosition = EStowWeaponPosition::Right;
-		StowWeaponSocketName = CharacterDefaultSettings->WeaponHandleSocketRName;
+		StowWeaponSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
 	}
 
 	AttachWeaponToCharacterMesh(EquippedWeapon, StowWeaponSocketName);
