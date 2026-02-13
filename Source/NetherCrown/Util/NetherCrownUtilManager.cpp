@@ -11,6 +11,74 @@
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 
+bool FNetherCrownUtilManager::bCacheInitialized{ false };
+TMap<FGameplayTag, FNetherCrownSoundData*> FNetherCrownUtilManager::CachedSoundDataByTag{};
+TMap<FGameplayTag, FNetherCrownWeaponDataTableRow*> FNetherCrownUtilManager::CachedWeaponDataByTag{};
+TMap<FGameplayTag, FNetherCrownEffectData*> FNetherCrownUtilManager::CachedEffectDataByTag{};
+
+TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedSoundDT{};
+TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedWeaponDT{};
+TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedEffectDT{};
+
+void FNetherCrownUtilManager::EnsureCacheBuilt()
+{
+	if (bCacheInitialized)
+	{
+		return;
+	}
+
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
+	const UDataTable* SoundDT{ DefaultSettings->CharacterSoundDT.LoadSynchronous() };
+	if (IsValid(SoundDT))
+	{
+		TArray<FNetherCrownSoundData*> OutRows{};
+		SoundDT->GetAllRows<FNetherCrownSoundData>(TEXT("SoundTag"), OutRows);
+		for (FNetherCrownSoundData* Row : OutRows)
+		{
+			if (Row)
+			{
+				CachedSoundDataByTag.Add(Row->GetSoundTag(), Row);
+			}
+		}
+	}
+
+	const UDataTable* WeaponDT{ DefaultSettings->WeaponDT.LoadSynchronous() };
+	if (IsValid(WeaponDT))
+	{
+		TArray<FNetherCrownWeaponDataTableRow*> OutRows{};
+		WeaponDT->GetAllRows<FNetherCrownWeaponDataTableRow>(TEXT("WeaponTag"), OutRows);
+		for (FNetherCrownWeaponDataTableRow* Row : OutRows)
+		{
+			if (Row)
+			{
+				CachedWeaponDataByTag.Add(Row->GetWeaponTag(), Row);
+			}
+		}
+	}
+
+	const UDataTable* EffectDT{ DefaultSettings->EffectDT.LoadSynchronous() };
+	if (IsValid(EffectDT))
+	{
+		TArray<FNetherCrownEffectData*> OutRows{};
+		EffectDT->GetAllRows<FNetherCrownEffectData>(TEXT("EffectTag"), OutRows);
+		for (FNetherCrownEffectData* Row : OutRows)
+		{
+			if (Row)
+			{
+				CachedEffectDataByTag.Add(Row->GetEffectTag(), Row);
+			}
+		}
+	}
+
+	CachedSoundDT = DefaultSettings->CharacterSoundDT.LoadSynchronous();
+	CachedWeaponDT = DefaultSettings->WeaponDT.LoadSynchronous();
+	CachedEffectDT = DefaultSettings->EffectDT.LoadSynchronous();
+
+	bCacheInitialized = true;
+}
+
 USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag& SoundTag)
 {
 	if (!SoundTag.IsValid())
@@ -18,45 +86,36 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 		return nullptr;
 	}
 
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
+	EnsureCacheBuilt();
 
-	const UDataTable* SoundDT{ DefaultSettings->CharacterSoundDT.LoadSynchronous() };
-	if (!ensureAlways(IsValid(SoundDT)))
+	if (!ensureAlways(IsValid(CachedSoundDT)))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No SoundDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
 
-	TArray<FNetherCrownSoundData*> OutRows{};
-	SoundDT->GetAllRows<FNetherCrownSoundData>(TEXT("SoundTag"), OutRows);
-
-	FNetherCrownSoundData** FoundSoundDataRow = OutRows.FindByPredicate([&SoundTag](FNetherCrownSoundData* Row)
-	{
-		return Row->GetSoundTag() == SoundTag;
-	});
-
-	if (!FoundSoundDataRow)
+	FNetherCrownSoundData** FoundSoundData{ CachedSoundDataByTag.Find(SoundTag) };
+	if (!FoundSoundData || !(*FoundSoundData))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No Found SoundDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
-
-	FNetherCrownSoundData* FoundSoundData = *FoundSoundDataRow;
-	if (!FoundSoundData)
-	{
-		return nullptr;
-	}
-	return FoundSoundData->GetSoundCue().LoadSynchronous();
+	return (*FoundSoundData)->GetSoundCue().LoadSynchronous();
 }
 
 void FNetherCrownUtilManager::PlaySound2DByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& SoundTag)
 {
-	check(WorldContextObject);
-	UWorld* World = WorldContextObject->GetWorld();
-	if (World && World->GetNetMode() == NM_DedicatedServer)
+	if (!ensureAlways(WorldContextObject))
+	{
+		return;
+	}
+
+	const UWorld* World{ WorldContextObject->GetWorld() };
+	check(World);
+
+	if (World->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -73,78 +132,58 @@ void FNetherCrownUtilManager::PlaySound2DByGameplayTag(const UObject* WorldConte
 
 UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag)
 {
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
+	EnsureCacheBuilt();
 
-	const UDataTable* WeaponDT{ DefaultSettings->WeaponDT.LoadSynchronous() };
-	if (!ensureAlways(IsValid(WeaponDT)))
+	if (!ensureAlways(IsValid(CachedWeaponDT)))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No WeaponDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
 
-	TArray<FNetherCrownWeaponDataTableRow*> OutRows{};
-	WeaponDT->GetAllRows<FNetherCrownWeaponDataTableRow>(TEXT("WeaponTag"), OutRows);
-	if (OutRows.IsEmpty())
-	{
-		return nullptr;
-	}
-
-	FNetherCrownWeaponDataTableRow** FoundWeaponDataTableRow{ OutRows.FindByPredicate([&WeaponTag](FNetherCrownWeaponDataTableRow* WeaponDataTableRow)
-	{
-		return WeaponTag == WeaponDataTableRow->GetWeaponTag();
-	}) };
-
-	if (!FoundWeaponDataTableRow)
+	FNetherCrownWeaponDataTableRow** FoundWeaponData{ CachedWeaponDataByTag.Find(WeaponTag) };
+	if (!FoundWeaponData || !(*FoundWeaponData))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No Found WeaponDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
 
-	FNetherCrownWeaponDataTableRow* FoundWeaponData = *FoundWeaponDataTableRow;
-	if (!FoundWeaponData)
-	{
-		return nullptr;
-	}
-
-	return FoundWeaponData->GetWeaponData().LoadSynchronous();
+	return (*FoundWeaponData)->GetWeaponData().LoadSynchronous();
 }
 
 UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGameplayTag& EffectTag)
 {
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
+	EnsureCacheBuilt();
 
-	const UDataTable* EffectDT{ DefaultSettings->EffectDT.LoadSynchronous() };
-	if (!ensureAlways(IsValid(EffectDT)))
+	if (!ensureAlways(IsValid(CachedEffectDT)))
 	{
 		UE_LOG(LogTemp, Warning, TEXT("There is No EffectDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
 
-	TArray<FNetherCrownEffectData*> OutRows{};
-	EffectDT->GetAllRows<FNetherCrownEffectData>(TEXT("EffectTag"), OutRows);
-
-	FNetherCrownEffectData** FoundEffectDataRow{ OutRows.FindByPredicate([&EffectTag](FNetherCrownEffectData* EffectData)
+	FNetherCrownEffectData** FoundEffectData{ CachedEffectDataByTag.Find(EffectTag) };
+	if (!FoundEffectData || !(*FoundEffectData))
 	{
-		return EffectData->GetEffectTag() == EffectTag;
-	}) };
-
-	FNetherCrownEffectData* FoundEffectData = *FoundEffectDataRow;
-	if (!FoundEffectData)
-	{
+		UE_LOG(LogTemp, Warning, TEXT("Effect Data Not Found for Tag: %s"), *EffectTag.ToString());
 		return nullptr;
 	}
 
-	return FoundEffectData->GetEffectNiagaraSystem().LoadSynchronous();
+	return (*FoundEffectData)->GetEffectNiagaraSystem().LoadSynchronous();
 }
 
 void FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform)
 {
 	if (!ensureAlways(WorldContextObject))
+	{
+		return;
+	}
+
+	const UWorld* World{ WorldContextObject->GetWorld() };
+	check(World);
+
+	if (World->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -155,7 +194,7 @@ void FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(const UObject* Wor
 		return;
 	}
 
-	UNiagaraFunctionLibrary::SpawnSystemAtLocation(WorldContextObject, NiagaraSystem,SpawnTransform.GetLocation(), SpawnTransform.GetRotation().Rotator(), SpawnTransform.GetScale3D());
+	UNiagaraFunctionLibrary::SpawnSystemAtLocation(WorldContextObject, NiagaraSystem, SpawnTransform.GetLocation(), SpawnTransform.GetRotation().Rotator(), SpawnTransform.GetScale3D());
 }
 
 UNiagaraComponent* FNetherCrownUtilManager::AttachNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, USceneComponent* AttachComponent, const FName AttachSocketName)
