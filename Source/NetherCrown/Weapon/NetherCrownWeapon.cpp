@@ -3,14 +3,16 @@
 #include "NetherCrownWeapon.h"
 
 #include "NetherCrownWeaponTraceComponent.h"
-#include "NiagaraComponent.h"
-#include "Components/SphereComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
+#include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
+
 #include "NiagaraSystem.h"
+#include "NiagaraComponent.h"
+#include "Components/SphereComponent.h"
 
 ANetherCrownWeapon::ANetherCrownWeapon()
 {
@@ -66,24 +68,19 @@ void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENeth
 
 	check(WeaponAuraNiagaraComponent);
 
-	if (SkillKeyEnum == ENetherCrownSkillKeyEnum::None || !bActive)
+	if (bActive && SkillKeyEnum != ENetherCrownSkillKeyEnum::None)
+	{
+		UNiagaraSystem* FoundWeaponAuraNiagaraSystem{ WeaponAuraMap.Find(SkillKeyEnum)->LoadSynchronous() };
+		if (IsValid(FoundWeaponAuraNiagaraSystem))
+		{
+			WeaponAuraNiagaraComponent->SetAsset(FoundWeaponAuraNiagaraSystem);
+			WeaponAuraNiagaraComponent->Activate();
+		}
+	}
+	else
 	{
 		WeaponAuraNiagaraComponent->SetAsset(nullptr);
 		WeaponAuraNiagaraComponent->Deactivate();
-
-		return;
-	}
-
-	UNiagaraSystem* FoundWeaponAuraNiagaraSystem{ WeaponAuraMap.Find(SkillKeyEnum)->LoadSynchronous() };
-	if (!ensureAlways(FoundWeaponAuraNiagaraSystem))
-	{
-		return;
-	}
-
-	if (bActive)
-	{
-		WeaponAuraNiagaraComponent->SetAsset(FoundWeaponAuraNiagaraSystem);
-		WeaponAuraNiagaraComponent->Activate();
 	}
 }
 
@@ -99,6 +96,8 @@ void ANetherCrownWeapon::BeginPlay()
 
 	check(WeaponTraceComponent);
 	WeaponTraceComponent->GetOnHitEnemy().AddUObject(this, &ThisClass::HandleOnHitEnemy);
+
+	CacheWeaponAuraMap();
 }
 
 void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap,
@@ -173,6 +172,19 @@ void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLo
 	}
 
 	BasicAttackComponent->ApplyDamageToHitEnemy(HitEnemy, HitLocation);
+}
+
+void ANetherCrownWeapon::Multicast_ActiveWeaponAuraNiagara_Implementation(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum)
+{
+	ActiveWeaponAuraNiagara(bActive, SkillKeyEnum);
+}
+
+void ANetherCrownWeapon::CacheWeaponAuraMap()
+{
+	for (const auto& WeaponAuraPair : WeaponAuraMap)
+	{
+		CachedWeaponAuraMap.Add(WeaponAuraPair.Key, WeaponAuraPair.Value.LoadSynchronous());
+	}
 }
 
 void ANetherCrownWeapon::DisableEquipSphereCollision() const

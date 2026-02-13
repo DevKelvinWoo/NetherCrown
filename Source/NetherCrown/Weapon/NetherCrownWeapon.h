@@ -5,17 +5,17 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Actor.h"
-#include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrownWeapon.generated.h"
 
 class UNiagaraSystem;
-class UNetherCrownWeaponTraceComponent;
 class UBoxComponent;
 class USphereComponent;
 class USkeletalMeshComponent;
 class UNiagaraComponent;
 
 class UNetherCrownWeaponData;
+class UNetherCrownWeaponTraceComponent;
+enum class ENetherCrownSkillKeyEnum : uint8;
 
 USTRUCT()
 struct FNetherCrownWeaponTagData
@@ -49,7 +49,8 @@ public:
 
 	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 
-	void ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 protected:
 	virtual void BeginPlay() override;
@@ -61,10 +62,14 @@ private:
 	UFUNCTION()
 	void HandleOnEquipSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
-	void SetEquipComponentSetting(AActor* OtherActor, const bool bCanEquip);
-
 	UFUNCTION()
 	void HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLocation) const;
+
+	void SetEquipComponentSetting(AActor* OtherActor, const bool bCanEquip);
+
+	void ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
+
+	void CacheWeaponAuraMap();
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent{};
@@ -86,4 +91,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>> WeaponAuraMap{};
+
+	UPROPERTY()
+	TMap<ENetherCrownSkillKeyEnum, TObjectPtr<UNiagaraSystem>> CachedWeaponAuraMap{};
 };

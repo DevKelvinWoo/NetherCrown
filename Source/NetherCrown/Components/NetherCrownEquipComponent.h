@@ -49,7 +49,7 @@ public:
 
 	void NotifyEquipEndOrStart(const bool bEquipEnd) const;
 
-	const ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
+	ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 	const UNetherCrownWeaponData* GetEquippedWeaponData() const;
 
 	const FNetherCrownWeaponTagData& GetEquippedWeaponTagData() const;

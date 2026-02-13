@@ -33,14 +33,14 @@ void UNetherCrownKnightAnimInstance::AnimNotify_ActiveWeaponAuraNiagara()
 	}
 
 	const UNetherCrownEquipComponent* EquipComponent{ OwningCharacter->GetEquipComponent() };
-	const ANetherCrownWeapon* EquippedWeapon{ EquipComponent ? EquipComponent->GetEquippedWeapon() : nullptr };
+	ANetherCrownWeapon* EquippedWeapon{ EquipComponent ? EquipComponent->GetEquippedWeapon() : nullptr };
 	if (!(IsValid(EquippedWeapon)))
 	{
 		return;
 	}
 
 	const ENetherCrownSkillKeyEnum SkillKeyEnum{ SkillComponent->GetActiveSkillKeyEnum() };
-	EquippedWeapon->ActiveWeaponAuraNiagara(true, SkillKeyEnum);
+	EquippedWeapon->Multicast_ActiveWeaponAuraNiagara(true, SkillKeyEnum);
 }
 
 void UNetherCrownKnightAnimInstance::AnimNotify_DeactiveWeaponAuraNiagara()
@@ -52,11 +52,11 @@ void UNetherCrownKnightAnimInstance::AnimNotify_DeactiveWeaponAuraNiagara()
 	}
 
 	const UNetherCrownEquipComponent* EquipComponent{ OwningCharacter->GetEquipComponent() };
-	const ANetherCrownWeapon* EquippedWeapon{ EquipComponent ? EquipComponent->GetEquippedWeapon() : nullptr };
+	ANetherCrownWeapon* EquippedWeapon{ EquipComponent ? EquipComponent->GetEquippedWeapon() : nullptr };
 	if (!(IsValid(EquippedWeapon)))
 	{
 		return;
 	}
 
-	EquippedWeapon->ActiveWeaponAuraNiagara(false, ENetherCrownSkillKeyEnum::None);
+	EquippedWeapon->Multicast_ActiveWeaponAuraNiagara(false, ENetherCrownSkillKeyEnum::None);
 }
