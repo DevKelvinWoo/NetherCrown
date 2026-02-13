@@ -14,12 +14,14 @@ class NETHERCROWN_API ANetherCrownPlayerState : public APlayerState
 	GENERATED_BODY()
 
 public:
+	ANetherCrownPlayerState();
+
 	UNetherCrownPlayerStatComponent* GetNetherCrownPlayerStatComponent() const { return NetherCrownPlayerStatComponent; }
 
 protected:
-	ANetherCrownPlayerState();
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Replicated)
 	TObjectPtr<UNetherCrownPlayerStatComponent> NetherCrownPlayerStatComponent{};
 };
