@@ -28,6 +28,8 @@ namespace NetherCrownTags
 #pragma region Weapon
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon, "Weapon", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon_Weapon1, "Weapon.Weapon1", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon_Weapon2, "Weapon.Weapon2", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon_Weapon3, "Weapon.Weapon3", "");
 #pragma endregion
 
 }

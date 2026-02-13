@@ -7,6 +7,7 @@
 #include "Components/ActorComponent.h"
 #include "NetherCrownBasicAttackComponent.generated.h"
 
+class ANetherCrownCharacter;
 class UAnimMontage;
 class UCameraShakeBase;
 
@@ -25,6 +26,18 @@ public:
 	FGameplayTag BasicAttackImpactEffectTag{};
 };
 
+UENUM()
+enum class ENetherCrownBasicAttackState : uint8
+{
+	CanAttack,
+	CannotAttack,
+	Attacking,
+	NotAttacking,
+	CanQueueNextCombo,
+	CannotQueueNextCombo,
+	ComboQueued
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownBasicAttackComponent : public UActorComponent
 {
@@ -33,15 +46,17 @@ class NETHERCROWN_API UNetherCrownBasicAttackComponent : public UActorComponent
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStopOrStartBasicAttackAnim, const bool);
 
 public:
+	UNetherCrownBasicAttackComponent();
+
 	void RequestBasicAttack();
 
 	void HandleEnableComboWindow();
 	void HandleDisableComboWindow();
-	void HandleEnableHitTrace();
+	void HandleEnableHitTrace() const;
 
-	void SetCanAttack(const bool InbCanAttack) { bCanAttack = InbCanAttack; }
+	void SetCanAttack(const bool InbCanAttack);
 
-	bool IsAttacking() const { return bIsAttacking; }
+	bool IsAttacking() const { return BasicAttackState == ENetherCrownBasicAttackState::Attacking; }
 
 	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
 
@@ -51,6 +66,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	void CacheBasicAttackMontage();
+	void CacheCharacter();
+
 	void CalculateNextComboCount();
 
 	void StartAttackBasic();
@@ -99,16 +117,21 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UCameraShakeBase> ApplyDamageCameraShakeClass{};
 
+	UPROPERTY(EditDefaultsOnly)
+	float AutoTargetingRadius{ 130.0f };
+
 	int32 CurrentComboCount{ 1 };
 
-	bool bCanQueueNextCombo{ false };
-	bool bHasQueuedNextCombo{ false };
-	bool bCanInputFirstAttack{ true };
-	bool bCanAttack{ false };
-	bool bIsAttacking{ false };
+	ENetherCrownBasicAttackState BasicAttackState{ ENetherCrownBasicAttackState::CannotAttack };
 
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownBasicAttackComponentTagData BasicAttackComponentTagData{};
+
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> CachedBasicAttackMontage;
+
+	UPROPERTY()
+	TObjectPtr<ANetherCrownCharacter> CachedCharacter;
 
 	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
 };

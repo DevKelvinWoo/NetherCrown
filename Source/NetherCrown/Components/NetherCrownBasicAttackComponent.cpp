@@ -17,23 +17,48 @@
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
+UNetherCrownBasicAttackComponent::UNetherCrownBasicAttackComponent()
+{
+	PrimaryComponentTick.bCanEverTick = false;
+	SetIsReplicatedByDefault(true);
+}
+
 void UNetherCrownBasicAttackComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	CacheCharacter();
+
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
 	}
 
-	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
 	if (!ensureAlways(IsValid(EquipComponent)))
 	{
 		return;
 	}
 
 	EquipComponent->GetOnEquipWeapon().AddUObject(this, &ThisClass::HandleOnEquipWeapon);
+
+	CacheBasicAttackMontage();
+}
+
+void UNetherCrownBasicAttackComponent::CacheBasicAttackMontage()
+{
+	if (BasicAttackAnimMontageSoft.IsNull())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("BasicAttackAnimMontage is null %hs"), __FUNCTION__);
+		return;
+	}
+
+	CachedBasicAttackMontage = BasicAttackAnimMontageSoft.LoadSynchronous();
+}
+
+void UNetherCrownBasicAttackComponent::CacheCharacter()
+{
+	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
 }
 
 void UNetherCrownBasicAttackComponent::RequestBasicAttack()
@@ -45,18 +70,18 @@ void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 
 void UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Implementation()
 {
-	if (!bCanAttack)
+	if (BasicAttackState == ENetherCrownBasicAttackState::CannotAttack)
 	{
 		return;
 	}
 
 	Multicast_AutoTargetEnemy();
 
-	if (bCanQueueNextCombo)
+	if (BasicAttackState == ENetherCrownBasicAttackState::CanQueueNextCombo)
 	{
-		bHasQueuedNextCombo = true;
+		BasicAttackState = ENetherCrownBasicAttackState::ComboQueued;
 	}
-	else if (bCanInputFirstAttack)
+	else if (BasicAttackState == ENetherCrownBasicAttackState::CanAttack)
 	{
 		StartAttackBasic();
 	}
@@ -64,8 +89,6 @@ void UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Implementation(
 
 void UNetherCrownBasicAttackComponent::StartAttackBasic()
 {
-	bCanInputFirstAttack = false;
-
 	if (ComboMontageSectionMap.IsEmpty())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
@@ -89,14 +112,7 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 		return;
 	}
 
-	UAnimMontage* BasicAttackAnimMontage{ BasicAttackAnimMontageSoft.LoadSynchronous() };
-	if (!ensureAlways(IsValid(BasicAttackAnimMontage)))
-	{
-		return;
-	}
-
-	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	const USkeletalMeshComponent* OwnerCharacterMesh{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr };
+	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter ? CachedCharacter->GetMesh() : nullptr };
 	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr};
 	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ Cast<UNetherCrownCharacterAnimInstance>(AnimInstance) };
 	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
@@ -104,9 +120,13 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 		return;
 	}
 
-	bIsAttacking = true;
+	BasicAttackState = ENetherCrownBasicAttackState::Attacking;
 
-	NetherCrownCharacterAnimInstance->Montage_Play(BasicAttackAnimMontage);
+	if (!ensureAlways(IsValid(CachedBasicAttackMontage)))
+	{
+		return;
+	}
+	NetherCrownCharacterAnimInstance->Montage_Play(CachedBasicAttackMontage);
 	NetherCrownCharacterAnimInstance->Montage_JumpToSection(*SectionName);
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 
@@ -117,13 +137,12 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 
 void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool bEnable) const
 {
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
 	}
 
-	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
 	if (!ensureAlways(IsValid(EquipComponent)))
 	{
 		return;
@@ -146,17 +165,14 @@ void UNetherCrownBasicAttackComponent::Multicast_AutoTargetEnemy_Implementation(
 
 void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 {
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
 	}
 
 	TArray<AActor*> OverlappedActors{};
-	constexpr float SphereRadius{ 130.0f };
-
 	const TArray<TEnumAsByte<EObjectTypeQuery>>& EnemyTypes{ UEngineTypes::ConvertToObjectType(ECC_Enemy) };
-	UKismetSystemLibrary::SphereOverlapActors(this, OwnerCharacter->GetActorLocation(), SphereRadius, EnemyTypes,
+	UKismetSystemLibrary::SphereOverlapActors(this, CachedCharacter->GetActorLocation(), AutoTargetingRadius, EnemyTypes,
 		ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors);
 
 	if (OverlappedActors.IsEmpty())
@@ -169,8 +185,8 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 	{
 		if (IsValid(AutoTargetActor))
 		{
-			const double DistanceToOverlappedActor{ UKismetMathLibrary::Distance2D(FVector2D(OwnerCharacter->GetActorLocation() ), FVector2D(OverlappedActor->GetActorLocation())) };
-			const double DistanceToAutoTargetActor{ UKismetMathLibrary::Distance2D(FVector2D(OwnerCharacter->GetActorLocation() ), FVector2D(AutoTargetActor->GetActorLocation())) };
+			const double DistanceToOverlappedActor{ UKismetMathLibrary::Distance2D(FVector2D(CachedCharacter->GetActorLocation() ), FVector2D(OverlappedActor->GetActorLocation())) };
+			const double DistanceToAutoTargetActor{ UKismetMathLibrary::Distance2D(FVector2D(CachedCharacter->GetActorLocation() ), FVector2D(AutoTargetActor->GetActorLocation())) };
 
 			if (DistanceToOverlappedActor < DistanceToAutoTargetActor)
 			{
@@ -183,8 +199,8 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 		}
 	}
 
-	const FRotator& AutoTargetRotation{ UKismetMathLibrary::FindLookAtRotation(OwnerCharacter->GetActorLocation(), AutoTargetActor->GetActorLocation()) };
-	OwnerCharacter->SetActorRotation(AutoTargetRotation);
+	const FRotator& AutoTargetRotation{ UKismetMathLibrary::FindLookAtRotation(CachedCharacter->GetActorLocation(), AutoTargetActor->GetActorLocation()) };
+	CachedCharacter->SetActorRotation(AutoTargetRotation);
 }
 
 void UNetherCrownBasicAttackComponent::Server_ApplyDamageToHitEnemy_Implementation(AActor* HitEnemy)
@@ -204,27 +220,32 @@ void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactEffect_Implementat
 
 void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) const
 {
-	UGameplayStatics::ApplyDamage(HitEnemy, CalculateBasicAttackDamage(), GetOwner()->GetInstigatorController(), GetOwner(), UDamageType::StaticClass());
+	if (!IsValid(CachedCharacter))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CachedCharacter is invalid %hs"), __FUNCTION__);
+		return;
+	}
+
+	UGameplayStatics::ApplyDamage(HitEnemy, CalculateBasicAttackDamage(), CachedCharacter->GetInstigatorController(), CachedCharacter, UDamageType::StaticClass());
 }
 
 void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeapon)
 {
-	if (GetOwner()->HasAuthority())
+	if (IsValid(CachedCharacter) && CachedCharacter->HasAuthority())
 	{
-		bCanAttack = bEquipWeapon;
+		BasicAttackState = bEquipWeapon ? ENetherCrownBasicAttackState::CanAttack : ENetherCrownBasicAttackState::CannotAttack;
 	}
 }
 
 int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 {
 	//@NOTE : Character의 Stat의 공격력, 현재 장착중인 Weapon의 공격력을 이용하여 데미지 계산을 한다
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return 0;
 	}
 
-	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(OwnerCharacter->GetPlayerState()) };
+	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(CachedCharacter->GetPlayerState()) };
 	check(OwnerPlayerState);
 
 	const UNetherCrownPlayerStatComponent* OwnerChracterStatComponent{ OwnerPlayerState->GetNetherCrownPlayerStatComponent() };
@@ -236,7 +257,7 @@ int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 	const FNetherCrownPlayerStatData& StatData{ OwnerChracterStatComponent->GetPlayerStatData() };
 	const int32 AttackDamage{ StatData.AttackDamage };
 
-	const UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
 	if (!ensureAlways(IsValid(EquipComponent)))
 	{
 		return 0;
@@ -250,13 +271,12 @@ int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 
 void UNetherCrownBasicAttackComponent::PlayHitImpactCameraShake() const
 {
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
 	}
 
-	ANetherCrownPlayerController* OwnerPlayerController{ Cast<ANetherCrownPlayerController>(OwnerCharacter->GetController()) };
+	ANetherCrownPlayerController* OwnerPlayerController{ Cast<ANetherCrownPlayerController>(CachedCharacter->GetController()) };
 	check(OwnerPlayerController);
 
 	APlayerCameraManager* CameraManager{ OwnerPlayerController->PlayerCameraManager };
@@ -267,22 +287,21 @@ void UNetherCrownBasicAttackComponent::PlayHitImpactCameraShake() const
 
 void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
 {
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
 	}
 
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetOwner(), BasicAttackComponentTagData.BasicAttackGruntSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedCharacter, BasicAttackComponentTagData.BasicAttackGruntSoundTag);
 
-	UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter->GetEquipComponent() };
+	UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
 	if (!ensureAlways(EquipComponent))
 	{
 		return;
 	}
 
 	const FGameplayTag& SwingWeaponSoundTag{ EquipComponent->GetEquippedWeaponTagData().WeaponSwingSound };
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetOwner(), SwingWeaponSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedCharacter, SwingWeaponSoundTag);
 }
 
 void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLocation) const
@@ -292,19 +311,17 @@ void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLo
 	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
 	SpawnTransform.SetScale3D(FVector(1.0f));
 
-	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(GetOwner(), BasicAttackComponentTagData.BasicAttackImpactEffectTag, SpawnTransform);
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedCharacter, BasicAttackComponentTagData.BasicAttackImpactEffectTag, SpawnTransform);
 }
 
 void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation)
 {
-	AActor* OwnerActor = GetOwner();
-	ANetherCrownCharacter* OwnerCharacter = Cast<ANetherCrownCharacter>(OwnerActor);
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
 	}
 
-	if (!OwnerCharacter->IsLocallyControlled()) //@NOTE : SimulatedProxy Role Character의 실행 방지
+	if (!CachedCharacter->IsLocallyControlled()) //@NOTE : SimulatedProxy Role Character의 실행 방지
 	{
 		return;
 	}
@@ -329,32 +346,24 @@ void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 void UNetherCrownBasicAttackComponent::HandleEnableComboWindow()
 {
 	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
-	AActor* Owner{ GetOwner() };
-	check(Owner);
-
-	if (Owner->HasAuthority())
+	if (IsValid(CachedCharacter) && CachedCharacter->HasAuthority())
 	{
-		bCanQueueNextCombo = true;
+		BasicAttackState = ENetherCrownBasicAttackState::CanQueueNextCombo;
 	}
 }
 
 void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 {
 	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
-	AActor* Owner{ GetOwner() };
-	check(Owner);
-
-	if (Owner->HasAuthority())
+	if (IsValid(CachedCharacter) && CachedCharacter->HasAuthority())
 	{
-		bIsAttacking = false;
-		bCanQueueNextCombo = false;
-
-		if (!bHasQueuedNextCombo)
+		if (BasicAttackState != ENetherCrownBasicAttackState::ComboQueued)
 		{
+			BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
+
 			SetEquippedWeaponTraceEnable(false);
 
 			CurrentComboCount = 1;
-			bCanInputFirstAttack = true;
 
 			OnStopOrStartBasicAttackAnim.Broadcast(true);
 
@@ -363,13 +372,13 @@ void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 
 		CalculateNextComboCount();
 
-		bHasQueuedNextCombo = false;
-
 		if (ComboMontageSectionMap.IsEmpty())
 		{
 			UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
 			return;
 		}
+
+		BasicAttackState = ENetherCrownBasicAttackState::CanQueueNextCombo;
 
 		const FName* CurrentComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
 		Multicast_PlayAndJumpToComboMontageSection(*CurrentComboMontageSectionName);
@@ -378,7 +387,12 @@ void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 	SetEquippedWeaponTraceEnable(false);
 }
 
-void UNetherCrownBasicAttackComponent::HandleEnableHitTrace()
+void UNetherCrownBasicAttackComponent::HandleEnableHitTrace() const
 {
 	SetEquippedWeaponTraceEnable(true);
+}
+
+void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
+{
+	BasicAttackState = InbCanAttack ? ENetherCrownBasicAttackState::CanAttack : ENetherCrownBasicAttackState::CannotAttack;
 }
