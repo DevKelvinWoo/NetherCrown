@@ -11,19 +11,9 @@
 
 UNetherCrownEquipComponent::UNetherCrownEquipComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	SetIsReplicatedByDefault(true);
-}
-
-void UNetherCrownEquipComponent::BeginPlay()
-{
-	Super::BeginPlay();
-}
-
-void UNetherCrownEquipComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UNetherCrownEquipComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -31,6 +21,13 @@ void UNetherCrownEquipComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, EquippedWeapon);
+}
+
+void UNetherCrownEquipComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CacheEquipMontage();
 }
 
 void UNetherCrownEquipComponent::SetEquipableWeapon(ANetherCrownWeapon* InEquipableWeapon)
@@ -99,13 +96,12 @@ void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementa
 		return;
 	}
 
-	UAnimMontage* EquipAnimMontage{ EquipAnimMontageSoft.LoadSynchronous() };
-	if (!ensureAlways(IsValid(EquipAnimMontage)))
+	if (!ensureAlways(IsValid(CachedEquipMontage)))
 	{
 		return;
 	}
 
-	NetherCrownCharacterAnimInstance->Montage_Play(EquipAnimMontage);
+	NetherCrownCharacterAnimInstance->Montage_Play(CachedEquipMontage);
 
 	if (OwnerCharacter->IsLocallyControlled())
 	{
@@ -159,7 +155,7 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 {
 	if (StowWeaponContainer.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("StowWeaponContainer is Empty %hs"), __FUNCTION__);
+		UE_LOG(LogTemp, Warning, TEXT("StowWeaponContainerMap is Empty %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -205,4 +201,12 @@ void UNetherCrownEquipComponent::StowCurrentWeapon()
 	AttachWeaponToCharacterMesh(EquippedWeapon, StowWeaponSocketName);
 
 	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ StowWeaponPosition, EquippedWeapon });
+}
+
+void UNetherCrownEquipComponent::CacheEquipMontage()
+{
+	if (!EquipAnimMontageSoft.IsNull())
+	{
+		CachedEquipMontage = EquipAnimMontageSoft.LoadSynchronous();
+	}
 }

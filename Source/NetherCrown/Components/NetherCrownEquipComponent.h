@@ -58,9 +58,8 @@ public:
 	FOnEquipEndOrStart& GetOnEquipEndOrStart() { return OnEquipEndOrStart; }
 
 protected:
-	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void BeginPlay() override;
 
 private:
 	UFUNCTION(Server, Reliable)
@@ -79,6 +78,8 @@ private:
 
 	void StowCurrentWeapon();
 
+	void CacheEquipMontage();
+
 	bool bCanEquip{ false };
 
 	TWeakObjectPtr<ANetherCrownWeapon> EquipableWeaponWeak{};
@@ -91,6 +92,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownEquipComponentTagData EquipComponentTagData{};
+
+	UPROPERTY()
+	TObjectPtr<UAnimMontage> CachedEquipMontage;
 
 	TArray<TPair<EStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
 
