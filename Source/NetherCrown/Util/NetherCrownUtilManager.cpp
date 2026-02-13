@@ -34,7 +34,7 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 
 	FNetherCrownSoundData** FoundSoundDataRow = OutRows.FindByPredicate([&SoundTag](FNetherCrownSoundData* Row)
 	{
-		return Row->SoundTag == SoundTag;
+		return Row->GetSoundTag() == SoundTag;
 	});
 
 	if (!FoundSoundDataRow)
@@ -49,7 +49,7 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 	{
 		return nullptr;
 	}
-	return FoundSoundData->SoundCue.LoadSynchronous();
+	return FoundSoundData->GetSoundCue().LoadSynchronous();
 }
 
 void FNetherCrownUtilManager::PlaySound2DByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& SoundTag)

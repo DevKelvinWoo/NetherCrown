@@ -11,8 +11,13 @@ class USoundCue;
 USTRUCT(BlueprintType)
 struct FNetherCrownSoundData : public FTableRowBase
 {
-	GENERATED_BODY();
+	GENERATED_BODY()
 
+public:
+	const FGameplayTag& GetSoundTag() const { return SoundTag; }
+	TSoftObjectPtr<USoundCue> GetSoundCue() const { return SoundCue; }
+
+private:
 	UPROPERTY(EditAnywhere)
 	FGameplayTag SoundTag;
 
