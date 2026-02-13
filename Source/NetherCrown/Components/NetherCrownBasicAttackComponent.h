@@ -88,14 +88,11 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_RequestBasicAttack();
 
-	UFUNCTION(Server, Reliable)
-	void Server_ApplyDamageToHitEnemy(AActor* HitEnemy);
-
-	UFUNCTION(Server, Reliable)
-	void Server_SpawnHitImpactEffect(const FVector& HitLocation);
-
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayHitImpactEffect(const FVector& HitLocation);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayHitImpactCameraShake();
 
 	UFUNCTION()
 	void ApplyDamageInternal(AActor* HitEnemy) const;

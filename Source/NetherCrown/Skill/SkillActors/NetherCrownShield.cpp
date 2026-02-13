@@ -11,9 +11,8 @@ ANetherCrownShield::ANetherCrownShield()
 	ShieldMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("ShieldMeshComponent"));
 	ShieldMeshComponent->SetupAttachment(RootComponent);
 
-	bNetLoadOnClient = true;
-	bReplicates = true;
-	SetReplicatingMovement(true);
+	bReplicates = false;
+	SetReplicatingMovement(false);
 }
 
 void ANetherCrownShield::DestroyShield()

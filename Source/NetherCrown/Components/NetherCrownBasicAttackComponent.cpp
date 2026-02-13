@@ -203,19 +203,14 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 	CachedCharacter->SetActorRotation(AutoTargetRotation);
 }
 
-void UNetherCrownBasicAttackComponent::Server_ApplyDamageToHitEnemy_Implementation(AActor* HitEnemy)
-{
-	ApplyDamageInternal(HitEnemy);
-}
-
-void UNetherCrownBasicAttackComponent::Server_SpawnHitImpactEffect_Implementation(const FVector& HitLocation)
-{
-	Multicast_PlayHitImpactEffect(HitLocation);
-}
-
 void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactEffect_Implementation(const FVector& HitLocation)
 {
 	SpawnHitImpactEffect(HitLocation);
+}
+
+void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactCameraShake_Implementation()
+{
+	PlayHitImpactCameraShake();
 }
 
 void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) const
@@ -276,6 +271,11 @@ void UNetherCrownBasicAttackComponent::PlayHitImpactCameraShake() const
 		return;
 	}
 
+	if (!CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	ANetherCrownPlayerController* OwnerPlayerController{ Cast<ANetherCrownPlayerController>(CachedCharacter->GetController()) };
 	check(OwnerPlayerController);
 
@@ -316,12 +316,8 @@ void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLo
 
 void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation)
 {
+	//@NOTE : Only Server Called
 	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
-	if (!CachedCharacter->IsLocallyControlled()) //@NOTE : SimulatedProxy Role Character의 실행 방지
 	{
 		return;
 	}
@@ -331,10 +327,10 @@ void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, c
 		return;
 	}
 
-	PlayHitImpactCameraShake();
+	Multicast_PlayHitImpactCameraShake();
+	Multicast_PlayHitImpactEffect(HitLocation);
 
-	Server_SpawnHitImpactEffect(HitLocation);
-	Server_ApplyDamageToHitEnemy(HitEnemy);
+	ApplyDamageInternal(HitEnemy);
 }
 
 void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
