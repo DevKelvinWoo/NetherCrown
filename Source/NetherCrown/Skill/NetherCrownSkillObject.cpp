@@ -125,7 +125,13 @@ int32 UNetherCrownSkillObject::CalculatePhysicalSkillDamage() const
 		return 0;
 	}
 
-	const int32 EquippedWeaponDamage { EquipComponent->GetEquippedWeaponData()->WeaponAttackDamage };
+	const UNetherCrownWeaponData* EquippedWeaponData{ EquipComponent->GetEquippedWeaponData() };
+	if (!ensureAlways(IsValid(EquippedWeaponData)))
+	{
+		return 0;
+	}
+
+	const int32 EquippedWeaponDamage { EquippedWeaponData->GetWeaponAttackDamage() };
 	const int32 ResultSkillDamage{ EquippedWeaponDamage + SkillDamage + PlayerStatAttackDamage };
 	return ResultSkillDamage;
 }

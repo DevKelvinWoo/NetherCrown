@@ -69,7 +69,7 @@ void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser
 		return;
 	}
 
-	const int32 PhysicalPenetration{ WeaponData->PhysicalPenetration };
+	const int32 PhysicalPenetration{ WeaponData->GetPhysicalPenetration() };
 
 	check(EnemyStatComponent);
 	const FNetherCrownEnemyStatData& EnemyStatData{ EnemyStatComponent->GetEnemyStatData() };

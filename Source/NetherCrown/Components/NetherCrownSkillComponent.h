@@ -17,13 +17,13 @@ class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
 public:
 	UNetherCrownSkillComponent();
 
-	void ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
+	void ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 	void SetActiveSkillSlowPlayRate(const bool bBeginSlow);
 
 	FOnStopOrStartSkill& GetOnStopOrStartSkill() { return OnStopOrStartSkill; }
 
-	bool CanActiveSkill() const;
+	bool CanActivateSkill() const;
 
 	ENetherCrownSkillKeyEnum GetActiveSkillKeyEnum() const { return ActiveSkillKeyEnum; }
 
@@ -37,7 +37,7 @@ private:
 	void ConstructSkillObjects();
 
 	UFUNCTION(Server, Reliable)
-	void Server_ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
+	void Server_ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlaySkillCosmetics(UNetherCrownSkillObject* FoundSkillObject);

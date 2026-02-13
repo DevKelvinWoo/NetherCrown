@@ -308,7 +308,7 @@ void ANetherCrownCharacter::ActiveQSkill(const FInputActionValue& Value)
 		if (bActiveQSkillInput)
 		{
 			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::QSkill);
+			NetherCrownSkillComponent->ActivateSkill(ENetherCrownSkillKeyEnum::QSkill);
 		}
 	}
 }
@@ -321,7 +321,7 @@ void ANetherCrownCharacter::ActiveESkill(const FInputActionValue& Value)
 		if (bActiveESkillInput)
 		{
 			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::ESkill);
+			NetherCrownSkillComponent->ActivateSkill(ENetherCrownSkillKeyEnum::ESkill);
 		}
 	}
 }
@@ -334,7 +334,7 @@ void ANetherCrownCharacter::ActiveRSkill(const FInputActionValue& Value)
 		if (bActiveRSkillInput)
 		{
 			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::RSkill);
+			NetherCrownSkillComponent->ActivateSkill(ENetherCrownSkillKeyEnum::RSkill);
 		}
 	}
 }
@@ -347,7 +347,7 @@ void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value)
 		if (bActiveShiftSkillInput)
 		{
 			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActiveSkill(ENetherCrownSkillKeyEnum::ShiftSkill);
+			NetherCrownSkillComponent->ActivateSkill(ENetherCrownSkillKeyEnum::ShiftSkill);
 		}
 	}
 }

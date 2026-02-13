@@ -13,6 +13,10 @@ class NETHERCROWN_API UNetherCrownWeaponData : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	int32 GetWeaponAttackDamage() const { return WeaponAttackDamage; }
+	int32 GetPhysicalPenetration() const { return PhysicalPenetration; }
+
+private:
 	UPROPERTY(EditAnywhere)
 	FString WeaponName{};
 
@@ -41,6 +45,10 @@ struct FNetherCrownWeaponDataTableRow : public FTableRowBase
 	GENERATED_BODY()
 
 public:
+	const FGameplayTag& GetWeaponTag() const { return WeaponTag; }
+	TSoftObjectPtr<UNetherCrownWeaponData> GetWeaponData() const { return WeaponData; }
+
+private:
 	UPROPERTY(EditAnywhere)
 	FGameplayTag WeaponTag{};
 

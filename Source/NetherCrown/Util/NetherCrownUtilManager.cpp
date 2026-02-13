@@ -93,7 +93,7 @@ UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(cons
 
 	FNetherCrownWeaponDataTableRow** FoundWeaponDataTableRow{ OutRows.FindByPredicate([&WeaponTag](FNetherCrownWeaponDataTableRow* WeaponDataTableRow)
 	{
-		return WeaponTag == WeaponDataTableRow->WeaponTag;
+		return WeaponTag == WeaponDataTableRow->GetWeaponTag();
 	}) };
 
 	if (!FoundWeaponDataTableRow)
@@ -109,7 +109,7 @@ UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(cons
 		return nullptr;
 	}
 
-	return FoundWeaponData->WeaponData.LoadSynchronous();
+	return FoundWeaponData->GetWeaponData().LoadSynchronous();
 }
 
 UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGameplayTag& EffectTag)

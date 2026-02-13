@@ -18,9 +18,9 @@ UNetherCrownSkillComponent::UNetherCrownSkillComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-void UNetherCrownSkillComponent::ActiveSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum)
+void UNetherCrownSkillComponent::ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
-	Server_ActiveSkill(SkillKeyEnum);
+	Server_ActivateSkill(SkillKeyEnum);
 }
 
 void UNetherCrownSkillComponent::SetActiveSkillSlowPlayRate(const bool bBeginSlow)
@@ -41,7 +41,7 @@ void UNetherCrownSkillComponent::SetActiveSkillSlowPlayRate(const bool bBeginSlo
 	FoundSkillObject->SetSkillMontageSlowPlayRate(SkillPlayRate);
 }
 
-bool UNetherCrownSkillComponent::CanActiveSkill() const
+bool UNetherCrownSkillComponent::CanActivateSkill() const
 {
 	const  ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
 	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter ? OwnerCharacter->GetBasicAttackComponent() : nullptr };
@@ -130,9 +130,9 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 	}
 }
 
-void UNetherCrownSkillComponent::Server_ActiveSkill_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
+void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
-	if (!CanActiveSkill())
+	if (!CanActivateSkill())
 	{
 		return;
 	}
@@ -165,8 +165,7 @@ void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNe
 	FoundSkillObject->PlaySkillCosmetics();
 }
 
-void UNetherCrownSkillComponent::Multicast_SetActiveSkillKeyEnum_Implementation(
-	const ENetherCrownSkillKeyEnum SkillKeyEnum)
+void UNetherCrownSkillComponent::Multicast_SetActiveSkillKeyEnum_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
 	ActiveSkillKeyEnum = SkillKeyEnum;
 }

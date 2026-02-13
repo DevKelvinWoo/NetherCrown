@@ -243,7 +243,7 @@ int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 	}
 
 	const UNetherCrownWeaponData* EquippedWeaponData{ EquipComponent->GetEquippedWeaponData() };
-	const int32 WeaponAttackDamage{ EquippedWeaponData ? EquippedWeaponData->WeaponAttackDamage : 0 };
+	const int32 WeaponAttackDamage{ EquippedWeaponData ? EquippedWeaponData->GetWeaponAttackDamage() : 0 };
 
 	return AttackDamage + WeaponAttackDamage;
 }

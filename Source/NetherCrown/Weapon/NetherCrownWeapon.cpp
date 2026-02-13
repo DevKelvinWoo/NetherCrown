@@ -55,6 +55,11 @@ void ANetherCrownWeapon::InitWeaponTraceComponentSettings() const
 
 void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const
 {
+	if (CachedWeaponAuraMap.IsEmpty())
+	{
+		return;
+	}
+
 	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
 	if (!ensureAlways(IsValid(OwnerCharacter)))
 	{
@@ -70,10 +75,10 @@ void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENeth
 
 	if (bActive && SkillKeyEnum != ENetherCrownSkillKeyEnum::None)
 	{
-		UNiagaraSystem* FoundWeaponAuraNiagaraSystem{ WeaponAuraMap.Find(SkillKeyEnum)->LoadSynchronous() };
-		if (IsValid(FoundWeaponAuraNiagaraSystem))
+		const TObjectPtr<UNiagaraSystem>* FoundWeaponAuraNiagaraSystem = CachedWeaponAuraMap.Find(SkillKeyEnum);
+		if (FoundWeaponAuraNiagaraSystem)
 		{
-			WeaponAuraNiagaraComponent->SetAsset(FoundWeaponAuraNiagaraSystem);
+			WeaponAuraNiagaraComponent->SetAsset(*FoundWeaponAuraNiagaraSystem);
 			WeaponAuraNiagaraComponent->Activate();
 		}
 	}
