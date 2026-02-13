@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownPlayerController.h"
 
@@ -18,9 +18,16 @@ void ANetherCrownPlayerController::SetupInputComponent()
 	AddIMCAndBindAction();
 }
 
-void ANetherCrownPlayerController::Tick(float DeltaTime)
+void ANetherCrownPlayerController::OnPossess(APawn* InPawn)
 {
-	Super::Tick(DeltaTime);
+	Super::OnPossess(InPawn);
+	CachedCharacter = Cast<ANetherCrownCharacter>(InPawn);
+}
+
+void ANetherCrownPlayerController::AcknowledgePossession(APawn* P)
+{
+	Super::AcknowledgePossession(P);
+	CachedCharacter = Cast<ANetherCrownCharacter>(P);
 }
 
 void ANetherCrownPlayerController::AddIMCAndBindAction()
@@ -43,158 +50,125 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 		return;
 	}
 
-	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::MoveCharacter);
+	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::HandleInputMoveCharacter);
 	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ThisClass::HandleOnMoveActionCompleted);
-	EnhancedPlayerInputComponent->BindAction(LookAtAction, ETriggerEvent::Triggered, this, &ThisClass::LookAtCharacter);
-	EnhancedPlayerInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::JumpCharacter);
-	EnhancedPlayerInputComponent->BindAction(AttackBasicAction, ETriggerEvent::Started, this, &ThisClass::RequestBasicAttack);
-	EnhancedPlayerInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ThisClass::EquipCharacter);
-	EnhancedPlayerInputComponent->BindAction(ChangeWeaponAction, ETriggerEvent::Started, this, &ThisClass::ChangeWeapon);
-	EnhancedPlayerInputComponent->BindAction(QSkillAction, ETriggerEvent::Started, this, &ThisClass::ActiveQSkill);
-	EnhancedPlayerInputComponent->BindAction(ESkillAction, ETriggerEvent::Started, this, &ThisClass::ActiveESkill);
-	EnhancedPlayerInputComponent->BindAction(RSkillAction, ETriggerEvent::Started, this, &ThisClass::ActiveRSkill);
-	EnhancedPlayerInputComponent->BindAction(ShiftSkillAction, ETriggerEvent::Started, this, &ThisClass::ActiveShiftSkill);
+	EnhancedPlayerInputComponent->BindAction(LookAtAction, ETriggerEvent::Triggered, this, &ThisClass::HandleInputLookAtCharacter);
+	EnhancedPlayerInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ThisClass::HandleInputJumpCharacter);
+	EnhancedPlayerInputComponent->BindAction(AttackBasicAction, ETriggerEvent::Started, this, &ThisClass::HandleInputRequestBasicAttack);
+	EnhancedPlayerInputComponent->BindAction(EquipAction, ETriggerEvent::Started, this, &ThisClass::HandleInputEquipCharacter);
+	EnhancedPlayerInputComponent->BindAction(ChangeWeaponAction, ETriggerEvent::Started, this, &ThisClass::HandleInputChangeWeapon);
+	EnhancedPlayerInputComponent->BindAction(QSkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveQSkill);
+	EnhancedPlayerInputComponent->BindAction(ESkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveESkill);
+	EnhancedPlayerInputComponent->BindAction(RSkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveRSkill);
+	EnhancedPlayerInputComponent->BindAction(ShiftSkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveShiftSkill);
 }
 
-void ANetherCrownPlayerController::MoveCharacter(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputMoveCharacter(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->MoveCharacter(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::MoveCharacter, InActionValue);
 }
 
-void ANetherCrownPlayerController::LookAtCharacter(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputLookAtCharacter(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->LookAtCharacter(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::LookAtCharacter, InActionValue);
 }
 
-void ANetherCrownPlayerController::JumpCharacter(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputJumpCharacter(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->JumpCharacter(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::JumpCharacter, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleOnMoveActionCompleted()
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->HandleOnMoveActionCompleted();
+	ExecuteCharacterAction(&ANetherCrownCharacter::HandleOnMoveActionCompleted);
 }
 
-void ANetherCrownPlayerController::RequestBasicAttack(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputRequestBasicAttack(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->RequestBasicAttack(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::RequestBasicAttack, InActionValue);
 }
 
-void ANetherCrownPlayerController::EquipCharacter(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputEquipCharacter(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->EquipCharacter(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::EquipCharacter, InActionValue);
 }
 
-void ANetherCrownPlayerController::ChangeWeapon(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputChangeWeapon(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->ChangeWeapon(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::ChangeWeapon, InActionValue);
 }
 
-void ANetherCrownPlayerController::ActiveQSkill(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputActiveQSkill(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->ActiveQSkill(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveQSkill, InActionValue);
 }
 
-void ANetherCrownPlayerController::ActiveESkill(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputActiveESkill(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->ActiveESkill(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveESkill, InActionValue);
 }
 
-void ANetherCrownPlayerController::ActiveRSkill(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputActiveRSkill(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->ActiveRSkill(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveRSkill, InActionValue);
 }
 
-void ANetherCrownPlayerController::ActiveShiftSkill(const FInputActionValue& InActionValue)
+void ANetherCrownPlayerController::HandleInputActiveShiftSkill(const FInputActionValue& InActionValue)
 {
-	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(GetCharacter()) };
-	if (!ensureAlways(NetherCrownCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Possessed Character in %hs"), __FUNCTION__);
-
 		return;
 	}
 
-	NetherCrownCharacter->ActiveShiftSkill(InActionValue);
+	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveShiftSkill, InActionValue);
 }

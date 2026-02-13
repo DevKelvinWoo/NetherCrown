@@ -1,8 +1,9 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NetherCrownCharacter.h"
 #include "GameFramework/PlayerController.h"
 #include "NetherCrownPlayerController.generated.h"
 
@@ -19,7 +20,8 @@ public:
 
 protected:
 	virtual void SetupInputComponent() override;
-	virtual void Tick(float DeltaTime) override;
+	virtual void OnPossess(APawn* InPawn) override;
+	virtual void AcknowledgePossession(APawn* P) override;
 
 private:
 	UPROPERTY(EditDefaultsOnly)
@@ -49,25 +51,42 @@ private:
 	void AddIMCAndBindAction();
 
 	UFUNCTION()
-	void MoveCharacter(const FInputActionValue& InActionValue);
+	void HandleInputMoveCharacter(const FInputActionValue& InActionValue);
 	UFUNCTION()
-	void LookAtCharacter(const FInputActionValue& InActionValue);
+	void HandleInputLookAtCharacter(const FInputActionValue& InActionValue);
 	UFUNCTION()
-	void JumpCharacter(const FInputActionValue& InActionValue);
+	void HandleInputJumpCharacter(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void HandleOnMoveActionCompleted();
 	UFUNCTION()
-	void RequestBasicAttack(const FInputActionValue& InActionValue);
+	void HandleInputRequestBasicAttack(const FInputActionValue& InActionValue);
 	UFUNCTION()
-	void EquipCharacter(const FInputActionValue& InActionValue);
+	void HandleInputEquipCharacter(const FInputActionValue& InActionValue);
 	UFUNCTION()
-	void ChangeWeapon(const FInputActionValue& InActionValue);
+	void HandleInputChangeWeapon(const FInputActionValue& InActionValue);
 	UFUNCTION()
-	void ActiveQSkill(const FInputActionValue& InActionValue);
+	void HandleInputActiveQSkill(const FInputActionValue& InActionValue);
 	UFUNCTION()
-	void ActiveESkill(const FInputActionValue& InActionValue);
+	void HandleInputActiveESkill(const FInputActionValue& InActionValue);
 	UFUNCTION()
-	void ActiveRSkill(const FInputActionValue& InActionValue);
+	void HandleInputActiveRSkill(const FInputActionValue& InActionValue);
 	UFUNCTION()
-	void ActiveShiftSkill(const FInputActionValue& InActionValue);
+	void HandleInputActiveShiftSkill(const FInputActionValue& InActionValue);
+
+	template<typename FuncType, typename... ArgsType>
+	void ExecuteCharacterAction(FuncType Func, ArgsType&&... Args);
+
+	UPROPERTY()
+	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 };
+
+template<typename FuncType, typename... ArgsType>
+void ANetherCrownPlayerController::ExecuteCharacterAction(FuncType Func, ArgsType&&... Args)
+{
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		return;
+	}
+
+	(CachedCharacter->*Func)(Forward<ArgsType>(Args)...);
+}
