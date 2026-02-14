@@ -30,6 +30,9 @@ private:
 	void ApplyBeginShieldMaterialParameterCurveFloat();
 	void ApplyEndShieldMaterialParameterCurveFloat();
 
+	void SetBeginShieldDynamicMaterialScalarParam() const;
+	void SetEndShieldDynamicMaterialScalarParam();
+
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UStaticMeshComponent> ShieldMeshComponent{};
 
@@ -50,5 +53,7 @@ private:
 
 	FTimerHandle ShieldMaterialCurveTimerHandle{};
 	float ShieldMaterialCurveElapsedTime{ 0.f };
-	const FName ShieldMaterialScalarParameterName{ TEXT("ShieldAlpha") };
+
+	UPROPERTY(EditDefaultsOnly)
+	FName ShieldMaterialScalarParameterName{ TEXT("ShieldAlpha") };
 };

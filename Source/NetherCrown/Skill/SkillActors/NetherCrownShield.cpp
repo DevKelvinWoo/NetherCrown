@@ -2,6 +2,8 @@
 
 #include "NetherCrownShield.h"
 
+#include "NetherCrown/Util/NetherCrownCurveTimerUtil.h"
+
 ANetherCrownShield::ANetherCrownShield()
 {
 	PrimaryActorTick.bCanEverTick = false;
@@ -35,15 +37,12 @@ void ANetherCrownShield::BeginPlay()
 void ANetherCrownShield::CreateShieldDynamicMaterialInstance()
 {
 	ShieldDynamicMaterialInstance = ShieldMeshComponent->CreateDynamicMaterialInstance(0);
-	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)))
-	{
-		return;
-	}
+	ensureAlways(IsValid(ShieldDynamicMaterialInstance));
 }
 
 void ANetherCrownShield::StartShieldMaterialCurveTimer(const bool bStartShield)
 {
-	UWorld* World{ GetWorld() };
+	const UWorld* World{ GetWorld() };
 	check(World);
 
 	ShieldMaterialCurveElapsedTime = 0.f;
@@ -70,27 +69,32 @@ void ANetherCrownShield::StartShieldMaterialCurveTimer(const bool bStartShield)
 
 void ANetherCrownShield::ApplyBeginShieldMaterialParameterCurveFloat()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
+	FNetherCrownCurveTimerData CurveTimerData{};
+	CurveTimerData.WorldContextObject = this;
+	CurveTimerData.Curve = CachedStartCurveFloat;
+	CurveTimerData.TimerHandle = &ShieldMaterialCurveTimerHandle;
+	CurveTimerData.CurveElapsedTime = &ShieldMaterialCurveElapsedTime;
+	CurveTimerData.CurveElapsedTimeOffset = 0.015f;
+	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetBeginShieldDynamicMaterialScalarParam(); };
 
-	if (!ensureAlways(IsValid(CachedStartCurveFloat)))
-	{
-		World->GetTimerManager().ClearTimer(ShieldMaterialCurveTimerHandle);
-		return;
-	}
+	FNetherCrownCurveTimerUtil::BeginTimerByFloatCurve(CurveTimerData);
+}
 
-	ShieldMaterialCurveElapsedTime += 0.015f;
+void ANetherCrownShield::ApplyEndShieldMaterialParameterCurveFloat()
+{
+	FNetherCrownCurveTimerData CurveTimerData{};
+	CurveTimerData.WorldContextObject = this;
+	CurveTimerData.Curve = CachedEndCurveFloat;
+	CurveTimerData.TimerHandle = &ShieldMaterialCurveTimerHandle;
+	CurveTimerData.CurveElapsedTime = &ShieldMaterialCurveElapsedTime;
+	CurveTimerData.CurveElapsedTimeOffset = 0.015f;
+	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetEndShieldDynamicMaterialScalarParam(); };
 
-	float Min{};
-	float Max{};
-	CachedStartCurveFloat->GetTimeRange(Min, Max);
+	FNetherCrownCurveTimerUtil::BeginTimerByFloatCurve(CurveTimerData);
+}
 
-	if (ShieldMaterialCurveElapsedTime > Max)
-	{
-		World->GetTimerManager().ClearTimer(ShieldMaterialCurveTimerHandle);
-		return;
-	}
-
+void ANetherCrownShield::SetBeginShieldDynamicMaterialScalarParam() const
+{
 	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)))
 	{
 		return;
@@ -100,29 +104,8 @@ void ANetherCrownShield::ApplyBeginShieldMaterialParameterCurveFloat()
 	ShieldDynamicMaterialInstance->SetScalarParameterValue(ShieldMaterialScalarParameterName, CurveValue);
 }
 
-void ANetherCrownShield::ApplyEndShieldMaterialParameterCurveFloat()
+void ANetherCrownShield::SetEndShieldDynamicMaterialScalarParam()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
-
-	if (!ensureAlways(IsValid(CachedEndCurveFloat)))
-	{
-		World->GetTimerManager().ClearTimer(ShieldMaterialCurveTimerHandle);
-		return;
-	}
-
-	ShieldMaterialCurveElapsedTime += 0.015f;
-
-	float Min{};
-	float Max{};
-	CachedEndCurveFloat->GetTimeRange(Min, Max);
-
-	if (ShieldMaterialCurveElapsedTime > Max)
-	{
-		World->GetTimerManager().ClearTimer(ShieldMaterialCurveTimerHandle);
-		return;
-	}
-
 	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)))
 	{
 		return;
@@ -134,6 +117,5 @@ void ANetherCrownShield::ApplyEndShieldMaterialParameterCurveFloat()
 	if (FMath::IsNearlyZero(CurveValue))
 	{
 		Destroy();
-		return;
 	}
 }
