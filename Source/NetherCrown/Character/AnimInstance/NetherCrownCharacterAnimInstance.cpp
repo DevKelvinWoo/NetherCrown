@@ -8,11 +8,25 @@
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
 
+void UNetherCrownCharacterAnimInstance::NativeInitializeAnimation()
+{
+	Super::NativeInitializeAnimation();
+
+	OwningCharacter = Cast<ANetherCrownCharacter>(GetOwningActor());
+	if (!ensureAlways(OwningCharacter))
+	{
+		return;
+	}
+
+	BasicAttackComponent = OwningCharacter->GetBasicAttackComponent();
+	EquipComponent = OwningCharacter->GetEquipComponent();
+	SkillComponent = OwningCharacter->GetSkillComponent();
+	CharacterMovementComponent = OwningCharacter->GetCharacterMovement();
+}
+
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter ? OwningCharacter->GetBasicAttackComponent() : nullptr};
-	if (!(IsValid(BasicAttackComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(BasicAttackComponent)))
 	{
 		return;
 	}
@@ -22,13 +36,12 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
 		return;
 	}
 
-	BasicAttackComponent->HandleEnableComboWindow();}
+	BasicAttackComponent->HandleEnableComboWindow();
+}
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter ? OwningCharacter->GetBasicAttackComponent() : nullptr };
-	if (!(IsValid(BasicAttackComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(BasicAttackComponent)))
 	{
 		return;
 	}
@@ -38,9 +51,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_EquipStart()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownEquipComponent* EquipComponent{ OwningCharacter ? OwningCharacter->GetEquipComponent() : nullptr };
-	if (!(IsValid(EquipComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(EquipComponent)))
 	{
 		return;
 	}
@@ -50,9 +61,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_EquipStart()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_EquipEnd()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownEquipComponent* EquipComponent{ OwningCharacter ? OwningCharacter->GetEquipComponent() : nullptr };
-	if (!(IsValid(EquipComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(EquipComponent)))
 	{
 		return;
 	}
@@ -62,9 +71,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_EquipEnd()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_HitTraceEnable()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwningCharacter ? OwningCharacter->GetBasicAttackComponent() : nullptr };
-	if (!(IsValid(BasicAttackComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(BasicAttackComponent)))
 	{
 		return;
 	}
@@ -79,9 +86,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_HitTraceEnable()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowBegin()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
-	if (!(IsValid(SkillComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(SkillComponent)))
 	{
 		return;
 	}
@@ -96,9 +101,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowBegin()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowEnd()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
-	if (!(IsValid(SkillComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(SkillComponent)))
 	{
 		return;
 	}
@@ -113,9 +116,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowEnd()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
-	if (!(IsValid(SkillComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(SkillComponent)))
 	{
 		return;
 	}
@@ -125,7 +126,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
 		return;
 	}
 
-	if (UNetherCrownBasicAttackComponent* BasicAttackComponent = OwningCharacter->GetBasicAttackComponent())
+	if (IsValid(BasicAttackComponent))
 	{
 		BasicAttackComponent->SetCanAttack(false);
 	}
@@ -135,9 +136,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillEnd()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
-	if (!(IsValid(SkillComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(SkillComponent)))
 	{
 		return;
 	}
@@ -147,7 +146,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillEnd()
 		return;
 	}
 
-	if (UNetherCrownBasicAttackComponent* BasicAttackComponent = OwningCharacter->GetBasicAttackComponent())
+	if (IsValid(BasicAttackComponent))
 	{
 		BasicAttackComponent->SetCanAttack(true);
 	}
@@ -157,9 +156,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillEnd()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementFly()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UCharacterMovementComponent* CharacterMovementComponent{ OwningCharacter ? OwningCharacter->GetCharacterMovement() : nullptr };
-	if (!(IsValid(CharacterMovementComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(CharacterMovementComponent)))
 	{
 		return;
 	}
@@ -169,9 +166,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementFly()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementWalk()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
-	UCharacterMovementComponent* CharacterMovementComponent{ OwningCharacter ? OwningCharacter->GetCharacterMovement() : nullptr };
-	if (!(IsValid(CharacterMovementComponent)))
+	if (!(IsValid(OwningCharacter)) || !(IsValid(CharacterMovementComponent)))
 	{
 		return;
 	}

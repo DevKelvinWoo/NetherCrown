@@ -20,19 +20,16 @@ void UNetherCrownKnightAnimInstance::AnimNotify_HitFrozenTempestSkill()
 
 void UNetherCrownKnightAnimInstance::AnimNotify_ActiveWeaponAuraNiagara()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
 	if (!(IsValid(OwningCharacter)) || OwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	const UNetherCrownSkillComponent* SkillComponent{ OwningCharacter->GetSkillComponent() };
 	if (!(IsValid(SkillComponent)))
 	{
 		return;
 	}
 
-	const UNetherCrownEquipComponent* EquipComponent{ OwningCharacter->GetEquipComponent() };
 	ANetherCrownWeapon* EquippedWeapon{ EquipComponent ? EquipComponent->GetEquippedWeapon() : nullptr };
 	if (!(IsValid(EquippedWeapon)))
 	{
@@ -45,13 +42,11 @@ void UNetherCrownKnightAnimInstance::AnimNotify_ActiveWeaponAuraNiagara()
 
 void UNetherCrownKnightAnimInstance::AnimNotify_DeactiveWeaponAuraNiagara()
 {
-	const ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningActor()) };
 	if (!(IsValid(OwningCharacter)) || OwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	const UNetherCrownEquipComponent* EquipComponent{ OwningCharacter->GetEquipComponent() };
 	ANetherCrownWeapon* EquippedWeapon{ EquipComponent ? EquipComponent->GetEquippedWeapon() : nullptr };
 	if (!(IsValid(EquippedWeapon)))
 	{

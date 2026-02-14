@@ -6,6 +6,12 @@
 #include "Animation/AnimInstance.h"
 #include "NetherCrownCharacterAnimInstance.generated.h"
 
+class ANetherCrownCharacter;
+class UNetherCrownBasicAttackComponent;
+class UNetherCrownEquipComponent;
+class UNetherCrownSkillComponent;
+class UCharacterMovementComponent;
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownCharacterAnimInstance : public UAnimInstance
 {
@@ -44,4 +50,22 @@ public:
 
 	UFUNCTION()
 	void AnimNotify_SetCharacterMovementWalk();
+
+protected:
+	virtual void NativeInitializeAnimation() override;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Character")
+	TObjectPtr<ANetherCrownCharacter> OwningCharacter;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UNetherCrownBasicAttackComponent> BasicAttackComponent;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UNetherCrownEquipComponent> EquipComponent;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UNetherCrownSkillComponent> SkillComponent;
+
+	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	TObjectPtr<UCharacterMovementComponent> CharacterMovementComponent;
 };
