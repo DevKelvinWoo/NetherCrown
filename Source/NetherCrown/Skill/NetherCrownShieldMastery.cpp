@@ -5,6 +5,7 @@
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NiagaraComponent.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "SkillActors/NetherCrownShield.h"

@@ -3,15 +3,15 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "UObject/Object.h"
-#include "NetherCrown/Character/NetherCrownCharacter.h"
-#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrownSkillObject.generated.h"
 
 class UAnimMontage;
 
 class ANetherCrownCharacter;
 class ANetherCrownEnemy;
+enum class ENetherCrownCrowdControlType : uint8;
 
 USTRUCT()
 struct FNetherCrownSkillData

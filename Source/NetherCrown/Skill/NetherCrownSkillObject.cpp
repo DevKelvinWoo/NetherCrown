@@ -2,9 +2,8 @@
 
 #include "NetherCrownSkillObject.h"
 
-#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
-#include "TimerManager.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
@@ -12,6 +11,9 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
+
+#include "Net/UnrealNetwork.h"
+#include "TimerManager.h"
 
 void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -188,6 +190,12 @@ void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) cons
 
 void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(SkillOwnerCharacter) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	const UWorld* World{ GetWorld() };
 	check(World);
 

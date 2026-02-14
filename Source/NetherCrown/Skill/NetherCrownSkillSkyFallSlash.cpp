@@ -7,6 +7,7 @@
 #include "Kismet/KismetSystemLibrary.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
+#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
