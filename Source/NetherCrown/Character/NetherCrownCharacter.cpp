@@ -22,22 +22,25 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	bUseControllerRotationPitch = false;
-	bUseControllerRotationYaw = false;
-	bUseControllerRotationRoll = false;
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSetting);
+
+	bUseControllerRotationPitch = CharacterDefaultSetting->IsControllerRotationPitchEnabled();
+	bUseControllerRotationYaw = CharacterDefaultSetting->IsControllerRotationYawEnabled();
+	bUseControllerRotationRoll = CharacterDefaultSetting->IsControllerRotationRollEnabled();
 
 	MainSpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("MainSpringArmComponent"));
 	MainSpringArmComponent->SetupAttachment(RootComponent);
-	MainSpringArmComponent->bUsePawnControlRotation = true;
-	MainSpringArmComponent->TargetArmLength = 535.f;
-	MainSpringArmComponent->TargetOffset = FVector(0.f, 0.f, 180.f);
-	MainSpringArmComponent->bEnableCameraLag = true;
-	MainSpringArmComponent->CameraLagSpeed = 7.f;
+	MainSpringArmComponent->bUsePawnControlRotation = CharacterDefaultSetting->IsMainSpringArmUsePawnControlRotation();
+	MainSpringArmComponent->TargetArmLength = CharacterDefaultSetting->GetMainSpringArmTargetLength();
+	MainSpringArmComponent->TargetOffset = CharacterDefaultSetting->GetMainSpringArmTargetOffset();
+	MainSpringArmComponent->bEnableCameraLag = CharacterDefaultSetting->IsMainSpringArmCameraLagEnabled();
+	MainSpringArmComponent->CameraLagSpeed = CharacterDefaultSetting->GetMainSpringArmCameraLagSpeed();
 
 	MainCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("MainCameraComponent"));
 	MainCameraComponent->SetupAttachment(MainSpringArmComponent);
-	MainCameraComponent->bUsePawnControlRotation = false;
-	MainCameraComponent->SetRelativeRotation(FRotator(-20.f, 0.f, 0.f));
+	MainCameraComponent->bUsePawnControlRotation = CharacterDefaultSetting->IsMainCameraUsePawnControlRotation();
+	MainCameraComponent->SetRelativeRotation(CharacterDefaultSetting->GetMainCameraRelativeRotation());
 
 	SetCharacterDefaultMovementValues();
 
@@ -159,10 +162,13 @@ void ANetherCrownCharacter::SetCharacterDefaultMovementValues() const
 	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
 	check(MovementComponent);
 
-	MovementComponent->bOrientRotationToMovement = true;
-	MovementComponent->MaxAcceleration = 1000.f;
-	MovementComponent->BrakingDecelerationWalking = 1200.f;
-	MovementComponent->bUseSeparateBrakingFriction = true;
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSetting);
+
+	MovementComponent->bOrientRotationToMovement = CharacterDefaultSetting->IsOrientRotationToMovementEnabled();
+	MovementComponent->MaxAcceleration = CharacterDefaultSetting->GetMaxAcceleration();
+	MovementComponent->BrakingDecelerationWalking = CharacterDefaultSetting->GetBrakingDecelerationWalking();
+	MovementComponent->bUseSeparateBrakingFriction = CharacterDefaultSetting->IsUseSeparateBrakingFrictionEnabled();
 }
 
 void ANetherCrownCharacter::ResetHardLandingState()
@@ -300,56 +306,33 @@ void ANetherCrownCharacter::ChangeWeapon(const FInputActionValue& Value)
 	}
 }
 
-void ANetherCrownCharacter::ActiveQSkill(const FInputActionValue& Value)
+void ANetherCrownCharacter::ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const
 {
-	if (Value.IsNonZero())
+	if (Value.Get<bool>())
 	{
-		const bool bActiveQSkillInput{ Value.Get<bool>() };
-		if (bActiveQSkillInput)
-		{
-			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActivateSkill(ENetherCrownSkillKeyEnum::QSkill);
-		}
+		check(NetherCrownSkillComponent);
+		NetherCrownSkillComponent->ActivateSkill(SkillKey);
 	}
 }
 
-void ANetherCrownCharacter::ActiveESkill(const FInputActionValue& Value)
+void ANetherCrownCharacter::ActiveQSkill(const FInputActionValue& Value) const
 {
-	if (Value.IsNonZero())
-	{
-		const bool bActiveESkillInput{ Value.Get<bool>() };
-		if (bActiveESkillInput)
-		{
-			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActivateSkill(ENetherCrownSkillKeyEnum::ESkill);
-		}
-	}
+	ExecuteSkillByKey(Value, ENetherCrownSkillKeyEnum::QSkill);
 }
 
-void ANetherCrownCharacter::ActiveRSkill(const FInputActionValue& Value)
+void ANetherCrownCharacter::ActiveESkill(const FInputActionValue& Value) const
 {
-	if (Value.IsNonZero())
-	{
-		const bool bActiveRSkillInput{ Value.Get<bool>() };
-		if (bActiveRSkillInput)
-		{
-			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActivateSkill(ENetherCrownSkillKeyEnum::RSkill);
-		}
-	}
+	ExecuteSkillByKey(Value, ENetherCrownSkillKeyEnum::ESkill);
 }
 
-void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value)
+void ANetherCrownCharacter::ActiveRSkill(const FInputActionValue& Value) const
 {
-	if (Value.IsNonZero())
-	{
-		const bool bActiveShiftSkillInput{ Value.Get<bool>() };
-		if (bActiveShiftSkillInput)
-		{
-			check(NetherCrownSkillComponent);
-			NetherCrownSkillComponent->ActivateSkill(ENetherCrownSkillKeyEnum::ShiftSkill);
-		}
-	}
+	ExecuteSkillByKey(Value, ENetherCrownSkillKeyEnum::RSkill);
+}
+
+void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value) const
+{
+	ExecuteSkillByKey(Value, ENetherCrownSkillKeyEnum::ShiftSkill);
 }
 
 bool ANetherCrownCharacter::IsEquippedWeapon() const

@@ -19,6 +19,7 @@ class UPostProcessComponent;
 class UNetherCrownBasicAttackComponent;
 class UNetherCrownEquipComponent;
 class UNetherCrownSkillComponent;
+enum class ENetherCrownSkillKeyEnum : uint8;
 
 USTRUCT()
 struct FNetherCrownCharacterTagData
@@ -48,10 +49,11 @@ public:
 	void RequestBasicAttack(const FInputActionValue& Value);
 	void EquipCharacter(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
-	void ActiveQSkill(const FInputActionValue& Value);
-	void ActiveESkill(const FInputActionValue& Value);
-	void ActiveRSkill(const FInputActionValue& Value);
-	void ActiveShiftSkill(const FInputActionValue& Value);
+	void ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const;
+	void ActiveQSkill(const FInputActionValue& Value) const;
+	void ActiveESkill(const FInputActionValue& Value) const;
+	void ActiveRSkill(const FInputActionValue& Value) const;
+	void ActiveShiftSkill(const FInputActionValue& Value) const;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}
