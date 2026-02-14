@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
+#include "NetherCrown/Util/NetherCrownCurveTimerUtil.h"
 
 UNetherCrownCrowdControlComponent::UNetherCrownCrowdControlComponent()
 {
@@ -111,48 +112,57 @@ void UNetherCrownCrowdControlComponent::Stun() const
 
 void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Implementation()
 {
-	//@TODO : switch-case로 변경 후 각각을 함수로 로직을 빼서 호출하는 방식으로 변경
-	if (CrowdControlType == ENetherCrownCrowdControlType::FROZEN)
+	switch (CrowdControlType)
 	{
-		ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-		if (!ensureAlways(IsValid(OwnerCharacter)))
-		{
-			return;
-		}
-
-		if (!OwnerCharacter->HasAuthority())
-		{
-			StartFrozenTargetOverlayMaterialEndTimer();
-		}
-
-		UCharacterMovementComponent* MovementComponent{ OwnerCharacter->GetCharacterMovement() };
-		check(MovementComponent);
-		MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
-
-		USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
-		if (IsValid(SkeletalMeshComponent))
-		{
-			SkeletalMeshComponent->bPauseAnims = false;
-		}
+	case ENetherCrownCrowdControlType::FROZEN:
+		ClearFrozenCosmetics();
+		break;
+	case ENetherCrownCrowdControlType::STUN:
+		ClearStunCosmetics();
+		break;
+	default:
+		break;
 	}
-	else if (CrowdControlType == ENetherCrownCrowdControlType::STUN)
+
+	ResetMovementAndAnimation();
+}
+
+void UNetherCrownCrowdControlComponent::ResetMovementAndAnimation() const
+{
+	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
 	{
-		ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-		if (!ensureAlways(IsValid(OwnerCharacter)))
-		{
-			return;
-		}
-
-		UCharacterMovementComponent* MovementComponent{ OwnerCharacter->GetCharacterMovement() };
-		check(MovementComponent);
-		MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
-
-		USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
-		if (IsValid(SkeletalMeshComponent))
-		{
-			SkeletalMeshComponent->bPauseAnims = false;
-		}
+		return;
 	}
+
+	UCharacterMovementComponent* MovementComponent{ OwnerCharacter->GetCharacterMovement() };
+	check(MovementComponent);
+	MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+
+	USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
+	if (IsValid(SkeletalMeshComponent))
+	{
+		SkeletalMeshComponent->bPauseAnims = false;
+	}
+}
+
+void UNetherCrownCrowdControlComponent::ClearFrozenCosmetics()
+{
+	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)))
+	{
+		return;
+	}
+
+	if (!OwnerCharacter->HasAuthority())
+	{
+		StartFrozenTargetOverlayMaterialEndTimer();
+	}
+}
+
+void UNetherCrownCrowdControlComponent::ClearStunCosmetics()
+{
+	//@TODO : Stun Icon 해제 및 다른 Cosmetic 해제 로직 구현
 }
 
 void UNetherCrownCrowdControlComponent::ClearCrowdControl()
@@ -207,31 +217,22 @@ void UNetherCrownCrowdControlComponent::StartFrozenTargetOverlayMaterialEndTimer
 
 void UNetherCrownCrowdControlComponent::ApplyFrozenTargetOverlayEndMaterial()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
+	FNetherCrownCurveTimerData CurveTimerData{};
+	CurveTimerData.WorldContextObject = this;
+	CurveTimerData.Curve = CachedFrozenTargetOverlayMaterialEndCurveFloat;
+	CurveTimerData.TimerHandle = &FrozenTargetOverlayMaterialEndTimerHandle;
+	CurveTimerData.CurveElapsedTime = &FrozenTargetOverlayMaterialElapsedTime;
+	CurveTimerData.CurveElapsedTimeOffset = 0.01f;
+	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetEndFrozenTargetOverlayMaterialScalarParam(); };
 
-	if (!ensureAlways(IsValid(CachedFrozenTargetOverlayMaterialEndCurveFloat)))
-	{
-		World->GetTimerManager().ClearTimer(FrozenTargetOverlayMaterialEndTimerHandle);
-		return;
-	}
+	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
+}
 
-	FrozenTargetOverlayMaterialElapsedTime += 0.01f;
-
-	float Min{};
-	float Max{};
-	CachedFrozenTargetOverlayMaterialEndCurveFloat->GetTimeRange(Min, Max);
-
-	if (FrozenTargetOverlayMaterialElapsedTime > Max)
-	{
-		World->GetTimerManager().ClearTimer(FrozenTargetOverlayMaterialEndTimerHandle);
-		return;
-	}
-
+void UNetherCrownCrowdControlComponent::SetEndFrozenTargetOverlayMaterialScalarParam()
+{
 	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
 	if (!ensureAlways(IsValid(OwnerCharacter)))
 	{
-		World->GetTimerManager().ClearTimer(FrozenTargetOverlayMaterialEndTimerHandle);
 		return;
 	}
 

@@ -50,9 +50,14 @@ private:
 
 	void PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
 
+	void ResetMovementAndAnimation() const;
+	void ClearFrozenCosmetics();
+	void ClearStunCosmetics();
+
 	FTimerHandle FrozenTargetOverlayMaterialEndTimerHandle{};
 	void StartFrozenTargetOverlayMaterialEndTimer();
 	void ApplyFrozenTargetOverlayEndMaterial();
+	void SetEndFrozenTargetOverlayMaterialScalarParam();
 	float FrozenTargetOverlayMaterialElapsedTime{ 0.f };
 
 	UPROPERTY()
