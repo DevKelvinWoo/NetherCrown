@@ -2,7 +2,7 @@
 
 #include "NetherCrownCurveTimerUtil.h"
 
-void FNetherCrownCurveTimerUtil::BeginTimerByFloatCurve(const FNetherCrownCurveTimerData& CurveTimerData)
+void FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(const FNetherCrownCurveTimerData& CurveTimerData)
 {
 	const TObjectPtr<UObject> WorldContextObject{ CurveTimerData.WorldContextObject };
 	if (!ensureAlways(IsValid(WorldContextObject)))
@@ -19,7 +19,7 @@ void FNetherCrownCurveTimerUtil::BeginTimerByFloatCurve(const FNetherCrownCurveT
 		return;
 	}
 
-	const UCurveFloat* Curve{ CurveTimerData.Curve };
+	const UCurveBase* Curve{ CurveTimerData.Curve };
 	if (!ensureAlways(IsValid(Curve)))
 	{
 		World->GetTimerManager().ClearTimer(*TimerHandle);

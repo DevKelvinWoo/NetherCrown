@@ -8,7 +8,7 @@ struct FNetherCrownCurveTimerData
 {
 public:
 	TObjectPtr<UObject> WorldContextObject{};
-	UCurveFloat* Curve{};
+	UCurveBase* Curve{};
 	FTimerHandle* TimerHandle{};
 	float* CurveElapsedTime{};
 	float CurveElapsedTimeOffset{ 0.f };
@@ -18,5 +18,5 @@ public:
 class FNetherCrownCurveTimerUtil
 {
 public:
-	static void BeginTimerByFloatCurve(const FNetherCrownCurveTimerData& CurveTimerData);
+	static void ExecuteLoopTimerCallbackByCurve(const FNetherCrownCurveTimerData& CurveTimerData);
 };

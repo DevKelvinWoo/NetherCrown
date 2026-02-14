@@ -77,7 +77,7 @@ void ANetherCrownShield::ApplyBeginShieldMaterialParameterCurveFloat()
 	CurveTimerData.CurveElapsedTimeOffset = 0.015f;
 	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetBeginShieldDynamicMaterialScalarParam(); };
 
-	FNetherCrownCurveTimerUtil::BeginTimerByFloatCurve(CurveTimerData);
+	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
 }
 
 void ANetherCrownShield::ApplyEndShieldMaterialParameterCurveFloat()
@@ -90,7 +90,7 @@ void ANetherCrownShield::ApplyEndShieldMaterialParameterCurveFloat()
 	CurveTimerData.CurveElapsedTimeOffset = 0.015f;
 	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetEndShieldDynamicMaterialScalarParam(); };
 
-	FNetherCrownCurveTimerUtil::BeginTimerByFloatCurve(CurveTimerData);
+	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
 }
 
 void ANetherCrownShield::SetBeginShieldDynamicMaterialScalarParam() const

@@ -72,7 +72,6 @@ void UNetherCrownSkillObject::ApplyCrowdControlToTarget(ANetherCrownEnemy* Targe
 
 	if (!ensureAlways(IsValid(TargetEnemy)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("TargetCharacter is valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -170,7 +169,7 @@ void UNetherCrownSkillObject::ExecuteSkillGameplay()
 
 void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) const
 {
-	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter ? SkillOwnerCharacter->GetMesh() : nullptr };
 	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{};
 	NetherCrownCharacterAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownCharacterAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
