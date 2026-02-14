@@ -21,11 +21,13 @@ protected:
 	virtual void PlaySkillCosmetics() override;
 
 private:
-	void ApplySkillCameraCurveFloat();
 	void StartSkillCameraCurveTimer();
+	void ApplySkillCameraCurveFloat();
+	void SetSpringArmZOffset();
 
 	void StartSkillArmMaterialParameterCurveTimer();
 	void ApplySkillArmMaterialParameterCurveFloat();
+	void SetSkillArmMaterialScalarParam();
 
 	void HandleOnHitSkyFallSlashSkill();
 	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;
@@ -53,10 +55,17 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
 
-	const float SkillDetectingSphereRadius{ 225.f };
-	const double SkillDetectingThresholdDegrees{ 45.0 };
-	const float SkillKnockBackDistance{ 2400.f };
-	const float KnockBackDuration{ 1.f };
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
+	float SkillDetectingSphereRadius{ 225.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
+	double SkillDetectingThresholdDegrees{ 45.0 };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
+	float SkillKnockBackDistance{ 2400.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
+	float KnockBackDuration{ 1.f };
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> ArmMaterialInstanceDynamic{};

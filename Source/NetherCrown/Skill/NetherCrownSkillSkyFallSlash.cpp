@@ -11,6 +11,7 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
+#include "NetherCrown/Util/NetherCrownCurveTimerUtil.h"
 
 #define DEBUG_SPHERE 0
 
@@ -118,28 +119,19 @@ void UNetherCrownSkillSkyFallSlash::StartSkillArmMaterialParameterCurveTimer()
 
 void UNetherCrownSkillSkyFallSlash::ApplySkillArmMaterialParameterCurveFloat()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
+	FNetherCrownCurveTimerData CurveTimerData{};
+	CurveTimerData.WorldContextObject = this;
+	CurveTimerData.Curve = CachedSkillArmMaterialCurveFloat;
+	CurveTimerData.TimerHandle = &SkillArmMaterialCurveTimerHandle;
+	CurveTimerData.CurveElapsedTime = &SkillArmMaterialCurveElapsedTime;
+	CurveTimerData.CurveElapsedTimeOffset = 0.015f;
+	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetSkillArmMaterialScalarParam(); };
 
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(CachedSkillArmMaterialCurveFloat)) || !ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		World->GetTimerManager().ClearTimer(SkillArmMaterialCurveTimerHandle);
-		return;
-	}
+	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
+}
 
-	SkillArmMaterialCurveElapsedTime += 0.01f;
-
-	float MinTime{};
-	float MaxTime{};
-	CachedSkillArmMaterialCurveFloat->GetTimeRange(MinTime, MaxTime);
-
-	if (SkillArmMaterialCurveElapsedTime > MaxTime)
-	{
-		World->GetTimerManager().ClearTimer(SkillArmMaterialCurveTimerHandle);
-		return;
-	}
-
+void UNetherCrownSkillSkyFallSlash::SetSkillArmMaterialScalarParam()
+{
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
@@ -256,45 +248,34 @@ void UNetherCrownSkillSkyFallSlash::CreateArmMaterialInstanceDynamic()
 		return;
 	}
 
-
 	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
 	constexpr int32 ArmMaterialIndex{ 1 };
 
 	ArmMaterialInstanceDynamic = SkeletalMeshComponent ? SkeletalMeshComponent->CreateDynamicMaterialInstance(ArmMaterialIndex) : nullptr;
-	if (!ensureAlways(IsValid(ArmMaterialInstanceDynamic)))
-	{
-		return;
-	}
+	ensureAlways(IsValid(ArmMaterialInstanceDynamic));
 }
 
 void UNetherCrownSkillSkyFallSlash::ApplySkillCameraCurveFloat()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
+	FNetherCrownCurveTimerData CurveTimerData{};
+	CurveTimerData.WorldContextObject = this;
+	CurveTimerData.Curve = CachedSkillCameraCurveFloat;
+	CurveTimerData.TimerHandle = &SkillCameraCurveTimerHandle;
+	CurveTimerData.CurveElapsedTime = &SkillCameraCurveElapsedTime;
+	CurveTimerData.CurveElapsedTimeOffset = 1.f;
+	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetSpringArmZOffset(); };
 
+	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
+}
+
+void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffset()
+{
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(CachedSkillCameraCurveFloat)) || !ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		World->GetTimerManager().ClearTimer(SkillCameraCurveTimerHandle);
-		return;
-	}
-
-	if (!SkillOwnerCharacter->IsLocallyControlled())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
 	}
 
-	SkillCameraCurveElapsedTime += 1.f;
-
-	float MinTime{};
-	float MaxTime{};
-	CachedSkillCameraCurveFloat->GetTimeRange(MinTime, MaxTime);
-
-	if (SkillCameraCurveElapsedTime > MaxTime)
-	{
-		World->GetTimerManager().ClearTimer(SkillCameraCurveTimerHandle);
-		return;
-	}
-
+	UE_LOG(LogTemp, Warning, TEXT("%f"), CachedSkillCameraCurveFloat->GetFloatValue(SkillCameraCurveElapsedTime));
 	SkillOwnerCharacter->SetSpringArmZOffset(CachedSkillCameraCurveFloat->GetFloatValue(SkillCameraCurveElapsedTime));
 }
