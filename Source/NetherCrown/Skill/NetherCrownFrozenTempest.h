@@ -21,13 +21,16 @@ protected:
 
 private:
 	void StartSkillCameraZoomCurveTimer();
-	void ApplySkillCameraZoomCurveFloat();
+	void ApplySkillCameraZoomCurveVector();
+	void SetSkillCameraSpringArmValues();
 
 	void StartCharacterOverlayMaterialStartTimer();
 	void ApplyCharacterOverlayStartMaterial();
+	void SetStartCharacterOverlayMaterialScalarParam();
 
 	void StartCharacterOverlayMaterialEndTimer();
 	void ApplyCharacterOverlayEndMaterial();
+	void SetEndCharacterOverlayMaterialScalarParam();
 
 	void HandleOnHitFrozenTempestSkill();
 
@@ -57,7 +60,7 @@ private:
 	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
 
 	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UCameraShakeBase> SKillChargeCameraShakeBaseClass{};
+	TSubclassOf<UCameraShakeBase> SkillChargeCameraShakeBaseClass{};
 
 	FTimerHandle SkillCameraZoomCurveTimerHandle{};
 	float SkillCameraZoomCurveElapsedTime{ 0.f };
@@ -77,4 +80,7 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInterface> CachedFrozenTempestTargetOverlayMaterial{};
+
+	UPROPERTY()
+	TObjectPtr<UMaterialInstanceDynamic> CachedDynamicFrozenTempestMaterial{};
 };
