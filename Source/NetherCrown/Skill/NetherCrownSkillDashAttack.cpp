@@ -13,6 +13,7 @@
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
+#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 
 #define DEBUG_SPHERE 0
 
@@ -61,7 +62,10 @@ TArray<AActor*> UNetherCrownSkillDashAttack::DetectDashAttackTargets() const
 	UKismetSystemLibrary::DrawDebugSphere(this, DetectSpherePos, SkillDetectSphereOffset, 16, FColor::Red, 10.f);
 #endif
 
-	OverlappedActors.SetNum(MaxTargetNum);
+	if (OverlappedActors.Num() > MaxTargetNum)
+	{
+		OverlappedActors.RemoveAt(MaxTargetNum, OverlappedActors.Num() - MaxTargetNum);
+	}
 
 	return OverlappedActors;
 }
