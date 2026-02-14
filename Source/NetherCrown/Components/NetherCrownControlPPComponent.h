@@ -29,7 +29,6 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	void StartClearPostProcessTimer(float Duration);
@@ -39,6 +38,9 @@ private:
 	void ApplyPostProcessBlendStartFloat();
 	void StartPostProcessBlendEndTimer();
 	void ApplyPostProcessBlendEndFloat();
+
+	void SetBeginPostProcessBlendWeight() const;
+	void SetEndPostProcessBlendWeight() const;
 
 	FTimerHandle PostProcessBlendStartTimerHandle{};
 	FTimerHandle PostProcessBlendEndTimerHandle{};

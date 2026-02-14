@@ -41,8 +41,18 @@ void FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(const FNetherCr
 
 	if (*CurveElapsedTime > Max)
 	{
+		TFunction<void()> ClearCallBack{ CurveTimerData.ClearCallBack };
+		if (ClearCallBack.IsSet())
+		{
+			CurveTimerData.ClearCallBack();
+		}
+
 		World->GetTimerManager().ClearTimer(*TimerHandle);
 	}
 
-	CurveTimerData.CallBack();
+	TFunction<void()> CallBack{ CurveTimerData.CallBack };
+	if (CallBack.IsSet())
+	{
+		CurveTimerData.CallBack();
+	}
 }

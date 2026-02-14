@@ -13,6 +13,7 @@ public:
 	float* CurveElapsedTime{};
 	float CurveElapsedTimeOffset{ 0.f };
 	TFunction<void()> CallBack{};
+	TFunction<void()> ClearCallBack{};
 };
 
 class FNetherCrownCurveTimerUtil
