@@ -54,7 +54,7 @@ void UNetherCrownShieldMastery::ActiveShieldEffectAndActor()
 		return;
 	}
 
-	HandledShieldMasteryActor->AttachToActor(SkillOwnerCharacter, FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("root"));
+	HandledShieldMasteryActor->AttachToActor(SkillOwnerCharacter, FAttachmentTransformRules::SnapToTargetNotIncludingScale, ShieldEffectSocketName);
 }
 
 void UNetherCrownShieldMastery::DeactivateShieldEffectAndActor()
@@ -92,7 +92,7 @@ void UNetherCrownShieldMastery::PlayShieldOnSound() const
 void UNetherCrownShieldMastery::AddPlayerShieldAndSetShieldEndTimer(int32 InShieldValue) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
