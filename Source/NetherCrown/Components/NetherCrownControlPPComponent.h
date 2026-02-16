@@ -13,6 +13,8 @@ enum class ENetherCrownPPType : uint8
 {
 	Default,
 	Frozen,
+	Charging,
+	Lightning,
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -25,18 +27,19 @@ public:
 
 	void SetHandlingPostProcessComponent(UPostProcessComponent* PostProcessComponent);
 
-	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration);
+	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true);
+	void StartPostProcessBlendEndTimer();
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
 	void StartClearPostProcessTimer(float Duration);
-	void ClearPostProcess();
+	void ResetPostProcess();
+	void ClearPostProcessImmediately();
 
 	void StartPostProcessBlendStartTimer();
 	void ApplyPostProcessBlendStartFloat();
-	void StartPostProcessBlendEndTimer();
 	void ApplyPostProcessBlendEndFloat();
 
 	void SetBeginPostProcessBlendWeight() const;

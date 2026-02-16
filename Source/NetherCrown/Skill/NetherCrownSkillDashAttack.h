@@ -35,6 +35,9 @@ private:
 	void Multicast_SetCharacterCapsuleCollisionData(const bool bStartDashAttack);
 
 	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_StartPostProcessBlendEndTimer();
+
+	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DeactivateDashAttackGhostTrail();
 
 	UFUNCTION(NetMulticast, Reliable)

@@ -116,6 +116,7 @@ void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Im
 	{
 	case ENetherCrownCrowdControlType::FROZEN:
 		ClearFrozenCosmetics();
+		ResetMovementAndAnimation();
 		break;
 	case ENetherCrownCrowdControlType::STUN:
 		ClearStunCosmetics();
@@ -123,8 +124,6 @@ void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Im
 	default:
 		break;
 	}
-
-	ResetMovementAndAnimation();
 }
 
 void UNetherCrownCrowdControlComponent::ResetMovementAndAnimation() const

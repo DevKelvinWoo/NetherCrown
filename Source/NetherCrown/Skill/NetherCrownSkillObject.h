@@ -12,6 +12,7 @@ class UAnimMontage;
 class ANetherCrownCharacter;
 class ANetherCrownEnemy;
 enum class ENetherCrownCrowdControlType : uint8;
+enum class ENetherCrownPPType : uint8;
 
 USTRUCT()
 struct FNetherCrownSkillData
@@ -99,6 +100,8 @@ protected:
 	void PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
 
 	int32 CalculatePhysicalSkillDamage() const;
+
+	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true) const;
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};

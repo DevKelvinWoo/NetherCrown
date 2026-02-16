@@ -11,6 +11,7 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
+#include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
@@ -135,6 +136,23 @@ int32 UNetherCrownSkillObject::CalculatePhysicalSkillDamage() const
 	const int32 EquippedWeaponDamage { EquippedWeaponData->GetWeaponAttackDamage() };
 	const int32 ResultSkillDamage{ EquippedWeaponDamage + SkillDamage + PlayerStatAttackDamage };
 	return ResultSkillDamage;
+}
+
+void UNetherCrownSkillObject::ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic) const
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	UNetherCrownControlPPComponent* ControlPPComponent{ SkillOwnerCharacter->GetControlPPComponent() };
+	if (!ensureAlways(IsValid(ControlPPComponent)))
+	{
+		return;
+	}
+
+	ControlPPComponent->ApplyPostProcess(PPType, Duration, bEndTimerAutomatic);
 }
 
 void UNetherCrownSkillObject::PlaySkillCosmetics()

@@ -13,6 +13,7 @@
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
+#include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 
 #define DEBUG_SPHERE 0
@@ -20,6 +21,19 @@
 void UNetherCrownSkillDashAttack::PlaySkillCosmetics()
 {
 	Super::PlaySkillCosmetics();
+
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	ApplyPostProcess(ENetherCrownPPType::Charging, 2.5f, false);
 }
 
 void UNetherCrownSkillDashAttack::ExecuteSkillGameplay()
@@ -87,6 +101,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	else
 	{
 		ClearDashAttackData();
+		Multicast_StartPostProcessBlendEndTimer();
 	}
 
 	++CurrentTargetIndex;
@@ -157,6 +172,28 @@ void UNetherCrownSkillDashAttack::Multicast_ActiveSkillHitCameraShake_Implementa
 	}
 
 	CameraManager->StartCameraShake(DashAttackHitCameraShakeClass, 1.f);
+}
+
+void UNetherCrownSkillDashAttack::Multicast_StartPostProcessBlendEndTimer_Implementation()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority() || !SkillOwnerCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	UNetherCrownControlPPComponent* ControlPPComponent{ SkillOwnerCharacter->GetControlPPComponent() };
+	if (!ensureAlways(IsValid(ControlPPComponent)))
+	{
+		return;
+	}
+
+	ControlPPComponent->StartPostProcessBlendEndTimer();
 }
 
 void UNetherCrownSkillDashAttack::PlayLoopDashAttackMontage() const

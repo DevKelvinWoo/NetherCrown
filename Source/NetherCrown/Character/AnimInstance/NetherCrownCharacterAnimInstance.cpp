@@ -13,7 +13,7 @@ void UNetherCrownCharacterAnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	OwningCharacter = Cast<ANetherCrownCharacter>(GetOwningActor());
-	if (!ensureAlways(OwningCharacter))
+	if (!IsValid(OwningCharacter))
 	{
 		return;
 	}

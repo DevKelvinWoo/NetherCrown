@@ -63,6 +63,8 @@ void UNetherCrownFrozenTempest::PlaySkillCosmetics()
 		return;
 	}
 
+	ApplyPostProcess(ENetherCrownPPType::Charging, 2.5f);
+
 	StartSkillCameraZoomCurveTimer();
 	StartCharacterOverlayMaterialStartTimer();
 	PlayChargeCameraShake();
