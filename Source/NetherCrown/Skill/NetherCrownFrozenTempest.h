@@ -73,7 +73,7 @@ private:
 	float SkillDetectingSphereRadius{ 500.f };
 
 	UPROPERTY(EditDefaultsOnly)
-	float SkillDuration{ 3.f };
+	float FrozenDuration{ 3.f };
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UMaterialInterface> FrozenTempestTargetOverlayMaterialSoft{};

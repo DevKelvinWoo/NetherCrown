@@ -5,11 +5,14 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
+#include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
 
+class UNiagaraComponent;
 class UCapsuleComponent;
 
 class ANetherCrownCharacter;
+class UNetherCrownStatusEffectControlComponent;
 class UNetherCrownEnemyStatComponent;
 class UNetherCrownCrowdControlComponent;
 
@@ -27,7 +30,7 @@ public:
 };
 
 UCLASS()
-class NETHERCROWN_API ANetherCrownEnemy : public ACharacter
+class NETHERCROWN_API ANetherCrownEnemy : public ACharacter, public INetherCrownCrowdControlInterface
 {
 	GENERATED_BODY()
 
@@ -40,9 +43,14 @@ public:
 
 	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return CrowdControlComponent; }
 
+	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	ENetherCrownCrowdControlType GetCrowdControlType() const;
 
 private:
 	void ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount);
@@ -61,6 +69,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNetherCrownCrowdControlComponent> CrowdControlComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNiagaraComponent> StatusNiagaraComponent{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TObjectPtr<UNetherCrownStatusEffectControlComponent> StatusEffectControlComponent{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> TakeDamageAnimMontageSoft{};

@@ -68,6 +68,12 @@ void ANetherCrownCharacter::SetSpringArmLength(float InSpringArmLength) const
 	MainSpringArmComponent->TargetArmLength = InSpringArmLength;
 }
 
+UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const
+{
+	//@TODO : Need to implements Status Effect Control Component in NetherCrownCharacter class (now only for enemy class)
+	return nullptr;
+}
+
 void ANetherCrownCharacter::BeginPlay()
 {
 	Super::BeginPlay();

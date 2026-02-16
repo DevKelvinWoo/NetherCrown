@@ -2,12 +2,14 @@
 
 #include "NetherCrownEnemy.h"
 
+#include "NiagaraComponent.h"
 #include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
+#include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -18,17 +20,30 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 	EnemyHitBoxComponent = CreateDefaultSubobject<UCapsuleComponent>(TEXT("EnemyHitBoxComponent"));
 	EnemyHitBoxComponent->SetupAttachment(RootComponent);
 
+	StatusNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("StatusNiagaraComponent"));
+	StatusNiagaraComponent->SetupAttachment(RootComponent);
+
 	EnemyStatComponent = CreateDefaultSubobject<UNetherCrownEnemyStatComponent>(TEXT("EnemyStatComponent"));
 
 	CrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
+
+	StatusEffectControlComponent = CreateDefaultSubobject<UNetherCrownStatusEffectControlComponent>(TEXT("StatusEffectControlComponent"));
 
 	bNetLoadOnClient = true;
 	bReplicates = true;
 }
 
+UNetherCrownStatusEffectControlComponent* ANetherCrownEnemy::GetStatusEffectControlComponent() const
+{
+	return StatusEffectControlComponent;
+}
+
 void ANetherCrownEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	check(StatusEffectControlComponent);
+	StatusEffectControlComponent->SetHandledStatusNiagaraComponent(StatusNiagaraComponent);
 
 	SetReplicateMovement(true);
 }
@@ -46,6 +61,12 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	ProcessIncomingPhysicalDamage(DamageCauser, ResultDamage);
 
 	return ResultDamage;
+}
+
+ENetherCrownCrowdControlType ANetherCrownEnemy::GetCrowdControlType() const
+{
+	check(CrowdControlComponent);
+	return CrowdControlComponent->GetCrowdControlType();
 }
 
 void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount)

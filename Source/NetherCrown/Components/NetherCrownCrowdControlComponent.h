@@ -50,9 +50,12 @@ private:
 
 	void PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
 
-	void ResetMovementAndAnimation() const;
+	void ResetMovementAndAnimationSettings() const;
 	void ClearFrozenCosmetics();
 	void ClearStunCosmetics();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetActiveStatusNiagaraSystem(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable) const;
 
 	FTimerHandle FrozenTargetOverlayMaterialEndTimerHandle{};
 	void StartFrozenTargetOverlayMaterialEndTimer();

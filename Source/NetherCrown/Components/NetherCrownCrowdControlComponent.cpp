@@ -2,6 +2,7 @@
 
 #include "NetherCrownCrowdControlComponent.h"
 
+#include "NetherCrownStatusEffectControlComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -53,11 +54,10 @@ void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrow
 	//@NOTE : Only called by server
 	CrowdControlType = InCrowdControlType;
 
-	Multicast_PlayCrowdControlAnim(InCrowdControlType);
-
 	const UWorld* World{ GetWorld() };
 	check(World);
 
+	//MultiCast로 CC Implements를 호출해버리기
 	World->GetTimerManager().SetTimer(CrowdControlTimerHandle, this, &ThisClass::ClearCrowdControl, DurationTime, false);
 }
 
@@ -107,7 +107,7 @@ void UNetherCrownCrowdControlComponent::Stun() const
 
 	OwnerCharacterMovementComponent->DisableMovement();
 
-	//@TODO : Stun Effect 출력 필요
+	Multicast_SetActiveStatusNiagaraSystem(ENetherCrownCrowdControlType::STUN, true);
 }
 
 void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Implementation()
@@ -116,7 +116,7 @@ void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Im
 	{
 	case ENetherCrownCrowdControlType::FROZEN:
 		ClearFrozenCosmetics();
-		ResetMovementAndAnimation();
+		ResetMovementAndAnimationSettings();
 		break;
 	case ENetherCrownCrowdControlType::STUN:
 		ClearStunCosmetics();
@@ -126,7 +126,7 @@ void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Im
 	}
 }
 
-void UNetherCrownCrowdControlComponent::ResetMovementAndAnimation() const
+void UNetherCrownCrowdControlComponent::ResetMovementAndAnimationSettings() const
 {
 	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
 	if (!ensureAlways(IsValid(OwnerCharacter)))
@@ -161,7 +161,30 @@ void UNetherCrownCrowdControlComponent::ClearFrozenCosmetics()
 
 void UNetherCrownCrowdControlComponent::ClearStunCosmetics()
 {
-	//@TODO : Stun Icon 해제 및 다른 Cosmetic 해제 로직 구현
+	Multicast_SetActiveStatusNiagaraSystem(ENetherCrownCrowdControlType::STUN, false);
+}
+
+void UNetherCrownCrowdControlComponent::Multicast_SetActiveStatusNiagaraSystem_Implementation(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable) const
+{
+	const ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const INetherCrownCrowdControlInterface* CrowdControlInterface{ Cast<INetherCrownCrowdControlInterface>(OwnerCharacter) };
+	if (!ensureAlways(CrowdControlInterface))
+	{
+		return;
+	}
+
+	UNetherCrownStatusEffectControlComponent* StatusEffectControlComponent{ CrowdControlInterface->GetStatusEffectControlComponent() };
+	if (!ensureAlways(StatusEffectControlComponent))
+	{
+		return;
+	}
+
+	StatusEffectControlComponent->SetActiveStatusNiagaraSystem(InCrowdControlType, bEnable);
 }
 
 void UNetherCrownCrowdControlComponent::ClearCrowdControl()

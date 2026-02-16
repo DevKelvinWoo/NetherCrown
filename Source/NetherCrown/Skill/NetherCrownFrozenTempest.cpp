@@ -237,7 +237,7 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 			return;
 		}
 
-		ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::Frozen, SkillDuration);
+		ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::Frozen, FrozenDuration);
 	}
 
 	if (!SkillOwnerCharacter->HasAuthority())
@@ -256,7 +256,7 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 	{
 		if (SkillOwnerCharacter->HasAuthority())
 		{
-			DetectedEnemy->ApplyCrowdControl(ENetherCrownCrowdControlType::FROZEN, SkillDuration);
+			ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::FROZEN, FrozenDuration);
 			continue;
 		}
 

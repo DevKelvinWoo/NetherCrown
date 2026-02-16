@@ -6,6 +6,7 @@
 #include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
 #include "InputActionValue.h"
+#include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownCharacter.generated.h"
 
 class UNetherCrownControlGhostTrailComponent;
@@ -35,7 +36,7 @@ public:
 };
 
 UCLASS()
-class NETHERCROWN_API ANetherCrownCharacter : public ACharacter
+class NETHERCROWN_API ANetherCrownCharacter : public ACharacter, public INetherCrownCrowdControlInterface
 {
 	GENERATED_BODY()
 
@@ -72,6 +73,8 @@ public:
 
 	void SetSpringArmZOffset(float InSpringArmZOffset) const;
 	void SetSpringArmLength(float InSpringArmLength) const;
+
+	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 protected:
 	virtual void BeginPlay() override;

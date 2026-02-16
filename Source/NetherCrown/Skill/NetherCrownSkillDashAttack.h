@@ -45,7 +45,7 @@ private:
 
 	void PlayLoopDashAttackMontage() const;
 
-	void HitDashAttack() const;
+	void HitDashAttack();
 
 	void ClearDashAttackData();
 
@@ -66,6 +66,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 MaxTargetNum{ 5 };
+
+	UPROPERTY(EditDefaultsOnly)
+	float StunDuration{ 3.f };
 
 	int32 CurrentTargetIndex{ 0 };
 

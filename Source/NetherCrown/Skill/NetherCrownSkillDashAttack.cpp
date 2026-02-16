@@ -221,7 +221,7 @@ void UNetherCrownSkillDashAttack::PlayLoopDashAttackMontage() const
 	NetherCrownCharacterAnimInstance->Montage_Play(SkillAnimMontage);
 }
 
-void UNetherCrownSkillDashAttack::HitDashAttack() const
+void UNetherCrownSkillDashAttack::HitDashAttack()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -235,7 +235,7 @@ void UNetherCrownSkillDashAttack::HitDashAttack() const
 		return;
 	}
 
-	const ANetherCrownEnemy* CurrentTargetEnemy{ Cast<ANetherCrownEnemy>(CurrentTargetActor) };
+	ANetherCrownEnemy* CurrentTargetEnemy{ Cast<ANetherCrownEnemy>(CurrentTargetActor) };
 	if (!ensureAlways(IsValid(CurrentTargetEnemy)))
 	{
 		return;
@@ -247,7 +247,8 @@ void UNetherCrownSkillDashAttack::HitDashAttack() const
 		return;
 	}
 
-	CrowdControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::STUN, 3.f);
+	ApplyCrowdControlToTarget(CurrentTargetEnemy, ENetherCrownCrowdControlType::STUN, StunDuration);
+	CrowdControlComponent->Stun();
 	UGameplayStatics::ApplyDamage(CurrentTargetActor, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
 
 	Multicast_SpawnSkillImpactEffect(CurrentTargetEnemy);
