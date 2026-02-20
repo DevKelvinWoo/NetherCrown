@@ -1,14 +1,13 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownControlPPComponent.h"
 
 #include "Components/PostProcessComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
-#include "NetherCrown/Util/NetherCrownCurveTimerUtil.h"
 
 UNetherCrownControlPPComponent::UNetherCrownControlPPComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 }
 
 void UNetherCrownControlPPComponent::SetHandlingPostProcessComponent(UPostProcessComponent* PostProcessComponent)
@@ -50,7 +49,7 @@ void UNetherCrownControlPPComponent::ApplyPostProcess(const ENetherCrownPPType P
 
 	HandledPostProcessComponent->Settings = *FindProcessSettings;
 
-	StartPostProcessBlendStartTimer();
+	StartSetPostProcessBlendStartTimeline();
 
 	if (bEndTimerAutomatic)
 	{
@@ -60,11 +59,8 @@ void UNetherCrownControlPPComponent::ApplyPostProcess(const ENetherCrownPPType P
 
 void UNetherCrownControlPPComponent::ClearPostProcessImmediately()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
-
-	World->GetTimerManager().ClearTimer(PostProcessBlendStartTimerHandle);
-	World->GetTimerManager().ClearTimer(PostProcessBlendEndTimerHandle);
+	PostProcessBlendStartFloatTimeline.Stop();
+	PostProcessBlendEndFloatTimeline.Stop();
 
 	ResetPostProcess();
 }
@@ -81,6 +77,38 @@ void UNetherCrownControlPPComponent::BeginPlay()
 
 	CachedPostProcessStartCurveFloat = PostProcessStartCurveFloatSoft.LoadSynchronous();
 	CachedPostProcessEndCurveFloat = PostProcessEndCurveFloatSoft.LoadSynchronous();
+
+	BindTimelineFunctions();
+}
+
+void UNetherCrownControlPPComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (PostProcessBlendStartFloatTimeline.IsPlaying())
+	{
+		PostProcessBlendStartFloatTimeline.TickTimeline(DeltaTime);
+	}
+
+	if (PostProcessBlendEndFloatTimeline.IsPlaying())
+	{
+		PostProcessBlendEndFloatTimeline.TickTimeline(DeltaTime);
+	}
+}
+
+void UNetherCrownControlPPComponent::BindTimelineFunctions()
+{
+	FOnTimelineFloat PostProcessBlendStartProgressFunc{};
+	PostProcessBlendStartProgressFunc.BindUFunction(this, FName("SetPostProcessBlendStartByFloatTimeline"));
+	PostProcessBlendStartFloatTimeline.AddInterpFloat(CachedPostProcessStartCurveFloat, PostProcessBlendStartProgressFunc);
+
+	FOnTimelineFloat PostProcessBlendEndProgressFunc{};
+	PostProcessBlendEndProgressFunc.BindUFunction(this, FName("SetPostProcessBlendEndByFloatTimeline"));
+	PostProcessBlendEndFloatTimeline.AddInterpFloat(CachedPostProcessEndCurveFloat, PostProcessBlendEndProgressFunc);
+
+	FOnTimelineEvent PostProcessBlendEndFinishedFunc{};
+	PostProcessBlendEndFinishedFunc.BindUFunction(this, FName("HandlePostProcessBlendEndTimelineFinished"));
+	PostProcessBlendEndFloatTimeline.SetTimelineFinishedFunc(PostProcessBlendEndFinishedFunc);
 }
 
 void UNetherCrownControlPPComponent::StartClearPostProcessTimer(float Duration)
@@ -90,7 +118,7 @@ void UNetherCrownControlPPComponent::StartClearPostProcessTimer(float Duration)
 
 	FTimerHandle TimerHandle{};
 
-	World->GetTimerManager().SetTimer(TimerHandle, this, &UNetherCrownControlPPComponent::StartPostProcessBlendEndTimer, Duration, false);
+	World->GetTimerManager().SetTimer(TimerHandle, this, &UNetherCrownControlPPComponent::StartSetPostProcessBlendEndTimeline, Duration, false);
 }
 
 void UNetherCrownControlPPComponent::ResetPostProcess()
@@ -110,71 +138,39 @@ void UNetherCrownControlPPComponent::ResetPostProcess()
 	HandledPostProcessComponent->Settings = *DefaultProcessSettings;
 }
 
-void UNetherCrownControlPPComponent::StartPostProcessBlendStartTimer()
+void UNetherCrownControlPPComponent::StartSetPostProcessBlendStartTimeline()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
-
-	PostProcessBlendElapsedTime = 0.f;
-
-	World->GetTimerManager().SetTimer(PostProcessBlendStartTimerHandle, this, &ThisClass::ApplyPostProcessBlendStartFloat, 0.01f, true, 0.f);
+	PostProcessBlendStartFloatTimeline.PlayFromStart();
 }
 
-void UNetherCrownControlPPComponent::ApplyPostProcessBlendStartFloat()
+void UNetherCrownControlPPComponent::StartSetPostProcessBlendEndTimeline()
 {
-	FNetherCrownCurveTimerData CurveTimerData{};
-	CurveTimerData.WorldContextObject = this;
-	CurveTimerData.Curve = CachedPostProcessStartCurveFloat;
-	CurveTimerData.TimerHandle = &PostProcessBlendStartTimerHandle;
-	CurveTimerData.CurveElapsedTime = &PostProcessBlendElapsedTime;
-	CurveTimerData.CurveElapsedTimeOffset = 0.01f;
-	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetBeginPostProcessBlendWeight(); };
-
-	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
+	PostProcessBlendEndFloatTimeline.PlayFromStart();
 }
 
-void UNetherCrownControlPPComponent::StartPostProcessBlendEndTimer()
-{
-	const UWorld* World{ GetWorld() };
-	check(World);
-
-	PostProcessBlendElapsedTime = 0.f;
-
-	World->GetTimerManager().SetTimer(PostProcessBlendEndTimerHandle, this, &ThisClass::ApplyPostProcessBlendEndFloat, 0.01f, true, 0.f);
-}
-
-void UNetherCrownControlPPComponent::ApplyPostProcessBlendEndFloat()
-{
-	FNetherCrownCurveTimerData CurveTimerData{};
-	CurveTimerData.WorldContextObject = this;
-	CurveTimerData.Curve = CachedPostProcessEndCurveFloat;
-	CurveTimerData.TimerHandle = &PostProcessBlendEndTimerHandle;
-	CurveTimerData.CurveElapsedTime = &PostProcessBlendElapsedTime;
-	CurveTimerData.CurveElapsedTimeOffset = 0.01f;
-	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetEndPostProcessBlendWeight(); };
-	CurveTimerData.ClearCallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->ResetPostProcess(); };
-
-	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
-}
-
-void UNetherCrownControlPPComponent::SetBeginPostProcessBlendWeight() const
+void UNetherCrownControlPPComponent::SetPostProcessBlendStartByFloatTimeline(float FloatCurveValue)
 {
 	UPostProcessComponent* HandledPostProcessComponent{ HandledPostProcessComponentWeak.Get() };
-	if (!ensureAlways(IsValid(HandledPostProcessComponent)) || !ensureAlways(IsValid(CachedPostProcessStartCurveFloat)))
+	if (!ensureAlways(IsValid(HandledPostProcessComponent)))
 	{
 		return;
 	}
 
-	HandledPostProcessComponent->BlendWeight = CachedPostProcessStartCurveFloat->GetFloatValue(PostProcessBlendElapsedTime);
+	HandledPostProcessComponent->BlendWeight = FloatCurveValue;
 }
 
-void UNetherCrownControlPPComponent::SetEndPostProcessBlendWeight() const
+void UNetherCrownControlPPComponent::SetPostProcessBlendEndByFloatTimeline(float FloatCurveValue)
 {
 	UPostProcessComponent* HandledPostProcessComponent{ HandledPostProcessComponentWeak.Get() };
-	if (!ensureAlways(IsValid(HandledPostProcessComponent)) || !ensureAlways(IsValid(CachedPostProcessEndCurveFloat)))
+	if (!ensureAlways(IsValid(HandledPostProcessComponent)))
 	{
 		return;
 	}
 
-	HandledPostProcessComponent->BlendWeight = CachedPostProcessEndCurveFloat->GetFloatValue(PostProcessBlendElapsedTime);
+	HandledPostProcessComponent->BlendWeight = FloatCurveValue;
+}
+
+void UNetherCrownControlPPComponent::HandlePostProcessBlendEndTimelineFinished()
+{
+	ResetPostProcess();
 }

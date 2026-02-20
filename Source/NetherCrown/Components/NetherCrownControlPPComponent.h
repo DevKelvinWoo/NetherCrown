@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/TimelineComponent.h"
 #include "NetherCrownControlPPComponent.generated.h"
 
 class UPostProcessComponent;
@@ -28,26 +29,28 @@ public:
 	void SetHandlingPostProcessComponent(UPostProcessComponent* PostProcessComponent);
 
 	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true);
-	void StartPostProcessBlendEndTimer();
+	void StartSetPostProcessBlendEndTimeline();
+	void StartSetPostProcessBlendStartTimeline();
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	void BindTimelineFunctions();
+
 	void StartClearPostProcessTimer(float Duration);
 	void ResetPostProcess();
 	void ClearPostProcessImmediately();
 
-	void StartPostProcessBlendStartTimer();
-	void ApplyPostProcessBlendStartFloat();
-	void ApplyPostProcessBlendEndFloat();
+	UFUNCTION()
+	void SetPostProcessBlendStartByFloatTimeline(float FloatCurveValue);
 
-	void SetBeginPostProcessBlendWeight() const;
-	void SetEndPostProcessBlendWeight() const;
+	UFUNCTION()
+	void SetPostProcessBlendEndByFloatTimeline(float FloatCurveValue);
 
-	FTimerHandle PostProcessBlendStartTimerHandle{};
-	FTimerHandle PostProcessBlendEndTimerHandle{};
-	float PostProcessBlendElapsedTime{ 0.f };
+	UFUNCTION()
+	void HandlePostProcessBlendEndTimelineFinished();
 
 	UPROPERTY(EditDefaultsOnly)
 	TMap<ENetherCrownPPType, FPostProcessSettings> PostProcessSettingsMap{};
@@ -63,4 +66,7 @@ private:
 	TObjectPtr<UCurveFloat> CachedPostProcessEndCurveFloat{};
 
 	TWeakObjectPtr<UPostProcessComponent> HandledPostProcessComponentWeak{};
+
+	FTimeline PostProcessBlendStartFloatTimeline{};
+	FTimeline PostProcessBlendEndFloatTimeline{};
 };

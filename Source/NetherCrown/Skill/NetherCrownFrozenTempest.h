@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "NetherCrownSkillObject.h"
+#include "Components/TimelineComponent.h"
 #include "NetherCrownFrozenTempest.generated.h"
 
 class UCurveVector;
@@ -19,18 +20,23 @@ protected:
 	virtual void ExecuteSkillGameplay() override;
 	virtual void PlaySkillCosmetics() override;
 
+	virtual void TickFloatTimeline(float DeltaTime) override;
+
 private:
-	void StartSkillCameraZoomCurveTimer();
-	void ApplySkillCameraZoomCurveVector();
-	void SetSkillCameraSpringArmValues();
+	void BindTimelineFunctions();
 
-	void StartCharacterOverlayMaterialStartTimer();
-	void ApplyCharacterOverlayStartMaterial();
-	void SetStartCharacterOverlayMaterialScalarParam();
+	void StartSetSkillCameraZoomTimeline();
+	void StartSetCharacterOverlayStartMaterialTimeline();
+	void StartSetCharacterOverlayEndMaterialTimeline();
 
-	void StartCharacterOverlayMaterialEndTimer();
-	void ApplyCharacterOverlayEndMaterial();
-	void SetEndCharacterOverlayMaterialScalarParam();
+	UFUNCTION()
+	void SetSkillCameraZoomByVectorTimeline(FVector VectorCurveValue);
+
+	UFUNCTION()
+	void SetCharacterOverlayStartMaterialByFloatTimeline(float FloatCurveValue);
+
+	UFUNCTION()
+	void SetCharacterOverlayEndMaterialByFloatTimeline(float FloatCurveValue);
 
 	void HandleOnHitFrozenTempestSkill();
 
@@ -62,13 +68,6 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<UCameraShakeBase> SkillChargeCameraShakeBaseClass{};
 
-	FTimerHandle SkillCameraZoomCurveTimerHandle{};
-	float SkillCameraZoomCurveElapsedTime{ 0.f };
-
-	FTimerHandle CharacterOverlayMaterialStartTimerHandle{};
-	FTimerHandle CharacterOverlayMaterialEndTimerHandle{};
-	float CharacterOverlayMaterialElapsedTime{ 0.f };
-
 	UPROPERTY(EditDefaultsOnly)
 	float SkillDetectingSphereRadius{ 500.f };
 
@@ -83,4 +82,8 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> CachedDynamicFrozenTempestMaterial{};
+
+	FTimeline SkillCameraZoomVectorTimeline{};
+	FTimeline CharacterOverlayStartMaterialFloatTimeline{};
+	FTimeline CharacterOverlayEndMaterialFloatTimeline{};
 };

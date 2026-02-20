@@ -39,12 +39,6 @@ private:
 
 	void CreateArmMaterialInstanceDynamic();
 
-	FTimerHandle SkillCameraCurveTimerHandle{};
-	float SkillCameraCurveElapsedTime{ 0.f };
-
-	FTimerHandle SkillArmMaterialCurveTimerHandle{};
-	float SkillArmMaterialCurveElapsedTime{ 0.f };
-
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UCurveFloat> SkillCameraCurveFloatSoft{};
 

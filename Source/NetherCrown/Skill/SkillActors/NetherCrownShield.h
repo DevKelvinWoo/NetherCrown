@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "Components/TimelineComponent.h"
 #include "NetherCrownShield.generated.h"
 
 class UStaticMeshComponent;
@@ -22,16 +23,20 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 private:
 	void CreateShieldDynamicMaterialInstance();
+	void BindTimelineFunctions();
 
-	void StartShieldMaterialCurveTimer(const bool bStartShield);
-	void ApplyBeginShieldMaterialParameterCurveFloat();
-	void ApplyEndShieldMaterialParameterCurveFloat();
+	void StartSetBeginShieldMaterialTimeline();
+	void StartSetEndShieldMaterialTimeline();
 
-	void SetBeginShieldDynamicMaterialScalarParam() const;
-	void SetEndShieldDynamicMaterialScalarParam();
+	UFUNCTION()
+	void SetBeginShieldMaterialByFloatTimeline(float FloatCurveValue);
+
+	UFUNCTION()
+	void SetEndShieldMaterialByFloatTimeline(float FloatCurveValue);
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UStaticMeshComponent> ShieldMeshComponent{};
@@ -51,9 +56,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> CachedEndCurveFloat{};
 
-	FTimerHandle ShieldMaterialCurveTimerHandle{};
-	float ShieldMaterialCurveElapsedTime{ 0.f };
-
 	UPROPERTY(EditDefaultsOnly)
 	FName ShieldMaterialScalarParameterName{ TEXT("ShieldAlpha") };
+
+	FTimeline BeginShieldMaterialFloatTimeline{};
+	FTimeline EndShieldMaterialFloatTimeline{};
 };

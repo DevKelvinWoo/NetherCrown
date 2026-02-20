@@ -193,7 +193,7 @@ void UNetherCrownSkillDashAttack::Multicast_StartPostProcessBlendEndTimer_Implem
 		return;
 	}
 
-	ControlPPComponent->StartPostProcessBlendEndTimer();
+	ControlPPComponent->StartSetPostProcessBlendEndTimeline();
 }
 
 void UNetherCrownSkillDashAttack::PlayLoopDashAttackMontage() const

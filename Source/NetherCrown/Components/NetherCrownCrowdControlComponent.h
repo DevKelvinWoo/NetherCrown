@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/TimelineComponent.h"
 #include "NetherCrownCrowdControlComponent.generated.h"
 
 class UAnimMontage;
@@ -35,6 +36,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
@@ -57,14 +59,17 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetActiveStatusNiagaraSystem(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable) const;
 
-	FTimerHandle FrozenTargetOverlayMaterialEndTimerHandle{};
-	void StartFrozenTargetOverlayMaterialEndTimer();
-	void ApplyFrozenTargetOverlayEndMaterial();
-	void SetEndFrozenTargetOverlayMaterialScalarParam();
-	float FrozenTargetOverlayMaterialElapsedTime{ 0.f };
+	void BindTimelineFunctions();
+
+	void StartSetFrozenTargetOverlayEndMaterialTimeline();
+
+	UFUNCTION()
+	void SetFrozenTargetOverlayEndMaterialByFloatTimeline(float FloatCurveValue);
 
 	UPROPERTY()
 	TObjectPtr<UCurveFloat> CachedFrozenTargetOverlayMaterialEndCurveFloat{};
+
+	FTimeline FrozenTargetOverlayEndMaterialFloatTimeline{};
 
 	FTimerHandle CrowdControlTimerHandle{};
 

@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownFrozenTempest.h"
 
@@ -11,7 +11,6 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
-#include "NetherCrown/Util/NetherCrownCurveTimerUtil.h"
 
 void UNetherCrownFrozenTempest::InitSkillObject()
 {
@@ -40,6 +39,8 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 		CachedFrozenTempestTargetOverlayMaterial = FrozenTempestTargetOverlayMaterialSoft.LoadSynchronous();
 		CachedCharacterOverlayMaterialStartCurveFloat = CharacterOverlayMaterialStartCurveFloatSoft.LoadSynchronous();
 		CachedCharacterOverlayMaterialEndCurveFloat = CharacterOverlayMaterialEndCurveFloatSoft.LoadSynchronous();
+
+		BindTimelineFunctions();
 	}
 }
 
@@ -65,52 +66,53 @@ void UNetherCrownFrozenTempest::PlaySkillCosmetics()
 
 	ApplyPostProcess(ENetherCrownPPType::Charging, 2.5f);
 
-	StartSkillCameraZoomCurveTimer();
-	StartCharacterOverlayMaterialStartTimer();
+	StartSetSkillCameraZoomTimeline();
+	StartSetCharacterOverlayStartMaterialTimeline();
 	PlayChargeCameraShake();
 }
 
-void UNetherCrownFrozenTempest::StartSkillCameraZoomCurveTimer()
+void UNetherCrownFrozenTempest::TickFloatTimeline(float DeltaTime)
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
+	Super::TickFloatTimeline(DeltaTime);
 
-	SkillCameraZoomCurveElapsedTime = 0.f;
-
-	World->GetTimerManager().SetTimer(SkillCameraZoomCurveTimerHandle, this, &ThisClass::ApplySkillCameraZoomCurveVector, 0.01f, true, 0.f);
-}
-
-void UNetherCrownFrozenTempest::ApplySkillCameraZoomCurveVector()
-{
-	FNetherCrownCurveTimerData CurveTimerData{};
-	CurveTimerData.WorldContextObject = this;
-	CurveTimerData.Curve = CachedSkillCameraZoomCurveVector;
-	CurveTimerData.TimerHandle = &SkillCameraZoomCurveTimerHandle;
-	CurveTimerData.CurveElapsedTime = &SkillCameraZoomCurveElapsedTime;
-	CurveTimerData.CurveElapsedTimeOffset = 0.01f;
-	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetSkillCameraSpringArmValues(); };
-
-	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
-}
-
-void UNetherCrownFrozenTempest::SetSkillCameraSpringArmValues()
-{
-	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (SkillCameraZoomVectorTimeline.IsPlaying())
 	{
-		return;
+		SkillCameraZoomVectorTimeline.TickTimeline(DeltaTime);
 	}
 
-	const FVector& SkillCameraZoomCurveFloatValue{ CachedSkillCameraZoomCurveVector->GetVectorValue(SkillCameraZoomCurveElapsedTime) };
-	SkillOwnerCharacter->SetSpringArmLength(SkillCameraZoomCurveFloatValue.X);
-	SkillOwnerCharacter->SetSpringArmZOffset(SkillCameraZoomCurveFloatValue.Z);
+	if (CharacterOverlayStartMaterialFloatTimeline.IsPlaying())
+	{
+		CharacterOverlayStartMaterialFloatTimeline.TickTimeline(DeltaTime);
+	}
+
+	if (CharacterOverlayEndMaterialFloatTimeline.IsPlaying())
+	{
+		CharacterOverlayEndMaterialFloatTimeline.TickTimeline(DeltaTime);
+	}
 }
 
-void UNetherCrownFrozenTempest::StartCharacterOverlayMaterialStartTimer()
+void UNetherCrownFrozenTempest::BindTimelineFunctions()
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
+	FOnTimelineVector SkillCameraZoomProgressFunc{};
+	SkillCameraZoomProgressFunc.BindUFunction(this, FName("SetSkillCameraZoomByVectorTimeline"));
+	SkillCameraZoomVectorTimeline.AddInterpVector(CachedSkillCameraZoomCurveVector, SkillCameraZoomProgressFunc);
 
+	FOnTimelineFloat CharacterOverlayStartMaterialProgressFunc{};
+	CharacterOverlayStartMaterialProgressFunc.BindUFunction(this, FName("SetCharacterOverlayStartMaterialByFloatTimeline"));
+	CharacterOverlayStartMaterialFloatTimeline.AddInterpFloat(CachedCharacterOverlayMaterialStartCurveFloat, CharacterOverlayStartMaterialProgressFunc);
+
+	FOnTimelineFloat CharacterOverlayEndMaterialProgressFunc{};
+	CharacterOverlayEndMaterialProgressFunc.BindUFunction(this, FName("SetCharacterOverlayEndMaterialByFloatTimeline"));
+	CharacterOverlayEndMaterialFloatTimeline.AddInterpFloat(CachedCharacterOverlayMaterialEndCurveFloat, CharacterOverlayEndMaterialProgressFunc);
+}
+
+void UNetherCrownFrozenTempest::StartSetSkillCameraZoomTimeline()
+{
+	SkillCameraZoomVectorTimeline.PlayFromStart();
+}
+
+void UNetherCrownFrozenTempest::StartSetCharacterOverlayStartMaterialTimeline()
+{
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
@@ -118,25 +120,28 @@ void UNetherCrownFrozenTempest::StartCharacterOverlayMaterialStartTimer()
 	}
 
 	CachedDynamicFrozenTempestMaterial = UMaterialInstanceDynamic::Create(CachedFrozenTempestTargetOverlayMaterial, SkillOwnerCharacter);
-	CharacterOverlayMaterialElapsedTime = 0.f;
 
-	World->GetTimerManager().SetTimer(CharacterOverlayMaterialStartTimerHandle, this, &ThisClass::ApplyCharacterOverlayStartMaterial, 0.01f, true, 0.f);
+	CharacterOverlayStartMaterialFloatTimeline.PlayFromStart();
 }
 
-void UNetherCrownFrozenTempest::ApplyCharacterOverlayStartMaterial()
+void UNetherCrownFrozenTempest::StartSetCharacterOverlayEndMaterialTimeline()
 {
-	FNetherCrownCurveTimerData CurveTimerData{};
-	CurveTimerData.WorldContextObject = this;
-	CurveTimerData.Curve = CachedCharacterOverlayMaterialStartCurveFloat;
-	CurveTimerData.TimerHandle = &CharacterOverlayMaterialStartTimerHandle;
-	CurveTimerData.CurveElapsedTime = &CharacterOverlayMaterialElapsedTime;
-	CurveTimerData.CurveElapsedTimeOffset = 0.01f;
-	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetStartCharacterOverlayMaterialScalarParam(); };
-
-	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
+	CharacterOverlayEndMaterialFloatTimeline.PlayFromStart();
 }
 
-void UNetherCrownFrozenTempest::SetStartCharacterOverlayMaterialScalarParam()
+void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector VectorCurveValue)
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	SkillOwnerCharacter->SetSpringArmLength(VectorCurveValue.X);
+	SkillOwnerCharacter->SetSpringArmZOffset(VectorCurveValue.Z);
+}
+
+void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -158,34 +163,10 @@ void UNetherCrownFrozenTempest::SetStartCharacterOverlayMaterialScalarParam()
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
-	const float CharacterOverlayMaterialAlpha{ CachedCharacterOverlayMaterialStartCurveFloat->GetFloatValue(CharacterOverlayMaterialElapsedTime) };
-	CachedDynamicFrozenTempestMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
+	CachedDynamicFrozenTempestMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, FloatCurveValue);
 }
 
-void UNetherCrownFrozenTempest::StartCharacterOverlayMaterialEndTimer()
-{
-	const UWorld* World{ GetWorld() };
-	check(World);
-
-	CharacterOverlayMaterialElapsedTime = 0.f;
-
-	World->GetTimerManager().SetTimer(CharacterOverlayMaterialEndTimerHandle, this, &ThisClass::ApplyCharacterOverlayEndMaterial, 0.01f, true, 0.f);
-}
-
-void UNetherCrownFrozenTempest::ApplyCharacterOverlayEndMaterial()
-{
-	FNetherCrownCurveTimerData CurveTimerData{};
-	CurveTimerData.WorldContextObject = this;
-	CurveTimerData.Curve = CachedCharacterOverlayMaterialEndCurveFloat;
-	CurveTimerData.TimerHandle = &CharacterOverlayMaterialEndTimerHandle;
-	CurveTimerData.CurveElapsedTime = &CharacterOverlayMaterialElapsedTime;
-	CurveTimerData.CurveElapsedTimeOffset = 0.01f;
-	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetEndCharacterOverlayMaterialScalarParam(); };
-
-	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
-}
-
-void UNetherCrownFrozenTempest::SetEndCharacterOverlayMaterialScalarParam()
+void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -208,8 +189,7 @@ void UNetherCrownFrozenTempest::SetEndCharacterOverlayMaterialScalarParam()
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
-	const float CharacterOverlayMaterialAlpha{ CachedCharacterOverlayMaterialEndCurveFloat->GetFloatValue(CharacterOverlayMaterialElapsedTime) };
-	DynamicOverlayMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
+	DynamicOverlayMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, FloatCurveValue);
 }
 
 void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
@@ -242,7 +222,7 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 
 	if (!SkillOwnerCharacter->HasAuthority())
 	{
-		StartCharacterOverlayMaterialEndTimer();
+		StartSetCharacterOverlayEndMaterialTimeline();
 	}
 
 	const TArray<ANetherCrownEnemy*> DetectedEnemies{ GetSkillDetectedTargets() };

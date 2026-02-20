@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownCrowdControlComponent.h"
 
@@ -7,11 +7,10 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
-#include "NetherCrown/Util/NetherCrownCurveTimerUtil.h"
 
 UNetherCrownCrowdControlComponent::UNetherCrownCrowdControlComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -42,6 +41,8 @@ void UNetherCrownCrowdControlComponent::InitLoadData()
 	check(DefaultSettings);
 
 	CachedFrozenTargetOverlayMaterialEndCurveFloat = DefaultSettings->TargetOverlayMaterialEndCurveFloatSoft.LoadSynchronous();
+
+	BindTimelineFunctions();
 }
 
 void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
@@ -155,7 +156,7 @@ void UNetherCrownCrowdControlComponent::ClearFrozenCosmetics()
 
 	if (!OwnerCharacter->HasAuthority())
 	{
-		StartFrozenTargetOverlayMaterialEndTimer();
+		StartSetFrozenTargetOverlayEndMaterialTimeline();
 	}
 }
 
@@ -227,30 +228,29 @@ void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownC
 	OwnerEnemy->PlayAnimMontage(FoundCrowdControlAnimMontage);
 }
 
-void UNetherCrownCrowdControlComponent::StartFrozenTargetOverlayMaterialEndTimer()
+void UNetherCrownCrowdControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
-	const UWorld* World{ GetWorld() };
-	check(World);
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	FrozenTargetOverlayMaterialElapsedTime = 0.f;
-
-	World->GetTimerManager().SetTimer(FrozenTargetOverlayMaterialEndTimerHandle, this, &ThisClass::ApplyFrozenTargetOverlayEndMaterial, 0.01f, true, 0.f);
+	if (FrozenTargetOverlayEndMaterialFloatTimeline.IsPlaying())
+	{
+		FrozenTargetOverlayEndMaterialFloatTimeline.TickTimeline(DeltaTime);
+	}
 }
 
-void UNetherCrownCrowdControlComponent::ApplyFrozenTargetOverlayEndMaterial()
+void UNetherCrownCrowdControlComponent::BindTimelineFunctions()
 {
-	FNetherCrownCurveTimerData CurveTimerData{};
-	CurveTimerData.WorldContextObject = this;
-	CurveTimerData.Curve = CachedFrozenTargetOverlayMaterialEndCurveFloat;
-	CurveTimerData.TimerHandle = &FrozenTargetOverlayMaterialEndTimerHandle;
-	CurveTimerData.CurveElapsedTime = &FrozenTargetOverlayMaterialElapsedTime;
-	CurveTimerData.CurveElapsedTimeOffset = 0.01f;
-	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetEndFrozenTargetOverlayMaterialScalarParam(); };
-
-	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
+	FOnTimelineFloat FrozenTargetOverlayEndMaterialProgressFunc{};
+	FrozenTargetOverlayEndMaterialProgressFunc.BindUFunction(this, FName("SetFrozenTargetOverlayEndMaterialByFloatTimeline"));
+	FrozenTargetOverlayEndMaterialFloatTimeline.AddInterpFloat(CachedFrozenTargetOverlayMaterialEndCurveFloat, FrozenTargetOverlayEndMaterialProgressFunc);
 }
 
-void UNetherCrownCrowdControlComponent::SetEndFrozenTargetOverlayMaterialScalarParam()
+void UNetherCrownCrowdControlComponent::StartSetFrozenTargetOverlayEndMaterialTimeline()
+{
+	FrozenTargetOverlayEndMaterialFloatTimeline.PlayFromStart();
+}
+
+void UNetherCrownCrowdControlComponent::SetFrozenTargetOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
 {
 	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
 	if (!ensureAlways(IsValid(OwnerCharacter)))
@@ -273,6 +273,5 @@ void UNetherCrownCrowdControlComponent::SetEndFrozenTargetOverlayMaterialScalarP
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
-	const float CharacterOverlayMaterialAlpha{ CachedFrozenTargetOverlayMaterialEndCurveFloat->GetFloatValue(FrozenTargetOverlayMaterialElapsedTime) };
-	DynamicOverlayMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, CharacterOverlayMaterialAlpha);
+	DynamicOverlayMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, FloatCurveValue);
 }
