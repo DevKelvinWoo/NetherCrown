@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "Components/TimelineComponent.h"
 #include "UObject/Object.h"
 #include "NetherCrownSkillObject.generated.h"
 
@@ -80,6 +81,9 @@ public:
 	void StopSkillCoolDownTimer();
 
 	bool CanActiveSkill() const { return bCanActiveSkill; }
+
+	//@NOTE : Timeline
+	virtual void TickFloatTimeline(float DeltaTime){};
 
 protected:
 	//@NOTE : To Replicate UObject

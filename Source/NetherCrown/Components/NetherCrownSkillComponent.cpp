@@ -9,11 +9,12 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Skill/NetherCrownSkillObject.h"
+#include "NetherCrown/Skill/NetherCrownSkillSkyFallSlash.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 UNetherCrownSkillComponent::UNetherCrownSkillComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -70,6 +71,22 @@ void UNetherCrownSkillComponent::BeginPlay()
 	Super::BeginPlay();
 
 	ConstructSkillObjects();
+}
+
+void UNetherCrownSkillComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	for (const auto& SkillPair : SkillObjects)
+	{
+		UNetherCrownSkillObject* SkillObject{ SkillPair.Value };
+		if (!IsValid(SkillObject))
+		{
+			continue;
+		}
+
+		SkillObject->TickFloatTimeline(DeltaTime);
+	}
 }
 
 bool UNetherCrownSkillComponent::ReplicateSubobjects(UActorChannel* Channel, FOutBunch* Bunch, FReplicationFlags* RepFlags)

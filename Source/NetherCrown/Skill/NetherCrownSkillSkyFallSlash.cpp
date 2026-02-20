@@ -41,8 +41,10 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 
 	if (!SkillOwnerCharacter->HasAuthority())
 	{
-		CachedSkillArmMaterialCurveFloat = SkillArmMaterialCurveFloatSoft.LoadSynchronous();
 		CachedSkillCameraCurveFloat = SkillCameraCurveFloatSoft.LoadSynchronous();
+		CachedSkillArmMaterialCurveFloat = SkillArmMaterialCurveFloatSoft.LoadSynchronous();
+
+		BindTimelineFunctions();
 	}
 }
 
@@ -72,74 +74,52 @@ void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics()
 
 	ApplyPostProcess(ENetherCrownPPType::Charging, 1.0f);
 
-	StartSkillCameraCurveTimer();
-	StartSkillArmMaterialParameterCurveTimer();
+	StartSetSpringArmZOffsetTimeline();
+	StartSetArmMaterialParamTimeline();
 }
 
-void UNetherCrownSkillSkyFallSlash::StartSkillCameraCurveTimer()
+void UNetherCrownSkillSkyFallSlash::TickFloatTimeline(float DeltaTime)
 {
-	SkillCameraCurveElapsedTime = 0.f;
+	Super::TickFloatTimeline(DeltaTime);
 
-	const UWorld* World{ GetWorld() };
-	check(World);
-
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (SpringArmZOffsetFloatTimeline.IsPlaying())
 	{
-		return;
+		SpringArmZOffsetFloatTimeline.TickTimeline(DeltaTime);
 	}
 
-	if (!SkillOwnerCharacter->IsLocallyControlled())
+	if (ArmMaterialFloatTimeline.IsPlaying())
 	{
-		return;
+		ArmMaterialFloatTimeline.TickTimeline(DeltaTime);
 	}
-
-	World->GetTimerManager().SetTimer(
-		SkillCameraCurveTimerHandle,
-		this,
-		&ThisClass::ApplySkillCameraCurveFloat,
-		0.015f,
-		true,
-		0.f
-	);
 }
 
-void UNetherCrownSkillSkyFallSlash::StartSkillArmMaterialParameterCurveTimer()
+void UNetherCrownSkillSkyFallSlash::StartSetSpringArmZOffsetTimeline()
 {
-	SkillArmMaterialCurveElapsedTime = 0.f;
-
-	const UWorld* World{ GetWorld() };
-	check(World);
-
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	World->GetTimerManager().SetTimer(SkillArmMaterialCurveTimerHandle, this, &ThisClass::ApplySkillArmMaterialParameterCurveFloat, 0.015f, true, 0.f);
+	SpringArmZOffsetFloatTimeline.PlayFromStart();
 }
 
-void UNetherCrownSkillSkyFallSlash::ApplySkillArmMaterialParameterCurveFloat()
+void UNetherCrownSkillSkyFallSlash::StartSetArmMaterialParamTimeline()
 {
-	FNetherCrownCurveTimerData CurveTimerData{};
-	CurveTimerData.WorldContextObject = this;
-	CurveTimerData.Curve = CachedSkillArmMaterialCurveFloat;
-	CurveTimerData.TimerHandle = &SkillArmMaterialCurveTimerHandle;
-	CurveTimerData.CurveElapsedTime = &SkillArmMaterialCurveElapsedTime;
-	CurveTimerData.CurveElapsedTimeOffset = 0.015f;
-	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetSkillArmMaterialScalarParam(); };
-
-	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
+	ArmMaterialFloatTimeline.PlayFromStart();
 }
 
-void UNetherCrownSkillSkyFallSlash::SetSkillArmMaterialScalarParam()
+void UNetherCrownSkillSkyFallSlash::BindTimelineFunctions()
+{
+	FOnTimelineFloat SpringArmZOffsetProgressFunc{};
+	SpringArmZOffsetProgressFunc.BindUFunction(this, FName("SetSpringArmZOffsetByFloatTimeline"));
+	SpringArmZOffsetFloatTimeline.AddInterpFloat(CachedSkillCameraCurveFloat, SpringArmZOffsetProgressFunc);
+
+	FOnTimelineFloat ArmMaterialFloatProgressFunc{};
+	ArmMaterialFloatProgressFunc.BindUFunction(this, FName("SetArmMaterialParamByFloatTimeline"));
+	SpringArmZOffsetFloatTimeline.AddInterpFloat(CachedSkillArmMaterialCurveFloat, ArmMaterialFloatProgressFunc);
+}
+
+void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float FloatCurveValue)
 {
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
-	const float ArmMaterialCurveFloatValue{ CachedSkillArmMaterialCurveFloat->GetFloatValue(SkillArmMaterialCurveElapsedTime) };
-	ArmMaterialInstanceDynamic->SetScalarParameterValue(DefaultSettings->SkyFallSlashArmMaterialParam, ArmMaterialCurveFloatValue);
+	ArmMaterialInstanceDynamic->SetScalarParameterValue(DefaultSettings->SkyFallSlashArmMaterialParam, FloatCurveValue);
 }
 
 void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
@@ -258,20 +238,7 @@ void UNetherCrownSkillSkyFallSlash::CreateArmMaterialInstanceDynamic()
 	ensureAlways(IsValid(ArmMaterialInstanceDynamic));
 }
 
-void UNetherCrownSkillSkyFallSlash::ApplySkillCameraCurveFloat()
-{
-	FNetherCrownCurveTimerData CurveTimerData{};
-	CurveTimerData.WorldContextObject = this;
-	CurveTimerData.Curve = CachedSkillCameraCurveFloat;
-	CurveTimerData.TimerHandle = &SkillCameraCurveTimerHandle;
-	CurveTimerData.CurveElapsedTime = &SkillCameraCurveElapsedTime;
-	CurveTimerData.CurveElapsedTimeOffset = 1.f;
-	CurveTimerData.CallBack = [WeakThis = MakeWeakObjectPtr(this)]() { WeakThis->SetSpringArmZOffset(); };
-
-	FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(CurveTimerData);
-}
-
-void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffset()
+void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue)
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -279,6 +246,5 @@ void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffset()
 		return;
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("%f"), CachedSkillCameraCurveFloat->GetFloatValue(SkillCameraCurveElapsedTime));
-	SkillOwnerCharacter->SetSpringArmZOffset(CachedSkillCameraCurveFloat->GetFloatValue(SkillCameraCurveElapsedTime));
+	SkillOwnerCharacter->SetSpringArmZOffset(FloatCurveValue);
 }

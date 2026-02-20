@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "NetherCrownSkillObject.h"
+#include "Components/TimelineComponent.h"
 #include "NetherCrownSkillSkyFallSlash.generated.h"
 
 class UCurveFloat;
@@ -20,14 +21,18 @@ protected:
 	virtual void ExecuteSkillGameplay() override;
 	virtual void PlaySkillCosmetics() override;
 
-private:
-	void StartSkillCameraCurveTimer();
-	void ApplySkillCameraCurveFloat();
-	void SetSpringArmZOffset();
+	virtual void TickFloatTimeline(float DeltaTime) override;
 
-	void StartSkillArmMaterialParameterCurveTimer();
-	void ApplySkillArmMaterialParameterCurveFloat();
-	void SetSkillArmMaterialScalarParam();
+private:
+	void StartSetSpringArmZOffsetTimeline();
+	void StartSetArmMaterialParamTimeline();
+	void BindTimelineFunctions();
+
+	UFUNCTION()
+	void SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue);
+
+	UFUNCTION()
+	void SetArmMaterialParamByFloatTimeline(float FloatCurveValue);
 
 	void HandleOnHitSkyFallSlashSkill();
 	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;
@@ -70,5 +75,9 @@ private:
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> ArmMaterialInstanceDynamic{};
 
-	const FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
+	UPROPERTY(EditDefaultsOnly)
+	FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
+
+	FTimeline SpringArmZOffsetFloatTimeline{};
+	FTimeline ArmMaterialFloatTimeline{};
 };
