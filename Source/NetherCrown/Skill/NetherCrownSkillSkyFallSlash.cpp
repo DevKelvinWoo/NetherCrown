@@ -12,7 +12,6 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
-#include "NetherCrown/Util/NetherCrownCurveTimerUtil.h"
 
 #define DEBUG_SPHERE 0
 
