@@ -56,7 +56,7 @@ private:
 	float SkillDetectSphereOffset{ 750.f };
 
 	UPROPERTY(EditDefaultsOnly)
-	float EndLocationOffset{ 150.f };
+	float EndLocationOffset{ 50.f };
 
 	UPROPERTY(EditDefaultsOnly)
 	float DashTimerRate{ 0.4f };

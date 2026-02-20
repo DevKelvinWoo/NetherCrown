@@ -129,7 +129,15 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	const FRotator RotationToTarget{ UKismetMathLibrary::FindLookAtRotation(SkillOwnerLocation, CurrentTargetLocation) };
 	Multicast_SetOwnerCharacterRotToTarget(RotationToTarget); //@NOTE : Need Multicast RPC to rotate in dedicate server env
 
-	const FVector DashOffsetByDirection{ SkillOwnerCharacter->GetActorForwardVector() * EndLocationOffset };
+	float CurrentTargetCapsuleRadius{};
+	const ANetherCrownEnemy* CurrentTargetEnemy{ Cast<ANetherCrownEnemy>(CurrentTargetActor) };
+	const UCapsuleComponent* CurrentTargetEnemyCapsule{ CurrentTargetEnemy ? CurrentTargetEnemy->GetCapsuleComponent() : nullptr };
+	if (IsValid(CurrentTargetEnemyCapsule))
+	{
+		CurrentTargetCapsuleRadius = CurrentTargetEnemyCapsule->GetScaledCapsuleRadius();
+	}
+
+	const FVector DashOffsetByDirection{ SkillOwnerCharacter->GetActorForwardVector() * (CurrentTargetCapsuleRadius + EndLocationOffset) };
 	const FVector DashEndLocation{ CurrentTargetLocation + DashOffsetByDirection };
 	Multicast_DashOwnerCharacter(SkillOwnerLocation, DashEndLocation); //@NOTE : Server에서만 호출 시 네트워크 복제 지연으로 끊김 발생
 }
