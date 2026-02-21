@@ -57,19 +57,19 @@ public:
 protected:
 	virtual void NativeInitializeAnimation() override;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Character")
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
 	TObjectPtr<ANetherCrownCharacter> CachedOwningCharacter;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "Component")
 	TObjectPtr<UNetherCrownBasicAttackComponent> CachedBasicAttackComponent;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "Component")
 	TObjectPtr<UNetherCrownEquipComponent> CachedEquipComponent;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "Component")
 	TObjectPtr<UNetherCrownSkillComponent> CachedSkillComponent;
 
-	UPROPERTY(BlueprintReadOnly, Category = "Component")
+	UPROPERTY(BlueprintReadOnly, Transient, Category = "Component")
 	TObjectPtr<UCharacterMovementComponent> CachedCharacterMovementComponent;
 
 private:
