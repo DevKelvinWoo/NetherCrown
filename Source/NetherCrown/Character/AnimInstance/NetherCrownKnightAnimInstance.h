@@ -21,12 +21,6 @@ public:
 	UFUNCTION()
 	void AnimNotify_HitFrozenTempestSkill();
 
-	UFUNCTION()
-	void AnimNotify_ActiveWeaponAuraNiagara();
-
-	UFUNCTION()
-	void AnimNotify_DeactiveWeaponAuraNiagara();
-
 	FOnHitSkyFallSlashSkill& GetOnHitSkyFallSlashSkill() { return OnHitSkyFallSlashSkill; }
 	FOnHitFrozenTempestSkill& GetOnHitFrozenTempestSkill() { return OnHitFrozenTempestSkill; }
 

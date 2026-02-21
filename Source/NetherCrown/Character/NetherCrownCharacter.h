@@ -9,17 +9,18 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownCharacter.generated.h"
 
-class UNetherCrownControlGhostTrailComponent;
 class UNiagaraComponent;
-class UNetherCrownControlPPComponent;
-class UNetherCrownCrowdControlComponent;
 class USpringArmComponent;
 class UCameraComponent;
 class UPostProcessComponent;
 
+class UNetherCrownControlPPComponent;
+class UNetherCrownCrowdControlComponent;
+class UNetherCrownControlGhostTrailComponent;
 class UNetherCrownBasicAttackComponent;
 class UNetherCrownEquipComponent;
 class UNetherCrownSkillComponent;
+
 enum class ENetherCrownSkillKeyEnum : uint8;
 
 USTRUCT()

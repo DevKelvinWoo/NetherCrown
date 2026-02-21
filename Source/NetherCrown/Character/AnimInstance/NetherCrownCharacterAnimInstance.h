@@ -54,6 +54,12 @@ public:
 	UFUNCTION()
 	void AnimNotify_SetCharacterMovementWalk();
 
+	UFUNCTION()
+	void AnimNotify_ActiveWeaponAuraNiagara();
+
+	UFUNCTION()
+	void AnimNotify_DeactiveWeaponAuraNiagara();
+
 protected:
 	virtual void NativeInitializeAnimation() override;
 
