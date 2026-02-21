@@ -129,6 +129,81 @@ void UNetherCrownFrozenTempest::StartSetCharacterOverlayEndMaterialTimeline()
 	CharacterOverlayEndMaterialFloatTimeline.PlayFromStart();
 }
 
+void UNetherCrownFrozenTempest::Multicast_StartFrozenTempestHitCosmetics_Implementation()
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	StartSetCharacterOverlayEndMaterialTimeline();
+
+	if (SkillOwnerCharacter->IsLocallyControlled())
+	{
+		const ANetherCrownPlayerController* SkillOwnerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };
+		APlayerCameraManager* CameraManager{ SkillOwnerController ? SkillOwnerController->PlayerCameraManager : nullptr };
+		if (!ensureAlways(IsValid(CameraManager)))
+		{
+			return;
+		}
+
+		CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
+
+		UNetherCrownControlPPComponent* ControlPPComponent{ SkillOwnerCharacter->GetControlPPComponent() };
+		if (!ensureAlways(IsValid(ControlPPComponent)))
+		{
+			return;
+		}
+
+		ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::Frozen, FrozenDuration);
+	}
+}
+
+void UNetherCrownFrozenTempest::Multicast_SetDetectedEnemyOverlayMaterial_Implementation()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (!IsValid(CachedFrozenTempestTargetOverlayMaterial))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("CachedFrozenTempestTargetOverlayMaterial::Create failed"));
+		return;
+	}
+
+	for (const ANetherCrownEnemy* DetectedEnemy : GetSkillDetectedTargets())
+	{
+		USkeletalMeshComponent* DetectedEnemyMesh{ DetectedEnemy->GetMesh() };
+		if (!ensureAlways(IsValid(DetectedEnemyMesh)))
+		{
+			continue;
+		}
+
+		DetectedEnemyMesh->SetOverlayMaterial(CachedFrozenTempestTargetOverlayMaterial);
+
+		const UNetherCrownCrowdControlComponent* CrowdControlComponent{ DetectedEnemy->GetCrowdControlComponent() };
+		if (!ensureAlways(IsValid(CrowdControlComponent)))
+		{
+			continue;
+		}
+
+		CrowdControlComponent->Frozen();
+	}
+}
+
 void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector VectorCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
@@ -195,64 +270,17 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(fl
 void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (SkillOwnerCharacter->IsLocallyControlled())
+	Multicast_StartFrozenTempestHitCosmetics();
+	Multicast_SetDetectedEnemyOverlayMaterial();
+
+	for (ANetherCrownEnemy* DetectedEnemy : GetSkillDetectedTargets())
 	{
-		ANetherCrownPlayerController* SkillOwnerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };
-		APlayerCameraManager* CameraManager{ SkillOwnerController ? SkillOwnerController->PlayerCameraManager : nullptr };
-		if (!ensureAlways(IsValid(CameraManager)))
-		{
-			return;
-		}
-
-		CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
-
-		UNetherCrownControlPPComponent* ControlPPComponent{ SkillOwnerCharacter->GetControlPPComponent() };
-		if (!ensureAlways(IsValid(ControlPPComponent)))
-		{
-			return;
-		}
-
-		ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::Frozen, FrozenDuration);
-	}
-
-	if (!SkillOwnerCharacter->HasAuthority())
-	{
-		StartSetCharacterOverlayEndMaterialTimeline();
-	}
-
-	const TArray<ANetherCrownEnemy*> DetectedEnemies{ GetSkillDetectedTargets() };
-	if (DetectedEnemies.IsEmpty())
-	{
-		UE_LOG(LogTemp, Warning, TEXT("HandleOnHitFrozenTempestSkill - DetectedActors is empty"));
-		return;
-	}
-
-	for (ANetherCrownEnemy* DetectedEnemy : DetectedEnemies)
-	{
-		if (SkillOwnerCharacter->HasAuthority())
-		{
-			ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::FROZEN, FrozenDuration);
-			continue;
-		}
-
-		const UNetherCrownCrowdControlComponent* CrowdControlComponent{ DetectedEnemy->GetCrowdControlComponent() };
-		if (IsValid(CrowdControlComponent))
-		{
-			if (IsValid(CachedFrozenTempestTargetOverlayMaterial))
-			{
-				USkeletalMeshComponent* DetectedEnemyMesh{ DetectedEnemy->GetMesh() };
-				check(DetectedEnemyMesh);
-
-				DetectedEnemyMesh->SetOverlayMaterial(CachedFrozenTempestTargetOverlayMaterial);
-			}
-
-			CrowdControlComponent->Frozen();
-		}
+		ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::FROZEN, FrozenDuration);
 	}
 }
 

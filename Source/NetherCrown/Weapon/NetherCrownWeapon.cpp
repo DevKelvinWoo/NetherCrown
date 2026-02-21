@@ -181,6 +181,11 @@ void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLo
 
 void ANetherCrownWeapon::Multicast_ActiveWeaponAuraNiagara_Implementation(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
+	if (HasAuthority())
+	{
+		return;
+	}
+
 	ActiveWeaponAuraNiagara(bActive, SkillKeyEnum);
 }
 

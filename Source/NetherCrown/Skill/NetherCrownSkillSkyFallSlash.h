@@ -28,6 +28,9 @@ private:
 	void StartSetArmMaterialParamTimeline();
 	void BindTimelineFunctions();
 
+	UFUNCTION(NetMulticast, UnReliable)
+	void Multicast_StartCameraShake();
+
 	UFUNCTION()
 	void SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue);
 

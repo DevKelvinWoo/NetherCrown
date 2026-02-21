@@ -29,6 +29,12 @@ private:
 	void StartSetCharacterOverlayStartMaterialTimeline();
 	void StartSetCharacterOverlayEndMaterialTimeline();
 
+	UFUNCTION(NetMulticast, UnReliable)
+	void Multicast_StartFrozenTempestHitCosmetics();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetDetectedEnemyOverlayMaterial();
+
 	UFUNCTION()
 	void SetSkillCameraZoomByVectorTimeline(FVector VectorCurveValue);
 

@@ -113,6 +113,29 @@ void UNetherCrownSkillSkyFallSlash::BindTimelineFunctions()
 	SpringArmZOffsetFloatTimeline.AddInterpFloat(CachedSkillArmMaterialCurveFloat, ArmMaterialFloatProgressFunc);
 }
 
+void UNetherCrownSkillSkyFallSlash::Multicast_StartCameraShake_Implementation()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (!SkillOwnerCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	const ANetherCrownPlayerController* SkillOwnerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };
+	APlayerCameraManager* CameraManager{ SkillOwnerController ? SkillOwnerController->PlayerCameraManager : nullptr };
+	if (!ensureAlways(IsValid(CameraManager)))
+	{
+		return;
+	}
+
+	CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
+}
+
 void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float FloatCurveValue)
 {
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
@@ -124,27 +147,12 @@ void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float Flo
 void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (SkillOwnerCharacter->IsLocallyControlled())
-	{
-		ANetherCrownPlayerController* SkillOwnerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };
-		APlayerCameraManager* CameraManager{ SkillOwnerController ? SkillOwnerController->PlayerCameraManager : nullptr };
-		if (!ensureAlways(IsValid(CameraManager)))
-		{
-			return;
-		}
-
-		CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
-	}
-
-	if (!SkillOwnerCharacter->HasAuthority())
-	{
-		return;
-	}
+	Multicast_StartCameraShake();
 
 	const TArray<AActor*> DetectedActors{ GetSkillDetectedTargets() };
 	if (DetectedActors.IsEmpty())
