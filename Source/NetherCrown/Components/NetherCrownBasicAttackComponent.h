@@ -53,6 +53,7 @@ public:
 	void HandleEnableComboWindow();
 	void HandleDisableComboWindow();
 	void HandleEnableHitTrace() const;
+	void HandleBasicAttackEnd();
 
 	void SetCanAttack(const bool InbCanAttack);
 
@@ -75,7 +76,8 @@ private:
 
 	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName);
 
-	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetEquippedWeaponTraceEnable(const bool bEnable) const;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AutoTargetEnemy();
@@ -125,10 +127,10 @@ private:
 	FNetherCrownBasicAttackComponentTagData BasicAttackComponentTagData{};
 
 	UPROPERTY()
-	TObjectPtr<UAnimMontage> CachedBasicAttackMontage;
+	TObjectPtr<UAnimMontage> CachedBasicAttackMontage{};
 
 	UPROPERTY()
-	TObjectPtr<ANetherCrownCharacter> CachedCharacter;
+	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
 };

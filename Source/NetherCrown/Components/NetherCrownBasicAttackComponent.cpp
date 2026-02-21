@@ -89,6 +89,13 @@ void UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Implementation(
 
 void UNetherCrownBasicAttackComponent::StartAttackBasic()
 {
+	if (!CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	OnStopOrStartBasicAttackAnim.Broadcast(false);
+
 	if (ComboMontageSectionMap.IsEmpty())
 	{
 		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
@@ -126,16 +133,15 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	{
 		return;
 	}
+
+	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 	NetherCrownCharacterAnimInstance->Montage_Play(CachedBasicAttackMontage);
 	NetherCrownCharacterAnimInstance->Montage_JumpToSection(*SectionName);
-	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
-
-	OnStopOrStartBasicAttackAnim.Broadcast(false);
 
 	PlayBasicAttackSounds();
 }
 
-void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool bEnable) const
+void UNetherCrownBasicAttackComponent::Multicast_SetEquippedWeaponTraceEnable_Implementation(const bool bEnable) const
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -351,41 +357,55 @@ void UNetherCrownBasicAttackComponent::HandleEnableComboWindow()
 void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 {
 	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
-	if (IsValid(CachedCharacter) && CachedCharacter->HasAuthority())
+	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
 	{
-		if (BasicAttackState != ENetherCrownBasicAttackState::ComboQueued)
-		{
-			BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
-
-			SetEquippedWeaponTraceEnable(false);
-
-			CurrentComboCount = 1;
-
-			OnStopOrStartBasicAttackAnim.Broadcast(true);
-
-			return;
-		}
-
-		CalculateNextComboCount();
-
-		if (ComboMontageSectionMap.IsEmpty())
-		{
-			UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
-			return;
-		}
-
-		BasicAttackState = ENetherCrownBasicAttackState::CanQueueNextCombo;
-
-		const FName* CurrentComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
-		Multicast_PlayAndJumpToComboMontageSection(*CurrentComboMontageSectionName);
+		return;
 	}
 
-	SetEquippedWeaponTraceEnable(false);
+	if (BasicAttackState != ENetherCrownBasicAttackState::ComboQueued)
+	{
+		BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
+
+		CurrentComboCount = 1;
+
+		return;
+	}
+
+	OnStopOrStartBasicAttackAnim.Broadcast(false);
+
+	CalculateNextComboCount();
+
+	if (ComboMontageSectionMap.IsEmpty())
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
+		return;
+	}
+
+	BasicAttackState = ENetherCrownBasicAttackState::CanQueueNextCombo;
+
+	const FName* CurrentComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
+	Multicast_PlayAndJumpToComboMontageSection(*CurrentComboMontageSectionName);
 }
 
 void UNetherCrownBasicAttackComponent::HandleEnableHitTrace() const
 {
-	SetEquippedWeaponTraceEnable(true);
+	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	Multicast_SetEquippedWeaponTraceEnable(true);
+}
+
+void UNetherCrownBasicAttackComponent::HandleBasicAttackEnd()
+{
+	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	Multicast_SetEquippedWeaponTraceEnable(false);
+	OnStopOrStartBasicAttackAnim.Broadcast(true);
 }
 
 void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)

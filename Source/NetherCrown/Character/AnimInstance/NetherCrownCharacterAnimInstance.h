@@ -25,6 +25,9 @@ public:
 	void AnimNotify_ComboDisable();
 
 	UFUNCTION()
+	void AnimNotify_BasicAttackEnd();
+
+	UFUNCTION()
 	void AnimNotify_EquipStart();
 
 	UFUNCTION()
@@ -55,17 +58,20 @@ protected:
 	virtual void NativeInitializeAnimation() override;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Character")
-	TObjectPtr<ANetherCrownCharacter> OwningCharacter;
+	TObjectPtr<ANetherCrownCharacter> CachedOwningCharacter;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Component")
-	TObjectPtr<UNetherCrownBasicAttackComponent> BasicAttackComponent;
+	TObjectPtr<UNetherCrownBasicAttackComponent> CachedBasicAttackComponent;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Component")
-	TObjectPtr<UNetherCrownEquipComponent> EquipComponent;
+	TObjectPtr<UNetherCrownEquipComponent> CachedEquipComponent;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Component")
-	TObjectPtr<UNetherCrownSkillComponent> SkillComponent;
+	TObjectPtr<UNetherCrownSkillComponent> CachedSkillComponent;
 
 	UPROPERTY(BlueprintReadOnly, Category = "Component")
-	TObjectPtr<UCharacterMovementComponent> CharacterMovementComponent;
+	TObjectPtr<UCharacterMovementComponent> CachedCharacterMovementComponent;
+
+private:
+	void CacheInitData();
 };

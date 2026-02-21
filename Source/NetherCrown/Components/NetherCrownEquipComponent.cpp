@@ -27,7 +27,7 @@ void UNetherCrownEquipComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CacheEquipMontage();
+	CacheInitData();
 }
 
 void UNetherCrownEquipComponent::SetEquipableWeapon(ANetherCrownWeapon* InEquipableWeapon)
@@ -47,7 +47,7 @@ void UNetherCrownEquipComponent::ChangeWeapon()
 
 void UNetherCrownEquipComponent::NotifyEquipEndOrStart(const bool bEquipEnd) const
 {
-	if (GetOwner()->HasAuthority())
+	if (IsValid(CachedCharacter) && CachedCharacter->HasAuthority())
 	{
 		OnEquipEndOrStart.Broadcast(bEquipEnd);
 	}
@@ -87,8 +87,7 @@ void UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Implementation()
 
 void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementation()
 {
-	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	const USkeletalMeshComponent* OwnerCharacterMesh{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr };
+	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter ? CachedCharacter->GetMesh() : nullptr };
 	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr};
 	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ Cast<UNetherCrownCharacterAnimInstance>(AnimInstance) };
 	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
@@ -103,7 +102,7 @@ void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementa
 
 	NetherCrownCharacterAnimInstance->Montage_Play(CachedEquipMontage);
 
-	if (OwnerCharacter->IsLocallyControlled())
+	if (CachedCharacter->IsLocallyControlled())
 	{
 		FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), EquipComponentTagData.EquipSoundTag);
 	}
@@ -111,14 +110,13 @@ void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementa
 
 void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const
 {
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	USkeletalMeshComponent* OwnerCharacterMesh{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr };
+	USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter ? CachedCharacter->GetMesh() : nullptr };
 	if (!ensureAlways(IsValid(OwnerCharacterMesh)))
 	{
 		return;
 	}
 
-	TargetWeapon->SetOwner(OwnerCharacter);
+	TargetWeapon->SetOwner(CachedCharacter);
 	TargetWeapon->AttachToComponent(OwnerCharacterMesh, FAttachmentTransformRules::SnapToTargetIncludingScale, WeaponSocketName);
 }
 
@@ -203,10 +201,12 @@ void UNetherCrownEquipComponent::StowCurrentWeapon()
 	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ StowWeaponPosition, EquippedWeapon });
 }
 
-void UNetherCrownEquipComponent::CacheEquipMontage()
+void UNetherCrownEquipComponent::CacheInitData()
 {
 	if (!EquipAnimMontageSoft.IsNull())
 	{
 		CachedEquipMontage = EquipAnimMontageSoft.LoadSynchronous();
 	}
+
+	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
 }

@@ -11,6 +11,7 @@ class UNetherCrownWeaponData;
 class UAnimMontage;
 
 class ANetherCrownWeapon;
+class ANetherCrownCharacter;
 struct FNetherCrownWeaponTagData;
 
 UENUM()
@@ -78,7 +79,7 @@ private:
 
 	void StowCurrentWeapon();
 
-	void CacheEquipMontage();
+	void CacheInitData();
 
 	bool bCanEquip{ false };
 
@@ -95,6 +96,9 @@ private:
 
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> CachedEquipMontage;
+
+	UPROPERTY()
+	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	TArray<TPair<EStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
 

@@ -26,38 +26,29 @@ void UNetherCrownSkillComponent::ActivateSkill(const ENetherCrownSkillKeyEnum Sk
 
 void UNetherCrownSkillComponent::SetActiveSkillSlowPlayRate(const bool bBeginSlow)
 {
-	if (SkillObjects.IsEmpty())
+	if (!CachedCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(ActiveSkillKeyEnum) };
-	if (!IsValid(FoundSkillObject))
-	{
-		UE_LOG(LogTemp, Warning, TEXT("ActiveSkillKeyEnum is Invalid in %hs"), __FUNCTION__);
-		return;
-	}
-
-	const float SkillPlayRate{ bBeginSlow ? FoundSkillObject->GetSkillMontageBeginSlowPlayRate() : FoundSkillObject->GetSkillMontageEndSlowPlayRate() };
-	FoundSkillObject->SetSkillMontageSlowPlayRate(SkillPlayRate);
+	Multicast_SetActiveSkillSlowPlayRate(bBeginSlow);
 }
 
 bool UNetherCrownSkillComponent::CanActivateSkill() const
 {
-	const  ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter ? OwnerCharacter->GetBasicAttackComponent() : nullptr };
+	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ CachedCharacter ? CachedCharacter->GetBasicAttackComponent() : nullptr };
 	if (!ensureAlways(IsValid(BasicAttackComponent)) || BasicAttackComponent->IsAttacking())
 	{
 		return false;
 	}
 
-	const UNetherCrownEquipComponent* EquipComponent{ OwnerCharacter ? OwnerCharacter->GetEquipComponent() : nullptr };
+	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter ? CachedCharacter->GetEquipComponent() : nullptr };
 	if (!ensureAlways(IsValid(EquipComponent)) || !IsValid(EquipComponent->GetEquippedWeapon()))
 	{
 		return false;
 	}
 
-	const UPawnMovementComponent* MovementComponent{ OwnerCharacter->GetMovementComponent() };
+	const UPawnMovementComponent* MovementComponent{ CachedCharacter->GetMovementComponent() };
 	if (!ensureAlways(IsValid(MovementComponent)) || MovementComponent->IsFalling())
 	{
 		return false;
@@ -70,6 +61,7 @@ void UNetherCrownSkillComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CacheInitData();
 	ConstructSkillObjects();
 }
 
@@ -122,8 +114,7 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 		return;
 	}
 
-	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
 	}
@@ -136,7 +127,7 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 			continue;
 		}
 
-		SkillObject->SetSkillOwnerCharacter(OwnerCharacter);
+		SkillObject->SetSkillOwnerCharacter(CachedCharacter);
 		SkillObject->InitSkillObject();
 
 		//@NOTE : Server에서만 SkillObjects, ReplicatedSkillObjects를 구축한다
@@ -145,6 +136,11 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 		SkillObjects.Add(SkillEnum, SkillObject);
 		ReplicatedSkillObjects.Add(SkillObject);
 	}
+}
+
+void UNetherCrownSkillComponent::CacheInitData()
+{
+	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
 }
 
 void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
@@ -185,6 +181,24 @@ void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNe
 void UNetherCrownSkillComponent::Multicast_SetActiveSkillKeyEnum_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
 	ActiveSkillKeyEnum = SkillKeyEnum;
+}
+
+void UNetherCrownSkillComponent::Multicast_SetActiveSkillSlowPlayRate_Implementation(const bool bBeginSlow)
+{
+	if (SkillObjects.IsEmpty())
+	{
+		return;
+	}
+
+	const UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(ActiveSkillKeyEnum) };
+	if (!IsValid(FoundSkillObject))
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ActiveSkillKeyEnum is Invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	const float SkillPlayRate{ bBeginSlow ? FoundSkillObject->GetSkillMontageBeginSlowPlayRate() : FoundSkillObject->GetSkillMontageEndSlowPlayRate() };
+	FoundSkillObject->SetSkillMontageSlowPlayRate(SkillPlayRate);
 }
 
 void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()

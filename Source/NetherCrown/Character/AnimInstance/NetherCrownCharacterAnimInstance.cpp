@@ -12,164 +12,209 @@ void UNetherCrownCharacterAnimInstance::NativeInitializeAnimation()
 {
 	Super::NativeInitializeAnimation();
 
-	OwningCharacter = Cast<ANetherCrownCharacter>(GetOwningActor());
-	if (!IsValid(OwningCharacter))
-	{
-		return;
-	}
+	CacheInitData();
+}
 
-	BasicAttackComponent = OwningCharacter->GetBasicAttackComponent();
-	EquipComponent = OwningCharacter->GetEquipComponent();
-	SkillComponent = OwningCharacter->GetSkillComponent();
-	CharacterMovementComponent = OwningCharacter->GetCharacterMovement();
+void UNetherCrownCharacterAnimInstance::CacheInitData()
+{
+	CachedOwningCharacter = Cast<ANetherCrownCharacter>(GetOwningActor());
+
+	CachedBasicAttackComponent = CachedOwningCharacter->GetBasicAttackComponent();
+	CachedEquipComponent = CachedOwningCharacter->GetEquipComponent();
+	CachedSkillComponent = CachedOwningCharacter->GetSkillComponent();
+	CachedCharacterMovementComponent = CachedOwningCharacter->GetCharacterMovement();
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(BasicAttackComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (!OwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	BasicAttackComponent->HandleEnableComboWindow();
+	CachedBasicAttackComponent->HandleEnableComboWindow();
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(BasicAttackComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	BasicAttackComponent->HandleDisableComboWindow();
+	CachedBasicAttackComponent->HandleDisableComboWindow();
+}
+
+void UNetherCrownCharacterAnimInstance::AnimNotify_BasicAttackEnd()
+{
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	CachedBasicAttackComponent->HandleBasicAttackEnd();
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_EquipStart()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(EquipComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedEquipComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedEquipComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	EquipComponent->NotifyEquipEndOrStart(false);
+	CachedEquipComponent->NotifyEquipEndOrStart(false);
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_EquipEnd()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(EquipComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedEquipComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedEquipComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	EquipComponent->NotifyEquipEndOrStart(true);
+	CachedEquipComponent->NotifyEquipEndOrStart(true);
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_HitTraceEnable()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(BasicAttackComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (!OwningCharacter->IsLocallyControlled())
-	{
-		return;
-	}
-
-	BasicAttackComponent->HandleEnableHitTrace();
+	CachedBasicAttackComponent->HandleEnableHitTrace();
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowBegin()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(SkillComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (OwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	SkillComponent->SetActiveSkillSlowPlayRate(true);
+	CachedSkillComponent->SetActiveSkillSlowPlayRate(true);
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowEnd()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(SkillComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (OwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	SkillComponent->SetActiveSkillSlowPlayRate(false);
+	CachedSkillComponent->SetActiveSkillSlowPlayRate(false);
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(SkillComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)) || !(IsValid(CachedBasicAttackComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (!OwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	if (IsValid(BasicAttackComponent))
-	{
-		BasicAttackComponent->SetCanAttack(false);
-	}
-
-	SkillComponent->GetOnStopOrStartSkill().Broadcast(false);
+	CachedBasicAttackComponent->SetCanAttack(false);
+	CachedSkillComponent->GetOnStopOrStartSkill().Broadcast(false);
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillEnd()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(SkillComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)) || !(IsValid(CachedBasicAttackComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (!OwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	if (IsValid(BasicAttackComponent))
-	{
-		BasicAttackComponent->SetCanAttack(true);
-	}
-
-	SkillComponent->GetOnStopOrStartSkill().Broadcast(true);
+	CachedBasicAttackComponent->SetCanAttack(true);
+	CachedSkillComponent->GetOnStopOrStartSkill().Broadcast(true);
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementFly()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(CharacterMovementComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedCharacterMovementComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedCharacterMovementComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	CharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Flying);
+	CachedCharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Flying);
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementWalk()
 {
-	if (!(IsValid(OwningCharacter)) || !(IsValid(CharacterMovementComponent)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedCharacterMovementComponent)))
+	{
+		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedCharacterMovementComponent is not valid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedOwningCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	CharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+	CachedCharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
 }

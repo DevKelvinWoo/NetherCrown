@@ -8,6 +8,8 @@
 #include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrownSkillComponent.generated.h"
 
+class ANetherCrownCharacter;
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
 {
@@ -37,6 +39,7 @@ protected:
 
 private:
 	void ConstructSkillObjects();
+	void CacheInitData();
 
 	UFUNCTION(Server, Reliable)
 	void Server_ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
@@ -46,6 +49,9 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetActiveSkillKeyEnum(const ENetherCrownSkillKeyEnum SkillKeyEnum);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetActiveSkillSlowPlayRate(const bool bBeginSlow);
 
 	UFUNCTION()
 	void OnRep_ReplicatedSkillObjects();
@@ -61,6 +67,9 @@ private:
 
 	UPROPERTY(Replicated)
 	ENetherCrownSkillKeyEnum ActiveSkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
+
+	UPROPERTY()
+	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	FOnStopOrStartSkill OnStopOrStartSkill;
 };
