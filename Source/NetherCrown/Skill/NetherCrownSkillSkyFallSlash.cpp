@@ -247,11 +247,11 @@ void UNetherCrownSkillSkyFallSlash::CreateArmMaterialInstanceDynamic()
 
 void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue)
 {
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
 	}
 
-	SkillOwnerCharacter->SetSpringArmZOffset(FloatCurveValue);
+	SkillOwnerCharacter->SetMainSpringArmZOffset(FloatCurveValue);
 }

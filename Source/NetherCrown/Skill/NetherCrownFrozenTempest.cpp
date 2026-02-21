@@ -212,8 +212,8 @@ void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector Vecto
 		return;
 	}
 
-	SkillOwnerCharacter->SetSpringArmLength(VectorCurveValue.X);
-	SkillOwnerCharacter->SetSpringArmZOffset(VectorCurveValue.Z);
+	SkillOwnerCharacter->SetMainSpringArmLength(VectorCurveValue.X);
+	SkillOwnerCharacter->SetMainSpringArmZOffset(VectorCurveValue.Z);
 }
 
 void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(float FloatCurveValue)

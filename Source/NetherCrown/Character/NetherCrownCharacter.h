@@ -57,6 +57,9 @@ public:
 	void ActiveRSkill(const FInputActionValue& Value) const;
 	void ActiveShiftSkill(const FInputActionValue& Value) const;
 
+	void SetMainSpringArmZOffset(const float InSpringArmZOffset);
+	void SetMainSpringArmLength(const float InSpringArmLength);
+
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}
 
@@ -72,14 +75,10 @@ public:
 	UNetherCrownControlPPComponent* GetControlPPComponent() const { return NetherCrownControlPPComponent; }
 	UNetherCrownControlGhostTrailComponent* GetControlGhostTrailComponent() const { return NetherCrownControlGhostTrailComponent; }
 
-	void SetSpringArmZOffset(float InSpringArmZOffset) const;
-	void SetSpringArmLength(float InSpringArmLength) const;
-
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void OnJumped_Implementation() override;
@@ -89,16 +88,26 @@ private:
 	UFUNCTION(Server, Unreliable)
 	void Server_SetPressedMoveKey(const bool InbPressedMoveKey);
 
-	void SetCharacterDefaultMovementValues() const;
-
-	void ResetHardLandingState();
+	void SetUseControllerSettings();
+	void SetMainSpringArmComponentSettings();
+	void SetMainCameraComponentSettings();
+	void SetCharacterDefaultMovementSettings();
 
 	void CheckIsHardLandingAndSetTimer();
-
-	void BlockInputWhenHardLanding() const;
+	void ResetHardLandingState();
+	void DisableMovementWhenHardLanding() const;
 
 	//@NOTE : 만약 공격도 막아야 한다면 두 가지 버전의 함수를 오버로딩하자 (공격 + 움직임 제한, 움직임만 제한)
-	void SetEnableCharacterControl(const bool bEnableMovement) const;
+	void SetCharacterMovementControl(const bool bEnableMovement) const;
+
+	UPROPERTY(Replicated)
+	bool bPressedMoveKey{ false };
+
+	UPROPERTY(Replicated)
+	bool bIsHardLanding{ false };
+
+	UPROPERTY(Replicated)
+	FVector JumpStartLocation{};
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UCameraComponent> MainCameraComponent{};
@@ -129,15 +138,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly)
 	TObjectPtr<UNetherCrownControlGhostTrailComponent> NetherCrownControlGhostTrailComponent{};
-
-	UPROPERTY(Replicated)
-	bool bPressedMoveKey{ false };
-
-	UPROPERTY(Replicated)
-	bool bIsHardLanding{ false };
-
-	UPROPERTY(Replicated)
-	FVector HitPointToGroundWhenJumpStart{};
 
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownCharacterTagData CharacterTagData{};

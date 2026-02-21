@@ -50,6 +50,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 		return;
 	}
 
+	//@NOTE : 입력 이벤트는 client에서만 실행된다
 	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::HandleInputMoveCharacter);
 	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ThisClass::HandleOnMoveActionCompleted);
 	EnhancedPlayerInputComponent->BindAction(LookAtAction, ETriggerEvent::Triggered, this, &ThisClass::HandleInputLookAtCharacter);

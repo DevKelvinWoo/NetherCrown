@@ -22,27 +22,17 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 {
 	PrimaryActorTick.bCanEverTick = false;
 
-	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSetting);
-
-	bUseControllerRotationPitch = CharacterDefaultSetting->IsControllerRotationPitchEnabled();
-	bUseControllerRotationYaw = CharacterDefaultSetting->IsControllerRotationYawEnabled();
-	bUseControllerRotationRoll = CharacterDefaultSetting->IsControllerRotationRollEnabled();
+	SetUseControllerSettings();
 
 	MainSpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("MainSpringArmComponent"));
 	MainSpringArmComponent->SetupAttachment(RootComponent);
-	MainSpringArmComponent->bUsePawnControlRotation = CharacterDefaultSetting->IsMainSpringArmUsePawnControlRotation();
-	MainSpringArmComponent->TargetArmLength = CharacterDefaultSetting->GetMainSpringArmTargetLength();
-	MainSpringArmComponent->TargetOffset = CharacterDefaultSetting->GetMainSpringArmTargetOffset();
-	MainSpringArmComponent->bEnableCameraLag = CharacterDefaultSetting->IsMainSpringArmCameraLagEnabled();
-	MainSpringArmComponent->CameraLagSpeed = CharacterDefaultSetting->GetMainSpringArmCameraLagSpeed();
+	SetMainSpringArmComponentSettings();
 
 	MainCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("MainCameraComponent"));
 	MainCameraComponent->SetupAttachment(MainSpringArmComponent);
-	MainCameraComponent->bUsePawnControlRotation = CharacterDefaultSetting->IsMainCameraUsePawnControlRotation();
-	MainCameraComponent->SetRelativeRotation(CharacterDefaultSetting->GetMainCameraRelativeRotation());
+	SetMainCameraComponentSettings();
 
-	SetCharacterDefaultMovementValues();
+	SetCharacterDefaultMovementSettings();
 
 	NetherCrownGhostTrailNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("GhostTrailNiagaraComponent"));
 	NetherCrownGhostTrailNiagaraComponent->SetupAttachment(RootComponent);
@@ -56,22 +46,51 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownControlGhostTrailComponent = CreateDefaultSubobject<UNetherCrownControlGhostTrailComponent>(TEXT("ControlGhostTrailComponent"));
 }
 
-void ANetherCrownCharacter::SetSpringArmZOffset(float InSpringArmZOffset) const
+void ANetherCrownCharacter::SetUseControllerSettings()
 {
-	check(MainSpringArmComponent);
-	MainSpringArmComponent->TargetOffset.Z = InSpringArmZOffset;
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSetting);
+
+	bUseControllerRotationPitch = CharacterDefaultSetting->IsControllerRotationPitchEnabled();
+	bUseControllerRotationYaw = CharacterDefaultSetting->IsControllerRotationYawEnabled();
+	bUseControllerRotationRoll = CharacterDefaultSetting->IsControllerRotationRollEnabled();
 }
 
-void ANetherCrownCharacter::SetSpringArmLength(float InSpringArmLength) const
+void ANetherCrownCharacter::SetMainSpringArmComponentSettings()
 {
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSetting);
+
 	check(MainSpringArmComponent);
-	MainSpringArmComponent->TargetArmLength = InSpringArmLength;
+	MainSpringArmComponent->bUsePawnControlRotation = CharacterDefaultSetting->IsMainSpringArmUsePawnControlRotation();
+	MainSpringArmComponent->TargetArmLength = CharacterDefaultSetting->GetMainSpringArmTargetLength();
+	MainSpringArmComponent->TargetOffset = CharacterDefaultSetting->GetMainSpringArmTargetOffset();
+	MainSpringArmComponent->bEnableCameraLag = CharacterDefaultSetting->IsMainSpringArmCameraLagEnabled();
+	MainSpringArmComponent->CameraLagSpeed = CharacterDefaultSetting->GetMainSpringArmCameraLagSpeed();
 }
 
-UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const
+void ANetherCrownCharacter::SetMainCameraComponentSettings()
 {
-	//@TODO : Need to implements Status Effect Control Component in NetherCrownCharacter class (now only for enemy class)
-	return nullptr;
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSetting);
+
+	check(MainCameraComponent);
+	MainCameraComponent->bUsePawnControlRotation = CharacterDefaultSetting->IsMainCameraUsePawnControlRotation();
+	MainCameraComponent->SetRelativeRotation(CharacterDefaultSetting->GetMainCameraRelativeRotation());
+}
+
+void ANetherCrownCharacter::SetCharacterDefaultMovementSettings()
+{
+	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
+	check(MovementComponent);
+
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSetting);
+
+	MovementComponent->bOrientRotationToMovement = CharacterDefaultSetting->IsOrientRotationToMovementEnabled();
+	MovementComponent->MaxAcceleration = CharacterDefaultSetting->GetMaxAcceleration();
+	MovementComponent->BrakingDecelerationWalking = CharacterDefaultSetting->GetBrakingDecelerationWalking();
+	MovementComponent->bUseSeparateBrakingFriction = CharacterDefaultSetting->IsUseSeparateBrakingFrictionEnabled();
 }
 
 void ANetherCrownCharacter::BeginPlay()
@@ -79,13 +98,13 @@ void ANetherCrownCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	check(NetherCrownBasicAttackComponent);
-	NetherCrownBasicAttackComponent->GetOnStopOrStartBasicAttack().AddUObject(this, &ThisClass::SetEnableCharacterControl);
+	NetherCrownBasicAttackComponent->GetOnStopOrStartBasicAttack().AddUObject(this, &ThisClass::SetCharacterMovementControl);
 
 	check(NetherCrownEquipComponent);
-	NetherCrownEquipComponent->GetOnEquipEndOrStart().AddUObject(this, &ThisClass::SetEnableCharacterControl);
+	NetherCrownEquipComponent->GetOnEquipEndOrStart().AddUObject(this, &ThisClass::SetCharacterMovementControl);
 
 	check(NetherCrownSkillComponent);
-	NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetEnableCharacterControl);
+	NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetCharacterMovementControl);
 
 	check(NetherCrownControlPPComponent);
 	NetherCrownControlPPComponent->SetHandlingPostProcessComponent(NetherCrownPostProcessComponent);
@@ -94,25 +113,20 @@ void ANetherCrownCharacter::BeginPlay()
 	NetherCrownControlGhostTrailComponent->SetHandledGhostTrailNiagaraComponent(NetherCrownGhostTrailNiagaraComponent);
 }
 
-void ANetherCrownCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
-{
-	Super::SetupPlayerInputComponent(PlayerInputComponent);
-}
-
 void ANetherCrownCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, bPressedMoveKey);
 	DOREPLIFETIME(ThisClass, bIsHardLanding);
-	DOREPLIFETIME(ThisClass, HitPointToGroundWhenJumpStart);
+	DOREPLIFETIME(ThisClass, JumpStartLocation);
 }
 
 void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	//@NOTE  : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Server와 Client 둘 다에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
+	//@NOTE : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Server와 Client 둘 다에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
 	const bool bShouldHandleLocally = HasAuthority() || IsLocallyControlled();
 	if (bShouldHandleLocally)
 	{
@@ -120,7 +134,7 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 		NetherCrownBasicAttackComponent->SetCanAttack(true);
 
 		CheckIsHardLandingAndSetTimer();
-		BlockInputWhenHardLanding();
+		DisableMovementWhenHardLanding();
 
 		if (!HasAuthority() && bIsHardLanding)
 		{
@@ -139,7 +153,7 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 		NetherCrownBasicAttackComponent->SetCanAttack(false);
 
 		bIsHardLanding = false;
-		HitPointToGroundWhenJumpStart = GetActorLocation();
+		JumpStartLocation = GetActorLocation();
 	}
 	else
 	{
@@ -154,74 +168,8 @@ void ANetherCrownCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode
 	if (HasAuthority() && GetCharacterMovement()->IsFalling())
 	{
 		bIsHardLanding = false;
-		HitPointToGroundWhenJumpStart = GetActorLocation();
+		JumpStartLocation = GetActorLocation();
 	}
-}
-
-void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool InbPressedMoveKey)
-{
-	bPressedMoveKey = InbPressedMoveKey;
-}
-
-void ANetherCrownCharacter::SetCharacterDefaultMovementValues() const
-{
-	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-	check(MovementComponent);
-
-	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSetting);
-
-	MovementComponent->bOrientRotationToMovement = CharacterDefaultSetting->IsOrientRotationToMovementEnabled();
-	MovementComponent->MaxAcceleration = CharacterDefaultSetting->GetMaxAcceleration();
-	MovementComponent->BrakingDecelerationWalking = CharacterDefaultSetting->GetBrakingDecelerationWalking();
-	MovementComponent->bUseSeparateBrakingFriction = CharacterDefaultSetting->IsUseSeparateBrakingFrictionEnabled();
-}
-
-void ANetherCrownCharacter::ResetHardLandingState()
-{
-	bIsHardLanding = false;
-
-	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-	check(MovementComponent);
-
-	MovementComponent->SetMovementMode(MOVE_Walking);
-}
-
-void ANetherCrownCharacter::CheckIsHardLandingAndSetTimer()
-{
-	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSetting);
-
-	const double DistanceBetweenLandHitPoints{ HitPointToGroundWhenJumpStart.Z - GetActorLocation().Z };
-
-	const double MinHardLandHeight{ CharacterDefaultSetting->GetMinHardLandingHeight() };
-	bIsHardLanding = DistanceBetweenLandHitPoints > MinHardLandHeight;
-
-	//@NOTE  : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Client단에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
-	const float ResetDelay = CharacterDefaultSetting->GetRecoveryResetDelayTime();
-	GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
-	GetWorldTimerManager().SetTimer(TimerHandle_ResetHardLanding, this, &ANetherCrownCharacter::ResetHardLandingState, ResetDelay, false);
-}
-
-void ANetherCrownCharacter::BlockInputWhenHardLanding() const
-{
-	check(Controller);
-
-	if (bIsHardLanding)
-	{
-		UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-		check(MovementComponent);
-
-		MovementComponent->DisableMovement();
-	}
-}
-
-void ANetherCrownCharacter::SetEnableCharacterControl(const bool bEnableMovement) const
-{
-	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-	check(MovementComponent);
-
-	bEnableMovement ? MovementComponent->SetMovementMode(MOVE_Walking) : MovementComponent->DisableMovement();
 }
 
 void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
@@ -230,6 +178,7 @@ void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 
 	Server_SetPressedMoveKey(true);
 
+	//@NOTE : CMC의 클라이언트 예측 로직으로 input lag을 방지한다, 또한 FInputActionValue는 NetSerialize용으로 설계되지 않음 (이는 LookAt, Jump에도 해당함)
 	if (Value.IsNonZero())
 	{
 		const FVector2D& MovementVector{ Value.Get<FVector2D>() };
@@ -243,6 +192,11 @@ void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
+}
+
+void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool InbPressedMoveKey)
+{
+	bPressedMoveKey = InbPressedMoveKey;
 }
 
 void ANetherCrownCharacter::LookAtCharacter(const FInputActionValue& Value)
@@ -260,8 +214,7 @@ void ANetherCrownCharacter::JumpCharacter(const FInputActionValue& Value)
 {
 	if (Value.IsNonZero())
 	{
-		const bool bJumpActionInput{ Value.Get<bool>() };
-		if (bJumpActionInput)
+		if (Value.Get<bool>())
 		{
 			Jump();
 		}
@@ -277,8 +230,7 @@ void ANetherCrownCharacter::RequestBasicAttack(const FInputActionValue& Value)
 {
 	if (Value.IsNonZero())
 	{
-		const bool bBasicAttackActionInput{ Value.Get<bool>() };
-		if (bBasicAttackActionInput)
+		if (Value.Get<bool>())
 		{
 			check(NetherCrownBasicAttackComponent);
 			NetherCrownBasicAttackComponent->RequestBasicAttack();
@@ -290,8 +242,7 @@ void ANetherCrownCharacter::EquipCharacter(const FInputActionValue& Value)
 {
 	if (Value.IsNonZero())
 	{
-		const bool bEquipKeyInput{ Value.Get<bool>() };
-		if (bEquipKeyInput)
+		if (Value.Get<bool>())
 		{
 			check(NetherCrownEquipComponent);
 			NetherCrownEquipComponent->EquipOrStowWeapon();
@@ -303,8 +254,7 @@ void ANetherCrownCharacter::ChangeWeapon(const FInputActionValue& Value)
 {
 	if (Value.IsNonZero())
 	{
-		const bool bEquipKeyInput{ Value.Get<bool>() };
-		if (bEquipKeyInput)
+		if (Value.Get<bool>())
 		{
 			check(NetherCrownEquipComponent);
 			NetherCrownEquipComponent->ChangeWeapon();
@@ -341,8 +291,75 @@ void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value) con
 	ExecuteSkillByKey(Value, ENetherCrownSkillKeyEnum::ShiftSkill);
 }
 
+void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffset)
+{
+	check(MainSpringArmComponent);
+	MainSpringArmComponent->TargetOffset.Z = InSpringArmZOffset;
+}
+
+void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength)
+{
+	check(MainSpringArmComponent);
+	MainSpringArmComponent->TargetArmLength = InSpringArmLength;
+}
+
 bool ANetherCrownCharacter::IsEquippedWeapon() const
 {
 	check(NetherCrownEquipComponent);
 	return NetherCrownEquipComponent->GetEquippedWeapon() ? true : false;
+}
+
+UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const
+{
+	//@TODO : Need to implements Status Effect Control Component in NetherCrownCharacter class (now only for enemy class)
+	return nullptr;
+}
+
+void ANetherCrownCharacter::CheckIsHardLandingAndSetTimer()
+{
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSetting);
+
+	const double DistanceBetweenLandAndJumpStartLocation{ JumpStartLocation.Z - GetActorLocation().Z };
+	const double MinHardLandHeight{ CharacterDefaultSetting->GetMinHardLandingHeight() };
+	bIsHardLanding = DistanceBetweenLandAndJumpStartLocation > MinHardLandHeight;
+
+	if (bIsHardLanding)
+	{
+		//@NOTE  : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Client단에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
+		const float ResetDelay = CharacterDefaultSetting->GetRecoveryResetDelayTime();
+		GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
+		GetWorldTimerManager().SetTimer(TimerHandle_ResetHardLanding, this, &ANetherCrownCharacter::ResetHardLandingState, ResetDelay, false);
+	}
+}
+
+void ANetherCrownCharacter::ResetHardLandingState()
+{
+	bIsHardLanding = false;
+
+	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
+	check(MovementComponent);
+
+	MovementComponent->SetMovementMode(MOVE_Walking);
+}
+
+void ANetherCrownCharacter::DisableMovementWhenHardLanding() const
+{
+	check(Controller);
+
+	if (bIsHardLanding)
+	{
+		UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
+		check(MovementComponent);
+
+		MovementComponent->DisableMovement();
+	}
+}
+
+void ANetherCrownCharacter::SetCharacterMovementControl(const bool bEnableMovement) const
+{
+	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
+	check(MovementComponent);
+
+	bEnableMovement ? MovementComponent->SetMovementMode(MOVE_Walking) : MovementComponent->DisableMovement();
 }
