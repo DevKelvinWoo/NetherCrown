@@ -2,6 +2,7 @@
 
 #include "NetherCrownUtilManager.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "Kismet/GameplayStatics.h"
 #include "NetherCrown/Data/NetherCrownEffectData.h"
 #include "NetherCrown/Data/NetherCrownSoundData.h"
@@ -90,7 +91,7 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 
 	if (!ensureAlways(IsValid(CachedSoundDT)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No SoundDataTable in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No SoundDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
@@ -98,7 +99,7 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 	FNetherCrownSoundData** FoundSoundData{ CachedSoundDataByTag.Find(SoundTag) };
 	if (!FoundSoundData || !(*FoundSoundData))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Found SoundDataTable in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No Found SoundDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
@@ -123,7 +124,7 @@ void FNetherCrownUtilManager::PlaySound2DByGameplayTag(const UObject* WorldConte
 	USoundCue* SoundCue{ GetSoundCueByGameplayTag(SoundTag) };
 	if (!ensureAlways(SoundCue))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No SoundCue in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No SoundCue in %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -136,7 +137,7 @@ UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(cons
 
 	if (!ensureAlways(IsValid(CachedWeaponDT)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No WeaponDataTable in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No WeaponDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
@@ -144,7 +145,7 @@ UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(cons
 	FNetherCrownWeaponDataTableRow** FoundWeaponData{ CachedWeaponDataByTag.Find(WeaponTag) };
 	if (!FoundWeaponData || !(*FoundWeaponData))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No Found WeaponDataTable in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No Found WeaponDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
@@ -158,7 +159,7 @@ UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGa
 
 	if (!ensureAlways(IsValid(CachedEffectDT)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("There is No EffectDataTable in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No EffectDataTable in %hs"), __FUNCTION__);
 
 		return nullptr;
 	}
@@ -166,7 +167,7 @@ UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGa
 	FNetherCrownEffectData** FoundEffectData{ CachedEffectDataByTag.Find(EffectTag) };
 	if (!FoundEffectData || !(*FoundEffectData))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Effect Data Not Found for Tag: %s"), *EffectTag.ToString());
+		UE_LOG(LogNetherCrown, Warning, TEXT("Effect Data Not Found for Tag: %s"), *EffectTag.ToString());
 		return nullptr;
 	}
 

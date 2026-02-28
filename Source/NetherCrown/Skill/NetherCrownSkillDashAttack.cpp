@@ -2,6 +2,7 @@
 
 #include "NetherCrownSkillDashAttack.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h"
@@ -109,7 +110,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	if (!IsValid(CurrentTargetActor))
 	{
 		ClearDashAttackData();
-		UE_LOG(LogTemp, Warning, TEXT("Current Target Actor is InValid! : %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("Current Target Actor is InValid! : %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -117,7 +118,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		ClearDashAttackData();
-		UE_LOG(LogTemp, Warning, TEXT("SkillOwnerCharacter is InValid! : %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("SkillOwnerCharacter is InValid! : %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -239,7 +240,7 @@ void UNetherCrownSkillDashAttack::HitDashAttack()
 
 	if (!IsValid(CurrentTargetActor))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Current Target Actor is InValid! : %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("Current Target Actor is InValid! : %hs"), __FUNCTION__);
 		return;
 	}
 

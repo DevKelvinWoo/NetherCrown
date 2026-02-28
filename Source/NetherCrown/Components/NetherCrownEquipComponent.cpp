@@ -2,6 +2,7 @@
 
 #include "NetherCrownEquipComponent.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
@@ -57,7 +58,7 @@ const UNetherCrownWeaponData* UNetherCrownEquipComponent::GetEquippedWeaponData(
 {
 	if (!IsValid(EquippedWeapon))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Equipped weapon is invalid. Returning nullptr. %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("Equipped weapon is invalid. Returning nullptr. %hs"), __FUNCTION__);
 		return nullptr;
 	}
 
@@ -125,7 +126,7 @@ void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 	ANetherCrownWeapon* EquipableWeapon{ EquipableWeaponWeak.Get() };
 	if (!IsValid(EquipableWeapon))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("EquipableWeapon is invalid in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("EquipableWeapon is invalid in %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -153,7 +154,7 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 {
 	if (StowWeaponContainer.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("StowWeaponContainerMap is Empty %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("StowWeaponContainerMap is Empty %hs"), __FUNCTION__);
 		return;
 	}
 

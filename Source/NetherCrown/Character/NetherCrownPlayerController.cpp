@@ -2,6 +2,7 @@
 
 #include "NetherCrownPlayerController.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "NetherCrownCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
@@ -45,7 +46,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	if (!ensureAlways(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction && EquipAction && ChangeWeaponAction
 					&& QSkillAction && ESkillAction && RSkillAction && ShiftSkillAction))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Can't add Mapping Context and InputActions in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("Can't add Mapping Context and InputActions in %hs"), __FUNCTION__);
 
 		return;
 	}

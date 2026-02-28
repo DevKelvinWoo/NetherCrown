@@ -3,6 +3,7 @@
 
 #include "NetherCrownControlGhostTrailComponent.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 
@@ -21,7 +22,7 @@ void UNetherCrownControlGhostTrailComponent::ActivateGhostTrail(const bool bActi
 	UNiagaraComponent* HandledGhostTrailNiagaraComponent{ HandledGhostTrailNiagaraComponentWeak.Get() };
 	if (!IsValid(HandledGhostTrailNiagaraComponent))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HandledGhostTrailNiagaraComponent is invalid in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("HandledGhostTrailNiagaraComponent is invalid in %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -33,7 +34,7 @@ void UNetherCrownControlGhostTrailComponent::ActivateGhostTrail(const bool bActi
 
 	if (!IsValid(InGhostTrailNiagaraSystem))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("InGhostTrailNiagaraSystem is invalid in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("InGhostTrailNiagaraSystem is invalid in %hs"), __FUNCTION__);
 		return;
 	}
 

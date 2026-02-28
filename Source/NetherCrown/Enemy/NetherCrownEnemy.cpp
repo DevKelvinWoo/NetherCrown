@@ -2,6 +2,7 @@
 
 #include "NetherCrownEnemy.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "NiagaraComponent.h"
 #include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
@@ -102,7 +103,7 @@ void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser
 
 	EnemyStatComponent->SetEnemyHp(EnemyStatData.EnemyHP - FinalDamage);
 
-	UE_LOG(LogTemp, Warning, TEXT("FinalDamage : %d"), FinalDamage);
+	UE_LOG(LogNetherCrown, Warning, TEXT("FinalDamage : %d"), FinalDamage);
 	if (EnemyStatData.EnemyHP <= 0)
 	{
 		//Destroy(); //@NOTE : Temp Code

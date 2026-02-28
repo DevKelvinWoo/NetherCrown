@@ -2,6 +2,7 @@
 
 #include "NetherCrownWeapon.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "NetherCrownWeaponTraceComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
@@ -158,21 +159,21 @@ void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLo
 {
 	if (!IsValid(HitEnemy))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HitEnemy is invalid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("HitEnemy is invalid %hs"), __FUNCTION__);
 		return;
 	}
 
 	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
 	if (!ensureAlways(IsValid(OwnerCharacter)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("OwnerCharacter is invalid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("OwnerCharacter is invalid %hs"), __FUNCTION__);
 		return;
 	}
 
 	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter->GetBasicAttackComponent() };
 	if (!ensureAlways(IsValid(BasicAttackComponent)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BasicAttackComponent is invalid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("BasicAttackComponent is invalid %hs"), __FUNCTION__);
 		return;
 	}
 

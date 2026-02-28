@@ -2,6 +2,7 @@
 
 #include "NetherCrownFrozenTempest.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "Curves/CurveVector.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
@@ -180,7 +181,7 @@ void UNetherCrownFrozenTempest::Multicast_SetDetectedEnemyOverlayMaterial_Implem
 
 	if (!IsValid(CachedFrozenTempestTargetOverlayMaterial))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CachedFrozenTempestTargetOverlayMaterial::Create failed"));
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedFrozenTempestTargetOverlayMaterial::Create failed"));
 		return;
 	}
 
@@ -226,7 +227,7 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(
 
 	if (!IsValid(CachedDynamicFrozenTempestMaterial))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CachedDynamicFrozenTempestMaterial::Create failed"));
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedDynamicFrozenTempestMaterial::Create failed"));
 		return;
 	}
 
@@ -255,7 +256,7 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(fl
 	UMaterialInstanceDynamic* DynamicOverlayMaterial = Cast<UMaterialInstanceDynamic>(SkillOwnerMeshComponent->GetOverlayMaterial());
 	if (!IsValid(DynamicOverlayMaterial))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ApplyCharacterOverlayEndMaterial - Cannot cast dynamic material"));
+		UE_LOG(LogNetherCrown, Warning, TEXT("ApplyCharacterOverlayEndMaterial - Cannot cast dynamic material"));
 		return;
 	}
 

@@ -2,6 +2,7 @@
 
 #include "NetherCrownSkillComponent.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "NetherCrownBasicAttackComponent.h"
 #include "NetherCrownEquipComponent.h"
 #include "Engine/ActorChannel.h"
@@ -152,7 +153,7 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 
 	if (SkillObjects.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("SkillObjects is Empty in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("SkillObjects is Empty in %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -193,7 +194,7 @@ void UNetherCrownSkillComponent::Multicast_SetActiveSkillSlowPlayRate_Implementa
 	const UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(ActiveSkillKeyEnum) };
 	if (!IsValid(FoundSkillObject))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ActiveSkillKeyEnum is Invalid in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("ActiveSkillKeyEnum is Invalid in %hs"), __FUNCTION__);
 		return;
 	}
 

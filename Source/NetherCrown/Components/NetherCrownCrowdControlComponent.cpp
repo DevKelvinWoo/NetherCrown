@@ -2,6 +2,7 @@
 
 #include "NetherCrownCrowdControlComponent.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "NetherCrownStatusEffectControlComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -264,7 +265,7 @@ void UNetherCrownCrowdControlComponent::SetFrozenTargetOverlayEndMaterialByFloat
 	UMaterialInstanceDynamic* DynamicOverlayMaterial = Cast<UMaterialInstanceDynamic>(MeshComponent->GetOverlayMaterial());
 	if (!IsValid(DynamicOverlayMaterial))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ApplyCharacterOverlayEndMaterial - Cannot cast dynamic material"));
+		UE_LOG(LogNetherCrown, Warning, TEXT("ApplyCharacterOverlayEndMaterial - Cannot cast dynamic material"));
 		return;
 	}
 

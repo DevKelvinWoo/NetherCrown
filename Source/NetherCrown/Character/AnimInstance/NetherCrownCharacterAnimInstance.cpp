@@ -3,6 +3,7 @@
 #include "NetherCrownCharacterAnimInstance.h"
 
 #include "GameFramework/CharacterMovementComponent.h"
+#include "NetherCrown/NetherCrown.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
@@ -30,7 +31,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -46,7 +47,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -62,7 +63,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_BasicAttackEnd()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -78,7 +79,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_EquipStart()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedEquipComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedEquipComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedEquipComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -94,7 +95,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_EquipEnd()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedEquipComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedEquipComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedEquipComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -110,7 +111,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_HitTraceEnable()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -126,7 +127,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowBegin()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -142,7 +143,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowEnd()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -158,7 +159,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)) || !(IsValid(CachedBasicAttackComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -175,7 +176,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillEnd()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)) || !(IsValid(CachedBasicAttackComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -192,7 +193,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementFly()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedCharacterMovementComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedCharacterMovementComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedCharacterMovementComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -208,7 +209,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementWalk()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedCharacterMovementComponent)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter or CachedCharacterMovementComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedCharacterMovementComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -224,7 +225,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ActiveWeaponAuraNiagara()
 {
 	if (!(IsValid(CachedOwningCharacter)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -235,14 +236,14 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ActiveWeaponAuraNiagara()
 
 	if (!(IsValid(CachedSkillComponent)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedSkillComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
 	ANetherCrownWeapon* EquippedWeapon{ CachedEquipComponent ? CachedEquipComponent->GetEquippedWeapon() : nullptr };
 	if (!(IsValid(EquippedWeapon)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("EquippedWeapon is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("EquippedWeapon is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -254,7 +255,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_DeactiveWeaponAuraNiagara()
 {
 	if (!(IsValid(CachedOwningCharacter)))
 	{
-		UE_LOG(LogTemp, Error, TEXT("CachedOwningCharacter is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -266,7 +267,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_DeactiveWeaponAuraNiagara()
 	ANetherCrownWeapon* EquippedWeapon{ CachedEquipComponent ? CachedEquipComponent->GetEquippedWeapon() : nullptr };
 	if (!(IsValid(EquippedWeapon)))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("EquippedWeapon is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("EquippedWeapon is not valid %hs"), __FUNCTION__);
 		return;
 	}
 

@@ -3,6 +3,7 @@
 
 #include "NetherCrownSkillSkyFallSlash.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
@@ -157,7 +158,7 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 	const TArray<AActor*> DetectedActors{ GetSkillDetectedTargets() };
 	if (DetectedActors.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HandleOnHitSkyFallSlashSkill - DetectedActors is empty"));
+		UE_LOG(LogNetherCrown, Warning, TEXT("HandleOnHitSkyFallSlashSkill - DetectedActors is empty"));
 		return;
 	}
 

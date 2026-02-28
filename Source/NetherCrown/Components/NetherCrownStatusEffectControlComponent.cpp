@@ -2,6 +2,7 @@
 
 #include "NetherCrownStatusEffectControlComponent.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
 
@@ -36,7 +37,7 @@ void UNetherCrownStatusEffectControlComponent::SetActiveStatusNiagaraSystem(cons
 	UNiagaraComponent* HandledStatusNiagaraComponent{ HandledStatusNiagaraComponentWeak.Get() };
 	if (!IsValid(HandledStatusNiagaraComponent))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("HandledStatusNiagaraComponent is null %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("HandledStatusNiagaraComponent is null %hs"), __FUNCTION__);
 	}
 
 	if (bEnable)
@@ -44,7 +45,7 @@ void UNetherCrownStatusEffectControlComponent::SetActiveStatusNiagaraSystem(cons
 		TObjectPtr<UNiagaraSystem>* CachedStatusNiagaraSystemPtr{ CachedStatusNiagaraSystemMap.Find(InCrowdControlType) };
 		if (!CachedStatusNiagaraSystemPtr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("CachedStatusNiagaraSystem is null %hs"), __FUNCTION__);
+			UE_LOG(LogNetherCrown, Warning, TEXT("CachedStatusNiagaraSystem is null %hs"), __FUNCTION__);
 			return;
 		}
 

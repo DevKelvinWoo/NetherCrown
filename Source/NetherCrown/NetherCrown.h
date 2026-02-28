@@ -4,3 +4,4 @@
 
 #include "CoreMinimal.h"
 
+NETHERCROWN_API DECLARE_LOG_CATEGORY_EXTERN(LogNetherCrown, Log, All);

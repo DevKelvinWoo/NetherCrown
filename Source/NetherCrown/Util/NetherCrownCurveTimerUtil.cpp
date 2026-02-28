@@ -2,6 +2,8 @@
 
 #include "NetherCrownCurveTimerUtil.h"
 
+#include "NetherCrown/NetherCrown.h"
+
 void FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(const FNetherCrownCurveTimerData& CurveTimerData)
 {
 	const TObjectPtr<UObject> WorldContextObject{ CurveTimerData.WorldContextObject };
@@ -29,7 +31,7 @@ void FNetherCrownCurveTimerUtil::ExecuteLoopTimerCallbackByCurve(const FNetherCr
 	float* CurveElapsedTime{ CurveTimerData.CurveElapsedTime };
 	if (!CurveElapsedTime)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Curve Elasped Time pointer is nullptr"));
+		UE_LOG(LogNetherCrown, Warning, TEXT("Curve Elasped Time pointer is nullptr"));
 		return;
 	}
 

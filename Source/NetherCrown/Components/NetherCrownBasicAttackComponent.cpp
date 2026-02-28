@@ -2,6 +2,7 @@
 
 #include "NetherCrownBasicAttackComponent.h"
 
+#include "NetherCrown/NetherCrown.h"
 #include "NetherCrownEquipComponent.h"
 #include "NetherCrownPlayerStatComponent.h"
 #include "Animation/AnimMontage.h"
@@ -49,7 +50,7 @@ void UNetherCrownBasicAttackComponent::CacheBasicAttackMontage()
 {
 	if (BasicAttackAnimMontageSoft.IsNull())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("BasicAttackAnimMontage is null %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("BasicAttackAnimMontage is null %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -98,7 +99,7 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 
 	if (ComboMontageSectionMap.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -115,7 +116,7 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 {
 	if (!SectionName)
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Montage section not found in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("Montage section not found in %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -223,7 +224,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) con
 {
 	if (!IsValid(CachedCharacter))
 	{
-		UE_LOG(LogTemp, Warning, TEXT("CachedCharacter is invalid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -377,7 +378,7 @@ void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 
 	if (ComboMontageSectionMap.IsEmpty())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
 		return;
 	}
 
