@@ -85,7 +85,9 @@ protected:
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
 private:
-	UFUNCTION(Server, Unreliable)
+	void DestroyVisualOnlyComponentsOnDS();
+
+	UFUNCTION(Server, Reliable)
 	void Server_SetPressedMoveKey(const bool InbPressedMoveKey);
 
 	void SetUseControllerSettings();
@@ -93,17 +95,20 @@ private:
 	void SetMainCameraComponentSettings();
 	void SetCharacterDefaultMovementSettings();
 
-	void CheckIsHardLandingAndSetTimer();
+	void SetIsHardLanding();
 	void ResetHardLandingState();
-	void DisableMovementWhenHardLanding() const;
+	void DisableMovementAndSetResetTimerWhenHardLanding();
 
 	//@NOTE : 만약 공격도 막아야 한다면 두 가지 버전의 함수를 오버로딩하자 (공격 + 움직임 제한, 움직임만 제한)
 	void SetCharacterMovementControl(const bool bEnableMovement) const;
 
+	UFUNCTION()
+	void OnRep_IsHardLanding();
+
 	UPROPERTY(Replicated)
 	bool bPressedMoveKey{ false };
 
-	UPROPERTY(Replicated)
+	UPROPERTY(ReplicatedUsing = OnRep_IsHardLanding)
 	bool bIsHardLanding{ false };
 
 	UPROPERTY(Replicated)

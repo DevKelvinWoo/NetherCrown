@@ -17,14 +17,24 @@ void UNetherCrownCharacterAnimInstance::NativeInitializeAnimation()
 	CacheInitData();
 }
 
+void UNetherCrownCharacterAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
+{
+	Super::NativeUpdateAnimation(DeltaSeconds);
+
+	CacheInitData();
+}
+
 void UNetherCrownCharacterAnimInstance::CacheInitData()
 {
 	CachedOwningCharacter = Cast<ANetherCrownCharacter>(GetOwningActor());
 
-	CachedBasicAttackComponent = CachedOwningCharacter->GetBasicAttackComponent();
-	CachedEquipComponent = CachedOwningCharacter->GetEquipComponent();
-	CachedSkillComponent = CachedOwningCharacter->GetSkillComponent();
-	CachedCharacterMovementComponent = CachedOwningCharacter->GetCharacterMovement();
+	if (IsValid(CachedOwningCharacter))
+	{
+		CachedBasicAttackComponent = CachedOwningCharacter->GetBasicAttackComponent();
+		CachedEquipComponent = CachedOwningCharacter->GetEquipComponent();
+		CachedSkillComponent = CachedOwningCharacter->GetSkillComponent();
+		CachedCharacterMovementComponent = CachedOwningCharacter->GetCharacterMovement();
+	}
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()

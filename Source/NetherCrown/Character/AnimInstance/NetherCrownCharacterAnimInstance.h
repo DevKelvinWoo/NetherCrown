@@ -62,6 +62,7 @@ public:
 
 protected:
 	virtual void NativeInitializeAnimation() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 
 	UPROPERTY(BlueprintReadOnly, Transient, Category = "Character")
 	TObjectPtr<ANetherCrownCharacter> CachedOwningCharacter;

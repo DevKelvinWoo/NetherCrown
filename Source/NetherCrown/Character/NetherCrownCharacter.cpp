@@ -8,6 +8,7 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "NetherCrown/NetherCrown.h"
 
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
@@ -24,26 +25,32 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 
 	SetUseControllerSettings();
 
-	MainSpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("MainSpringArmComponent"));
-	MainSpringArmComponent->SetupAttachment(RootComponent);
-	SetMainSpringArmComponentSettings();
-
-	MainCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("MainCameraComponent"));
-	MainCameraComponent->SetupAttachment(MainSpringArmComponent);
-	SetMainCameraComponentSettings();
-
-	SetCharacterDefaultMovementSettings();
-
-	NetherCrownGhostTrailNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("GhostTrailNiagaraComponent"));
-	NetherCrownGhostTrailNiagaraComponent->SetupAttachment(RootComponent);
-
 	NetherCrownBasicAttackComponent = CreateDefaultSubobject<UNetherCrownBasicAttackComponent>(TEXT("BasicAttackComponent"));
 	NetherCrownEquipComponent = CreateDefaultSubobject<UNetherCrownEquipComponent>(TEXT("EquipComponent"));
 	NetherCrownSkillComponent = CreateDefaultSubobject<UNetherCrownSkillComponent>(TEXT("SkillComponent"));
 	NetherCrownCrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
-	NetherCrownPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
-	NetherCrownControlPPComponent = CreateDefaultSubobject<UNetherCrownControlPPComponent>(TEXT("ControlPPComponent"));
-	NetherCrownControlGhostTrailComponent = CreateDefaultSubobject<UNetherCrownControlGhostTrailComponent>(TEXT("ControlGhostTrailComponent"));
+
+	SetCharacterDefaultMovementSettings();
+
+	//@NOTE : Only for Client (visual only components), PIE is not checked by IsRunningDedicatedServer
+	if (!IsRunningDedicatedServer())
+	{
+		MainSpringArmComponent = CreateDefaultSubobject<USpringArmComponent>(TEXT("MainSpringArmComponent"));
+		MainSpringArmComponent->SetupAttachment(RootComponent);
+		SetMainSpringArmComponentSettings();
+
+		MainCameraComponent = CreateDefaultSubobject<UCameraComponent>(TEXT("MainCameraComponent"));
+		MainCameraComponent->SetupAttachment(MainSpringArmComponent);
+		SetMainCameraComponentSettings();
+
+		NetherCrownGhostTrailNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("GhostTrailNiagaraComponent"));
+		NetherCrownGhostTrailNiagaraComponent->SetupAttachment(RootComponent);
+
+		NetherCrownControlGhostTrailComponent = CreateDefaultSubobject<UNetherCrownControlGhostTrailComponent>(TEXT("ControlGhostTrailComponent"));
+
+		NetherCrownPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
+		NetherCrownControlPPComponent = CreateDefaultSubobject<UNetherCrownControlPPComponent>(TEXT("ControlPPComponent"));
+	}
 }
 
 void ANetherCrownCharacter::SetUseControllerSettings()
@@ -97,6 +104,8 @@ void ANetherCrownCharacter::BeginPlay()
 {
 	Super::BeginPlay();
 
+	DestroyVisualOnlyComponentsOnDS();
+
 	check(NetherCrownBasicAttackComponent);
 	NetherCrownBasicAttackComponent->GetOnStopOrStartBasicAttack().AddUObject(this, &ThisClass::SetCharacterMovementControl);
 
@@ -106,11 +115,15 @@ void ANetherCrownCharacter::BeginPlay()
 	check(NetherCrownSkillComponent);
 	NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetCharacterMovementControl);
 
-	check(NetherCrownControlPPComponent);
-	NetherCrownControlPPComponent->SetHandlingPostProcessComponent(NetherCrownPostProcessComponent);
+	if (IsValid(NetherCrownControlPPComponent) && IsValid(NetherCrownPostProcessComponent))
+	{
+		NetherCrownControlPPComponent->SetHandlingPostProcessComponent(NetherCrownPostProcessComponent);
+	}
 
-	check(NetherCrownControlGhostTrailComponent);
-	NetherCrownControlGhostTrailComponent->SetHandledGhostTrailNiagaraComponent(NetherCrownGhostTrailNiagaraComponent);
+	if (IsValid(NetherCrownControlGhostTrailComponent) && IsValid(NetherCrownGhostTrailNiagaraComponent))
+	{
+		NetherCrownControlGhostTrailComponent->SetHandledGhostTrailNiagaraComponent(NetherCrownGhostTrailNiagaraComponent);
+	}
 }
 
 void ANetherCrownCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -126,20 +139,13 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	//@NOTE : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Server와 Client 둘 다에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
-	const bool bShouldHandleLocally = HasAuthority() || IsLocallyControlled();
-	if (bShouldHandleLocally)
+	if (HasAuthority())
 	{
-		check(NetherCrownBasicAttackComponent);
+		check(NetherCrownBasicAttackComponent)
 		NetherCrownBasicAttackComponent->SetCanAttack(true);
 
-		CheckIsHardLandingAndSetTimer();
-		DisableMovementWhenHardLanding();
-
-		if (!HasAuthority() && bIsHardLanding)
-		{
-			FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, CharacterTagData.HardLandingSoundTag);
-		}
+		SetIsHardLanding();
+		DisableMovementAndSetResetTimerWhenHardLanding();
 	}
 }
 
@@ -155,7 +161,7 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 		bIsHardLanding = false;
 		JumpStartLocation = GetActorLocation();
 	}
-	else
+	else if (IsLocallyControlled())
 	{
 		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, CharacterTagData.JumpStartSoundTag);
 	}
@@ -172,11 +178,42 @@ void ANetherCrownCharacter::OnMovementModeChanged(EMovementMode PrevMovementMode
 	}
 }
 
+void ANetherCrownCharacter::DestroyVisualOnlyComponentsOnDS()
+{
+	if (!IsRunningDedicatedServer())
+	{
+		return;
+	}
+
+	auto SafeDestroyComponent = [](UActorComponent* Component)
+		{
+			if (IsValid(Component))
+			{
+				Component->DestroyComponent();
+				Component = nullptr;
+			}
+		};
+
+	SafeDestroyComponent(MainCameraComponent);
+	SafeDestroyComponent(MainSpringArmComponent);
+	SafeDestroyComponent(NetherCrownGhostTrailNiagaraComponent);
+	SafeDestroyComponent(NetherCrownPostProcessComponent);
+	SafeDestroyComponent(NetherCrownControlPPComponent);
+	SafeDestroyComponent(NetherCrownControlGhostTrailComponent);
+}
+
 void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 {
-	check(Controller);
+	if (!IsValid(Controller))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("Controller is invalid in %hs"), __FUNCTION__);
+		return;
+	}
 
-	Server_SetPressedMoveKey(true);
+	if (!bPressedMoveKey)
+	{
+		Server_SetPressedMoveKey(true);
+	}
 
 	//@NOTE : CMC의 클라이언트 예측 로직으로 input lag을 방지한다, 또한 FInputActionValue는 NetSerialize용으로 설계되지 않음 (이는 LookAt, Jump에도 해당함)
 	if (Value.IsNonZero())
@@ -223,7 +260,10 @@ void ANetherCrownCharacter::JumpCharacter(const FInputActionValue& Value)
 
 void ANetherCrownCharacter::HandleOnMoveActionCompleted()
 {
-	Server_SetPressedMoveKey(false);
+	if (bPressedMoveKey)
+	{
+		Server_SetPressedMoveKey(false);
+	}
 }
 
 void ANetherCrownCharacter::RequestBasicAttack(const FInputActionValue& Value)
@@ -315,7 +355,7 @@ UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffect
 	return nullptr;
 }
 
-void ANetherCrownCharacter::CheckIsHardLandingAndSetTimer()
+void ANetherCrownCharacter::SetIsHardLanding()
 {
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
 	check(CharacterDefaultSetting);
@@ -323,14 +363,6 @@ void ANetherCrownCharacter::CheckIsHardLandingAndSetTimer()
 	const double DistanceBetweenLandAndJumpStartLocation{ JumpStartLocation.Z - GetActorLocation().Z };
 	const double MinHardLandHeight{ CharacterDefaultSetting->GetMinHardLandingHeight() };
 	bIsHardLanding = DistanceBetweenLandAndJumpStartLocation > MinHardLandHeight;
-
-	if (bIsHardLanding)
-	{
-		//@NOTE  : bIsHardLanding이 replicate되기 전에 AnimState가 돌아서 Client단에서 true로 만들어 놓음, 그리고 n초뒤에 다시 false로 변경함
-		const float ResetDelay = CharacterDefaultSetting->GetRecoveryResetDelayTime();
-		GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
-		GetWorldTimerManager().SetTimer(TimerHandle_ResetHardLanding, this, &ANetherCrownCharacter::ResetHardLandingState, ResetDelay, false);
-	}
 }
 
 void ANetherCrownCharacter::ResetHardLandingState()
@@ -343,9 +375,13 @@ void ANetherCrownCharacter::ResetHardLandingState()
 	MovementComponent->SetMovementMode(MOVE_Walking);
 }
 
-void ANetherCrownCharacter::DisableMovementWhenHardLanding() const
+void ANetherCrownCharacter::DisableMovementAndSetResetTimerWhenHardLanding()
 {
-	check(Controller);
+	if (!IsValid(Controller))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("Controller is invalid in %hs"), __FUNCTION__);
+		return;
+	}
 
 	if (bIsHardLanding)
 	{
@@ -353,6 +389,13 @@ void ANetherCrownCharacter::DisableMovementWhenHardLanding() const
 		check(MovementComponent);
 
 		MovementComponent->DisableMovement();
+
+		const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+		check(CharacterDefaultSetting);
+
+		const float ResetDelay = CharacterDefaultSetting->GetRecoveryResetDelayTime();
+		GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
+		GetWorldTimerManager().SetTimer(TimerHandle_ResetHardLanding, this, &ANetherCrownCharacter::ResetHardLandingState, ResetDelay, false);
 	}
 }
 
@@ -362,4 +405,12 @@ void ANetherCrownCharacter::SetCharacterMovementControl(const bool bEnableMoveme
 	check(MovementComponent);
 
 	bEnableMovement ? MovementComponent->SetMovementMode(MOVE_Walking) : MovementComponent->DisableMovement();
+}
+
+void ANetherCrownCharacter::OnRep_IsHardLanding()
+{
+	if (bIsHardLanding)
+	{
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, CharacterTagData.HardLandingSoundTag);
+	}
 }
