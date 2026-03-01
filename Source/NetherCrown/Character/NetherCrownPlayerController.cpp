@@ -25,6 +25,12 @@ void ANetherCrownPlayerController::OnPossess(APawn* InPawn)
 	CachedCharacter = Cast<ANetherCrownCharacter>(InPawn);
 }
 
+void ANetherCrownPlayerController::OnUnPossess()
+{
+	Super::OnUnPossess();
+	CachedCharacter = nullptr;
+}
+
 void ANetherCrownPlayerController::AcknowledgePossession(APawn* P)
 {
 	Super::AcknowledgePossession(P);
@@ -39,11 +45,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	UEnhancedInputLocalPlayerSubsystem* EnhancedInputLocalPlayerSubSystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(GetLocalPlayer());
 	check(EnhancedInputLocalPlayerSubSystem);
 
-	ensureAlways(MappingContext);
-
-	EnhancedInputLocalPlayerSubSystem->AddMappingContext(MappingContext, 0);
-
-	if (!ensureAlways(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction && EquipAction && ChangeWeaponAction
+	if (!ensure(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction && EquipAction && ChangeWeaponAction
 					&& QSkillAction && ESkillAction && RSkillAction && ShiftSkillAction))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("Can't add Mapping Context and InputActions in %hs"), __FUNCTION__);
@@ -52,6 +54,8 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	}
 
 	//@NOTE : 입력 이벤트는 client에서만 실행된다
+	EnhancedInputLocalPlayerSubSystem->AddMappingContext(MappingContext, 0);
+
 	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Triggered, this, &ThisClass::HandleInputMoveCharacter);
 	EnhancedPlayerInputComponent->BindAction(MoveAction, ETriggerEvent::Completed, this, &ThisClass::HandleOnMoveActionCompleted);
 	EnhancedPlayerInputComponent->BindAction(LookAtAction, ETriggerEvent::Triggered, this, &ThisClass::HandleInputLookAtCharacter);
@@ -67,110 +71,55 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 
 void ANetherCrownPlayerController::HandleInputMoveCharacter(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::MoveCharacter, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleInputLookAtCharacter(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::LookAtCharacter, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleInputJumpCharacter(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::JumpCharacter, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleOnMoveActionCompleted()
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::HandleOnMoveActionCompleted);
 }
 
 void ANetherCrownPlayerController::HandleInputRequestBasicAttack(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::RequestBasicAttack, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleInputEquipCharacter(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::EquipCharacter, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleInputChangeWeapon(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::ChangeWeapon, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleInputActiveQSkill(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveQSkill, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleInputActiveESkill(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveESkill, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleInputActiveRSkill(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveRSkill, InActionValue);
 }
 
 void ANetherCrownPlayerController::HandleInputActiveShiftSkill(const FInputActionValue& InActionValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveShiftSkill, InActionValue);
 }

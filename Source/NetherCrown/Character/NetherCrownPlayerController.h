@@ -21,6 +21,7 @@ public:
 protected:
 	virtual void SetupInputComponent() override;
 	virtual void OnPossess(APawn* InPawn) override;
+	virtual void OnUnPossess() override;
 	virtual void AcknowledgePossession(APawn* P) override;
 
 private:
@@ -83,6 +84,11 @@ private:
 template<typename FuncType, typename... ArgsType>
 void ANetherCrownPlayerController::ExecuteCharacterAction(FuncType Func, ArgsType&&... Args)
 {
+	if (!IsLocalController())
+	{
+		return;
+	}
+
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
