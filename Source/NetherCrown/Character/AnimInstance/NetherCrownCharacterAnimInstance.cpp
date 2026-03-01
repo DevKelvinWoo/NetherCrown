@@ -169,7 +169,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)) || !(IsValid(CachedBasicAttackComponent)))
 	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -233,20 +233,14 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_SetCharacterMovementWalk()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_ActiveWeaponAuraNiagara()
 {
-	if (!(IsValid(CachedOwningCharacter)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)))
 	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
 	if (!CachedOwningCharacter->HasAuthority())
 	{
-		return;
-	}
-
-	if (!(IsValid(CachedSkillComponent)))
-	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("CachedSkillComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -263,9 +257,9 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_ActiveWeaponAuraNiagara()
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_DeactiveWeaponAuraNiagara()
 {
-	if (!(IsValid(CachedOwningCharacter)))
+	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedEquipComponent)))
 	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter is not valid %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedEquipComponent is not valid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -274,7 +268,7 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_DeactiveWeaponAuraNiagara()
 		return;
 	}
 
-	ANetherCrownWeapon* EquippedWeapon{ CachedEquipComponent ? CachedEquipComponent->GetEquippedWeapon() : nullptr };
+	ANetherCrownWeapon* EquippedWeapon{ CachedEquipComponent->GetEquippedWeapon() };
 	if (!(IsValid(EquippedWeapon)))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("EquippedWeapon is not valid %hs"), __FUNCTION__);
