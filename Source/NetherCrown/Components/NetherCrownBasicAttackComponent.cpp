@@ -142,7 +142,29 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	PlayBasicAttackSounds();
 }
 
-void UNetherCrownBasicAttackComponent::Multicast_SetEquippedWeaponTraceEnable_Implementation(const bool bEnable) const
+void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool bEnable) const
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
+	if (!ensureAlways(IsValid(EquipComponent)))
+	{
+		return;
+	}
+
+	const ANetherCrownWeapon* EquippedWeapon{ EquipComponent->GetEquippedWeapon() };
+	if (!ensureAlways(IsValid(EquippedWeapon)))
+	{
+		return;
+	}
+
+	EquippedWeapon->SetWeaponHitTraceEnable(bEnable);
+}
+
+void UNetherCrownBasicAttackComponent::InitWeaponTraceComponentSettings()
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -161,12 +183,16 @@ void UNetherCrownBasicAttackComponent::Multicast_SetEquippedWeaponTraceEnable_Im
 		return;
 	}
 
-	EquippedWeapon->SetWeaponHitTraceEnable(bEnable);
 	EquippedWeapon->InitWeaponTraceComponentSettings();
 }
 
 void UNetherCrownBasicAttackComponent::Multicast_AutoTargetEnemy_Implementation()
 {
+	if (IsValid(CachedCharacter) && CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	AutoTargetEnemy();
 }
 
@@ -323,8 +349,7 @@ void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLo
 
 void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation)
 {
-	//@NOTE : Only Server Called
-	if (!ensureAlways(IsValid(CachedCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -388,14 +413,25 @@ void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
 	Multicast_PlayAndJumpToComboMontageSection(*CurrentComboMontageSectionName);
 }
 
-void UNetherCrownBasicAttackComponent::HandleEnableHitTrace() const
+void UNetherCrownBasicAttackComponent::HandleEnableHitTrace()
 {
-	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	if (!IsValid(CachedCharacter))
 	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid %hs"), __FUNCTION__);
 		return;
 	}
 
-	Multicast_SetEquippedWeaponTraceEnable(true);
+	if (CachedCharacter->IsLocallyControlled())
+	{
+		InitWeaponTraceComponentSettings();
+		return;
+	}
+
+	if (CachedCharacter->HasAuthority())
+	{
+		SetEquippedWeaponTraceEnable(true);
+		InitWeaponTraceComponentSettings();
+	}
 }
 
 void UNetherCrownBasicAttackComponent::HandleBasicAttackEnd()
@@ -405,11 +441,17 @@ void UNetherCrownBasicAttackComponent::HandleBasicAttackEnd()
 		return;
 	}
 
-	Multicast_SetEquippedWeaponTraceEnable(false);
+	SetEquippedWeaponTraceEnable(false);
+
 	OnStopOrStartBasicAttackAnim.Broadcast(true);
 }
 
 void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
 {
+	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	BasicAttackState = InbCanAttack ? ENetherCrownBasicAttackState::CanAttack : ENetherCrownBasicAttackState::CannotAttack;
 }

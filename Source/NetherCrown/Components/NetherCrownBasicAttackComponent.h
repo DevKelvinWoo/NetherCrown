@@ -52,7 +52,7 @@ public:
 
 	void HandleEnableComboWindow();
 	void HandleDisableComboWindow();
-	void HandleEnableHitTrace() const;
+	void HandleEnableHitTrace();
 	void HandleBasicAttackEnd();
 
 	void SetCanAttack(const bool InbCanAttack);
@@ -76,8 +76,8 @@ private:
 
 	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetEquippedWeaponTraceEnable(const bool bEnable) const;
+	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
+	void InitWeaponTraceComponentSettings();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AutoTargetEnemy();

@@ -125,11 +125,6 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_HitTraceEnable()
 		return;
 	}
 
-	if (!CachedOwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
 	CachedBasicAttackComponent->HandleEnableHitTrace();
 }
 
