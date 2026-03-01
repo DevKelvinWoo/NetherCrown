@@ -68,7 +68,11 @@ void ANetherCrownCharacter::SetMainSpringArmComponentSettings()
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
 	check(CharacterDefaultSetting);
 
-	check(MainSpringArmComponent);
+	if (!IsValid(MainSpringArmComponent))
+	{
+		return;
+	}
+
 	MainSpringArmComponent->bUsePawnControlRotation = CharacterDefaultSetting->IsMainSpringArmUsePawnControlRotation();
 	MainSpringArmComponent->TargetArmLength = CharacterDefaultSetting->GetMainSpringArmTargetLength();
 	MainSpringArmComponent->TargetOffset = CharacterDefaultSetting->GetMainSpringArmTargetOffset();
@@ -249,12 +253,9 @@ void ANetherCrownCharacter::LookAtCharacter(const FInputActionValue& Value)
 
 void ANetherCrownCharacter::JumpCharacter(const FInputActionValue& Value)
 {
-	if (Value.IsNonZero())
+	if (Value.Get<bool>())
 	{
-		if (Value.Get<bool>())
-		{
-			Jump();
-		}
+		Jump();
 	}
 }
 
@@ -268,37 +269,28 @@ void ANetherCrownCharacter::HandleOnMoveActionCompleted()
 
 void ANetherCrownCharacter::RequestBasicAttack(const FInputActionValue& Value)
 {
-	if (Value.IsNonZero())
+	if (Value.Get<bool>())
 	{
-		if (Value.Get<bool>())
-		{
-			check(NetherCrownBasicAttackComponent);
-			NetherCrownBasicAttackComponent->RequestBasicAttack();
-		}
+		check(NetherCrownBasicAttackComponent);
+		NetherCrownBasicAttackComponent->RequestBasicAttack();
 	}
 }
 
 void ANetherCrownCharacter::EquipCharacter(const FInputActionValue& Value)
 {
-	if (Value.IsNonZero())
+	if (Value.Get<bool>())
 	{
-		if (Value.Get<bool>())
-		{
-			check(NetherCrownEquipComponent);
-			NetherCrownEquipComponent->EquipOrStowWeapon();
-		}
+		check(NetherCrownEquipComponent);
+		NetherCrownEquipComponent->EquipOrStowWeapon();
 	}
 }
 
 void ANetherCrownCharacter::ChangeWeapon(const FInputActionValue& Value)
 {
-	if (Value.IsNonZero())
+	if (Value.Get<bool>())
 	{
-		if (Value.Get<bool>())
-		{
-			check(NetherCrownEquipComponent);
-			NetherCrownEquipComponent->ChangeWeapon();
-		}
+		check(NetherCrownEquipComponent);
+		NetherCrownEquipComponent->ChangeWeapon();
 	}
 }
 
@@ -333,13 +325,21 @@ void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value) con
 
 void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffset)
 {
-	check(MainSpringArmComponent);
+	if (!IsValid(MainSpringArmComponent))
+	{
+		return;
+	}
+
 	MainSpringArmComponent->TargetOffset.Z = InSpringArmZOffset;
 }
 
 void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength)
 {
-	check(MainSpringArmComponent);
+	if (!IsValid(MainSpringArmComponent))
+	{
+		return;
+	}
+
 	MainSpringArmComponent->TargetArmLength = InSpringArmLength;
 }
 
@@ -352,11 +352,18 @@ bool ANetherCrownCharacter::IsEquippedWeapon() const
 UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const
 {
 	//@TODO : Need to implements Status Effect Control Component in NetherCrownCharacter class (now only for enemy class)
+	unimplemented();
+
 	return nullptr;
 }
 
 void ANetherCrownCharacter::SetIsHardLanding()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
 	check(CharacterDefaultSetting);
 
@@ -377,9 +384,8 @@ void ANetherCrownCharacter::ResetHardLandingState()
 
 void ANetherCrownCharacter::DisableMovementAndSetResetTimerWhenHardLanding()
 {
-	if (!IsValid(Controller))
+	if (!HasAuthority())
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("Controller is invalid in %hs"), __FUNCTION__);
 		return;
 	}
 
