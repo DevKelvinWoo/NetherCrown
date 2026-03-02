@@ -19,22 +19,10 @@ class NETHERCROWN_API UNetherCrownCharacterAnimInstance : public UAnimInstance
 
 public:
 	UFUNCTION()
-	void AnimNotify_ComboEnable();
-
-	UFUNCTION()
-	void AnimNotify_ComboDisable();
-
-	UFUNCTION()
-	void AnimNotify_BasicAttackEnd();
-
-	UFUNCTION()
 	void AnimNotify_EquipStart();
 
 	UFUNCTION()
 	void AnimNotify_EquipEnd();
-
-	UFUNCTION()
-	void AnimNotify_HitTraceEnable();
 
 	UFUNCTION()
 	void AnimNotify_SkillSlowBegin();

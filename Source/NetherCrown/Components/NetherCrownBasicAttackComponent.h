@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -26,6 +26,21 @@ public:
 	FGameplayTag BasicAttackImpactEffectTag{};
 };
 
+USTRUCT()
+struct FNetherCrownComboTimingData
+{
+	GENERATED_BODY()
+
+public:
+	//@NOTE : Montage Section 시작 기준, 콤보 윈도우가 열리는 시간 (초)
+	UPROPERTY(EditDefaultsOnly)
+	float ComboWindowOpenTime = 0.0f;
+
+	//@NOTE : Montage Section 시작 기준, 콤보 윈도우가 닫히는 시간 (초)
+	UPROPERTY(EditDefaultsOnly)
+	float ComboWindowCloseTime = 0.0f;
+};
+
 UENUM()
 enum class ENetherCrownBasicAttackState : uint8
 {
@@ -50,11 +65,6 @@ public:
 
 	void RequestBasicAttack();
 
-	void HandleEnableComboWindow();
-	void HandleDisableComboWindow();
-	void HandleEnableHitTrace();
-	void HandleBasicAttackEnd();
-
 	void SetCanAttack(const bool InbCanAttack);
 
 	bool IsAttacking() const { return BasicAttackState == ENetherCrownBasicAttackState::Attacking; }
@@ -65,6 +75,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	void CacheBasicAttackMontage();
@@ -77,7 +88,9 @@ private:
 	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName);
 
 	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
-	void InitWeaponTraceComponentSettings();
+
+	UFUNCTION(Client, Reliable)
+	void Client_InitWeaponTraceComponentSettings();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AutoTargetEnemy();
@@ -90,11 +103,11 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_RequestBasicAttack();
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitImpactEffect(const FVector& HitLocation);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayHitImpactCameraShake();
+	UFUNCTION(Client, Unreliable)
+	void Client_PlayHitImpactCameraShake();
 
 	UFUNCTION()
 	void ApplyDamageInternal(AActor* HitEnemy) const;
@@ -121,6 +134,7 @@ private:
 
 	int32 CurrentComboCount{ 1 };
 
+	UPROPERTY(Replicated)
 	ENetherCrownBasicAttackState BasicAttackState{ ENetherCrownBasicAttackState::CannotAttack };
 
 	UPROPERTY(EditDefaultsOnly)
@@ -133,4 +147,24 @@ private:
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
+
+	void SetupComboWindowTimers(const int32 ComboCount);
+	void ServerHandleComboWindowOpen();
+	void ServerHandleComboWindowClose();
+	void ServerHandleAttackEnd();
+	void ServerHandleHitTraceEnable();
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<int32, FNetherCrownComboTimingData> ComboTimingDataMap{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<int32, float> AttackEndTimingDataMap{};
+
+	UPROPERTY(EditDefaultsOnly)
+	TMap<int32, float> HitTraceEnableTimingDataMap{};
+
+	FTimerHandle ComboWindowOpenTimerHandle;
+	FTimerHandle ComboWindowCloseTimerHandle;
+	FTimerHandle AttackEndTimerHandle;
+	FTimerHandle HitTraceEnableHandle;
 };

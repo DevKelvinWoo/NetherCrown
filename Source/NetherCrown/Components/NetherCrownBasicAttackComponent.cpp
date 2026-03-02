@@ -8,6 +8,7 @@
 #include "Animation/AnimMontage.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
@@ -29,6 +30,7 @@ void UNetherCrownBasicAttackComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CacheCharacter();
+	CacheBasicAttackMontage();
 
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -42,12 +44,22 @@ void UNetherCrownBasicAttackComponent::BeginPlay()
 	}
 
 	EquipComponent->GetOnEquipWeapon().AddUObject(this, &ThisClass::HandleOnEquipWeapon);
+}
 
-	CacheBasicAttackMontage();
+void UNetherCrownBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, BasicAttackState);
 }
 
 void UNetherCrownBasicAttackComponent::CacheBasicAttackMontage()
 {
+	if (!IsValid(CachedCharacter) || CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	if (BasicAttackAnimMontageSoft.IsNull())
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("BasicAttackAnimMontage is null %hs"), __FUNCTION__);
@@ -103,20 +115,37 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 		return;
 	}
 
+	CurrentComboCount = 1;
+
 	const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(1) };
 	Multicast_PlayAndJumpToComboMontageSection(*FirstComboMontageSectionName);
+
+	SetupComboWindowTimers(CurrentComboCount);
 }
 
 void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSection_Implementation(const FName& SectionName)
 {
-	PlayAttackSoundAndJumpToComboMontageSection(&SectionName);
+	if (!IsValid(CachedCharacter))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (CachedCharacter->HasAuthority())
+	{
+		BasicAttackState = ENetherCrownBasicAttackState::Attacking;
+	}
+	else
+	{
+		PlayAttackSoundAndJumpToComboMontageSection(&SectionName);
+	}
 }
 
 void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName)
 {
-	if (!SectionName)
+	if (!SectionName || !IsValid(CachedCharacter))
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("Montage section not found in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("Montage section not found or CachedCharacter is invalid in %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -127,8 +156,6 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	{
 		return;
 	}
-
-	BasicAttackState = ENetherCrownBasicAttackState::Attacking;
 
 	if (!ensureAlways(IsValid(CachedBasicAttackMontage)))
 	{
@@ -164,7 +191,7 @@ void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool b
 	EquippedWeapon->SetWeaponHitTraceEnable(bEnable);
 }
 
-void UNetherCrownBasicAttackComponent::InitWeaponTraceComponentSettings()
+void UNetherCrownBasicAttackComponent::Client_InitWeaponTraceComponentSettings_Implementation()
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -238,10 +265,15 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 
 void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactEffect_Implementation(const FVector& HitLocation)
 {
+	if (!IsValid(CachedCharacter) || CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	SpawnHitImpactEffect(HitLocation);
 }
 
-void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactCameraShake_Implementation()
+void UNetherCrownBasicAttackComponent::Client_PlayHitImpactCameraShake_Implementation()
 {
 	PlayHitImpactCameraShake();
 }
@@ -359,7 +391,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, c
 		return;
 	}
 
-	Multicast_PlayHitImpactCameraShake();
+	Client_PlayHitImpactCameraShake();
 	Multicast_PlayHitImpactEffect(HitLocation);
 
 	ApplyDamageInternal(HitEnemy);
@@ -368,82 +400,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, c
 void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 {
 	const int32 MaxComboCount{ ComboMontageSectionMap.Num() };
-	CurrentComboCount = CurrentComboCount + 1 > MaxComboCount ? 1 : ++CurrentComboCount;
-}
-
-void UNetherCrownBasicAttackComponent::HandleEnableComboWindow()
-{
-	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
-	if (IsValid(CachedCharacter) && CachedCharacter->HasAuthority())
-	{
-		BasicAttackState = ENetherCrownBasicAttackState::CanQueueNextCombo;
-	}
-}
-
-void UNetherCrownBasicAttackComponent::HandleDisableComboWindow()
-{
-	//@NOTE : Do not use AnimNotifyState (Server<->Client duration issue)
-	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	if (BasicAttackState != ENetherCrownBasicAttackState::ComboQueued)
-	{
-		BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
-
-		CurrentComboCount = 1;
-
-		return;
-	}
-
-	OnStopOrStartBasicAttackAnim.Broadcast(false);
-
-	CalculateNextComboCount();
-
-	if (ComboMontageSectionMap.IsEmpty())
-	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
-		return;
-	}
-
-	BasicAttackState = ENetherCrownBasicAttackState::CanQueueNextCombo;
-
-	const FName* CurrentComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
-	Multicast_PlayAndJumpToComboMontageSection(*CurrentComboMontageSectionName);
-}
-
-void UNetherCrownBasicAttackComponent::HandleEnableHitTrace()
-{
-	if (!IsValid(CachedCharacter))
-	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid %hs"), __FUNCTION__);
-		return;
-	}
-
-	if (CachedCharacter->IsLocallyControlled())
-	{
-		InitWeaponTraceComponentSettings();
-		return;
-	}
-
-	if (CachedCharacter->HasAuthority())
-	{
-		SetEquippedWeaponTraceEnable(true);
-		InitWeaponTraceComponentSettings();
-	}
-}
-
-void UNetherCrownBasicAttackComponent::HandleBasicAttackEnd()
-{
-	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	SetEquippedWeaponTraceEnable(false);
-
-	OnStopOrStartBasicAttackAnim.Broadcast(true);
+	CurrentComboCount = CurrentComboCount >= MaxComboCount ? 1 : ++CurrentComboCount;
 }
 
 void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
@@ -454,4 +411,119 @@ void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
 	}
 
 	BasicAttackState = InbCanAttack ? ENetherCrownBasicAttackState::CanAttack : ENetherCrownBasicAttackState::CannotAttack;
+}
+
+void UNetherCrownBasicAttackComponent::SetupComboWindowTimers(const int32 ComboCount)
+{
+	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const FNetherCrownComboTimingData* ComboWindowTimingData{ ComboTimingDataMap.Find(ComboCount) };
+	const float* AttackEndTimingData{ AttackEndTimingDataMap.Find(ComboCount) };
+	const float* HitTraceEnableTimingData{ HitTraceEnableTimingDataMap.Find(ComboCount) };
+	if (!ComboWindowTimingData || !AttackEndTimingData || !HitTraceEnableTimingData)
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("Timing entry not found for combo %d in %hs"), ComboCount, __FUNCTION__);
+		return;
+	}
+
+	UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+
+	TimerManager.ClearTimer(ComboWindowOpenTimerHandle);
+	TimerManager.ClearTimer(ComboWindowCloseTimerHandle);
+	TimerManager.ClearTimer(AttackEndTimerHandle);
+	TimerManager.ClearTimer(HitTraceEnableHandle);
+
+	TimerManager.SetTimer(ComboWindowOpenTimerHandle, this, &ThisClass::ServerHandleComboWindowOpen,
+		ComboWindowTimingData->ComboWindowOpenTime, false);
+	TimerManager.SetTimer(ComboWindowCloseTimerHandle, this, &ThisClass::ServerHandleComboWindowClose,
+		ComboWindowTimingData->ComboWindowCloseTime, false);
+	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::ServerHandleAttackEnd, *AttackEndTimingData, false);
+	TimerManager.SetTimer(HitTraceEnableHandle, this, &ThisClass::ServerHandleHitTraceEnable, *HitTraceEnableTimingData, false);
+}
+
+void UNetherCrownBasicAttackComponent::ServerHandleComboWindowOpen()
+{
+	BasicAttackState = ENetherCrownBasicAttackState::CanQueueNextCombo;
+}
+
+void UNetherCrownBasicAttackComponent::ServerHandleComboWindowClose()
+{
+	if (BasicAttackState != ENetherCrownBasicAttackState::ComboQueued)
+	{
+		BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
+		CurrentComboCount = 1;
+		return;
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(AttackEndTimerHandle);
+	}
+
+	OnStopOrStartBasicAttackAnim.Broadcast(false);
+
+	CalculateNextComboCount();
+
+	if (ComboMontageSectionMap.IsEmpty())
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
+		BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
+		CurrentComboCount = 1;
+		return;
+	}
+
+	const FName* NextComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
+	if (!NextComboMontageSectionName)
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("ComboMontageSectionMap entry not found for combo %d in %hs"), CurrentComboCount, __FUNCTION__);
+		BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
+		CurrentComboCount = 1;
+		return;
+	}
+
+	Multicast_PlayAndJumpToComboMontageSection(*NextComboMontageSectionName);
+
+	SetupComboWindowTimers(CurrentComboCount);
+}
+
+void UNetherCrownBasicAttackComponent::ServerHandleAttackEnd()
+{
+	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (UWorld* World = GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(ComboWindowOpenTimerHandle);
+		World->GetTimerManager().ClearTimer(ComboWindowCloseTimerHandle);
+		World->GetTimerManager().ClearTimer(AttackEndTimerHandle);
+	}
+
+	CurrentComboCount = 1;
+
+	SetEquippedWeaponTraceEnable(false);
+
+	OnStopOrStartBasicAttackAnim.Broadcast(true);
+}
+
+void UNetherCrownBasicAttackComponent::ServerHandleHitTraceEnable()
+{
+	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	Client_InitWeaponTraceComponentSettings();
+
+	SetEquippedWeaponTraceEnable(true);
 }

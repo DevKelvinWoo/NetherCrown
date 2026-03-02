@@ -37,54 +37,6 @@ void UNetherCrownCharacterAnimInstance::CacheInitData()
 	}
 }
 
-void UNetherCrownCharacterAnimInstance::AnimNotify_ComboEnable()
-{
-	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
-	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
-		return;
-	}
-
-	if (!CachedOwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	CachedBasicAttackComponent->HandleEnableComboWindow();
-}
-
-void UNetherCrownCharacterAnimInstance::AnimNotify_ComboDisable()
-{
-	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
-	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
-		return;
-	}
-
-	if (!CachedOwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	CachedBasicAttackComponent->HandleDisableComboWindow();
-}
-
-void UNetherCrownCharacterAnimInstance::AnimNotify_BasicAttackEnd()
-{
-	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
-	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
-		return;
-	}
-
-	if (!CachedOwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	CachedBasicAttackComponent->HandleBasicAttackEnd();
-}
-
 void UNetherCrownCharacterAnimInstance::AnimNotify_EquipStart()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedEquipComponent)))
@@ -115,17 +67,6 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_EquipEnd()
 	}
 
 	CachedEquipComponent->NotifyEquipEndOrStart(true);
-}
-
-void UNetherCrownCharacterAnimInstance::AnimNotify_HitTraceEnable()
-{
-	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedBasicAttackComponent)))
-	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedBasicAttackComponent is not valid %hs"), __FUNCTION__);
-		return;
-	}
-
-	CachedBasicAttackComponent->HandleEnableHitTrace();
 }
 
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowBegin()
