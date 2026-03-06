@@ -15,6 +15,7 @@
 
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
+#include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -53,6 +54,17 @@ bool UNetherCrownSkillObject::CallRemoteFunction(UFunction* Function, void* Parm
 
 void UNetherCrownSkillObject::Multicast_SpawnSkillImpactEffect_Implementation(const ANetherCrownEnemy* TargetEnemy) const
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	PlaySkillHitImpactEffect(TargetEnemy);
 }
 
@@ -153,7 +165,7 @@ void UNetherCrownSkillObject::ApplyPostProcess(const ENetherCrownPPType PPType, 
 	ControlPPComponent->ApplyPostProcess(PPType, Duration, bEndTimerAutomatic);
 }
 
-void UNetherCrownSkillObject::SetupSkillAnimationSlowTimer()
+void UNetherCrownSkillObject::SetupSkillSlowTimer()
 {
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
@@ -169,6 +181,22 @@ void UNetherCrownSkillObject::SetupSkillAnimationSlowTimer()
 	TimerManager.SetTimer(SkillAnimationSlowEndTimerHandle, this, &ThisClass::RestoreSkillAnimationPlayRate, SkillMontageEndSlowTimeOffset, false);
 }
 
+void UNetherCrownSkillObject::SetupSkillWeaponAuraTimer()
+{
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(SkillWeaponAuraActiveTimerHandle);
+	TimerManager.ClearTimer(SkillWeaponAuraDeactivateTimerHandle);
+
+	TimerManager.SetTimer(SkillWeaponAuraActiveTimerHandle, this, &ThisClass::ActiveSkillWeaponAura, SkillAuraActiveTimeOffset, false);
+	TimerManager.SetTimer(SkillWeaponAuraDeactivateTimerHandle, this, &ThisClass::DeactivateSkillWeaponAura, SkillAuraDeactivateTimeOffset, false);
+}
+
 void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
 {
 	SetSkillMontageSlowPlayRate(SkillMontageBeginSlowPlayRate);
@@ -177,6 +205,39 @@ void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
 void UNetherCrownSkillObject::RestoreSkillAnimationPlayRate()
 {
 	SetSkillMontageSlowPlayRate(SkillMontageEndSlowPlayRate);
+}
+
+void UNetherCrownSkillObject::SetSkillWeaponAura(const bool bIsActivate)
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
+	UNetherCrownEquipComponent* EquipComponent{ SkillOwnerCharacter->GetEquipComponent() };
+	if (!ensureAlways(IsValid(EquipComponent)))
+	{
+		return;
+	}
+
+	ANetherCrownWeapon* EquippedWeapon{ EquipComponent->GetEquippedWeapon() };
+	if (!ensureAlways(IsValid(EquippedWeapon)))
+	{
+		return;
+	}
+
+	EquippedWeapon->Server_ActiveWeaponAuraNiagara(bIsActivate, SkillKeyEnum);
+}
+
+void UNetherCrownSkillObject::ActiveSkillWeaponAura()
+{
+	SetSkillWeaponAura(true);
+}
+
+void UNetherCrownSkillObject::DeactivateSkillWeaponAura()
+{
+	SetSkillWeaponAura(false);
 }
 
 void UNetherCrownSkillObject::PlaySkillCosmetics()

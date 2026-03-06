@@ -107,10 +107,15 @@ protected:
 
 	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true) const;
 
-	void SetupSkillAnimationSlowTimer();
+	void SetupSkillSlowTimer();
+	void SetupSkillWeaponAuraTimer();
 
 	void MakeSkillAnimationSlowly();
 	void RestoreSkillAnimationPlayRate();
+
+	void SetSkillWeaponAura(const bool bIsActivate);
+	void ActiveSkillWeaponAura();
+	void DeactivateSkillWeaponAura();
 
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
@@ -127,16 +132,25 @@ protected:
 	FTimerHandle SkillAnimationSlowStartTimerHandle{};
 	FTimerHandle SkillAnimationSlowEndTimerHandle{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillAnimationSlowStartTime{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillAnimationSlowEndTime{};
 
 	FTimerHandle SkillHitTimerHandle{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillHitTime{};
+
+	FTimerHandle SkillWeaponAuraActiveTimerHandle{};
+	FTimerHandle SkillWeaponAuraDeactivateTimerHandle{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float SkillAuraActiveTimeOffset{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float SkillAuraDeactivateTimeOffset{};
 
 private:
 	UPROPERTY(EditDefaultsOnly, Replicated)

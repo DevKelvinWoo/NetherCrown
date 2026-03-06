@@ -107,7 +107,8 @@ void UNetherCrownSkillSkyFallSlash::BindTimelineFunctions()
 
 void UNetherCrownSkillSkyFallSlash::SetupSkyFallSlashTimers()
 {
-	SetupSkillAnimationSlowTimer();
+	SetupSkillSlowTimer();
+	SetupSkillWeaponAuraTimer();
 
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
