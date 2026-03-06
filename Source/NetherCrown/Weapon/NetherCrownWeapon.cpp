@@ -90,11 +90,6 @@ void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENeth
 	}
 }
 
-void ANetherCrownWeapon::Server_ActiveWeaponAuraNiagara_Implementation(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum)
-{
-	Multicast_ActiveWeaponAuraNiagara(bActive, SkillKeyEnum);
-}
-
 void ANetherCrownWeapon::BeginPlay()
 {
 	Super::BeginPlay();

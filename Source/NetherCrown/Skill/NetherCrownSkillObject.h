@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -107,11 +107,19 @@ protected:
 
 	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true) const;
 
+	void SetupSkillStateTimer();
+	void SetupSkillMovementModeTimer();
 	void SetupSkillSlowTimer();
 	void SetupSkillWeaponAuraTimer();
 
+	void StartSkillState();
+	void EndSkillState();
+
 	void MakeSkillAnimationSlowly();
 	void RestoreSkillAnimationPlayRate();
+
+	void SetCharacterMovementFly();
+	void SetCharacterMovementWalk();
 
 	void SetSkillWeaponAura(const bool bIsActivate);
 	void ActiveSkillWeaponAura();
@@ -142,6 +150,24 @@ protected:
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillHitTime{};
+
+	FTimerHandle SkillStartTimerHandle{};
+	FTimerHandle SkillEndTimerHandle{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float SkillStartTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float SkillEndTimeOffset{ -1.f };
+
+	FTimerHandle CharacterMovementFlyTimerHandle{};
+	FTimerHandle CharacterMovementWalkTimerHandle{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float CharacterMovementFlyTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float CharacterMovementWalkTimeOffset{ -1.f };
 
 	FTimerHandle SkillWeaponAuraActiveTimerHandle{};
 	FTimerHandle SkillWeaponAuraDeactivateTimerHandle{};

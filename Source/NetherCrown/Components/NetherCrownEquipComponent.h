@@ -74,6 +74,10 @@ private:
 
 	void AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const;
 
+	void SetupEquipStateTimer();
+	void HandleEquipStart() const;
+	void HandleEquipEnd() const;
+
 	void EquipOrStowWeaponInternal();
 	void ChangeWeaponInternal();
 
@@ -94,6 +98,12 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	FNetherCrownEquipComponentTagData EquipComponentTagData{};
 
+	UPROPERTY(EditDefaultsOnly, Category = "EquipTimerData")
+	float EquipStartTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EquipTimerData")
+	float EquipEndTimeOffset{ -1.f };
+
 	UPROPERTY()
 	TObjectPtr<UAnimMontage> CachedEquipMontage;
 
@@ -101,6 +111,9 @@ private:
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	TArray<TPair<EStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
+
+	FTimerHandle EquipStartTimerHandle{};
+	FTimerHandle EquipEndTimerHandle{};
 
 	FOnEquipWeapon OnEquipWeapon;
 	FOnEquipEndOrStart OnEquipEndOrStart;

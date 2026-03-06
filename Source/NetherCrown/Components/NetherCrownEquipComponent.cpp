@@ -1,9 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownEquipComponent.h"
 
 #include "NetherCrown/NetherCrown.h"
 #include "Net/UnrealNetwork.h"
+#include "TimerManager.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
@@ -54,6 +55,44 @@ void UNetherCrownEquipComponent::NotifyEquipEndOrStart(const bool bEquipEnd) con
 	}
 }
 
+void UNetherCrownEquipComponent::SetupEquipStateTimer()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(EquipStartTimerHandle);
+	TimerManager.ClearTimer(EquipEndTimerHandle);
+
+	if (EquipStartTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(EquipStartTimerHandle, this, &ThisClass::HandleEquipStart, EquipStartTimeOffset, false);
+	}
+
+	if (EquipEndTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(EquipEndTimerHandle, this, &ThisClass::HandleEquipEnd, EquipEndTimeOffset, false);
+	}
+}
+
+void UNetherCrownEquipComponent::HandleEquipStart() const
+{
+	NotifyEquipEndOrStart(false);
+}
+
+void UNetherCrownEquipComponent::HandleEquipEnd() const
+{
+	NotifyEquipEndOrStart(true);
+}
+
 const UNetherCrownWeaponData* UNetherCrownEquipComponent::GetEquippedWeaponData() const
 {
 	if (!IsValid(EquippedWeapon))
@@ -80,6 +119,7 @@ void UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Implementation()
 	if (bCanEquip)
 	{
 		EquipOrStowWeaponInternal();
+		SetupEquipStateTimer();
 		Multicast_PlayEquipAnimationAndSound();
 
 		OnEquipWeapon.Broadcast(true);
@@ -176,6 +216,7 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 
 	EquippedWeapon = ChangeTargetWeaponPair.Value;
 
+	SetupEquipStateTimer();
 	Multicast_PlayEquipAnimationAndSound();
 }
 

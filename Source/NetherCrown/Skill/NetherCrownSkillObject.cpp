@@ -2,20 +2,23 @@
 
 #include "NetherCrownSkillObject.h"
 
+#include "GameFramework/CharacterMovementComponent.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
+#include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
+#include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
-#include "NetherCrown/Components/NetherCrownControlPPComponent.h"
+#include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
-#include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
@@ -165,6 +168,64 @@ void UNetherCrownSkillObject::ApplyPostProcess(const ENetherCrownPPType PPType, 
 	ControlPPComponent->ApplyPostProcess(PPType, Duration, bEndTimerAutomatic);
 }
 
+void UNetherCrownSkillObject::SetupSkillStateTimer()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(SkillStartTimerHandle);
+	TimerManager.ClearTimer(SkillEndTimerHandle);
+
+	if (SkillStartTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(SkillStartTimerHandle, this, &ThisClass::StartSkillState, SkillStartTimeOffset, false);
+	}
+
+	if (SkillEndTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(SkillEndTimerHandle, this, &ThisClass::EndSkillState, SkillEndTimeOffset, false);
+	}
+}
+
+void UNetherCrownSkillObject::SetupSkillMovementModeTimer()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(CharacterMovementFlyTimerHandle);
+	TimerManager.ClearTimer(CharacterMovementWalkTimerHandle);
+
+	if (CharacterMovementFlyTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(CharacterMovementFlyTimerHandle, this, &ThisClass::SetCharacterMovementFly, CharacterMovementFlyTimeOffset, false);
+	}
+
+	if (CharacterMovementWalkTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(CharacterMovementWalkTimerHandle, this, &ThisClass::SetCharacterMovementWalk, CharacterMovementWalkTimeOffset, false);
+	}
+}
+
 void UNetherCrownSkillObject::SetupSkillSlowTimer()
 {
 	const UWorld* World{ GetWorld() };
@@ -197,6 +258,54 @@ void UNetherCrownSkillObject::SetupSkillWeaponAuraTimer()
 	TimerManager.SetTimer(SkillWeaponAuraDeactivateTimerHandle, this, &ThisClass::DeactivateSkillWeaponAura, SkillAuraDeactivateTimeOffset, false);
 }
 
+void UNetherCrownSkillObject::StartSkillState()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ SkillOwnerCharacter->GetBasicAttackComponent() };
+	if (!ensureAlways(IsValid(BasicAttackComponent)))
+	{
+		return;
+	}
+
+	UNetherCrownSkillComponent* SkillComponent{ SkillOwnerCharacter->GetSkillComponent() };
+	if (!ensureAlways(IsValid(SkillComponent)))
+	{
+		return;
+	}
+
+	BasicAttackComponent->SetCanAttack(false);
+	SkillComponent->GetOnStopOrStartSkill().Broadcast(false);
+}
+
+void UNetherCrownSkillObject::EndSkillState()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	UNetherCrownBasicAttackComponent* BasicAttackComponent{ SkillOwnerCharacter->GetBasicAttackComponent() };
+	if (!ensureAlways(IsValid(BasicAttackComponent)))
+	{
+		return;
+	}
+
+	UNetherCrownSkillComponent* SkillComponent{ SkillOwnerCharacter->GetSkillComponent() };
+	if (!ensureAlways(IsValid(SkillComponent)))
+	{
+		return;
+	}
+
+	BasicAttackComponent->SetCanAttack(true);
+	SkillComponent->GetOnStopOrStartSkill().Broadcast(true);
+}
+
 void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
 {
 	SetSkillMontageSlowPlayRate(SkillMontageBeginSlowPlayRate);
@@ -205,6 +314,40 @@ void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
 void UNetherCrownSkillObject::RestoreSkillAnimationPlayRate()
 {
 	SetSkillMontageSlowPlayRate(SkillMontageEndSlowPlayRate);
+}
+
+void UNetherCrownSkillObject::SetCharacterMovementFly()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	UCharacterMovementComponent* CharacterMovementComponent{ SkillOwnerCharacter->GetCharacterMovement() };
+	if (!ensureAlways(IsValid(CharacterMovementComponent)))
+	{
+		return;
+	}
+
+	CharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Flying);
+}
+
+void UNetherCrownSkillObject::SetCharacterMovementWalk()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	UCharacterMovementComponent* CharacterMovementComponent{ SkillOwnerCharacter->GetCharacterMovement() };
+	if (!ensureAlways(IsValid(CharacterMovementComponent)))
+	{
+		return;
+	}
+
+	CharacterMovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
 }
 
 void UNetherCrownSkillObject::SetSkillWeaponAura(const bool bIsActivate)
@@ -227,7 +370,7 @@ void UNetherCrownSkillObject::SetSkillWeaponAura(const bool bIsActivate)
 		return;
 	}
 
-	EquippedWeapon->Server_ActiveWeaponAuraNiagara(bIsActivate, SkillKeyEnum);
+	EquippedWeapon->Multicast_ActiveWeaponAuraNiagara(bIsActivate, SkillKeyEnum);
 }
 
 void UNetherCrownSkillObject::ActiveSkillWeaponAura()
@@ -268,6 +411,8 @@ void UNetherCrownSkillObject::PlaySkillCosmetics()
 void UNetherCrownSkillObject::ExecuteSkillGameplay()
 {
 	StartSkillCoolDownTimer();
+	SetupSkillStateTimer();
+	SetupSkillMovementModeTimer();
 }
 
 void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) const

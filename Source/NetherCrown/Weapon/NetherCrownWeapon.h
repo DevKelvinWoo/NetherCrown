@@ -49,16 +49,13 @@ public:
 
 	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 
-	UFUNCTION(Server, Unreliable)
-	void Server_ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum);
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum);
-
 	UFUNCTION()
 	void HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 

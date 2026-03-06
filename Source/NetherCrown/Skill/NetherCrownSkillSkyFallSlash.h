@@ -28,9 +28,10 @@ private:
 	void StartSetArmMaterialParamTimeline();
 	void BindTimelineFunctions();
 
-	void SetupSkyFallSlashTimers();
+	void SetupSkyFallSlashHitTimers();
 
-	void StartCameraShake();
+	UFUNCTION(Client, Unreliable)
+	void Client_StartCameraShake();
 
 	UFUNCTION()
 	void SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue);
@@ -38,10 +39,9 @@ private:
 	UFUNCTION()
 	void SetArmMaterialParamByFloatTimeline(float FloatCurveValue);
 
-	UFUNCTION(Server, Reliable)
-	void Server_HandleOnHitSkyFallSlashSkill();
-
 	void HandleOnHitSkyFallSlashSkill();
+
+	void DetectAndHitSkyFallSlashSkill();
 	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;
 
 	void CreateArmMaterialInstanceDynamic();

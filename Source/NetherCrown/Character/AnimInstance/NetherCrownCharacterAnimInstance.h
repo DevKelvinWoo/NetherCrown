@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
@@ -16,25 +16,6 @@ UCLASS()
 class NETHERCROWN_API UNetherCrownCharacterAnimInstance : public UAnimInstance
 {
 	GENERATED_BODY()
-
-public:
-	UFUNCTION()
-	void AnimNotify_EquipStart();
-
-	UFUNCTION()
-	void AnimNotify_EquipEnd();
-
-	UFUNCTION()
-	void AnimNotify_SkillStart();
-
-	UFUNCTION()
-	void AnimNotify_SkillEnd();
-
-	UFUNCTION()
-	void AnimNotify_SetCharacterMovementFly();
-
-	UFUNCTION()
-	void AnimNotify_SetCharacterMovementWalk();
 
 protected:
 	virtual void NativeInitializeAnimation() override;

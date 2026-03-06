@@ -42,6 +42,8 @@ void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay()
 	Super::ExecuteSkillGameplay();
 
 	//@NOTE : Only gameplay logic (server)
+	SetupSkyFallSlashHitTimers();
+	SetupSkillWeaponAuraTimer();
 }
 
 void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics()
@@ -61,7 +63,7 @@ void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics()
 		return;
 	}
 
-	SetupSkyFallSlashTimers();
+	SetupSkillSlowTimer();
 
 	ApplyPostProcess(ENetherCrownPPType::Charging, 1.0f);
 
@@ -105,11 +107,8 @@ void UNetherCrownSkillSkyFallSlash::BindTimelineFunctions()
 	SpringArmZOffsetFloatTimeline.AddInterpFloat(CachedSkillArmMaterialCurveFloat, ArmMaterialFloatProgressFunc);
 }
 
-void UNetherCrownSkillSkyFallSlash::SetupSkyFallSlashTimers()
+void UNetherCrownSkillSkyFallSlash::SetupSkyFallSlashHitTimers()
 {
-	SetupSkillSlowTimer();
-	SetupSkillWeaponAuraTimer();
-
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
@@ -122,7 +121,7 @@ void UNetherCrownSkillSkyFallSlash::SetupSkyFallSlashTimers()
 	TimerManager.SetTimer(SkillHitTimerHandle, this, &ThisClass::HandleOnHitSkyFallSlashSkill, SkillHitTime, false);
 }
 
-void UNetherCrownSkillSkyFallSlash::StartCameraShake()
+void UNetherCrownSkillSkyFallSlash::Client_StartCameraShake_Implementation()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -153,7 +152,7 @@ void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float Flo
 	ArmMaterialInstanceDynamic->SetScalarParameterValue(DefaultSettings->SkyFallSlashArmMaterialParam, FloatCurveValue);
 }
 
-void UNetherCrownSkillSkyFallSlash::Server_HandleOnHitSkyFallSlashSkill_Implementation()
+void UNetherCrownSkillSkyFallSlash::DetectAndHitSkyFallSlashSkill()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -164,7 +163,7 @@ void UNetherCrownSkillSkyFallSlash::Server_HandleOnHitSkyFallSlashSkill_Implemen
 	const TArray<AActor*> DetectedActors{ GetSkillDetectedTargets() };
 	if (DetectedActors.IsEmpty())
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("HandleOnHitSkyFallSlashSkill - DetectedActors is empty"));
+		UE_LOG(LogNetherCrown, Warning, TEXT("DetectAndHitSkyFallSlashSkill - DetectedActors is empty"));
 		return;
 	}
 
@@ -191,14 +190,14 @@ void UNetherCrownSkillSkyFallSlash::Server_HandleOnHitSkyFallSlashSkill_Implemen
 void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	StartCameraShake();
+	Client_StartCameraShake();
 
-	Server_HandleOnHitSkyFallSlashSkill();
+	DetectAndHitSkyFallSlashSkill();
 }
 
 const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetectedTargets() const
