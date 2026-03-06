@@ -26,17 +26,6 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 		return;
 	}
 
-	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
-	UNetherCrownKnightAnimInstance* NetherCrownKnightAnimInstance{};
-	NetherCrownKnightAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownKnightAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
-	if (!ensureAlways(IsValid(NetherCrownKnightAnimInstance)))
-	{
-		return;
-	}
-
-	NetherCrownKnightAnimInstance->GetOnHitSkyFallSlashSkill().RemoveAll(this);
-	NetherCrownKnightAnimInstance->GetOnHitSkyFallSlashSkill().AddUObject(this, &ThisClass::HandleOnHitSkyFallSlashSkill);
-
 	CreateArmMaterialInstanceDynamic();
 
 	if (!SkillOwnerCharacter->HasAuthority())
@@ -119,9 +108,20 @@ void UNetherCrownSkillSkyFallSlash::BindTimelineFunctions()
 void UNetherCrownSkillSkyFallSlash::SetupSkyFallSlashTimers()
 {
 	SetupSkillAnimationSlowTimer();
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(SkillHitTimerHandle);
+
+	TimerManager.SetTimer(SkillHitTimerHandle, this, &ThisClass::HandleOnHitSkyFallSlashSkill, SkillHitTime, false);
 }
 
-void UNetherCrownSkillSkyFallSlash::Multicast_StartCameraShake_Implementation()
+void UNetherCrownSkillSkyFallSlash::StartCameraShake()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -152,19 +152,13 @@ void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float Flo
 	ArmMaterialInstanceDynamic->SetScalarParameterValue(DefaultSettings->SkyFallSlashArmMaterialParam, FloatCurveValue);
 }
 
-void UNetherCrownSkillSkyFallSlash::MakeAnimationSlowly()
-{
-}
-
-void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
+void UNetherCrownSkillSkyFallSlash::Server_HandleOnHitSkyFallSlashSkill_Implementation()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
 	}
-
-	Multicast_StartCameraShake();
 
 	const TArray<AActor*> DetectedActors{ GetSkillDetectedTargets() };
 	if (DetectedActors.IsEmpty())
@@ -191,6 +185,19 @@ void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
 			Multicast_SpawnSkillImpactEffect(DetectedEnemy);
 		}
 	}
+}
+
+void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	StartCameraShake();
+
+	Server_HandleOnHitSkyFallSlashSkill();
 }
 
 const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetectedTargets() const

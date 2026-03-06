@@ -155,7 +155,7 @@ void UNetherCrownSkillObject::ApplyPostProcess(const ENetherCrownPPType PPType, 
 
 void UNetherCrownSkillObject::SetupSkillAnimationSlowTimer()
 {
-	UWorld* World{ GetWorld() };
+	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
 		return;

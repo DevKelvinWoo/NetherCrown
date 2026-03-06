@@ -133,6 +133,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly)
 	float SkillAnimationSlowEndTime{};
 
+	FTimerHandle SkillHitTimerHandle{};
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillHitTime{};
+
 private:
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	ENetherCrownSkillKeyEnum SkillKeyEnum{};

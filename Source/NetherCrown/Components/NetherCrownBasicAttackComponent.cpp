@@ -429,7 +429,7 @@ void UNetherCrownBasicAttackComponent::SetupBasicAttackTimers(const int32 ComboC
 		return;
 	}
 
-	UWorld* World{ GetWorld() };
+	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
 		return;
@@ -464,7 +464,7 @@ void UNetherCrownBasicAttackComponent::ServerHandleComboWindowClose()
 		return;
 	}
 
-	if (UWorld* World = GetWorld())
+	if (const UWorld* World = GetWorld())
 	{
 		World->GetTimerManager().ClearTimer(AttackEndTimerHandle);
 	}
@@ -502,7 +502,7 @@ void UNetherCrownBasicAttackComponent::ServerHandleAttackEnd()
 		return;
 	}
 
-	if (UWorld* World = GetWorld())
+	if (const UWorld* World = GetWorld())
 	{
 		World->GetTimerManager().ClearTimer(ComboWindowOpenTimerHandle);
 		World->GetTimerManager().ClearTimer(ComboWindowCloseTimerHandle);
