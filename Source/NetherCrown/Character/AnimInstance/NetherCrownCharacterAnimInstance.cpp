@@ -69,38 +69,6 @@ void UNetherCrownCharacterAnimInstance::AnimNotify_EquipEnd()
 	CachedEquipComponent->NotifyEquipEndOrStart(true);
 }
 
-void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowBegin()
-{
-	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)))
-	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
-		return;
-	}
-
-	if (!CachedOwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	CachedSkillComponent->SetActiveSkillSlowPlayRate(true);
-}
-
-void UNetherCrownCharacterAnimInstance::AnimNotify_SkillSlowEnd()
-{
-	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)))
-	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedOwningCharacter or CachedSkillComponent is not valid %hs"), __FUNCTION__);
-		return;
-	}
-
-	if (!CachedOwningCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	CachedSkillComponent->SetActiveSkillSlowPlayRate(false);
-}
-
 void UNetherCrownCharacterAnimInstance::AnimNotify_SkillStart()
 {
 	if (!(IsValid(CachedOwningCharacter)) || !(IsValid(CachedSkillComponent)) || !(IsValid(CachedBasicAttackComponent)))

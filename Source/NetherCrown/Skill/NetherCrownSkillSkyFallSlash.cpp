@@ -72,6 +72,8 @@ void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics()
 		return;
 	}
 
+	SetupSkyFallSlashTimers();
+
 	ApplyPostProcess(ENetherCrownPPType::Charging, 1.0f);
 
 	StartSetSpringArmZOffsetTimeline();
@@ -114,6 +116,11 @@ void UNetherCrownSkillSkyFallSlash::BindTimelineFunctions()
 	SpringArmZOffsetFloatTimeline.AddInterpFloat(CachedSkillArmMaterialCurveFloat, ArmMaterialFloatProgressFunc);
 }
 
+void UNetherCrownSkillSkyFallSlash::SetupSkyFallSlashTimers()
+{
+	SetupSkillAnimationSlowTimer();
+}
+
 void UNetherCrownSkillSkyFallSlash::Multicast_StartCameraShake_Implementation()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
@@ -143,6 +150,10 @@ void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float Flo
 	check(DefaultSettings);
 
 	ArmMaterialInstanceDynamic->SetScalarParameterValue(DefaultSettings->SkyFallSlashArmMaterialParam, FloatCurveValue);
+}
+
+void UNetherCrownSkillSkyFallSlash::MakeAnimationSlowly()
+{
 }
 
 void UNetherCrownSkillSkyFallSlash::HandleOnHitSkyFallSlashSkill()

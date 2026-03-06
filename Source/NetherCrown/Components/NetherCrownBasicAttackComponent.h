@@ -148,7 +148,7 @@ private:
 
 	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
 
-	void SetupComboWindowTimers(const int32 ComboCount);
+	void SetupBasicAttackTimers(const int32 ComboCount);
 	void ServerHandleComboWindowOpen();
 	void ServerHandleComboWindowClose();
 	void ServerHandleAttackEnd();

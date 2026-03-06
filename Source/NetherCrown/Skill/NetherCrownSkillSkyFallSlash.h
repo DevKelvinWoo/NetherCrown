@@ -28,6 +28,8 @@ private:
 	void StartSetArmMaterialParamTimeline();
 	void BindTimelineFunctions();
 
+	void SetupSkyFallSlashTimers();
+
 	UFUNCTION(NetMulticast, UnReliable)
 	void Multicast_StartCameraShake();
 
@@ -36,6 +38,9 @@ private:
 
 	UFUNCTION()
 	void SetArmMaterialParamByFloatTimeline(float FloatCurveValue);
+
+	UFUNCTION()
+	void MakeAnimationSlowly();
 
 	void HandleOnHitSkyFallSlashSkill();
 	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;

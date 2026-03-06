@@ -22,8 +22,6 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 
 	DOREPLIFETIME(ThisClass, SkillKeyEnum);
 	DOREPLIFETIME(ThisClass, SkillOwnerCharacterWeak);
-	DOREPLIFETIME(ThisClass, SkillMontageBeginSlowPlayRate);
-	DOREPLIFETIME(ThisClass, SkillMontageEndSlowPlayRate);
 	DOREPLIFETIME(ThisClass, SkillData);
 	DOREPLIFETIME(ThisClass, bCanActiveSkill);
 }
@@ -153,6 +151,32 @@ void UNetherCrownSkillObject::ApplyPostProcess(const ENetherCrownPPType PPType, 
 	}
 
 	ControlPPComponent->ApplyPostProcess(PPType, Duration, bEndTimerAutomatic);
+}
+
+void UNetherCrownSkillObject::SetupSkillAnimationSlowTimer()
+{
+	UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(SkillAnimationSlowStartTimerHandle);
+	TimerManager.ClearTimer(SkillAnimationSlowEndTimerHandle);
+
+	TimerManager.SetTimer(SkillAnimationSlowStartTimerHandle, this, &ThisClass::MakeSkillAnimationSlowly, SkillMontageBeginSlowTimeOffset, false);
+	TimerManager.SetTimer(SkillAnimationSlowEndTimerHandle, this, &ThisClass::RestoreSkillAnimationPlayRate, SkillMontageEndSlowTimeOffset, false);
+}
+
+void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
+{
+	SetSkillMontageSlowPlayRate(SkillMontageBeginSlowPlayRate);
+}
+
+void UNetherCrownSkillObject::RestoreSkillAnimationPlayRate()
+{
+	SetSkillMontageSlowPlayRate(SkillMontageEndSlowPlayRate);
 }
 
 void UNetherCrownSkillObject::PlaySkillCosmetics()

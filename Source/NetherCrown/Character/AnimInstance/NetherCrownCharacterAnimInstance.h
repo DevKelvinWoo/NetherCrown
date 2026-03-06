@@ -25,12 +25,6 @@ public:
 	void AnimNotify_EquipEnd();
 
 	UFUNCTION()
-	void AnimNotify_SkillSlowBegin();
-
-	UFUNCTION()
-	void AnimNotify_SkillSlowEnd();
-
-	UFUNCTION()
 	void AnimNotify_SkillStart();
 
 	UFUNCTION()

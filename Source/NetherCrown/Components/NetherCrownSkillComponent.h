@@ -22,8 +22,6 @@ public:
 
 	void ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
-	void SetActiveSkillSlowPlayRate(const bool bBeginSlow);
-
 	FOnStopOrStartSkill& GetOnStopOrStartSkill() { return OnStopOrStartSkill; }
 
 	bool CanActivateSkill() const;
@@ -44,14 +42,11 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlaySkillCosmetics(UNetherCrownSkillObject* FoundSkillObject);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetActiveSkillKeyEnum(const ENetherCrownSkillKeyEnum SkillKeyEnum);
-
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetActiveSkillSlowPlayRate(const bool bBeginSlow);
+	UFUNCTION(Client, Unreliable)
+	void Client_SetActiveSkillKeyEnum(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 	UFUNCTION()
 	void OnRep_ReplicatedSkillObjects();

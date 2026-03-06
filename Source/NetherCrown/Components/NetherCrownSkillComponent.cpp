@@ -25,16 +25,6 @@ void UNetherCrownSkillComponent::ActivateSkill(const ENetherCrownSkillKeyEnum Sk
 	Server_ActivateSkill(SkillKeyEnum);
 }
 
-void UNetherCrownSkillComponent::SetActiveSkillSlowPlayRate(const bool bBeginSlow)
-{
-	if (!CachedCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	Multicast_SetActiveSkillSlowPlayRate(bBeginSlow);
-}
-
 bool UNetherCrownSkillComponent::CanActivateSkill() const
 {
 	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ CachedCharacter ? CachedCharacter->GetBasicAttackComponent() : nullptr };
@@ -157,18 +147,25 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 		return;
 	}
 
-	UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(SkillKeyEnum) };
-	if (!ensureAlways(IsValid(FoundSkillObject)))
+	if (SkillKeyEnum == ENetherCrownSkillKeyEnum::None)
 	{
 		return;
 	}
 
+	Client_SetActiveSkillKeyEnum(SkillKeyEnum);
+
+	UNetherCrownSkillObject** FoundSkillObjectPtr{ SkillObjects.Find(SkillKeyEnum) };
+	if (!IsValid(*FoundSkillObjectPtr))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("FoundSkillObjectPtr is Invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	UNetherCrownSkillObject* FoundSkillObject{ *FoundSkillObjectPtr };
 	if (!FoundSkillObject->CanActiveSkill())
 	{
 		return;
 	}
-
-	Multicast_SetActiveSkillKeyEnum(SkillKeyEnum);
 
 	FoundSkillObject->ExecuteSkillGameplay();
 	Multicast_PlaySkillCosmetics(FoundSkillObject);
@@ -176,30 +173,23 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 
 void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNetherCrownSkillObject* FoundSkillObject)
 {
+	if (!IsValid(CachedCharacter) || CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (!IsValid(FoundSkillObject))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("FoundSkillObject is Invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
 	FoundSkillObject->PlaySkillCosmetics();
 }
 
-void UNetherCrownSkillComponent::Multicast_SetActiveSkillKeyEnum_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
+void UNetherCrownSkillComponent::Client_SetActiveSkillKeyEnum_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
 	ActiveSkillKeyEnum = SkillKeyEnum;
-}
-
-void UNetherCrownSkillComponent::Multicast_SetActiveSkillSlowPlayRate_Implementation(const bool bBeginSlow)
-{
-	if (SkillObjects.IsEmpty())
-	{
-		return;
-	}
-
-	const UNetherCrownSkillObject* FoundSkillObject{ *SkillObjects.Find(ActiveSkillKeyEnum) };
-	if (!IsValid(FoundSkillObject))
-	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("ActiveSkillKeyEnum is Invalid in %hs"), __FUNCTION__);
-		return;
-	}
-
-	const float SkillPlayRate{ bBeginSlow ? FoundSkillObject->GetSkillMontageBeginSlowPlayRate() : FoundSkillObject->GetSkillMontageEndSlowPlayRate() };
-	FoundSkillObject->SetSkillMontageSlowPlayRate(SkillPlayRate);
 }
 
 void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()

@@ -107,6 +107,11 @@ protected:
 
 	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true) const;
 
+	void SetupSkillAnimationSlowTimer();
+
+	void MakeSkillAnimationSlowly();
+	void RestoreSkillAnimationPlayRate();
+
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
 
@@ -119,15 +124,30 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	FNetherCrownSkillData SkillData{};
 
+	FTimerHandle SkillAnimationSlowStartTimerHandle{};
+	FTimerHandle SkillAnimationSlowEndTimerHandle{};
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillAnimationSlowStartTime{};
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillAnimationSlowEndTime{};
+
 private:
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	ENetherCrownSkillKeyEnum SkillKeyEnum{};
 
-	UPROPERTY(EditDefaultsOnly, Replicated)
+	UPROPERTY(EditDefaultsOnly)
 	float SkillMontageBeginSlowPlayRate{ 0.5f };
 
-	UPROPERTY(EditDefaultsOnly, Replicated)
+	UPROPERTY(EditDefaultsOnly)
+	float SkillMontageBeginSlowTimeOffset{};
+
+	UPROPERTY(EditDefaultsOnly)
 	float SkillMontageEndSlowPlayRate{ 1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillMontageEndSlowTimeOffset{};
 
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	bool bCanActiveSkill{ true };

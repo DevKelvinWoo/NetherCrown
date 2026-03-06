@@ -120,7 +120,7 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 	const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(1) };
 	Multicast_PlayAndJumpToComboMontageSection(*FirstComboMontageSectionName);
 
-	SetupComboWindowTimers(CurrentComboCount);
+	SetupBasicAttackTimers(CurrentComboCount);
 }
 
 void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSection_Implementation(const FName& SectionName)
@@ -413,7 +413,7 @@ void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
 	BasicAttackState = InbCanAttack ? ENetherCrownBasicAttackState::CanAttack : ENetherCrownBasicAttackState::CannotAttack;
 }
 
-void UNetherCrownBasicAttackComponent::SetupComboWindowTimers(const int32 ComboCount)
+void UNetherCrownBasicAttackComponent::SetupBasicAttackTimers(const int32 ComboCount)
 {
 	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
 	{
@@ -492,7 +492,7 @@ void UNetherCrownBasicAttackComponent::ServerHandleComboWindowClose()
 
 	Multicast_PlayAndJumpToComboMontageSection(*NextComboMontageSectionName);
 
-	SetupComboWindowTimers(CurrentComboCount);
+	SetupBasicAttackTimers(CurrentComboCount);
 }
 
 void UNetherCrownBasicAttackComponent::ServerHandleAttackEnd()
