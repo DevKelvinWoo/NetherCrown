@@ -55,7 +55,7 @@ void UNetherCrownBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class F
 
 void UNetherCrownBasicAttackComponent::CacheBasicAttackMontage()
 {
-	if (!IsValid(CachedCharacter) || CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -102,7 +102,7 @@ void UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Implementation(
 
 void UNetherCrownBasicAttackComponent::StartAttackBasic()
 {
-	if (!CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -125,7 +125,7 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 
 void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSection_Implementation(const FName& SectionName)
 {
-	if (!IsValid(CachedCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid %hs"), __FUNCTION__);
 		return;
@@ -143,13 +143,18 @@ void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSectio
 
 void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName)
 {
-	if (!SectionName || !IsValid(CachedCharacter))
+	if (!SectionName || !ensureAlways(IsValid(CachedCharacter)))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("Montage section not found or CachedCharacter is invalid in %hs"), __FUNCTION__);
 		return;
 	}
 
-	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter ? CachedCharacter->GetMesh() : nullptr };
+	if (CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter->GetMesh() };
 	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr};
 	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ Cast<UNetherCrownCharacterAnimInstance>(AnimInstance) };
 	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
@@ -176,7 +181,7 @@ void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool b
 		return;
 	}
 
-	UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
+	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
 	if (!ensureAlways(IsValid(EquipComponent)))
 	{
 		return;
@@ -265,7 +270,7 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 
 void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactEffect_Implementation(const FVector& HitLocation)
 {
-	if (!IsValid(CachedCharacter) || CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -280,9 +285,14 @@ void UNetherCrownBasicAttackComponent::Client_PlayHitImpactCameraShake_Implement
 
 void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) const
 {
-	if (!IsValid(CachedCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedCharacter->HasAuthority())
+	{
 		return;
 	}
 
@@ -291,7 +301,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) con
 
 void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeapon)
 {
-	if (IsValid(CachedCharacter) && CachedCharacter->HasAuthority())
+	if (ensureAlways(IsValid(CachedCharacter)) && CachedCharacter->HasAuthority())
 	{
 		BasicAttackState = bEquipWeapon ? ENetherCrownBasicAttackState::CanAttack : ENetherCrownBasicAttackState::CannotAttack;
 	}
@@ -305,16 +315,24 @@ int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 		return 0;
 	}
 
-	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(CachedCharacter->GetPlayerState()) };
-	check(OwnerPlayerState);
-
-	const UNetherCrownPlayerStatComponent* OwnerChracterStatComponent{ OwnerPlayerState->GetNetherCrownPlayerStatComponent() };
-	if (!ensureAlways(IsValid(OwnerChracterStatComponent)))
+	if (!CachedCharacter->HasAuthority())
 	{
 		return 0;
 	}
 
-	const FNetherCrownPlayerStatData& StatData{ OwnerChracterStatComponent->GetPlayerStatData() };
+	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(CachedCharacter->GetPlayerState()) };
+	if (!ensureAlways(IsValid(OwnerPlayerState)))
+	{
+		return 0;
+	}
+
+	const UNetherCrownPlayerStatComponent* OwnerCharacterStatComponent{ OwnerPlayerState->GetNetherCrownPlayerStatComponent() };
+	if (!ensureAlways(IsValid(OwnerCharacterStatComponent)))
+	{
+		return 0;
+	}
+
+	const FNetherCrownPlayerStatData& StatData{ OwnerCharacterStatComponent->GetPlayerStatData() };
 	const int32 AttackDamage{ StatData.AttackDamage };
 
 	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
@@ -357,9 +375,14 @@ void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
 		return;
 	}
 
+	if (CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedCharacter, BasicAttackComponentTagData.BasicAttackGruntSoundTag);
 
-	UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
+	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
 	if (!ensureAlways(EquipComponent))
 	{
 		return;
@@ -371,6 +394,16 @@ void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
 
 void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLocation) const
 {
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		return;
+	}
+
+	if (CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	FTransform SpawnTransform{};
 	SpawnTransform.SetLocation(HitLocation);
 	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
@@ -405,7 +438,7 @@ void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 
 void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
 {
-	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -415,7 +448,7 @@ void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
 
 void UNetherCrownBasicAttackComponent::SetupBasicAttackTimers(const int32 ComboCount)
 {
-	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -497,7 +530,7 @@ void UNetherCrownBasicAttackComponent::ServerHandleComboWindowClose()
 
 void UNetherCrownBasicAttackComponent::ServerHandleAttackEnd()
 {
-	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -518,7 +551,7 @@ void UNetherCrownBasicAttackComponent::ServerHandleAttackEnd()
 
 void UNetherCrownBasicAttackComponent::ServerHandleHitTraceEnable()
 {
-	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}

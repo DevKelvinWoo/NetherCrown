@@ -47,9 +47,7 @@ enum class ENetherCrownBasicAttackState : uint8
 	CanAttack,
 	CannotAttack,
 	Attacking,
-	NotAttacking,
 	CanQueueNextCombo,
-	CannotQueueNextCombo,
 	ComboQueued
 };
 
@@ -82,6 +80,7 @@ private:
 	void CacheCharacter();
 
 	void CalculateNextComboCount();
+	int32 CalculateBasicAttackDamage() const;
 
 	void StartAttackBasic();
 
@@ -92,61 +91,31 @@ private:
 	UFUNCTION(Client, Reliable)
 	void Client_InitWeaponTraceComponentSettings();
 
+	UFUNCTION(Client, Unreliable)
+	void Client_PlayHitImpactCameraShake();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AutoTargetEnemy();
-
-	void AutoTargetEnemy() const;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayAndJumpToComboMontageSection(const FName& SectionName);
 
-	UFUNCTION(Server, Reliable)
-	void Server_RequestBasicAttack();
-
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitImpactEffect(const FVector& HitLocation);
 
-	UFUNCTION(Client, Unreliable)
-	void Client_PlayHitImpactCameraShake();
+	UFUNCTION(Server, Reliable)
+	void Server_RequestBasicAttack();
+
+	void AutoTargetEnemy() const;
 
 	UFUNCTION()
 	void ApplyDamageInternal(AActor* HitEnemy) const;
 
 	void HandleOnEquipWeapon(const bool bEquipWeapon);
 
-	int32 CalculateBasicAttackDamage() const;
-
 	void PlayHitImpactCameraShake() const;
 	void PlayBasicAttackSounds() const;
 	void SpawnHitImpactEffect(const FVector& HitLocation) const;
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};
-
-	UPROPERTY(EditDefaultsOnly)
-	TMap<int32, FName> ComboMontageSectionMap{};
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UCameraShakeBase> ApplyDamageCameraShakeClass{};
-
-	UPROPERTY(EditDefaultsOnly)
-	float AutoTargetingRadius{ 130.0f };
-
-	int32 CurrentComboCount{ 1 };
-
-	UPROPERTY(Replicated)
-	ENetherCrownBasicAttackState BasicAttackState{ ENetherCrownBasicAttackState::CannotAttack };
-
-	UPROPERTY(EditDefaultsOnly)
-	FNetherCrownBasicAttackComponentTagData BasicAttackComponentTagData{};
-
-	UPROPERTY()
-	TObjectPtr<UAnimMontage> CachedBasicAttackMontage{};
-
-	UPROPERTY()
-	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
-
-	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
 
 	void SetupBasicAttackTimers(const int32 ComboCount);
 	void ServerHandleComboWindowOpen();
@@ -154,14 +123,42 @@ private:
 	void ServerHandleAttackEnd();
 	void ServerHandleHitTraceEnable();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
+	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combo")
+	TMap<int32, FName> ComboMontageSectionMap{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Combo")
 	TMap<int32, FNetherCrownComboTimingData> ComboTimingDataMap{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Combo")
 	TMap<int32, float> AttackEndTimingDataMap{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Combo")
 	TMap<int32, float> HitTraceEnableTimingDataMap{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
+	TSubclassOf<UCameraShakeBase> ApplyDamageCameraShakeClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float AutoTargetingRadius{ 130.0f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FNetherCrownBasicAttackComponentTagData BasicAttackComponentTagData{};
+
+	int32 CurrentComboCount{ 1 };
+
+	UPROPERTY(Replicated)
+	ENetherCrownBasicAttackState BasicAttackState{ ENetherCrownBasicAttackState::CannotAttack };
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> CachedBasicAttackMontage{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
+
+	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
 
 	FTimerHandle ComboWindowOpenTimerHandle;
 	FTimerHandle ComboWindowCloseTimerHandle;
