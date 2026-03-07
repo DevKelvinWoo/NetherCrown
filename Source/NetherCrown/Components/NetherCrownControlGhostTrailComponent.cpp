@@ -6,6 +6,7 @@
 #include "NetherCrown/NetherCrown.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 
 UNetherCrownControlGhostTrailComponent::UNetherCrownControlGhostTrailComponent()
 {
@@ -19,6 +20,12 @@ void UNetherCrownControlGhostTrailComponent::SetHandledGhostTrailNiagaraComponen
 
 void UNetherCrownControlGhostTrailComponent::ActivateGhostTrail(const bool bActivate, UNiagaraSystem* InGhostTrailNiagaraSystem/*nullptr*/) const
 {
+	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	UNiagaraComponent* HandledGhostTrailNiagaraComponent{ HandledGhostTrailNiagaraComponentWeak.Get() };
 	if (!IsValid(HandledGhostTrailNiagaraComponent))
 	{
