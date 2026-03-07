@@ -173,7 +173,7 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 
 void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNetherCrownSkillObject* FoundSkillObject)
 {
-	if (!IsValid(CachedCharacter) || CachedCharacter->HasAuthority())
+	if (!IsValid(CachedCharacter))
 	{
 		return;
 	}

@@ -200,7 +200,7 @@ void UNetherCrownSkillObject::SetupSkillStateTimer()
 void UNetherCrownSkillObject::SetupSkillMovementModeTimer()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
 	}
@@ -319,7 +319,7 @@ void UNetherCrownSkillObject::RestoreSkillAnimationPlayRate()
 void UNetherCrownSkillObject::SetCharacterMovementFly()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
 	}
@@ -336,7 +336,7 @@ void UNetherCrownSkillObject::SetCharacterMovementFly()
 void UNetherCrownSkillObject::SetCharacterMovementWalk()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
 	}
@@ -383,7 +383,7 @@ void UNetherCrownSkillObject::DeactivateSkillWeaponAura()
 	SetSkillWeaponAura(false);
 }
 
-void UNetherCrownSkillObject::PlaySkillCosmetics()
+void UNetherCrownSkillObject::InitSkillObject()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -399,20 +399,37 @@ void UNetherCrownSkillObject::PlaySkillCosmetics()
 		return;
 	}
 
-	UAnimMontage* SkillAnimMontage{ SkillAnimMontageSoft.LoadSynchronous() };
-	if (!ensureAlways(IsValid(SkillAnimMontage)))
+	CachedSkillAnimMontage = SkillAnimMontageSoft.LoadSynchronous();
+}
+
+void UNetherCrownSkillObject::PlaySkillCosmetics()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
 		return;
 	}
 
-	NetherCrownCharacterAnimInstance->Montage_Play(SkillAnimMontage);
+	const USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
+	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{};
+	NetherCrownCharacterAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownCharacterAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
+	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)) || !IsValid(CachedSkillAnimMontage))
+	{
+		return;
+	}
+
+	if (SkillOwnerCharacter->HasAuthority() && !CachedSkillAnimMontage->HasRootMotion())
+	{
+		return;
+	}
+
+	NetherCrownCharacterAnimInstance->Montage_Play(CachedSkillAnimMontage);
 }
 
 void UNetherCrownSkillObject::ExecuteSkillGameplay()
 {
 	StartSkillCoolDownTimer();
 	SetupSkillStateTimer();
-	SetupSkillMovementModeTimer();
 }
 
 void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) const

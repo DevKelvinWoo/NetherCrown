@@ -63,7 +63,7 @@ class NETHERCROWN_API UNetherCrownSkillObject : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual void InitSkillObject() {};
+	virtual void InitSkillObject();
 
 	ENetherCrownSkillKeyEnum GetSkillEnum() const { return SkillKeyEnum; }
 
@@ -196,4 +196,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	bool bCanActiveSkill{ true };
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> CachedSkillAnimMontage{};
 };

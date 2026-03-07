@@ -11,14 +11,7 @@ class NETHERCROWN_API UNetherCrownKnightAnimInstance : public UNetherCrownCharac
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE(FOnHitFrozenTempestSkill);
-
 public:
-	UFUNCTION()
-	void AnimNotify_HitFrozenTempestSkill();
-
-	FOnHitFrozenTempestSkill& GetOnHitFrozenTempestSkill() { return OnHitFrozenTempestSkill; }
 
 private:
-	FOnHitFrozenTempestSkill OnHitFrozenTempestSkill;
 };

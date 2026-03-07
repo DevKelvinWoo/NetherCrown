@@ -6,7 +6,6 @@
 #include "Curves/CurveVector.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
-#include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -23,17 +22,6 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 		return;
 	}
 
-	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
-	UNetherCrownKnightAnimInstance* NetherCrownKnightAnimInstance{};
-	NetherCrownKnightAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownKnightAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
-	if (!ensureAlways(IsValid(NetherCrownKnightAnimInstance)))
-	{
-		return;
-	}
-
-	NetherCrownKnightAnimInstance->GetOnHitFrozenTempestSkill().RemoveAll(this);
-	NetherCrownKnightAnimInstance->GetOnHitFrozenTempestSkill().AddUObject(this, &ThisClass::HandleOnHitFrozenTempestSkill);
-
 	if (!SkillOwnerCharacter->HasAuthority())
 	{
 		CachedSkillCameraZoomCurveVector = SkillCameraZoomCurveVectorSoft.LoadSynchronous();
@@ -48,6 +36,11 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 void UNetherCrownFrozenTempest::ExecuteSkillGameplay()
 {
 	Super::ExecuteSkillGameplay();
+
+	SetupFrozenTempestHitTimers();
+	SetupSkillWeaponAuraTimer();
+
+	SetupSkillMovementModeTimer();
 }
 
 void UNetherCrownFrozenTempest::PlaySkillCosmetics()
@@ -338,4 +331,18 @@ const TArray<ANetherCrownEnemy*> UNetherCrownFrozenTempest::GetSkillDetectedTarg
 	}
 
 	return DetectedEnemies;
+}
+
+void UNetherCrownFrozenTempest::SetupFrozenTempestHitTimers()
+{
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(SkillHitTimerHandle);
+
+	TimerManager.SetTimer(SkillHitTimerHandle, this, &ThisClass::HandleOnHitFrozenTempestSkill, SkillHitTime, false);
 }

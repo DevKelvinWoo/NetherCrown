@@ -50,6 +50,8 @@ private:
 
 	const TArray<ANetherCrownEnemy*> GetSkillDetectedTargets() const;
 
+	void SetupFrozenTempestHitTimers();
+
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UCurveVector> SkillCameraZoomCurveVectorSoft{};
 
