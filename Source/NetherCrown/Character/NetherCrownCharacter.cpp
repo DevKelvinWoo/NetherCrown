@@ -56,7 +56,10 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 void ANetherCrownCharacter::SetUseControllerSettings()
 {
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSetting);
+	if (!ensureAlways(IsValid(CharacterDefaultSetting)))
+	{
+		return;
+	}
 
 	bUseControllerRotationPitch = CharacterDefaultSetting->IsControllerRotationPitchEnabled();
 	bUseControllerRotationYaw = CharacterDefaultSetting->IsControllerRotationYawEnabled();
@@ -66,9 +69,7 @@ void ANetherCrownCharacter::SetUseControllerSettings()
 void ANetherCrownCharacter::SetMainSpringArmComponentSettings()
 {
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSetting);
-
-	if (!IsValid(MainSpringArmComponent))
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || !ensureAlways(IsValid(CharacterDefaultSetting)))
 	{
 		return;
 	}
@@ -83,9 +84,15 @@ void ANetherCrownCharacter::SetMainSpringArmComponentSettings()
 void ANetherCrownCharacter::SetMainCameraComponentSettings()
 {
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSetting);
+	if (!ensureAlways(IsValid(CharacterDefaultSetting)))
+	{
+		return;
+	}
 
-	check(MainCameraComponent);
+	if (!ensureAlways(IsValid(MainCameraComponent)))
+	{
+		return;
+	}
 	MainCameraComponent->bUsePawnControlRotation = CharacterDefaultSetting->IsMainCameraUsePawnControlRotation();
 	MainCameraComponent->SetRelativeRotation(CharacterDefaultSetting->GetMainCameraRelativeRotation());
 }
@@ -93,10 +100,16 @@ void ANetherCrownCharacter::SetMainCameraComponentSettings()
 void ANetherCrownCharacter::SetCharacterDefaultMovementSettings()
 {
 	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-	check(MovementComponent);
+	if (!ensureAlways(IsValid(MovementComponent)))
+	{
+		return;
+	}
 
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSetting);
+	if (!ensureAlways(IsValid(CharacterDefaultSetting)))
+	{
+		return;
+	}
 
 	MovementComponent->bOrientRotationToMovement = CharacterDefaultSetting->IsOrientRotationToMovementEnabled();
 	MovementComponent->MaxAcceleration = CharacterDefaultSetting->GetMaxAcceleration();
@@ -110,21 +123,27 @@ void ANetherCrownCharacter::BeginPlay()
 
 	DestroyVisualOnlyComponentsOnDS();
 
-	check(NetherCrownBasicAttackComponent);
-	NetherCrownBasicAttackComponent->GetOnStopOrStartBasicAttack().AddUObject(this, &ThisClass::SetCharacterMovementControl);
+	if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
+	{
+		NetherCrownBasicAttackComponent->GetOnStopOrStartBasicAttack().AddUObject(this, &ThisClass::SetCharacterMovementControl);
+	}
 
-	check(NetherCrownEquipComponent);
-	NetherCrownEquipComponent->GetOnEquipEndOrStart().AddUObject(this, &ThisClass::SetCharacterMovementControl);
+	if (ensureAlways(IsValid(NetherCrownEquipComponent)))
+	{
+		NetherCrownEquipComponent->GetOnEquipEndOrStart().AddUObject(this, &ThisClass::SetCharacterMovementControl);
+	}
 
-	check(NetherCrownSkillComponent);
-	NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetCharacterMovementControl);
+	if (ensureAlways(IsValid(NetherCrownSkillComponent)))
+	{
+		NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetCharacterMovementControl);
+	}
 
-	if (IsValid(NetherCrownControlPPComponent) && IsValid(NetherCrownPostProcessComponent))
+	if (ensureAlways(IsValid(NetherCrownControlPPComponent)) && ensureAlways(IsValid(NetherCrownPostProcessComponent)))
 	{
 		NetherCrownControlPPComponent->SetHandlingPostProcessComponent(NetherCrownPostProcessComponent);
 	}
 
-	if (IsValid(NetherCrownControlGhostTrailComponent) && IsValid(NetherCrownGhostTrailNiagaraComponent))
+	if (ensureAlways(IsValid(NetherCrownControlGhostTrailComponent)) && ensureAlways(IsValid(NetherCrownGhostTrailNiagaraComponent)))
 	{
 		NetherCrownControlGhostTrailComponent->SetHandledGhostTrailNiagaraComponent(NetherCrownGhostTrailNiagaraComponent);
 	}
@@ -143,14 +162,18 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	if (HasAuthority())
+	if (!HasAuthority())
 	{
-		check(NetherCrownBasicAttackComponent)
-		NetherCrownBasicAttackComponent->SetCanAttack(true);
-
-		SetIsHardLanding();
-		DisableMovementAndSetResetTimerWhenHardLanding();
+		return;
 	}
+
+	if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
+	{
+		NetherCrownBasicAttackComponent->SetCanAttack(true);
+	}
+
+	SetIsHardLanding();
+	DisableMovementAndSetResetTimerWhenHardLanding();
 }
 
 void ANetherCrownCharacter::OnJumped_Implementation()
@@ -159,8 +182,10 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 
 	if (HasAuthority())
 	{
-		check(NetherCrownBasicAttackComponent);
-		NetherCrownBasicAttackComponent->SetCanAttack(false);
+		if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
+		{
+			NetherCrownBasicAttackComponent->SetCanAttack(false);
+		}
 
 		bIsHardLanding = false;
 		JumpStartLocation = GetActorLocation();
@@ -208,7 +233,7 @@ void ANetherCrownCharacter::DestroyVisualOnlyComponentsOnDS()
 
 void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 {
-	if (!IsValid(Controller))
+	if (!ensureAlways(IsValid(Controller)))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("Controller is invalid in %hs"), __FUNCTION__);
 		return;
@@ -242,13 +267,14 @@ void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool I
 
 void ANetherCrownCharacter::LookAtCharacter(const FInputActionValue& Value)
 {
-	if (Value.IsNonZero())
+	const FVector2D& MovementVector{ Value.Get<FVector2D>() };
+	if (MovementVector.IsNearlyZero())
 	{
-		const FVector2D& MovementVector{ Value.Get<FVector2D>() };
-
-		AddControllerYawInput(MovementVector.X);
-		AddControllerPitchInput(MovementVector.Y);
+		return;
 	}
+
+	AddControllerYawInput(MovementVector.X);
+	AddControllerPitchInput(MovementVector.Y);
 }
 
 void ANetherCrownCharacter::JumpCharacter(const FInputActionValue& Value)
@@ -269,36 +295,52 @@ void ANetherCrownCharacter::HandleOnMoveActionCompleted()
 
 void ANetherCrownCharacter::RequestBasicAttack(const FInputActionValue& Value)
 {
-	if (Value.Get<bool>())
+	if (!Value.Get<bool>())
 	{
-		check(NetherCrownBasicAttackComponent);
+		return;
+	}
+
+	if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
+	{
 		NetherCrownBasicAttackComponent->RequestBasicAttack();
 	}
 }
 
 void ANetherCrownCharacter::EquipCharacter(const FInputActionValue& Value)
 {
-	if (Value.Get<bool>())
+	if (!Value.Get<bool>())
 	{
-		check(NetherCrownEquipComponent);
+		return;
+	}
+
+	if (ensureAlways(IsValid(NetherCrownEquipComponent)))
+	{
 		NetherCrownEquipComponent->EquipOrStowWeapon();
 	}
 }
 
 void ANetherCrownCharacter::ChangeWeapon(const FInputActionValue& Value)
 {
-	if (Value.Get<bool>())
+	if (!Value.Get<bool>())
 	{
-		check(NetherCrownEquipComponent);
+		return;
+	}
+
+	if (ensureAlways(IsValid(NetherCrownEquipComponent)))
+	{
 		NetherCrownEquipComponent->ChangeWeapon();
 	}
 }
 
 void ANetherCrownCharacter::ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const
 {
-	if (Value.Get<bool>())
+	if (!Value.Get<bool>())
 	{
-		check(NetherCrownSkillComponent);
+		return;
+	}
+
+	if (ensureAlways(IsValid(NetherCrownSkillComponent)))
+	{
 		NetherCrownSkillComponent->ActivateSkill(SkillKey);
 	}
 }
@@ -325,7 +367,7 @@ void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value) con
 
 void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffset)
 {
-	if (!IsValid(MainSpringArmComponent))
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || HasAuthority())
 	{
 		return;
 	}
@@ -335,7 +377,7 @@ void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffs
 
 void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength)
 {
-	if (!IsValid(MainSpringArmComponent))
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || HasAuthority())
 	{
 		return;
 	}
@@ -345,7 +387,11 @@ void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength
 
 bool ANetherCrownCharacter::IsEquippedWeapon() const
 {
-	check(NetherCrownEquipComponent);
+	if (!ensureAlways(IsValid(NetherCrownEquipComponent)))
+	{
+		return false;
+	}
+
 	return NetherCrownEquipComponent->GetEquippedWeapon() ? true : false;
 }
 
@@ -365,7 +411,10 @@ void ANetherCrownCharacter::SetIsHardLanding()
 	}
 
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSetting);
+	if (!ensureAlways(IsValid(CharacterDefaultSetting)))
+	{
+		return;
+	}
 
 	const double DistanceBetweenLandAndJumpStartLocation{ JumpStartLocation.Z - GetActorLocation().Z };
 	const double MinHardLandHeight{ CharacterDefaultSetting->GetMinHardLandingHeight() };
@@ -374,10 +423,18 @@ void ANetherCrownCharacter::SetIsHardLanding()
 
 void ANetherCrownCharacter::ResetHardLandingState()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	bIsHardLanding = false;
 
 	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-	check(MovementComponent);
+	if (!ensureAlways(IsValid(MovementComponent)))
+	{
+		return;
+	}
 
 	MovementComponent->SetMovementMode(MOVE_Walking);
 }
@@ -392,12 +449,18 @@ void ANetherCrownCharacter::DisableMovementAndSetResetTimerWhenHardLanding()
 	if (bIsHardLanding)
 	{
 		UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-		check(MovementComponent);
+		if (!ensureAlways(IsValid(MovementComponent)))
+		{
+			return;
+		}
 
 		MovementComponent->DisableMovement();
 
 		const UNetherCrownCharacterDefaultSettings* CharacterDefaultSetting{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-		check(CharacterDefaultSetting);
+		if (!ensureAlways(IsValid(CharacterDefaultSetting)))
+		{
+			return;
+		}
 
 		const float ResetDelay = CharacterDefaultSetting->GetRecoveryResetDelayTime();
 		GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
@@ -405,10 +468,13 @@ void ANetherCrownCharacter::DisableMovementAndSetResetTimerWhenHardLanding()
 	}
 }
 
-void ANetherCrownCharacter::SetCharacterMovementControl(const bool bEnableMovement) const
+void ANetherCrownCharacter::SetCharacterMovementControl(const bool bEnableMovement)
 {
 	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-	check(MovementComponent);
+	if (!ensureAlways(IsValid(MovementComponent)))
+	{
+		return;
+	}
 
 	bEnableMovement ? MovementComponent->SetMovementMode(MOVE_Walking) : MovementComponent->DisableMovement();
 }

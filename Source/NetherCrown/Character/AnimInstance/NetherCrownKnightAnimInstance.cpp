@@ -2,6 +2,3 @@
 
 
 #include "NetherCrownKnightAnimInstance.h"
-
-#include "NetherCrown/NetherCrown.h"
-#include "NetherCrown/Character/NetherCrownCharacter.h"

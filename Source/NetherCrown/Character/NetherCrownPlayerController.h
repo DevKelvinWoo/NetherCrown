@@ -25,30 +25,6 @@ protected:
 	virtual void AcknowledgePossession(APawn* P) override;
 
 private:
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> MoveAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> LookAtAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> JumpAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> AttackBasicAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> EquipAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> ChangeWeaponAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> QSkillAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> ESkillAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> RSkillAction{};
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputAction> ShiftSkillAction{};
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UInputMappingContext> MappingContext{};
-
 	void AddIMCAndBindAction();
 
 	UFUNCTION()
@@ -77,7 +53,31 @@ private:
 	template<typename FuncType, typename... ArgsType>
 	void ExecuteCharacterAction(FuncType Func, ArgsType&&... Args);
 
-	UPROPERTY()
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> MoveAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> LookAtAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> JumpAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> AttackBasicAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> EquipAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> ChangeWeaponAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> QSkillAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> ESkillAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> RSkillAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> ShiftSkillAction{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "InputMappingContext")
+	TObjectPtr<UInputMappingContext> MappingContext{};
+
+	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 };
 

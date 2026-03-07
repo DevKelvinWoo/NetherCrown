@@ -51,6 +51,7 @@ public:
 	void RequestBasicAttack(const FInputActionValue& Value);
 	void EquipCharacter(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
+
 	void ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const;
 	void ActiveQSkill(const FInputActionValue& Value) const;
 	void ActiveESkill(const FInputActionValue& Value) const;
@@ -75,14 +76,15 @@ public:
 	UNetherCrownControlPPComponent* GetControlPPComponent() const { return NetherCrownControlPPComponent; }
 	UNetherCrownControlGhostTrailComponent* GetControlGhostTrailComponent() const { return NetherCrownControlGhostTrailComponent; }
 
-	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
-
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void OnJumped_Implementation() override;
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
+
+	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 private:
 	void DestroyVisualOnlyComponentsOnDS();
@@ -99,11 +101,10 @@ private:
 	void ResetHardLandingState();
 	void DisableMovementAndSetResetTimerWhenHardLanding();
 
-	//@NOTE : 만약 공격도 막아야 한다면 두 가지 버전의 함수를 오버로딩하자 (공격 + 움직임 제한, 움직임만 제한)
-	void SetCharacterMovementControl(const bool bEnableMovement) const;
-
 	UFUNCTION()
 	void OnRep_IsHardLanding();
+
+	void SetCharacterMovementControl(const bool bEnableMovement);
 
 	UPROPERTY(Replicated)
 	bool bPressedMoveKey{ false };
@@ -114,37 +115,37 @@ private:
 	UPROPERTY(Replicated)
 	FVector JumpStartLocation{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UCameraComponent> MainCameraComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USpringArmComponent> MainSpringArmComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownBasicAttackComponent> NetherCrownBasicAttackComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownEquipComponent> NetherCrownEquipComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownSkillComponent> NetherCrownSkillComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownCrowdControlComponent> NetherCrownCrowdControlComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UPostProcessComponent> NetherCrownPostProcessComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownControlPPComponent> NetherCrownControlPPComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNiagaraComponent> NetherCrownGhostTrailNiagaraComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownControlGhostTrailComponent> NetherCrownControlGhostTrailComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownCharacterTagData CharacterTagData{};
 
 	FTimerHandle TimerHandle_ResetHardLanding;
