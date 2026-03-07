@@ -141,15 +141,15 @@ protected:
 	FTimerHandle SkillAnimationSlowEndTimerHandle{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillAnimationSlowStartTime{};
+	float SkillAnimationSlowStartTime{ -1.f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillAnimationSlowEndTime{};
+	float SkillAnimationSlowEndTime{ -1.f };
 
 	FTimerHandle SkillHitTimerHandle{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillHitTime{};
+	float SkillHitTime{ -1.f };
 
 	FTimerHandle SkillStartTimerHandle{};
 	FTimerHandle SkillEndTimerHandle{};
@@ -173,10 +173,10 @@ protected:
 	FTimerHandle SkillWeaponAuraDeactivateTimerHandle{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillAuraActiveTimeOffset{};
+	float SkillAuraActiveTimeOffset{ -1.f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillAuraDeactivateTimeOffset{};
+	float SkillAuraDeactivateTimeOffset{ -1.f };
 
 private:
 	UPROPERTY(EditDefaultsOnly, Replicated)
@@ -185,14 +185,14 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	float SkillMontageBeginSlowPlayRate{ 0.5f };
 
-	UPROPERTY(EditDefaultsOnly)
-	float SkillMontageBeginSlowTimeOffset{};
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float SkillMontageBeginSlowTimeOffset{ -1.f };
 
 	UPROPERTY(EditDefaultsOnly)
 	float SkillMontageEndSlowPlayRate{ 1.f };
 
-	UPROPERTY(EditDefaultsOnly)
-	float SkillMontageEndSlowTimeOffset{};
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float SkillMontageEndSlowTimeOffset{ -1.f };
 
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	bool bCanActiveSkill{ true };

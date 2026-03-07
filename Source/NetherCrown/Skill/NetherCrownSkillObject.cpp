@@ -238,8 +238,15 @@ void UNetherCrownSkillObject::SetupSkillSlowTimer()
 	TimerManager.ClearTimer(SkillAnimationSlowStartTimerHandle);
 	TimerManager.ClearTimer(SkillAnimationSlowEndTimerHandle);
 
-	TimerManager.SetTimer(SkillAnimationSlowStartTimerHandle, this, &ThisClass::MakeSkillAnimationSlowly, SkillMontageBeginSlowTimeOffset, false);
-	TimerManager.SetTimer(SkillAnimationSlowEndTimerHandle, this, &ThisClass::RestoreSkillAnimationPlayRate, SkillMontageEndSlowTimeOffset, false);
+	if (SkillMontageBeginSlowTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(SkillAnimationSlowStartTimerHandle, this, &ThisClass::MakeSkillAnimationSlowly, SkillMontageBeginSlowTimeOffset, false);
+	}
+
+	if (SkillMontageEndSlowTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(SkillAnimationSlowEndTimerHandle, this, &ThisClass::RestoreSkillAnimationPlayRate, SkillMontageEndSlowTimeOffset, false);
+	}
 }
 
 void UNetherCrownSkillObject::SetupSkillWeaponAuraTimer()
@@ -254,8 +261,15 @@ void UNetherCrownSkillObject::SetupSkillWeaponAuraTimer()
 	TimerManager.ClearTimer(SkillWeaponAuraActiveTimerHandle);
 	TimerManager.ClearTimer(SkillWeaponAuraDeactivateTimerHandle);
 
-	TimerManager.SetTimer(SkillWeaponAuraActiveTimerHandle, this, &ThisClass::ActiveSkillWeaponAura, SkillAuraActiveTimeOffset, false);
-	TimerManager.SetTimer(SkillWeaponAuraDeactivateTimerHandle, this, &ThisClass::DeactivateSkillWeaponAura, SkillAuraDeactivateTimeOffset, false);
+	if (SkillAuraActiveTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(SkillWeaponAuraActiveTimerHandle, this, &ThisClass::ActiveSkillWeaponAura, SkillAuraActiveTimeOffset, false);
+	}
+
+	if (SkillAuraDeactivateTimeOffset >= 0.f)
+	{
+		TimerManager.SetTimer(SkillWeaponAuraDeactivateTimerHandle, this, &ThisClass::DeactivateSkillWeaponAura, SkillAuraDeactivateTimeOffset, false);
+	}
 }
 
 void UNetherCrownSkillObject::StartSkillState()
