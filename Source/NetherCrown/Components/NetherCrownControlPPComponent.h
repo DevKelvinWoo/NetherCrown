@@ -7,6 +7,7 @@
 #include "Components/TimelineComponent.h"
 #include "NetherCrownControlPPComponent.generated.h"
 
+class ANetherCrownCharacter;
 class UPostProcessComponent;
 
 UENUM()
@@ -52,18 +53,20 @@ private:
 	UFUNCTION()
 	void HandlePostProcessBlendEndTimelineFinished();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	TMap<ENetherCrownPPType, FPostProcessSettings> PostProcessSettingsMap{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Curve")
 	TSoftObjectPtr<UCurveFloat> PostProcessStartCurveFloatSoft{};
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Curve")
 	TSoftObjectPtr<UCurveFloat> PostProcessEndCurveFloatSoft{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedPostProcessStartCurveFloat{};
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedPostProcessEndCurveFloat{};
+	UPROPERTY(Transient)
+	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	TWeakObjectPtr<UPostProcessComponent> HandledPostProcessComponentWeak{};
 

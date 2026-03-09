@@ -12,6 +12,11 @@ UNetherCrownControlPPComponent::UNetherCrownControlPPComponent()
 
 void UNetherCrownControlPPComponent::SetHandlingPostProcessComponent(UPostProcessComponent* PostProcessComponent)
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	HandledPostProcessComponentWeak = MakeWeakObjectPtr(PostProcessComponent);
 
 	UPostProcessComponent* HandledPostProcessComponent{ HandledPostProcessComponentWeak.Get() };
@@ -27,8 +32,7 @@ void UNetherCrownControlPPComponent::SetHandlingPostProcessComponent(UPostProces
 
 void UNetherCrownControlPPComponent::ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic/*true*/)
 {
-	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority() || !OwnerCharacter->IsLocallyControlled())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
 	{
 		return;
 	}
@@ -59,6 +63,11 @@ void UNetherCrownControlPPComponent::ApplyPostProcess(const ENetherCrownPPType P
 
 void UNetherCrownControlPPComponent::ClearPostProcessImmediately()
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	PostProcessBlendStartFloatTimeline.Stop();
 	PostProcessBlendEndFloatTimeline.Stop();
 
@@ -69,8 +78,8 @@ void UNetherCrownControlPPComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority() || !OwnerCharacter->IsLocallyControlled())
+	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
 	{
 		return;
 	}
@@ -85,6 +94,11 @@ void UNetherCrownControlPPComponent::TickComponent(float DeltaTime, ELevelTick T
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	if (PostProcessBlendStartFloatTimeline.IsPlaying())
 	{
 		PostProcessBlendStartFloatTimeline.TickTimeline(DeltaTime);
@@ -98,6 +112,11 @@ void UNetherCrownControlPPComponent::TickComponent(float DeltaTime, ELevelTick T
 
 void UNetherCrownControlPPComponent::BindTimelineFunctions()
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	FOnTimelineFloat PostProcessBlendStartProgressFunc{};
 	PostProcessBlendStartProgressFunc.BindUFunction(this, FName("SetPostProcessBlendStartByFloatTimeline"));
 	PostProcessBlendStartFloatTimeline.AddInterpFloat(CachedPostProcessStartCurveFloat, PostProcessBlendStartProgressFunc);
@@ -113,6 +132,11 @@ void UNetherCrownControlPPComponent::BindTimelineFunctions()
 
 void UNetherCrownControlPPComponent::StartClearPostProcessTimer(float Duration)
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	const UWorld* World{ GetWorld() };
 	check(World);
 
@@ -123,6 +147,11 @@ void UNetherCrownControlPPComponent::StartClearPostProcessTimer(float Duration)
 
 void UNetherCrownControlPPComponent::ResetPostProcess()
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	UPostProcessComponent* HandledPostProcessComponent{ HandledPostProcessComponentWeak.Get() };
 	if (!ensureAlways(IsValid(HandledPostProcessComponent)))
 	{
@@ -150,6 +179,11 @@ void UNetherCrownControlPPComponent::StartSetPostProcessBlendEndTimeline()
 
 void UNetherCrownControlPPComponent::SetPostProcessBlendStartByFloatTimeline(float FloatCurveValue)
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	UPostProcessComponent* HandledPostProcessComponent{ HandledPostProcessComponentWeak.Get() };
 	if (!ensureAlways(IsValid(HandledPostProcessComponent)))
 	{
@@ -161,6 +195,11 @@ void UNetherCrownControlPPComponent::SetPostProcessBlendStartByFloatTimeline(flo
 
 void UNetherCrownControlPPComponent::SetPostProcessBlendEndByFloatTimeline(float FloatCurveValue)
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	UPostProcessComponent* HandledPostProcessComponent{ HandledPostProcessComponentWeak.Get() };
 	if (!ensureAlways(IsValid(HandledPostProcessComponent)))
 	{
@@ -172,5 +211,10 @@ void UNetherCrownControlPPComponent::SetPostProcessBlendEndByFloatTimeline(float
 
 void UNetherCrownControlPPComponent::HandlePostProcessBlendEndTimelineFinished()
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
 	ResetPostProcess();
 }
