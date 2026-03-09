@@ -20,6 +20,8 @@ void UNetherCrownCrowdControlComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	CachedOwner = Cast<ACharacter>(GetOwner());
+
 	InitLoadData();
 }
 
@@ -32,8 +34,7 @@ void UNetherCrownCrowdControlComponent::GetLifetimeReplicatedProps(TArray<class 
 
 void UNetherCrownCrowdControlComponent::InitLoadData()
 {
-	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
 	{
 		return;
 	}
@@ -48,66 +49,93 @@ void UNetherCrownCrowdControlComponent::InitLoadData()
 
 void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	{
+		return;
+	}
+
 	PlayCrowdControlAnim(InCrowdControlType);
 }
 
 void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime)
 {
-	//@NOTE : Only called by server
+	if (!ensureAlways(IsValid(CachedOwner)) || !CachedOwner->HasAuthority())
+	{
+		return;
+	}
+
 	CrowdControlType = InCrowdControlType;
 
 	const UWorld* World{ GetWorld() };
 	check(World);
 
-	//MultiCast로 CC Implements를 호출해버리기
 	World->GetTimerManager().SetTimer(CrowdControlTimerHandle, this, &ThisClass::ClearCrowdControl, DurationTime, false);
 }
 
 void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector) const
 {
-	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedOwner)) || !CachedOwner->HasAuthority())
 	{
 		return;
 	}
 
-	OwnerCharacter->LaunchCharacter(KnockBackVector, true, true);
+	CachedOwner->LaunchCharacter(KnockBackVector, true, true);
 }
 
 void UNetherCrownCrowdControlComponent::Frozen() const
 {
-	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
-	UCharacterMovementComponent* MovementComponent{ OwnerCharacter ? OwnerCharacter->GetCharacterMovement() : nullptr};
-	UMaterialInterface* MaterialInterface{ SkeletalMeshComponent ? SkeletalMeshComponent->GetOverlayMaterial() : nullptr };
-	if (!ensureAlways(IsValid(MaterialInterface)))
+	if (!ensureAlways(IsValid(CachedOwner)))
 	{
 		return;
 	}
 
-	UMaterialInstanceDynamic* DMI{ UMaterialInstanceDynamic::Create(MaterialInterface, OwnerCharacter) };
-	if (!ensureAlways(IsValid(DMI)))
+	UCharacterMovementComponent* MovementComponent{ CachedOwner->GetCharacterMovement() };
+	if (!ensureAlways(IsValid(MovementComponent)))
 	{
 		return;
 	}
 
-	MovementComponent->DisableMovement();
-	SkeletalMeshComponent->bPauseAnims = true;
-	SkeletalMeshComponent->SetOverlayMaterial(DMI);
+	if (CachedOwner->HasAuthority())
+	{
+		MovementComponent->DisableMovement();
+	}
+	else
+	{
+		USkeletalMeshComponent* SkeletalMeshComponent{ CachedOwner->GetMesh() };
+		UMaterialInterface* MaterialInterface{ SkeletalMeshComponent ? SkeletalMeshComponent->GetOverlayMaterial() : nullptr };
+		if (!ensureAlways(IsValid(MaterialInterface)))
+		{
+			return;
+		}
 
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
+		UMaterialInstanceDynamic* DMI{ UMaterialInstanceDynamic::Create(MaterialInterface, CachedOwner) };
+		if (!ensureAlways(IsValid(DMI)))
+		{
+			return;
+		}
 
-	DMI->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, DefaultSettings->FrozenTempestTargetMaterialAlpha);
+		SkeletalMeshComponent->bPauseAnims = true;
+		SkeletalMeshComponent->SetOverlayMaterial(DMI);
+
+		const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+		check(DefaultSettings);
+
+		DMI->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, DefaultSettings->FrozenTempestTargetMaterialAlpha);
+	}
 }
 
 void UNetherCrownCrowdControlComponent::Stun() const
 {
-	const ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	UCharacterMovementComponent* OwnerCharacterMovementComponent{ OwnerCharacter ? OwnerCharacter->GetCharacterMovement() : nullptr};
-	check(OwnerCharacterMovementComponent);
+	if (!ensureAlways(IsValid(CachedOwner)) || !CachedOwner->HasAuthority())
+	{
+		return;
+	}
 
-	OwnerCharacterMovementComponent->DisableMovement();
+	UCharacterMovementComponent* OwnerCharacterMovementComponent{ CachedOwner->GetCharacterMovement() };
+	if (ensureAlways(IsValid(OwnerCharacterMovementComponent)))
+	{
+		OwnerCharacterMovementComponent->DisableMovement();
+	}
 
 	Multicast_SetActiveStatusNiagaraSystem(ENetherCrownCrowdControlType::STUN, true);
 }
@@ -130,35 +158,35 @@ void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Im
 
 void UNetherCrownCrowdControlComponent::ResetMovementAndAnimationSettings() const
 {
-	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedOwner)))
 	{
 		return;
 	}
 
-	UCharacterMovementComponent* MovementComponent{ OwnerCharacter->GetCharacterMovement() };
-	check(MovementComponent);
-	MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
-
-	USkeletalMeshComponent* SkeletalMeshComponent{ OwnerCharacter ? OwnerCharacter->GetMesh() : nullptr};
-	if (IsValid(SkeletalMeshComponent))
+	if (CachedOwner->HasAuthority())
 	{
-		SkeletalMeshComponent->bPauseAnims = false;
+		UCharacterMovementComponent* MovementComponent{ CachedOwner->GetCharacterMovement() };
+		check(MovementComponent);
+		MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+	}
+	else
+	{
+		USkeletalMeshComponent* SkeletalMeshComponent{ CachedOwner->GetMesh() };
+		if (IsValid(SkeletalMeshComponent))
+		{
+			SkeletalMeshComponent->bPauseAnims = false;
+		}
 	}
 }
 
 void UNetherCrownCrowdControlComponent::ClearFrozenCosmetics()
 {
-	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
 	{
 		return;
 	}
 
-	if (!OwnerCharacter->HasAuthority())
-	{
-		StartSetFrozenTargetOverlayEndMaterialTimeline();
-	}
+	StartSetFrozenTargetOverlayEndMaterialTimeline();
 }
 
 void UNetherCrownCrowdControlComponent::ClearStunCosmetics()
@@ -168,20 +196,19 @@ void UNetherCrownCrowdControlComponent::ClearStunCosmetics()
 
 void UNetherCrownCrowdControlComponent::Multicast_SetActiveStatusNiagaraSystem_Implementation(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable) const
 {
-	const ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
 	{
 		return;
 	}
 
-	const INetherCrownCrowdControlInterface* CrowdControlInterface{ Cast<INetherCrownCrowdControlInterface>(OwnerCharacter) };
+	const INetherCrownCrowdControlInterface* CrowdControlInterface{ Cast<INetherCrownCrowdControlInterface>(CachedOwner) };
 	if (!ensureAlways(CrowdControlInterface))
 	{
 		return;
 	}
 
 	UNetherCrownStatusEffectControlComponent* StatusEffectControlComponent{ CrowdControlInterface->GetStatusEffectControlComponent() };
-	if (!ensureAlways(StatusEffectControlComponent))
+	if (!ensureAlways(IsValid(StatusEffectControlComponent)))
 	{
 		return;
 	}
@@ -198,6 +225,11 @@ void UNetherCrownCrowdControlComponent::ClearCrowdControl()
 
 void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType)
 {
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	{
+		return;
+	}
+
 	if (InCrowdControlType == ENetherCrownCrowdControlType::NONE)
 	{
 		return;
@@ -220,13 +252,7 @@ void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownC
 		return;
 	}
 
-	ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerEnemy)))
-	{
-		return;
-	}
-
-	OwnerEnemy->PlayAnimMontage(FoundCrowdControlAnimMontage);
+	CachedOwner->PlayAnimMontage(FoundCrowdControlAnimMontage);
 }
 
 void UNetherCrownCrowdControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -241,6 +267,11 @@ void UNetherCrownCrowdControlComponent::TickComponent(float DeltaTime, ELevelTic
 
 void UNetherCrownCrowdControlComponent::BindTimelineFunctions()
 {
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	{
+		return;
+	}
+
 	FOnTimelineFloat FrozenTargetOverlayEndMaterialProgressFunc{};
 	FrozenTargetOverlayEndMaterialProgressFunc.BindUFunction(this, FName("SetFrozenTargetOverlayEndMaterialByFloatTimeline"));
 	FrozenTargetOverlayEndMaterialFloatTimeline.AddInterpFloat(CachedFrozenTargetOverlayMaterialEndCurveFloat, FrozenTargetOverlayEndMaterialProgressFunc);
@@ -248,19 +279,26 @@ void UNetherCrownCrowdControlComponent::BindTimelineFunctions()
 
 void UNetherCrownCrowdControlComponent::StartSetFrozenTargetOverlayEndMaterialTimeline()
 {
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	{
+		return;
+	}
+
 	FrozenTargetOverlayEndMaterialFloatTimeline.PlayFromStart();
 }
 
 void UNetherCrownCrowdControlComponent::SetFrozenTargetOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
 {
-	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
 	{
 		return;
 	}
 
-	USkeletalMeshComponent* MeshComponent{ OwnerCharacter->GetMesh() };
-	check(MeshComponent);
+	USkeletalMeshComponent* MeshComponent{ CachedOwner->GetMesh() };
+	if (!ensureAlways(IsValid(MeshComponent)))
+	{
+		return;
+	}
 
 	UMaterialInstanceDynamic* DynamicOverlayMaterial = Cast<UMaterialInstanceDynamic>(MeshComponent->GetOverlayMaterial());
 	if (!IsValid(DynamicOverlayMaterial))

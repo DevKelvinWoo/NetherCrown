@@ -73,9 +73,12 @@ private:
 
 	FTimerHandle CrowdControlTimerHandle{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CCAnimMap")
 	TMap<ENetherCrownCrowdControlType, TSoftObjectPtr<UAnimMontage>> CrowdControlAnimMap{};
 
 	UPROPERTY(Replicated)
 	ENetherCrownCrowdControlType CrowdControlType{ ENetherCrownCrowdControlType::NONE };
+
+	UPROPERTY(Transient)
+	TObjectPtr<ACharacter> CachedOwner{};
 };
