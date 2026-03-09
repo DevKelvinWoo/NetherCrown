@@ -10,7 +10,6 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Skill/NetherCrownSkillObject.h"
-#include "NetherCrown/Skill/NetherCrownSkillSkyFallSlash.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 UNetherCrownSkillComponent::UNetherCrownSkillComponent()
@@ -27,13 +26,18 @@ void UNetherCrownSkillComponent::ActivateSkill(const ENetherCrownSkillKeyEnum Sk
 
 bool UNetherCrownSkillComponent::CanActivateSkill() const
 {
-	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ CachedCharacter ? CachedCharacter->GetBasicAttackComponent() : nullptr };
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return false;
+	}
+
+	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ CachedCharacter->GetBasicAttackComponent() };
 	if (!ensureAlways(IsValid(BasicAttackComponent)) || BasicAttackComponent->IsAttacking())
 	{
 		return false;
 	}
 
-	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter ? CachedCharacter->GetEquipComponent() : nullptr };
+	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
 	if (!ensureAlways(IsValid(EquipComponent)) || !IsValid(EquipComponent->GetEquippedWeapon()))
 	{
 		return false;
@@ -60,7 +64,7 @@ void UNetherCrownSkillComponent::TickComponent(float DeltaTime, enum ELevelTick 
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	for (const auto& SkillPair : SkillObjects)
+	for (const auto& SkillPair : SkillObjectMap)
 	{
 		UNetherCrownSkillObject* SkillObject{ SkillPair.Value };
 		if (!IsValid(SkillObject))
@@ -77,7 +81,7 @@ bool UNetherCrownSkillComponent::ReplicateSubobjects(UActorChannel* Channel, FOu
 	//@NOTE : Server에서만 호출됨
 	bool bWroteSomething{ Super::ReplicateSubobjects(Channel, Bunch, RepFlags) };
 
-	for (const auto& SkillPair : SkillObjects)
+	for (const auto& SkillPair : SkillObjectMap)
 	{
 		if (IsValid(SkillPair.Value))
 		{
@@ -100,12 +104,7 @@ void UNetherCrownSkillComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 
 void UNetherCrownSkillComponent::ConstructSkillObjects()
 {
-	if (!GetOwner()->HasAuthority())
-	{
-		return;
-	}
-
-	if (!ensureAlways(IsValid(CachedCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -124,7 +123,7 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 		//@NOTE : Server에서만 SkillObjects, ReplicatedSkillObjects를 구축한다
 		//이때 ReplicatedSkillObjects는 Replicate가 되기 때문에 OnRep_ReplicatedSKillObjects가 호출된다 (클라에서)
 		const ENetherCrownSkillKeyEnum SkillEnum{ SkillObject->GetSkillEnum() };
-		SkillObjects.Add(SkillEnum, SkillObject);
+		SkillObjectMap.Add(SkillEnum, SkillObject);
 		ReplicatedSkillObjects.Add(SkillObject);
 	}
 }
@@ -141,9 +140,9 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 		return;
 	}
 
-	if (SkillObjects.IsEmpty())
+	if (SkillObjectMap.IsEmpty())
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("SkillObjects is Empty in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("SkillObjectMap is Empty in %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -154,7 +153,7 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 
 	Client_SetActiveSkillKeyEnum(SkillKeyEnum);
 
-	UNetherCrownSkillObject** FoundSkillObjectPtr{ SkillObjects.Find(SkillKeyEnum) };
+	UNetherCrownSkillObject** FoundSkillObjectPtr{ SkillObjectMap.Find(SkillKeyEnum) };
 	if (!IsValid(*FoundSkillObjectPtr))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("FoundSkillObjectPtr is Invalid in %hs"), __FUNCTION__);
@@ -173,7 +172,7 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 
 void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNetherCrownSkillObject* FoundSkillObject)
 {
-	if (!IsValid(CachedCharacter))
+	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		return;
 	}
@@ -196,12 +195,8 @@ void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()
 {
 	//@NOTE : Client에서 Server로부터 replicate된 ReplicatedSkillObjects를 이용하여 실제 사용한 SkillObjects를 채운다
 	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
-	{
-		return;
-	}
 
-	SkillObjects.Empty();
+	SkillObjectMap.Empty();
 
 	for (UNetherCrownSkillObject* Obj : ReplicatedSkillObjects)
 	{
@@ -210,7 +205,7 @@ void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()
 			Obj->SetSkillOwnerCharacter(OwnerCharacter);
 			Obj->InitSkillObject();
 
-			SkillObjects.Add(Obj->GetSkillEnum(), Obj);
+			SkillObjectMap.Add(Obj->GetSkillEnum(), Obj);
 		}
 	}
 }

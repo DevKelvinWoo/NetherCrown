@@ -51,11 +51,11 @@ private:
 	UFUNCTION()
 	void OnRep_ReplicatedSkillObjects();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillObject")
 	TArray<TSubclassOf<UNetherCrownSkillObject>> SkillObjectClasses{};
 
 	UPROPERTY()
-	TMap<ENetherCrownSkillKeyEnum, UNetherCrownSkillObject*> SkillObjects{};
+	TMap<ENetherCrownSkillKeyEnum, UNetherCrownSkillObject*> SkillObjectMap{};
 
 	UPROPERTY(ReplicatedUsing=OnRep_ReplicatedSkillObjects)
 	TArray<TObjectPtr<UNetherCrownSkillObject>> ReplicatedSkillObjects;
@@ -63,7 +63,7 @@ private:
 	UPROPERTY(Replicated)
 	ENetherCrownSkillKeyEnum ActiveSkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	FOnStopOrStartSkill OnStopOrStartSkill;
