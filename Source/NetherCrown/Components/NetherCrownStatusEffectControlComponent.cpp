@@ -5,6 +5,7 @@
 #include "NetherCrown/NetherCrown.h"
 #include "NiagaraComponent.h"
 #include "NiagaraSystem.h"
+#include "GameFramework/Character.h"
 
 UNetherCrownStatusEffectControlComponent::UNetherCrownStatusEffectControlComponent()
 {
@@ -14,6 +15,12 @@ UNetherCrownStatusEffectControlComponent::UNetherCrownStatusEffectControlCompone
 void UNetherCrownStatusEffectControlComponent::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CachedOwnerCharacter = Cast<ACharacter>(GetOwner());
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || CachedOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
 
 	for (const TPair<ENetherCrownCrowdControlType, TSoftObjectPtr<UNiagaraSystem>>& Pair : StatusNiagaraSystemMap)
 	{
@@ -34,6 +41,11 @@ void UNetherCrownStatusEffectControlComponent::SetHandledStatusNiagaraComponent(
 
 void UNetherCrownStatusEffectControlComponent::SetActiveStatusNiagaraSystem(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable)
 {
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || CachedOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	UNiagaraComponent* HandledStatusNiagaraComponent{ HandledStatusNiagaraComponentWeak.Get() };
 	if (!IsValid(HandledStatusNiagaraComponent))
 	{

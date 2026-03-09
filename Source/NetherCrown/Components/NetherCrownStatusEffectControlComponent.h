@@ -26,11 +26,14 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "StatusNiagaraData")
 	TMap<ENetherCrownCrowdControlType, TSoftObjectPtr<UNiagaraSystem>> StatusNiagaraSystemMap{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TMap<ENetherCrownCrowdControlType, TObjectPtr<UNiagaraSystem>> CachedStatusNiagaraSystemMap{};
 
 	TWeakObjectPtr<UNiagaraComponent> HandledStatusNiagaraComponentWeak{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<ACharacter> CachedOwnerCharacter{};
 };
