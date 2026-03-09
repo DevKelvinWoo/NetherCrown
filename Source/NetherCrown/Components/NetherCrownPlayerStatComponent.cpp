@@ -3,7 +3,6 @@
 
 #include "NetherCrownPlayerStatComponent.h"
 
-#include "NetherCrown/NetherCrown.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 
@@ -35,13 +34,7 @@ void UNetherCrownPlayerStatComponent::BeginPlay()
 
 void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
 {
-	if (!IsValid(CachedCharacter))
-	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedCharacter is invalid."));
-		return;
-	}
-
-	if (!CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -51,13 +44,7 @@ void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
 
 void UNetherCrownPlayerStatComponent::ClearPlayerShield()
 {
-	if (!IsValid(CachedCharacter))
-	{
-		UE_LOG(LogNetherCrown, Error, TEXT("CachedCharacter is invalid."));
-		return;
-	}
-
-	if (!CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}

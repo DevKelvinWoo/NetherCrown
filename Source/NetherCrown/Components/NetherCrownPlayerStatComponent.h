@@ -71,9 +71,9 @@ protected:
 private:
 	void CacheCharacter();
 
-	UPROPERTY(EditDefaultsOnly, Replicated)
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "StatData")
 	FNetherCrownPlayerStatData PlayerStatData{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 };
