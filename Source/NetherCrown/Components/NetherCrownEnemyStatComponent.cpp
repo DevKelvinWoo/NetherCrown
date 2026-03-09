@@ -4,12 +4,7 @@
 
 UNetherCrownEnemyStatComponent::UNetherCrownEnemyStatComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
-}
-
-void UNetherCrownEnemyStatComponent::SetEnemyHp(int32 InHp)
-{
-	EnemyStatData.EnemyHP = InHp;
+	PrimaryComponentTick.bCanEverTick = false;
 }
 
 void UNetherCrownEnemyStatComponent::BeginPlay()
@@ -17,7 +12,7 @@ void UNetherCrownEnemyStatComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UNetherCrownEnemyStatComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownEnemyStatComponent::SetEnemyHp(int32 InHp)
 {
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+	EnemyStatData.EnemyHP = InHp;
 }
