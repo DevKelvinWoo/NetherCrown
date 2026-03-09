@@ -49,7 +49,7 @@ void UNetherCrownEquipComponent::ChangeWeapon()
 
 void UNetherCrownEquipComponent::NotifyEquipEndOrStart(const bool bEquipEnd) const
 {
-	if (IsValid(CachedCharacter) && CachedCharacter->HasAuthority())
+	if (ensureAlways(IsValid(CachedCharacter)) && CachedCharacter->HasAuthority())
 	{
 		OnEquipEndOrStart.Broadcast(bEquipEnd);
 	}
@@ -85,11 +85,21 @@ void UNetherCrownEquipComponent::SetupEquipStateTimer()
 
 void UNetherCrownEquipComponent::HandleEquipStart() const
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	NotifyEquipEndOrStart(false);
 }
 
 void UNetherCrownEquipComponent::HandleEquipEnd() const
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	NotifyEquipEndOrStart(true);
 }
 
@@ -128,8 +138,18 @@ void UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Implementation()
 
 void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementation()
 {
-	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter ? CachedCharacter->GetMesh() : nullptr };
-	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr};
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter->GetMesh() };
+	if (!ensureAlways(IsValid(OwnerCharacterMesh)))
+	{
+		return;
+	}
+
+	UAnimInstance* AnimInstance{ OwnerCharacterMesh->GetAnimInstance() };
 	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ Cast<UNetherCrownCharacterAnimInstance>(AnimInstance) };
 	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
 	{
@@ -143,15 +163,17 @@ void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementa
 
 	NetherCrownCharacterAnimInstance->Montage_Play(CachedEquipMontage);
 
-	if (CachedCharacter->IsLocallyControlled())
-	{
-		FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), EquipComponentTagData.EquipSoundTag);
-	}
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), EquipComponentTagData.EquipSoundTag);
 }
 
 void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const
 {
-	USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter ? CachedCharacter->GetMesh() : nullptr };
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter->GetMesh() };
 	if (!ensureAlways(IsValid(OwnerCharacterMesh)))
 	{
 		return;
@@ -163,6 +185,11 @@ void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon*
 
 void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	ANetherCrownWeapon* EquipableWeapon{ EquipableWeaponWeak.Get() };
 	if (!IsValid(EquipableWeapon))
 	{
@@ -192,6 +219,11 @@ void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 
 void UNetherCrownEquipComponent::ChangeWeaponInternal()
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	if (StowWeaponContainer.IsEmpty())
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("StowWeaponContainerMap is Empty %hs"), __FUNCTION__);
@@ -245,10 +277,10 @@ void UNetherCrownEquipComponent::StowCurrentWeapon()
 
 void UNetherCrownEquipComponent::CacheInitData()
 {
-	if (!EquipAnimMontageSoft.IsNull())
+	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
+
+	if (!EquipAnimMontageSoft.IsNull() && !CachedCharacter->HasAuthority())
 	{
 		CachedEquipMontage = EquipAnimMontageSoft.LoadSynchronous();
 	}
-
-	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
 }

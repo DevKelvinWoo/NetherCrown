@@ -92,10 +92,10 @@ private:
 	UPROPERTY(Transient, Replicated)
 	TObjectPtr<ANetherCrownWeapon> EquippedWeapon{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
 	TSoftObjectPtr<UAnimMontage> EquipAnimMontageSoft{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownEquipComponentTagData EquipComponentTagData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EquipTimerData")
@@ -104,10 +104,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "EquipTimerData")
 	float EquipEndTimeOffset{ -1.f };
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedEquipMontage;
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	TArray<TPair<EStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
