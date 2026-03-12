@@ -49,9 +49,9 @@ public:
 	TSoftObjectPtr<UNetherCrownWeaponData> GetWeaponData() const { return WeaponData; }
 
 private:
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "WeaponTag")
 	FGameplayTag WeaponTag{};
 
-	UPROPERTY(EditAnywhere)
+	UPROPERTY(EditAnywhere, Category = "WeaponData")
 	TSoftObjectPtr<UNetherCrownWeaponData> WeaponData{};
 };

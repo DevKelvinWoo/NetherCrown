@@ -18,9 +18,9 @@ public:
 	TSoftObjectPtr<USoundCue> GetSoundCue() const { return SoundCue; }
 
 private:
-	UPROPERTY(EditAnywhere)
-	FGameplayTag SoundTag;
+	UPROPERTY(EditAnywhere, Category = "SoundTag")
+	FGameplayTag SoundTag{};
 
-	UPROPERTY(EditAnywhere)
-	TSoftObjectPtr<USoundCue> SoundCue;
+	UPROPERTY(EditAnywhere, Category = "SoundCue")
+	TSoftObjectPtr<USoundCue> SoundCue{};
 };

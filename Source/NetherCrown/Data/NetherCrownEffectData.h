@@ -18,9 +18,9 @@ public:
 	TSoftObjectPtr<UNiagaraSystem> GetEffectNiagaraSystem() const { return EffectNiagaraSystem; }
 
 private:
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "EffectTag")
 	FGameplayTag EffectTag{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "NiagaraSystem")
 	TSoftObjectPtr<UNiagaraSystem> EffectNiagaraSystem{};
 };
