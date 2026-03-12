@@ -65,15 +65,9 @@ public:
 	void ClearPlayerShield();
 
 protected:
-	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	void CacheCharacter();
-
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "StatData")
 	FNetherCrownPlayerStatData PlayerStatData{};
-
-	UPROPERTY(Transient)
-	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 };

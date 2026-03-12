@@ -27,21 +27,21 @@ private:
 	void AddPlayerShieldAndSetShieldEndTimer(int32 InShieldValue) const;
 	void ClearPlayerShield() const;
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	int32 ShieldDuration{ 10 };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	int32 ShieldValue{ 50 };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	FName ShieldEffectSocketName{ TEXT("root") };
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UNiagaraComponent> HandledShieldMasteryNiagaraComponent{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownShield> HandledShieldMasteryActor{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "ShieldActor")
 	TSubclassOf<ANetherCrownShield> ShieldActorClass{};
 };

@@ -24,6 +24,11 @@ void ANetherCrownShield::BeginPlay()
 {
 	Super::BeginPlay();
 
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
 	CachedStartCurveFloat = ShieldMaterialStartCurveFloatSoft.LoadSynchronous();
 	CachedEndCurveFloat = ShieldMaterialEndCurveFloatSoft.LoadSynchronous();
 
@@ -51,6 +56,11 @@ void ANetherCrownShield::Tick(float DeltaTime)
 
 void ANetherCrownShield::CreateShieldDynamicMaterialInstance()
 {
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
 	ShieldDynamicMaterialInstance = ShieldMeshComponent->CreateDynamicMaterialInstance(0);
 	ensureAlways(IsValid(ShieldDynamicMaterialInstance));
 }
@@ -68,17 +78,27 @@ void ANetherCrownShield::BindTimelineFunctions()
 
 void ANetherCrownShield::StartSetBeginShieldMaterialTimeline()
 {
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
 	BeginShieldMaterialFloatTimeline.PlayFromStart();
 }
 
 void ANetherCrownShield::StartSetEndShieldMaterialTimeline()
 {
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
 	EndShieldMaterialFloatTimeline.PlayFromStart();
 }
 
 void ANetherCrownShield::SetBeginShieldMaterialByFloatTimeline(float FloatCurveValue)
 {
-	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)))
+	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)) || GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -88,7 +108,7 @@ void ANetherCrownShield::SetBeginShieldMaterialByFloatTimeline(float FloatCurveV
 
 void ANetherCrownShield::SetEndShieldMaterialByFloatTimeline(float FloatCurveValue)
 {
-	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)))
+	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)) || GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -100,3 +120,4 @@ void ANetherCrownShield::SetEndShieldMaterialByFloatTimeline(float FloatCurveVal
 		Destroy();
 	}
 }
+

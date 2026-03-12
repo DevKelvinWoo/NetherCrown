@@ -28,21 +28,22 @@ void UNetherCrownShieldMastery::ExecuteSkillGameplay()
 void UNetherCrownShieldMastery::ActiveShieldEffectAndActor()
 {
 	UWorld* World{ GetWorld() };
-	check(World);
-
-	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(World)))
 	{
 		return;
 	}
 
-	if (SkillOwnerCharacter->HasAuthority())
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
 
 	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
-	check(SkeletalMeshComponent)
+	if (!ensureAlways(IsValid(SkeletalMeshComponent)))
+	{
+		return;
+	}
 
 	HandledShieldMasteryNiagaraComponent = FNetherCrownUtilManager::AttachNiagaraSystemByGameplayTag(World, NetherCrownTags::Effect_ShieldMastery, SkeletalMeshComponent, ShieldEffectSocketName);
 
@@ -60,6 +61,12 @@ void UNetherCrownShieldMastery::ActiveShieldEffectAndActor()
 
 void UNetherCrownShieldMastery::DeactivateShieldEffectAndActor()
 {
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	if (!(IsValid(HandledShieldMasteryNiagaraComponent)))
 	{
 		return;
@@ -79,15 +86,12 @@ void UNetherCrownShieldMastery::DeactivateShieldEffectAndActor()
 void UNetherCrownShieldMastery::PlayShieldOnSound() const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (SkillOwnerCharacter->IsLocallyControlled())
-	{
-		FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), NetherCrownTags::Sound_Shield_On);
-	}
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), NetherCrownTags::Sound_Shield_On);
 }
 
 void UNetherCrownShieldMastery::AddPlayerShieldAndSetShieldEndTimer(int32 InShieldValue) const
@@ -105,12 +109,18 @@ void UNetherCrownShieldMastery::AddPlayerShieldAndSetShieldEndTimer(int32 InShie
 	}
 
 	UNetherCrownPlayerStatComponent* PlayerStatComponent{ PlayerState->GetNetherCrownPlayerStatComponent() };
-	check(PlayerStatComponent);
+	if (!ensureAlways(IsValid(PlayerStatComponent)))
+	{
+		return;
+	}
 
 	PlayerStatComponent->AddPlayerShield(InShieldValue);
 
 	const UWorld* World{ GetWorld() };
-	check(World);
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
 
 	FTimerHandle ShieldMasteryEndTimerHandle{};
 	World->GetTimerManager().SetTimer(ShieldMasteryEndTimerHandle, this, &ThisClass::ClearPlayerShield, ShieldDuration, false);
@@ -119,7 +129,7 @@ void UNetherCrownShieldMastery::AddPlayerShieldAndSetShieldEndTimer(int32 InShie
 void UNetherCrownShieldMastery::ClearPlayerShield() const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -131,7 +141,10 @@ void UNetherCrownShieldMastery::ClearPlayerShield() const
 	}
 
 	UNetherCrownPlayerStatComponent* PlayerStatComponent{ PlayerState->GetNetherCrownPlayerStatComponent() };
-	check(PlayerStatComponent);
+	if (!ensureAlways(IsValid(PlayerStatComponent)))
+	{
+		return;
+	}
 
 	PlayerStatComponent->ClearPlayerShield();
 }

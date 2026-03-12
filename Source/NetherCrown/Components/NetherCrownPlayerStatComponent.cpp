@@ -5,6 +5,7 @@
 
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 
 UNetherCrownPlayerStatComponent::UNetherCrownPlayerStatComponent()
 {
@@ -20,21 +21,16 @@ void UNetherCrownPlayerStatComponent::GetLifetimeReplicatedProps(TArray<class FL
 	DOREPLIFETIME(ThisClass, PlayerStatData);
 }
 
-void UNetherCrownPlayerStatComponent::CacheCharacter()
-{
-	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
-}
-
-void UNetherCrownPlayerStatComponent::BeginPlay()
-{
-	Super::BeginPlay();
-
-	CacheCharacter();
-}
-
 void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerPlayerState)))
+	{
+		return;
+	}
+
+	ANetherCrownCharacter* PlayerStateOwnerCharacter{ Cast<ANetherCrownCharacter>(OwnerPlayerState->GetPawn()) };
+	if (!ensureAlways(IsValid(PlayerStateOwnerCharacter)) || !PlayerStateOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -44,7 +40,14 @@ void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
 
 void UNetherCrownPlayerStatComponent::ClearPlayerShield()
 {
-	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerPlayerState)))
+	{
+		return;
+	}
+
+	ANetherCrownCharacter* PlayerStateOwnerCharacter{ Cast<ANetherCrownCharacter>(OwnerPlayerState->GetPawn()) };
+	if (!ensureAlways(IsValid(PlayerStateOwnerCharacter)) || !PlayerStateOwnerCharacter->HasAuthority())
 	{
 		return;
 	}

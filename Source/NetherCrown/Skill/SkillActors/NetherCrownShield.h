@@ -38,25 +38,25 @@ private:
 	UFUNCTION()
 	void SetEndShieldMaterialByFloatTimeline(float FloatCurveValue);
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UStaticMeshComponent> ShieldMeshComponent{};
 
 	UPROPERTY()
 	TObjectPtr<UMaterialInstanceDynamic> ShieldDynamicMaterialInstance{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
 	TSoftObjectPtr<UCurveFloat> ShieldMaterialStartCurveFloatSoft{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
 	TSoftObjectPtr<UCurveFloat> ShieldMaterialEndCurveFloatSoft{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedStartCurveFloat{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedEndCurveFloat{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "MaterialParam")
 	FName ShieldMaterialScalarParameterName{ TEXT("ShieldAlpha") };
 
 	FTimeline BeginShieldMaterialFloatTimeline{};
