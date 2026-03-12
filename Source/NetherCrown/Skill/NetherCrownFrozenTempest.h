@@ -32,7 +32,7 @@ private:
 	UFUNCTION(NetMulticast, UnReliable)
 	void Multicast_StartFrozenTempestHitCosmetics();
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, UnReliable)
 	void Multicast_SetDetectedEnemyOverlayMaterial();
 
 	UFUNCTION()
@@ -52,43 +52,43 @@ private:
 
 	void SetupFrozenTempestHitTimers();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
 	TSoftObjectPtr<UCurveVector> SkillCameraZoomCurveVectorSoft{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
 	TSoftObjectPtr<UCurveFloat> CharacterOverlayMaterialStartCurveFloatSoft{};
 
-	UPROPERTY()
-	TObjectPtr<UCurveFloat> CachedCharacterOverlayMaterialStartCurveFloat{};
-
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
 	TSoftObjectPtr<UCurveFloat> CharacterOverlayMaterialEndCurveFloatSoft{};
 
-	UPROPERTY()
-	TObjectPtr<UCurveFloat> CachedCharacterOverlayMaterialEndCurveFloat{};
-
-	UPROPERTY()
-	TObjectPtr<UCurveVector> CachedSkillCameraZoomCurveVector{};
-
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
 	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
 	TSubclassOf<UCameraShakeBase> SkillChargeCameraShakeBaseClass{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
 	float SkillDetectingSphereRadius{ 500.f };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Duration")
 	float FrozenDuration{ 3.f };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "MaterialData")
 	TSoftObjectPtr<UMaterialInterface> FrozenTempestTargetOverlayMaterialSoft{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveFloat> CachedCharacterOverlayMaterialStartCurveFloat{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveFloat> CachedCharacterOverlayMaterialEndCurveFloat{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveVector> CachedSkillCameraZoomCurveVector{};
+
+	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInterface> CachedFrozenTempestTargetOverlayMaterial{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> CachedDynamicFrozenTempestMaterial{};
 
 	FTimeline SkillCameraZoomVectorTimeline{};

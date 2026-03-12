@@ -95,33 +95,28 @@ void UNetherCrownCrowdControlComponent::Frozen() const
 		return;
 	}
 
-	if (CachedOwner->HasAuthority())
+	MovementComponent->DisableMovement();
+
+	USkeletalMeshComponent* SkeletalMeshComponent{ CachedOwner->GetMesh() };
+	UMaterialInterface* MaterialInterface{ SkeletalMeshComponent ? SkeletalMeshComponent->GetOverlayMaterial() : nullptr };
+	if (!ensureAlways(IsValid(MaterialInterface)))
 	{
-		MovementComponent->DisableMovement();
+		return;
 	}
-	else
+
+	UMaterialInstanceDynamic* DMI{ UMaterialInstanceDynamic::Create(MaterialInterface, CachedOwner) };
+	if (!ensureAlways(IsValid(DMI)))
 	{
-		USkeletalMeshComponent* SkeletalMeshComponent{ CachedOwner->GetMesh() };
-		UMaterialInterface* MaterialInterface{ SkeletalMeshComponent ? SkeletalMeshComponent->GetOverlayMaterial() : nullptr };
-		if (!ensureAlways(IsValid(MaterialInterface)))
-		{
-			return;
-		}
-
-		UMaterialInstanceDynamic* DMI{ UMaterialInstanceDynamic::Create(MaterialInterface, CachedOwner) };
-		if (!ensureAlways(IsValid(DMI)))
-		{
-			return;
-		}
-
-		SkeletalMeshComponent->bPauseAnims = true;
-		SkeletalMeshComponent->SetOverlayMaterial(DMI);
-
-		const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-		check(DefaultSettings);
-
-		DMI->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, DefaultSettings->FrozenTempestTargetMaterialAlpha);
+		return;
 	}
+
+	SkeletalMeshComponent->bPauseAnims = true;
+	SkeletalMeshComponent->SetOverlayMaterial(DMI);
+
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
+	DMI->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, DefaultSettings->FrozenTempestTargetMaterialAlpha);
 }
 
 void UNetherCrownCrowdControlComponent::Stun() const

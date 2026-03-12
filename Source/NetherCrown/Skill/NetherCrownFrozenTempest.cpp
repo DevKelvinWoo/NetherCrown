@@ -39,7 +39,6 @@ void UNetherCrownFrozenTempest::ExecuteSkillGameplay()
 
 	SetupFrozenTempestHitTimers();
 	SetupSkillWeaponAuraTimer();
-
 	SetupSkillMovementModeTimer();
 }
 
@@ -102,13 +101,19 @@ void UNetherCrownFrozenTempest::BindTimelineFunctions()
 
 void UNetherCrownFrozenTempest::StartSetSkillCameraZoomTimeline()
 {
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	SkillCameraZoomVectorTimeline.PlayFromStart();
 }
 
 void UNetherCrownFrozenTempest::StartSetCharacterOverlayStartMaterialTimeline()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -120,18 +125,19 @@ void UNetherCrownFrozenTempest::StartSetCharacterOverlayStartMaterialTimeline()
 
 void UNetherCrownFrozenTempest::StartSetCharacterOverlayEndMaterialTimeline()
 {
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	CharacterOverlayEndMaterialFloatTimeline.PlayFromStart();
 }
 
 void UNetherCrownFrozenTempest::Multicast_StartFrozenTempestHitCosmetics_Implementation()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	if (SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -162,12 +168,7 @@ void UNetherCrownFrozenTempest::Multicast_StartFrozenTempestHitCosmetics_Impleme
 void UNetherCrownFrozenTempest::Multicast_SetDetectedEnemyOverlayMaterial_Implementation()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	if (SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -201,7 +202,7 @@ void UNetherCrownFrozenTempest::Multicast_SetDetectedEnemyOverlayMaterial_Implem
 void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector VectorCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -213,7 +214,7 @@ void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector Vecto
 void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -225,7 +226,10 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(
 	}
 
 	USkeletalMeshComponent* SkillOwnerMeshComponent{ SkillOwnerCharacter->GetMesh() };
-	check(SkillOwnerMeshComponent);
+	if (!ensureAlways(IsValid(SkillOwnerMeshComponent)))
+	{
+		return;
+	}
 
 	SkillOwnerMeshComponent->SetOverlayMaterial(CachedDynamicFrozenTempestMaterial);
 
@@ -238,13 +242,16 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(
 void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
 
 	USkeletalMeshComponent* SkillOwnerMeshComponent{ SkillOwnerCharacter->GetMesh() };
-	check(SkillOwnerMeshComponent);
+	if (!ensureAlways(IsValid(SkillOwnerMeshComponent)))
+	{
+		return;
+	}
 
 	UMaterialInstanceDynamic* DynamicOverlayMaterial = Cast<UMaterialInstanceDynamic>(SkillOwnerMeshComponent->GetOverlayMaterial());
 	if (!IsValid(DynamicOverlayMaterial))
@@ -281,21 +288,22 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 void UNetherCrownFrozenTempest::PlayChargeCameraShake()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	if (!SkillOwnerCharacter->IsLocallyControlled())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}
 
 	const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(SkillOwnerCharacter->GetController()) };
-	check(PlayerController);
+	if (!ensureAlways(IsValid(PlayerController)))
+	{
+		return;
+	}
 
 	APlayerCameraManager* PlayerCameraManager{ PlayerController->PlayerCameraManager };
-	check(PlayerCameraManager);
+	if (!ensureAlways(IsValid(PlayerCameraManager)))
+	{
+		return;
+	}
 
 	PlayerCameraManager->StartCameraShake(SkillChargeCameraShakeBaseClass);
 }
