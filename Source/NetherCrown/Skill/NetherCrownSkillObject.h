@@ -98,7 +98,7 @@ protected:
 	void Multicast_SpawnSkillImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
 
 	//CC
-	void ApplyCrowdControlToTarget(ANetherCrownEnemy* TargetEnemy, const ENetherCrownCrowdControlType InCrowdControlType, const float CrowdControlDuration);
+	void ApplyCrowdControlToTarget(const ANetherCrownEnemy* TargetEnemy, const ENetherCrownCrowdControlType InCrowdControlType, const float CrowdControlDuration);
 
 	void PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const;
 	void PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;

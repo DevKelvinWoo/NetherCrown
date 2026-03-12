@@ -43,8 +43,10 @@ void ANetherCrownEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	check(StatusEffectControlComponent);
-	StatusEffectControlComponent->SetHandledStatusNiagaraComponent(StatusNiagaraComponent);
+	if (!HasAuthority() && ensureAlways(IsValid(StatusNiagaraComponent)))
+	{
+		StatusEffectControlComponent->SetHandledStatusNiagaraComponent(StatusNiagaraComponent);
+	}
 
 	SetReplicateMovement(true);
 }
@@ -56,8 +58,10 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
 	Multicast_PlayTakeDamageSound();
 
-	check(CrowdControlComponent);
-	Multicast_PlayTakeDamageAnimation(CrowdControlComponent->GetCrowdControlType());
+	if (ensureAlways(IsValid(CrowdControlComponent)))
+	{
+		Multicast_PlayTakeDamageAnimation(CrowdControlComponent->GetCrowdControlType());
+	}
 
 	ProcessIncomingPhysicalDamage(DamageCauser, ResultDamage);
 
@@ -66,13 +70,22 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
 ENetherCrownCrowdControlType ANetherCrownEnemy::GetCrowdControlType() const
 {
-	check(CrowdControlComponent);
+	if (!ensureAlways(IsValid(CrowdControlComponent)))
+	{
+		return ENetherCrownCrowdControlType::NONE;
+	}
+
 	return CrowdControlComponent->GetCrowdControlType();
 }
 
 void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount)
 {
 	//@NOTE : This function is only executed by server RPC
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	const ANetherCrownCharacter* NetherCrownCharacter = Cast<ANetherCrownCharacter>(DamageCauser);
 	if (!ensureAlways(IsValid(NetherCrownCharacter)))
 	{
@@ -112,6 +125,11 @@ void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser
 
 void ANetherCrownEnemy::Multicast_PlayTakeDamageAnimation_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
+	if (HasAuthority())
+	{
+		return;
+	}
+
 	if (InCrowdControlType != ENetherCrownCrowdControlType::NONE)
 	{
 		return;
@@ -135,22 +153,21 @@ void ANetherCrownEnemy::Multicast_PlayTakeDamageAnimation_Implementation(const E
 
 void ANetherCrownEnemy::PlayTakeDamageSound() const
 {
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtGruntSoundTag);
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtImpactSoundTag);
-}
-
-void ANetherCrownEnemy::ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime)
-{
-	if (!HasAuthority())
+	if (HasAuthority())
 	{
 		return;
 	}
 
-	check(CrowdControlComponent);
-	CrowdControlComponent->ApplyCrowdControl(InCrowdControlType, DurationTime);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtGruntSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtImpactSoundTag);
 }
 
 void ANetherCrownEnemy::Multicast_PlayTakeDamageSound_Implementation()
 {
+	if (HasAuthority())
+	{
+		return;
+	}
+
 	PlayTakeDamageSound();
 }

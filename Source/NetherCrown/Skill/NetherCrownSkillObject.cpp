@@ -71,7 +71,7 @@ void UNetherCrownSkillObject::Multicast_SpawnSkillImpactEffect_Implementation(co
 	PlaySkillHitImpactEffect(TargetEnemy);
 }
 
-void UNetherCrownSkillObject::ApplyCrowdControlToTarget(ANetherCrownEnemy* TargetEnemy, const ENetherCrownCrowdControlType InCrowdControlType, const float CrowdControlDuration)
+void UNetherCrownSkillObject::ApplyCrowdControlToTarget(const ANetherCrownEnemy* TargetEnemy, const ENetherCrownCrowdControlType InCrowdControlType, const float CrowdControlDuration)
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -89,7 +89,13 @@ void UNetherCrownSkillObject::ApplyCrowdControlToTarget(ANetherCrownEnemy* Targe
 		return;
 	}
 
-	TargetEnemy->ApplyCrowdControl(InCrowdControlType, CrowdControlDuration);
+	UNetherCrownCrowdControlComponent* EnemyCrowdControlComponent{ TargetEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(EnemyCrowdControlComponent))
+	{
+		return;
+	}
+
+	EnemyCrowdControlComponent->ApplyCrowdControl(InCrowdControlType, CrowdControlDuration);
 }
 
 void UNetherCrownSkillObject::PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const

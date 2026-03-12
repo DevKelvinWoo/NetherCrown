@@ -39,10 +39,7 @@ public:
 
 	void PlayTakeDamageSound() const;
 
-	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime);
-
 	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return CrowdControlComponent; }
-
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 protected:
@@ -55,30 +52,30 @@ protected:
 private:
 	void ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount);
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayTakeDamageSound();
 
-	UFUNCTION(NetMulticast, Reliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayTakeDamageAnimation(const ENetherCrownCrowdControlType InCrowdControlType);
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UCapsuleComponent> EnemyHitBoxComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownEnemyStatComponent> EnemyStatComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownCrowdControlComponent> CrowdControlComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNiagaraComponent> StatusNiagaraComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownStatusEffectControlComponent> StatusEffectControlComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
 	TSoftObjectPtr<UAnimMontage> TakeDamageAnimMontageSoft{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownEnemyTagData EnemyTagData{};
 };
