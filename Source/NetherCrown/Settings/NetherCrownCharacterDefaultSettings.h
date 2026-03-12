@@ -82,15 +82,15 @@ private:
 	UPROPERTY(Config, EditAnywhere)
 	float RecoveryResetDelayTime{ 1.f };
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "SocketName")
 	FName EquipWeaponSocketName{ TEXT("WeaponSocket") };
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "SocketName")
 	FName StowWeaponSocketLName{ TEXT("StowWeaponSocketL") };
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "SocketName")
 	FName StowWeaponSocketRName{ TEXT("StowWeaponSocketR") };
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "SocketName")
 	FName WeaponTraceSocketName{ TEXT("TraceEnd") };
 };

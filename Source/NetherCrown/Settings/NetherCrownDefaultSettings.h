@@ -15,24 +15,24 @@ class NETHERCROWN_API UNetherCrownDefaultSettings : public UDeveloperSettings
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
 	TSoftObjectPtr<UDataTable> CharacterSoundDT;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
 	TSoftObjectPtr<UDataTable> WeaponDT;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
 	TSoftObjectPtr<UDataTable> EffectDT;
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "MaterialParam")
 	FName FrozenTempestTargetMaterialParam{ TEXT("_VfxMix") };
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "MaterialParam")
 	FName SkyFallSlashArmMaterialParam{ TEXT("SkyFallSlashAlpha") };
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "MaterialAlpha")
 	float FrozenTempestTargetMaterialAlpha{ 0.85f };
 
-	UPROPERTY(Config, EditAnywhere)
+	UPROPERTY(Config, EditAnywhere, Category = "Curve")
 	TSoftObjectPtr<UCurveFloat> TargetOverlayMaterialEndCurveFloatSoft{};
 };
