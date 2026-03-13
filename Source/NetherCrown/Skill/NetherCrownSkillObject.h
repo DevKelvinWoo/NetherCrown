@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
-#include "Components/TimelineComponent.h"
 #include "UObject/Object.h"
 #include "NetherCrownSkillObject.generated.h"
 
@@ -64,26 +63,17 @@ class NETHERCROWN_API UNetherCrownSkillObject : public UObject
 
 public:
 	virtual void InitSkillObject();
+	virtual void PlaySkillCosmetics();
+	virtual void ExecuteSkillGameplay();
+
+	//@NOTE : Timeline
+	virtual void TickFloatTimeline(float DeltaTime){};
 
 	ENetherCrownSkillKeyEnum GetSkillEnum() const { return SkillKeyEnum; }
 
 	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter) { SkillOwnerCharacterWeak = MakeWeakObjectPtr(SkillOwnerCharacter); }
 
-	virtual void PlaySkillCosmetics();
-	virtual void ExecuteSkillGameplay();
-
-	void SetSkillMontageSlowPlayRate(float InPlayRate) const;
-
-	float GetSkillMontageBeginSlowPlayRate() const { return SkillMontageBeginSlowPlayRate; }
-	float GetSkillMontageEndSlowPlayRate() const { return SkillMontageEndSlowPlayRate; }
-
-	void StartSkillCoolDownTimer();
-	void StopSkillCoolDownTimer();
-
 	bool CanActiveSkill() const { return bCanActiveSkill; }
-
-	//@NOTE : Timeline
-	virtual void TickFloatTimeline(float DeltaTime){};
 
 protected:
 	//@NOTE : To Replicate UObject
@@ -100,7 +90,6 @@ protected:
 	//CC
 	void ApplyCrowdControlToTarget(const ANetherCrownEnemy* TargetEnemy, const ENetherCrownCrowdControlType InCrowdControlType, const float CrowdControlDuration);
 
-	void PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const;
 	void PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
 
 	int32 CalculatePhysicalSkillDamage() const;
@@ -125,34 +114,20 @@ protected:
 	void ActiveSkillWeaponAura();
 	void DeactivateSkillWeaponAura();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillAnimMontage")
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
 
-	UPROPERTY(Replicated)
+	UPROPERTY(Transient, Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> SkillOwnerCharacterWeak{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownSkillEffectTagData SkillEffectTagData{};
 
-	UPROPERTY(EditDefaultsOnly, Replicated)
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillData")
 	FNetherCrownSkillData SkillData{};
-
-	FTimerHandle SkillAnimationSlowStartTimerHandle{};
-	FTimerHandle SkillAnimationSlowEndTimerHandle{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillAnimationSlowStartTime{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillAnimationSlowEndTime{ -1.f };
-
-	FTimerHandle SkillHitTimerHandle{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillHitTime{ -1.f };
-
-	FTimerHandle SkillStartTimerHandle{};
-	FTimerHandle SkillEndTimerHandle{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillStartTimeOffset{ -1.f };
@@ -160,17 +135,11 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillEndTimeOffset{ -1.f };
 
-	FTimerHandle CharacterMovementFlyTimerHandle{};
-	FTimerHandle CharacterMovementWalkTimerHandle{};
-
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float CharacterMovementFlyTimeOffset{ -1.f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float CharacterMovementWalkTimeOffset{ -1.f };
-
-	FTimerHandle SkillWeaponAuraActiveTimerHandle{};
-	FTimerHandle SkillWeaponAuraDeactivateTimerHandle{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillAuraActiveTimeOffset{ -1.f };
@@ -178,23 +147,42 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillAuraDeactivateTimeOffset{ -1.f };
 
+	FTimerHandle SkillHitTimerHandle{};
+
+	FTimerHandle SkillStartTimerHandle{};
+	FTimerHandle SkillEndTimerHandle{};
+
+	FTimerHandle SkillAnimationSlowStartTimerHandle{};
+	FTimerHandle SkillAnimationSlowEndTimerHandle{};
+
+	FTimerHandle CharacterMovementFlyTimerHandle{};
+	FTimerHandle CharacterMovementWalkTimerHandle{};
+
+	FTimerHandle SkillWeaponAuraActiveTimerHandle{};
+	FTimerHandle SkillWeaponAuraDeactivateTimerHandle{};
+
 private:
+	void SetSkillMontageSlowPlayRate(float InPlayRate) const;
+
+	void StartSkillCoolDownTimer();
+	void StopSkillCoolDownTimer();
+
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	ENetherCrownSkillKeyEnum SkillKeyEnum{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillMontageBeginSlowPlayRate{ 0.5f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillMontageBeginSlowTimeOffset{ -1.f };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillMontageEndSlowPlayRate{ 1.f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillMontageEndSlowTimeOffset{ -1.f };
 
-	UPROPERTY(EditDefaultsOnly, Replicated)
+	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillData")
 	bool bCanActiveSkill{ true };
 
 	UPROPERTY(Transient)

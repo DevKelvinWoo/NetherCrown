@@ -58,12 +58,7 @@ bool UNetherCrownSkillObject::CallRemoteFunction(UFunction* Function, void* Parm
 void UNetherCrownSkillObject::Multicast_SpawnSkillImpactEffect_Implementation(const ANetherCrownEnemy* TargetEnemy) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	if (SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -74,12 +69,7 @@ void UNetherCrownSkillObject::Multicast_SpawnSkillImpactEffect_Implementation(co
 void UNetherCrownSkillObject::ApplyCrowdControlToTarget(const ANetherCrownEnemy* TargetEnemy, const ENetherCrownCrowdControlType InCrowdControlType, const float CrowdControlDuration)
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	if (!SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -98,18 +88,14 @@ void UNetherCrownSkillObject::ApplyCrowdControlToTarget(const ANetherCrownEnemy*
 	EnemyCrowdControlComponent->ApplyCrowdControl(InCrowdControlType, CrowdControlDuration);
 }
 
-void UNetherCrownSkillObject::PlayEnemyHitSound(const ANetherCrownEnemy* TargetEnemy) const
+void UNetherCrownSkillObject::PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const
 {
-	if (!ensureAlways(IsValid(TargetEnemy)))
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	TargetEnemy->PlayTakeDamageSound();
-}
-
-void UNetherCrownSkillObject::PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const
-{
 	if (SkillEffectTagData.SkillHitImpactEffectTag.IsValid())
 	{
 		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, SkillEffectTagData.SkillHitImpactEffectTag, TargetEnemy->GetActorTransform());
@@ -120,7 +106,7 @@ int32 UNetherCrownSkillObject::CalculatePhysicalSkillDamage() const
 {
 	//Character의 Stat + Weapon의 Damage + SkillDamage
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return 0;
 	}
@@ -206,7 +192,7 @@ void UNetherCrownSkillObject::SetupSkillStateTimer()
 void UNetherCrownSkillObject::SetupSkillMovementModeTimer()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -234,6 +220,12 @@ void UNetherCrownSkillObject::SetupSkillMovementModeTimer()
 
 void UNetherCrownSkillObject::SetupSkillSlowTimer()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
@@ -257,6 +249,12 @@ void UNetherCrownSkillObject::SetupSkillSlowTimer()
 
 void UNetherCrownSkillObject::SetupSkillWeaponAuraTimer()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
@@ -292,13 +290,14 @@ void UNetherCrownSkillObject::StartSkillState()
 		return;
 	}
 
+	BasicAttackComponent->SetCanAttack(false);
+
 	UNetherCrownSkillComponent* SkillComponent{ SkillOwnerCharacter->GetSkillComponent() };
 	if (!ensureAlways(IsValid(SkillComponent)))
 	{
 		return;
 	}
 
-	BasicAttackComponent->SetCanAttack(false);
 	SkillComponent->GetOnStopOrStartSkill().Broadcast(false);
 }
 
@@ -316,30 +315,43 @@ void UNetherCrownSkillObject::EndSkillState()
 		return;
 	}
 
+	BasicAttackComponent->SetCanAttack(true);
+
 	UNetherCrownSkillComponent* SkillComponent{ SkillOwnerCharacter->GetSkillComponent() };
 	if (!ensureAlways(IsValid(SkillComponent)))
 	{
 		return;
 	}
 
-	BasicAttackComponent->SetCanAttack(true);
 	SkillComponent->GetOnStopOrStartSkill().Broadcast(true);
 }
 
 void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	SetSkillMontageSlowPlayRate(SkillMontageBeginSlowPlayRate);
 }
 
 void UNetherCrownSkillObject::RestoreSkillAnimationPlayRate()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	SetSkillMontageSlowPlayRate(SkillMontageEndSlowPlayRate);
 }
 
 void UNetherCrownSkillObject::SetCharacterMovementFly()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -356,7 +368,7 @@ void UNetherCrownSkillObject::SetCharacterMovementFly()
 void UNetherCrownSkillObject::SetCharacterMovementWalk()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -395,11 +407,23 @@ void UNetherCrownSkillObject::SetSkillWeaponAura(const bool bIsActivate)
 
 void UNetherCrownSkillObject::ActiveSkillWeaponAura()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
 	SetSkillWeaponAura(true);
 }
 
 void UNetherCrownSkillObject::DeactivateSkillWeaponAura()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	{
+		return;
+	}
+
 	SetSkillWeaponAura(false);
 }
 
@@ -455,7 +479,12 @@ void UNetherCrownSkillObject::ExecuteSkillGameplay()
 void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter ? SkillOwnerCharacter->GetMesh() : nullptr };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
 	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{};
 	NetherCrownCharacterAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownCharacterAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
 	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
@@ -481,7 +510,10 @@ void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 	}
 
 	const UWorld* World{ GetWorld() };
-	check(World);
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
 
 	FTimerHandle SkillCoolDownTimerHandle{};
 	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, SkillData.SkillCooldown, false);
@@ -491,5 +523,11 @@ void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 
 void UNetherCrownSkillObject::StopSkillCoolDownTimer()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(SkillOwnerCharacter) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	bCanActiveSkill = true;
 }
