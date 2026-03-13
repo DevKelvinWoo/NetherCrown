@@ -39,7 +39,7 @@ private:
 	UPROPERTY(Replicated)
 	bool bIsTraceEnabled{ false };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "TraceData")
 	float TraceRadius = 10.0f;
 
 	UPROPERTY(Transient)
@@ -48,7 +48,7 @@ private:
 	UPROPERTY(Replicated)
 	FVector LastEndLocation{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	FName WeaponTraceSocketName{};
 
 	UPROPERTY(Replicated)
