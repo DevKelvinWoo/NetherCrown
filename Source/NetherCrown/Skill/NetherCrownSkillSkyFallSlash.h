@@ -46,19 +46,13 @@ private:
 
 	void CreateArmMaterialInstanceDynamic();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
 	TSoftObjectPtr<UCurveFloat> SkillCameraCurveFloatSoft{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
 	TSoftObjectPtr<UCurveFloat> SkillArmMaterialCurveFloatSoft{};
 
-	UPROPERTY()
-	TObjectPtr<UCurveFloat> CachedSkillCameraCurveFloat{};
-
-	UPROPERTY()
-	TObjectPtr<UCurveFloat> CachedSkillArmMaterialCurveFloat{};
-
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
 	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
@@ -73,11 +67,17 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
 	float KnockBackDuration{ 1.f };
 
-	UPROPERTY()
-	TObjectPtr<UMaterialInstanceDynamic> ArmMaterialInstanceDynamic{};
-
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "MaterialParam")
 	FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
+
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveFloat> CachedSkillCameraCurveFloat{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveFloat> CachedSkillArmMaterialCurveFloat{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UMaterialInstanceDynamic> ArmMaterialInstanceDynamic{};
 
 	FTimeline SpringArmZOffsetFloatTimeline{};
 	FTimeline ArmMaterialFloatTimeline{};
