@@ -160,7 +160,7 @@ int32 UNetherCrownSkillObject::CalculatePhysicalSkillDamage() const
 void UNetherCrownSkillObject::ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}

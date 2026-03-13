@@ -57,7 +57,7 @@ void UNetherCrownSkillDashAttack::InitSkillObject()
 TArray<AActor*> UNetherCrownSkillDashAttack::DetectDashAttackTargets() const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return {};
 	}
@@ -93,7 +93,10 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	}
 
 	const UWorld* World{ GetWorld() };
-	check(World);
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
 
 	if (CachedTargetActors.IsValidIndex(CurrentTargetIndex))
 	{
@@ -102,7 +105,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	else
 	{
 		ClearDashAttackData();
-		Multicast_StartPostProcessBlendEndTimer();
+		Client_StartPostProcessBlendEndTimer();
 	}
 
 	++CurrentTargetIndex;
@@ -146,7 +149,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 void UNetherCrownSkillDashAttack::Multicast_DeactivateDashAttackGhostTrail_Implementation()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -160,15 +163,10 @@ void UNetherCrownSkillDashAttack::Multicast_DeactivateDashAttackGhostTrail_Imple
 	ControlGhostTrailComponent->ActivateGhostTrail(false);
 }
 
-void UNetherCrownSkillDashAttack::Multicast_ActiveSkillHitCameraShake_Implementation() const
+void UNetherCrownSkillDashAttack::Client_ActiveSkillHitCameraShake_Implementation() const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	if (SkillOwnerCharacter->HasAuthority() || !(SkillOwnerCharacter->IsLocallyControlled()))
 	{
 		return;
 	}
@@ -183,15 +181,10 @@ void UNetherCrownSkillDashAttack::Multicast_ActiveSkillHitCameraShake_Implementa
 	CameraManager->StartCameraShake(DashAttackHitCameraShakeClass, 1.f);
 }
 
-void UNetherCrownSkillDashAttack::Multicast_StartPostProcessBlendEndTimer_Implementation()
+void UNetherCrownSkillDashAttack::Client_StartPostProcessBlendEndTimer_Implementation()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	if (SkillOwnerCharacter->HasAuthority() || !SkillOwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}
@@ -233,7 +226,7 @@ void UNetherCrownSkillDashAttack::PlayLoopDashAttackMontage() const
 void UNetherCrownSkillDashAttack::HitDashAttack()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -261,7 +254,7 @@ void UNetherCrownSkillDashAttack::HitDashAttack()
 	UGameplayStatics::ApplyDamage(CurrentTargetActor, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
 
 	Multicast_SpawnSkillImpactEffect(CurrentTargetEnemy);
-	Multicast_ActiveSkillHitCameraShake();
+	Client_ActiveSkillHitCameraShake();
 }
 
 void UNetherCrownSkillDashAttack::ClearDashAttackData()
@@ -349,8 +342,17 @@ void UNetherCrownSkillDashAttack::Multicast_SetOwnerCharacterRotToTarget_Impleme
 
 void UNetherCrownSkillDashAttack::StartDashAttackTimer()
 {
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
 	const UWorld* World{ GetWorld() };
-	check(World);
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
 
 	ClearDashAttackData();
 	Multicast_SetCharacterCapsuleCollisionData(true);

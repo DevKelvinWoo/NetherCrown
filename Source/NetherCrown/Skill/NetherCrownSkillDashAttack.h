@@ -34,14 +34,14 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCharacterCapsuleCollisionData(const bool bStartDashAttack);
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_StartPostProcessBlendEndTimer();
+	UFUNCTION(Client, UnReliable)
+	void Client_StartPostProcessBlendEndTimer();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_DeactivateDashAttackGhostTrail();
 
-	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_ActiveSkillHitCameraShake() const;
+	UFUNCTION(Client, UnReliable)
+	void Client_ActiveSkillHitCameraShake() const;
 
 	void PlayLoopDashAttackMontage() const;
 
@@ -52,38 +52,38 @@ private:
 	FTimerHandle DashAttackTimerHandle{};
 	FTimerHandle DashAttackHitTimerHandle{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	float SkillDetectSphereOffset{ 750.f };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	float EndLocationOffset{ 50.f };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	float DashTimerRate{ 0.4f };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	float DashDuration{ 0.2f };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	int32 MaxTargetNum{ 5 };
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	float StunDuration{ 3.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "NiagaraSystem")
+	TSoftObjectPtr<UNiagaraSystem> GhostTrailNiagaraSystemSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
+	TSubclassOf<UCameraShakeBase> DashAttackHitCameraShakeClass{};
 
 	int32 CurrentTargetIndex{ 0 };
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TArray<AActor*> CachedTargetActors{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<AActor> CurrentTargetActor{};
 
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UNiagaraSystem> GhostTrailNiagaraSystemSoft{};
-
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UNiagaraSystem> GhostTrailNiagaraSystem{};
-
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<UCameraShakeBase> DashAttackHitCameraShakeClass{};
 };
