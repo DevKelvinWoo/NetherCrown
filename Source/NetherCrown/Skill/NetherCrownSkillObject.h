@@ -147,6 +147,9 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
 	float SkillAuraDeactivateTimeOffset{ -1.f };
 
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> CachedSkillAnimMontage{};
+
 	FTimerHandle SkillHitTimerHandle{};
 
 	FTimerHandle SkillStartTimerHandle{};
@@ -184,7 +187,4 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillData")
 	bool bCanActiveSkill{ true };
-
-	UPROPERTY(Transient)
-	TObjectPtr<UAnimMontage> CachedSkillAnimMontage{};
 };

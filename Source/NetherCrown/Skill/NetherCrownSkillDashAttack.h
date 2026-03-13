@@ -25,6 +25,8 @@ private:
 	void StartDashAttackTimer();
 	void DashAttackToTargets();
 
+	void LastDashAttack();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetOwnerCharacterRotToTarget(const FRotator& InTargetRot);
 
@@ -43,9 +45,19 @@ private:
 	UFUNCTION(Client, UnReliable)
 	void Client_ActiveSkillHitCameraShake() const;
 
-	void PlayLoopDashAttackMontage() const;
+	UFUNCTION(Client, UnReliable)
+	void Client_SetCameraViewLastDashAttack();
+
+	void SetAttackLastDashAttackTimer();
+	void AttackLastDashAttack();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayLastDashAttackMontage() const;
+
+	void PlayDashAttackMontage(UAnimMontage* SkillAnimMontage) const;
 
 	void HitDashAttack();
+	void ApplyDashAttackDamageAndCrowdControl(const ANetherCrownEnemy* TargetEnemy);
 
 	void ClearDashAttackData();
 
@@ -70,11 +82,17 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
 	float StunDuration{ 3.f };
 
+	UPROPERTY(EditDefaultsOnly, Category = "CameraData")
+	float LastDashAttackCameraDistance{ 500.f };
+
 	UPROPERTY(EditDefaultsOnly, Category = "NiagaraSystem")
 	TSoftObjectPtr<UNiagaraSystem> GhostTrailNiagaraSystemSoft{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
 	TSubclassOf<UCameraShakeBase> DashAttackHitCameraShakeClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
+	TSoftObjectPtr<UAnimMontage> LastDashAttackAnimMontageSoft{};
 
 	int32 CurrentTargetIndex{ 0 };
 
@@ -86,4 +104,10 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNiagaraSystem> GhostTrailNiagaraSystem{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> CachedLastDashAttackAnimMontage{};
+
+	FTimerHandle LastDashAttackCameraTimerHandle{};
+	FTimerHandle LastDashAttackHitStartTimerHandle{};
 };
