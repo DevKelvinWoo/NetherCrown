@@ -71,27 +71,27 @@ private:
 
 	void CacheWeaponAuraMap();
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USphereComponent> WeaponEquipSphereComponent{};
 
-	UPROPERTY(EditDefaultsOnly)
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownWeaponTraceComponent> WeaponTraceComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FNetherCrownWeaponTagData WeaponTagData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNiagaraComponent> WeaponAuraNiagaraComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "WeaponAuraData")
+	TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>> WeaponAuraMap{};
+
+	UPROPERTY(Transient)
+	TMap<ENetherCrownSkillKeyEnum, TObjectPtr<UNiagaraSystem>> CachedWeaponAuraMap{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownWeaponData> WeaponData{};
-
-	UPROPERTY(EditDefaultsOnly)
-	FNetherCrownWeaponTagData WeaponTagData{};
-
-	UPROPERTY(EditDefaultsOnly)
-	TObjectPtr<UNiagaraComponent> WeaponAuraNiagaraComponent{};
-
-	UPROPERTY(EditDefaultsOnly)
-	TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>> WeaponAuraMap{};
-
-	UPROPERTY()
-	TMap<ENetherCrownSkillKeyEnum, TObjectPtr<UNiagaraSystem>> CachedWeaponAuraMap{};
 };

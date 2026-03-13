@@ -37,15 +37,38 @@ ANetherCrownWeapon::ANetherCrownWeapon()
 	SetReplicatingMovement(true);
 }
 
+void ANetherCrownWeapon::BeginPlay()
+{
+	Super::BeginPlay();
+
+	WeaponData = FNetherCrownUtilManager::GetWeaponDataByGameplayTag(WeaponTagData.WeaponTag);
+
+	check(WeaponEquipSphereComponent);
+	WeaponEquipSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereBeginOverlap);
+	WeaponEquipSphereComponent->OnComponentEndOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereEndOverlap);
+
+	check(WeaponTraceComponent);
+	WeaponTraceComponent->GetOnHitEnemy().AddUObject(this, &ThisClass::HandleOnHitEnemy);
+
+	CacheWeaponAuraMap();
+}
+
 void ANetherCrownWeapon::SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) const
 {
-	check(WeaponTraceComponent);
+	if (!ensureAlways(IsValid(WeaponTraceComponent)) || !HasAuthority())
+	{
+		return;
+	}
+
 	WeaponTraceComponent->SetWeaponHitTraceEnable(bEnableWeaponHitTrace);
 }
 
 void ANetherCrownWeapon::InitWeaponTraceComponentSettings() const
 {
-	check(WeaponTraceComponent && WeaponMeshComponent);
+	if (!ensureAlways(IsValid(WeaponTraceComponent)) || !ensureAlways(IsValid(WeaponMeshComponent)))
+	{
+		return;
+	}
 
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings = GetDefault<UNetherCrownCharacterDefaultSettings>();
 	check(CharacterDefaultSettings);
@@ -58,21 +81,20 @@ void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENeth
 {
 	if (CachedWeaponAuraMap.IsEmpty())
 	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedWeaponAuraMap is Empty in %hs"), __FUNCTION__);
 		return;
 	}
 
 	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	if (OwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(WeaponAuraNiagaraComponent)))
 	{
 		return;
 	}
-
-	check(WeaponAuraNiagaraComponent);
 
 	if (bActive && SkillKeyEnum != ENetherCrownSkillKeyEnum::None)
 	{
@@ -88,22 +110,6 @@ void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENeth
 		WeaponAuraNiagaraComponent->SetAsset(nullptr);
 		WeaponAuraNiagaraComponent->Deactivate();
 	}
-}
-
-void ANetherCrownWeapon::BeginPlay()
-{
-	Super::BeginPlay();
-
-	WeaponData = FNetherCrownUtilManager::GetWeaponDataByGameplayTag(WeaponTagData.WeaponTag);
-
-	check(WeaponEquipSphereComponent);
-	WeaponEquipSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereBeginOverlap);
-	WeaponEquipSphereComponent->OnComponentEndOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereEndOverlap);
-
-	check(WeaponTraceComponent);
-	WeaponTraceComponent->GetOnHitEnemy().AddUObject(this, &ThisClass::HandleOnHitEnemy);
-
-	CacheWeaponAuraMap();
 }
 
 void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap,
@@ -140,7 +146,7 @@ void ANetherCrownWeapon::HandleOnEquipSphereEndOverlap(UPrimitiveComponent* Over
 void ANetherCrownWeapon::SetEquipComponentSetting(AActor* OtherActor, const bool bCanEquip)
 {
 	ANetherCrownCharacter* NetherCrownCharacter{ Cast<ANetherCrownCharacter>(OtherActor) };
-	if (!ensureAlways(IsValid(NetherCrownCharacter)))
+	if (!ensureAlways(IsValid(NetherCrownCharacter)) || !NetherCrownCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -164,16 +170,14 @@ void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLo
 	}
 
 	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)))
+	if (!ensureAlways(IsValid(OwnerCharacter)) || !OwnerCharacter->HasAuthority())
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("OwnerCharacter is invalid %hs"), __FUNCTION__);
 		return;
 	}
 
 	UNetherCrownBasicAttackComponent* BasicAttackComponent{ OwnerCharacter->GetBasicAttackComponent() };
 	if (!ensureAlways(IsValid(BasicAttackComponent)))
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("BasicAttackComponent is invalid %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -192,6 +196,11 @@ void ANetherCrownWeapon::Multicast_ActiveWeaponAuraNiagara_Implementation(const 
 
 void ANetherCrownWeapon::CacheWeaponAuraMap()
 {
+	if (HasAuthority())
+	{
+		return;
+	}
+
 	for (const auto& WeaponAuraPair : WeaponAuraMap)
 	{
 		CachedWeaponAuraMap.Add(WeaponAuraPair.Key, WeaponAuraPair.Value.LoadSynchronous());
@@ -200,6 +209,15 @@ void ANetherCrownWeapon::CacheWeaponAuraMap()
 
 void ANetherCrownWeapon::DisableEquipSphereCollision() const
 {
-	check(WeaponEquipSphereComponent);
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(WeaponEquipSphereComponent)))
+	{
+		return;
+	}
+
 	WeaponEquipSphereComponent->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 }
