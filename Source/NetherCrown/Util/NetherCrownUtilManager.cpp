@@ -11,15 +11,18 @@
 #include "Sound/SoundCue.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NetherCrown/UI/NetherCrownUITypes.h"
 
 bool FNetherCrownUtilManager::bCacheInitialized{ false };
 TMap<FGameplayTag, FNetherCrownSoundData*> FNetherCrownUtilManager::CachedSoundDataByTag{};
 TMap<FGameplayTag, FNetherCrownWeaponDataTableRow*> FNetherCrownUtilManager::CachedWeaponDataByTag{};
 TMap<FGameplayTag, FNetherCrownEffectData*> FNetherCrownUtilManager::CachedEffectDataByTag{};
+TMap<FGameplayTag, FNetherCrownUIScreenDefinition*> FNetherCrownUtilManager::CachedScreenDefinitionDataByTag{};
 
 TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedSoundDT{};
 TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedWeaponDT{};
 TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedEffectDT{};
+TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedScreenDefinitionDT{};
 
 void FNetherCrownUtilManager::EnsureCacheBuilt()
 {
@@ -73,9 +76,24 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
+	const UDataTable* ScreenDefinitionDT{ DefaultSettings->ScreenDefinitionDT.LoadSynchronous() };
+	if (IsValid(ScreenDefinitionDT))
+	{
+		TArray<FNetherCrownUIScreenDefinition*> OutRows{};
+		ScreenDefinitionDT->GetAllRows<FNetherCrownUIScreenDefinition>(TEXT("ScreenDefinitionTag"), OutRows);
+		for (FNetherCrownUIScreenDefinition* Row : OutRows)
+		{
+			if (Row)
+			{
+				CachedScreenDefinitionDataByTag.Add(Row->ScreenTag, Row);
+			}
+		}
+	}
+
 	CachedSoundDT = DefaultSettings->CharacterSoundDT.LoadSynchronous();
 	CachedWeaponDT = DefaultSettings->WeaponDT.LoadSynchronous();
 	CachedEffectDT = DefaultSettings->EffectDT.LoadSynchronous();
+	CachedScreenDefinitionDT = DefaultSettings->ScreenDefinitionDT.LoadSynchronous();
 
 	bCacheInitialized = true;
 }
@@ -212,4 +230,17 @@ UNiagaraComponent* FNetherCrownUtilManager::AttachNiagaraSystemByGameplayTag(con
 	}
 
 	return UNiagaraFunctionLibrary::SpawnSystemAttached(NiagaraSystem, AttachComponent, AttachSocketName, FVector::ZeroVector, FRotator::ZeroRotator, EAttachLocation::SnapToTarget, false);
+}
+
+const TArray<FNetherCrownUIScreenDefinition> FNetherCrownUtilManager::GetUIScreenDefinitionData()
+{
+	EnsureCacheBuilt();
+
+	TArray<FNetherCrownUIScreenDefinition> ScreenDefinitionArray{};
+	for (const TPair<FGameplayTag, FNetherCrownUIScreenDefinition*>& ScreenDefinitionPair : CachedScreenDefinitionDataByTag)
+	{
+		ScreenDefinitionArray.Add(*(ScreenDefinitionPair.Value));
+	}
+
+	return ScreenDefinitionArray;
 }

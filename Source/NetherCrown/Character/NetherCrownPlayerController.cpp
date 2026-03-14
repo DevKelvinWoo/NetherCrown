@@ -6,6 +6,10 @@
 #include "NetherCrownCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
+#include "NetherCrown/UI/NetherCrownPrimaryLayout.h"
+#include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 ANetherCrownPlayerController::ANetherCrownPlayerController()
 {
@@ -35,6 +39,40 @@ void ANetherCrownPlayerController::AcknowledgePossession(APawn* P)
 {
 	Super::AcknowledgePossession(P);
 	CachedCharacter = Cast<ANetherCrownCharacter>(P);
+}
+
+void ANetherCrownPlayerController::BeginPlay()
+{
+	Super::BeginPlay();
+
+	InitializeUI();
+}
+
+void ANetherCrownPlayerController::InitializeUI()
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	ULocalPlayer* LocalPlayer{ GetLocalPlayer() };
+	if (!ensureAlways(IsValid(LocalPlayer)))
+	{
+		return;
+	}
+
+	UNetherCrownUIManagerSubsystem* UIManagerSubsystem{ LocalPlayer->GetSubsystem<UNetherCrownUIManagerSubsystem>() };
+	if (!ensureAlways(IsValid(UIManagerSubsystem)))
+	{
+		return;
+	}
+
+	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
+	check(DefaultSettings);
+
+	UIManagerSubsystem->SetPrimaryLayoutClass(DefaultSettings->PrimaryLayoutWidgetClass);
+	UIManagerSubsystem->RegisterScreenDefinitions(FNetherCrownUtilManager::GetUIScreenDefinitionData());
+	UIManagerSubsystem->InitializePrimaryLayout();
 }
 
 void ANetherCrownPlayerController::AddIMCAndBindAction()

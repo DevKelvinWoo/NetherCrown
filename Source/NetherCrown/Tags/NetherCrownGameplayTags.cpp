@@ -32,4 +32,15 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon_Weapon3, "Weapon.Weapon3", "");
 #pragma endregion
 
+#pragma region UI
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer, "UI.Layer", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Game, "UI.Layer.Game", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_GameMenu, "UI.Layer.GameMenu", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Menu, "UI.Layer.Menu", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Modal, "UI.Layer.Modal", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Screen, "UI.Screen", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Screen_PrimaryLayout, "UI.Screen.PrimaryLayout", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Screen_HUD, "UI.Screen.HUD", "");
+#pragma endregion
+
 }

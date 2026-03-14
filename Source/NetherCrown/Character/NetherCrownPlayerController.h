@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "NetherCrownCharacter.h"
+#include "NetherCrown/UI/NetherCrownUITypes.h"
 #include "GameFramework/PlayerController.h"
 #include "NetherCrownPlayerController.generated.h"
 
+class UNetherCrownPrimaryLayout;
 class UInputAction;
 class UInputMappingContext;
 
@@ -19,6 +21,7 @@ public:
 	ANetherCrownPlayerController();
 
 protected:
+	virtual void BeginPlay() override;
 	virtual void SetupInputComponent() override;
 	virtual void OnPossess(APawn* InPawn) override;
 	virtual void OnUnPossess() override;
@@ -26,6 +29,7 @@ protected:
 
 private:
 	void AddIMCAndBindAction();
+	void InitializeUI();
 
 	UFUNCTION()
 	void HandleInputMoveCharacter(const FInputActionValue& InActionValue);
@@ -89,7 +93,7 @@ void ANetherCrownPlayerController::ExecuteCharacterAction(FuncType Func, ArgsTyp
 		return;
 	}
 
-	if (!ensureAlways(IsValid(CachedCharacter)))
+	if (!(IsValid(CachedCharacter)))
 	{
 		return;
 	}

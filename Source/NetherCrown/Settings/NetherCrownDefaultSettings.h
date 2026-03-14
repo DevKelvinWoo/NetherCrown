@@ -9,6 +9,8 @@
 class UDataTable;
 class UCurveFloat;
 
+class UNetherCrownPrimaryLayout;
+
 UCLASS(config = Game, defaultconfig, meta = (DisplayName = "NetherCrown Default Settings"))
 class NETHERCROWN_API UNetherCrownDefaultSettings : public UDeveloperSettings
 {
@@ -24,6 +26,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
 	TSoftObjectPtr<UDataTable> EffectDT;
 
+	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
+	TSoftObjectPtr<UDataTable> ScreenDefinitionDT;
+
 	UPROPERTY(Config, EditAnywhere, Category = "MaterialParam")
 	FName FrozenTempestTargetMaterialParam{ TEXT("_VfxMix") };
 
@@ -35,4 +40,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "Curve")
 	TSoftObjectPtr<UCurveFloat> TargetOverlayMaterialEndCurveFloatSoft{};
+
+	UPROPERTY(Config, EditAnywhere, Category = "UI")
+	TSubclassOf<UNetherCrownPrimaryLayout> PrimaryLayoutWidgetClass{};
 };

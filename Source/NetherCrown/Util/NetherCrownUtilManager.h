@@ -13,6 +13,7 @@ class UNetherCrownWeaponData;
 struct FNetherCrownEffectData;
 struct FNetherCrownSoundData;
 struct FNetherCrownWeaponDataTableRow;
+struct FNetherCrownUIScreenDefinition;
 
 class FNetherCrownUtilManager
 {
@@ -29,6 +30,9 @@ public:
 	static void SpawnNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform);
 	static UNiagaraComponent* AttachNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, USceneComponent* AttachComponent, const FName AttachSocketName);
 
+	//UI
+	static const TArray<FNetherCrownUIScreenDefinition> GetUIScreenDefinitionData();
+
 private:
 	static void EnsureCacheBuilt();
 
@@ -36,8 +40,10 @@ private:
 	static TMap<FGameplayTag, FNetherCrownSoundData*> CachedSoundDataByTag;
 	static TMap<FGameplayTag, FNetherCrownWeaponDataTableRow*> CachedWeaponDataByTag;
 	static TMap<FGameplayTag, FNetherCrownEffectData*> CachedEffectDataByTag;
+	static TMap<FGameplayTag, FNetherCrownUIScreenDefinition*> CachedScreenDefinitionDataByTag;
 
 	static TObjectPtr<UDataTable> CachedSoundDT;
 	static TObjectPtr<UDataTable> CachedWeaponDT;
 	static TObjectPtr<UDataTable> CachedEffectDT;
+	static TObjectPtr<UDataTable> CachedScreenDefinitionDT;
 };
