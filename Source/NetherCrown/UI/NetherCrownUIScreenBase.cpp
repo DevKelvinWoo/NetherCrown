@@ -30,13 +30,3 @@ ANetherCrownCharacter* UNetherCrownUIScreenBase::GetOwningNetherCrownCharacter()
 	return Cast<ANetherCrownCharacter>(GetOwningPlayerPawn());
 }
 
-ANetherCrownPlayerState* UNetherCrownUIScreenBase::GetOwningNetherCrownPlayerState() const
-{
-	const ANetherCrownCharacter* OwningCharacter{ GetOwningNetherCrownCharacter() };
-	if (!ensureAlways(IsValid(OwningCharacter)))
-	{
-		return nullptr;
-	}
-
-	return Cast<ANetherCrownPlayerState>(OwningCharacter->GetPlayerState());
-}

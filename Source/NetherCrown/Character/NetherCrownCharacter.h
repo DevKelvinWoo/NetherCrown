@@ -40,6 +40,7 @@ UCLASS()
 class NETHERCROWN_API ANetherCrownCharacter : public ACharacter, public INetherCrownCrowdControlInterface
 {
 	GENERATED_BODY()
+	DECLARE_MULTICAST_DELEGATE(FOnRepPlayerState);
 
 public:
 	ANetherCrownCharacter();
@@ -75,6 +76,7 @@ public:
 	UNetherCrownSkillComponent* GetSkillComponent() const { return NetherCrownSkillComponent; }
 	UNetherCrownControlPPComponent* GetControlPPComponent() const { return NetherCrownControlPPComponent; }
 	UNetherCrownControlGhostTrailComponent* GetControlGhostTrailComponent() const { return NetherCrownControlGhostTrailComponent; }
+	FOnRepPlayerState& GetOnRepPlayerState() { return OnRepPlayerState; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -85,6 +87,8 @@ protected:
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
 
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
+
+	virtual void OnRep_PlayerState() override;
 
 private:
 	void DestroyVisualOnlyComponentsOnDS();
@@ -149,4 +153,5 @@ private:
 	FNetherCrownCharacterTagData CharacterTagData{};
 
 	FTimerHandle TimerHandle_ResetHardLanding;
+	FOnRepPlayerState OnRepPlayerState;
 };

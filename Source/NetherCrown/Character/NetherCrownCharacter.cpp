@@ -403,6 +403,18 @@ UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffect
 	return nullptr;
 }
 
+void ANetherCrownCharacter::OnRep_PlayerState()
+{
+	Super::OnRep_PlayerState();
+
+	if (!IsLocallyControlled())
+	{
+		return;
+	}
+
+	OnRepPlayerState.Broadcast();
+}
+
 void ANetherCrownCharacter::SetIsHardLanding()
 {
 	if (!HasAuthority())

@@ -427,6 +427,29 @@ void UNetherCrownSkillObject::DeactivateSkillWeaponAura()
 	SetSkillWeaponAura(false);
 }
 
+void UNetherCrownSkillObject::SpendMP()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(SkillOwnerCharacter->GetPlayerState()) };
+	if (!ensureAlways(IsValid(OwnerPlayerState)))
+	{
+		return;
+	}
+
+	UNetherCrownPlayerStatComponent* OwnerCharacterStatComponent{ OwnerPlayerState->GetNetherCrownPlayerStatComponent() };
+	if (!ensureAlways(IsValid(OwnerCharacterStatComponent)))
+	{
+		return;
+	}
+
+	OwnerCharacterStatComponent->ModifyMP(-SkillData.SkillMPCost);
+}
+
 void UNetherCrownSkillObject::InitSkillObject()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
@@ -472,6 +495,7 @@ void UNetherCrownSkillObject::PlaySkillCosmetics()
 
 void UNetherCrownSkillObject::ExecuteSkillGameplay()
 {
+	SpendMP();
 	StartSkillCoolDownTimer();
 	SetupSkillStateTimer();
 }

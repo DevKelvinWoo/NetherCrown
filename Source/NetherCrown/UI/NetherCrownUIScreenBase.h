@@ -36,9 +36,6 @@ public:
 	UFUNCTION(BlueprintCallable)
 	ANetherCrownCharacter* GetOwningNetherCrownCharacter() const;
 
-	UFUNCTION(BlueprintCallable)
-	ANetherCrownPlayerState* GetOwningNetherCrownPlayerState() const;
-
 protected:
 	UFUNCTION(BlueprintImplementableEvent)
 	void HandleScreenShown();

@@ -18,7 +18,13 @@ public:
 	int32 CharacterHP{ 100 };
 
 	UPROPERTY(EditAnywhere)
-	int32 CharacterMP{ 100 };
+	float CharacterMaxHP{ 100.f };
+
+	UPROPERTY(EditAnywhere)
+	float CharacterMP{ 100.f };
+
+	UPROPERTY(EditAnywhere)
+	float CharacterMaxMP{ 100.f };
 
 	UPROPERTY(EditAnywhere)
 	int32 CharacterEXP{ 0 };
@@ -56,18 +62,32 @@ class NETHERCROWN_API UNetherCrownPlayerStatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnChacterMPModified, const float);
+
 public:
 	UNetherCrownPlayerStatComponent();
 
 	const FNetherCrownPlayerStatData& GetPlayerStatData() const { return PlayerStatData; }
 
+	//Set Stat
 	void AddPlayerShield(int32 InShieldValue);
 	void ClearPlayerShield();
+
+	void ModifyMP(float MPDelta);
+
+	//Delegate
+	FOnChacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Replicated, Category = "StatData")
+	UFUNCTION()
+	void OnRep_PlayerStatData(const FNetherCrownPlayerStatData& OldPlayerStatData);
+
+	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=OnRep_PlayerStatData, Category = "StatData")
 	FNetherCrownPlayerStatData PlayerStatData{};
+
+	//Delegate
+	FOnChacterMPModified OnCharacterMPModified;
 };

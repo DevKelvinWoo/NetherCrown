@@ -34,6 +34,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	int32 SkillCooldown{ 5 };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillMPCost{ 20.f };
 };
 
 USTRUCT()
@@ -113,6 +116,8 @@ protected:
 	void SetSkillWeaponAura(const bool bIsActivate);
 	void ActiveSkillWeaponAura();
 	void DeactivateSkillWeaponAura();
+
+	void SpendMP();
 
 	UPROPERTY(EditDefaultsOnly, Category = "SkillAnimMontage")
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};

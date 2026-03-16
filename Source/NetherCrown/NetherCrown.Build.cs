@@ -10,7 +10,7 @@ public class NetherCrown : ModuleRules
 
 		PublicDependencyModuleNames.AddRange(new string[]
 		{
-			"Core", "CoreUObject", "Engine", "InputCore", "EnhancedInput", "UMG", "DeveloperSettings", "GameplayTags", "Niagara"
+			"Core", "CoreUObject", "Engine", "FieldNotification", "InputCore", "EnhancedInput", "UMG", "DeveloperSettings", "GameplayTags", "Niagara", "ModelViewViewModel"
 		});
 
 		PrivateDependencyModuleNames.AddRange(new string[] {  });
