@@ -55,7 +55,7 @@ void ANetherCrownPlayerController::InitializeUI()
 		return;
 	}
 
-	ULocalPlayer* LocalPlayer{ GetLocalPlayer() };
+	const ULocalPlayer* LocalPlayer{ GetLocalPlayer() };
 	if (!ensureAlways(IsValid(LocalPlayer)))
 	{
 		return;
