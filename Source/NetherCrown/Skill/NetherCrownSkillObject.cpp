@@ -539,8 +539,10 @@ void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 		return;
 	}
 
-	FTimerHandle SkillCoolDownTimerHandle{};
-	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, SkillData.SkillCooldown, false);
+	SkillCoolDownAccumulator = SkillData.SkillCooldown;
+	Client_SkillCoolDownModify(1.f);
+
+	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, SkillCoolDownDecreaseOffset, true);
 
 	bCanActiveSkill = false;
 }
@@ -553,5 +555,26 @@ void UNetherCrownSkillObject::StopSkillCoolDownTimer()
 		return;
 	}
 
-	bCanActiveSkill = true;
+	SkillCoolDownAccumulator -= SkillCoolDownDecreaseOffset;
+
+	Client_SkillCoolDownModify(SkillCoolDownAccumulator / SkillData.SkillCooldown);
+
+	if (SkillCoolDownAccumulator <= 0.f)
+	{
+		Client_SkillCoolDownModify(0.f);
+
+		const UWorld* World{ GetWorld() };
+		if (!ensureAlways(IsValid(World)))
+		{
+			return;
+		}
+
+		World->GetTimerManager().ClearTimer(SkillCoolDownTimerHandle);
+		bCanActiveSkill = true;
+	}
+}
+
+void UNetherCrownSkillObject::Client_SkillCoolDownModify_Implementation(const float CoolDownRatio)
+{
+	OnSkillCoolDownModified.Broadcast(CoolDownRatio, SkillKeyEnum);
 }

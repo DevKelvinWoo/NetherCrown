@@ -204,8 +204,19 @@ void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()
 		{
 			Obj->SetSkillOwnerCharacter(OwnerCharacter);
 			Obj->InitSkillObject();
+			Obj->GetOnSkillCoolDownModified().AddUObject(this, &ThisClass::HandleOnSkillCoolDownModified);
 
 			SkillObjectMap.Add(Obj->GetSkillEnum(), Obj);
 		}
 	}
+}
+
+void UNetherCrownSkillComponent::HandleOnSkillCoolDownModified(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum)
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	OnSkillCoolDownModified.Broadcast(CoolDownRatio, SkillKeyEnum);
 }

@@ -33,7 +33,7 @@ public:
 	int32 SkillDamage{ 100 };
 
 	UPROPERTY(EditDefaultsOnly)
-	int32 SkillCooldown{ 5 };
+	float SkillCooldown{ 5.f };
 
 	UPROPERTY(EditDefaultsOnly)
 	float SkillMPCost{ 20.f };
@@ -64,6 +64,8 @@ class NETHERCROWN_API UNetherCrownSkillObject : public UObject
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSkillCoolDownModified, const float, const ENetherCrownSkillKeyEnum);
+
 public:
 	virtual void InitSkillObject();
 	virtual void PlaySkillCosmetics();
@@ -77,6 +79,8 @@ public:
 	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter) { SkillOwnerCharacterWeak = MakeWeakObjectPtr(SkillOwnerCharacter); }
 
 	bool CanActiveSkill() const { return bCanActiveSkill; }
+
+	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }
 
 protected:
 	//@NOTE : To Replicate UObject
@@ -169,11 +173,16 @@ protected:
 	FTimerHandle SkillWeaponAuraActiveTimerHandle{};
 	FTimerHandle SkillWeaponAuraDeactivateTimerHandle{};
 
+	FTimerHandle SkillCoolDownTimerHandle{};
+
 private:
 	void SetSkillMontageSlowPlayRate(float InPlayRate) const;
 
 	void StartSkillCoolDownTimer();
 	void StopSkillCoolDownTimer();
+
+	UFUNCTION(Client, Unreliable)
+	void Client_SkillCoolDownModify(const float CoolDownRatio);
 
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	ENetherCrownSkillKeyEnum SkillKeyEnum{};
@@ -192,4 +201,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillData")
 	bool bCanActiveSkill{ true };
+
+	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
+	float SkillCoolDownDecreaseOffset{ 0.1f };
+
+	UPROPERTY()
+	float SkillCoolDownAccumulator{ 0.f };
+
+	FOnSkillCoolDownModified OnSkillCoolDownModified;
 };

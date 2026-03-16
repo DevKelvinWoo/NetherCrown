@@ -7,7 +7,9 @@
 #include "NetherCrownPlayerStatusWidgetView.generated.h"
 
 class UNetherCrownSliderComponent;
+class UNetherCrownSkillIconComponent;
 class UNetherCrownPlayerStatusWidgetViewModel;
+enum class ENetherCrownSkillKeyEnum : uint8;
 
 UCLASS()
 class NETHERCROWN_API UNetherCrownPlayerStatusWidgetView : public UNetherCrownUIScreenBase
@@ -27,8 +29,19 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UNetherCrownSliderComponent> NativeMPBar{};
 
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UNetherCrownSkillIconComponent> NativeQSkillIcon{};
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UNetherCrownSkillIconComponent> NativeESkillIcon{};
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UNetherCrownSkillIconComponent> NativeRSkillIcon{};
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UNetherCrownSkillIconComponent> NativeShiftSkillIcon{};
+
 private:
 	void ApplyMPSlider(const float RemainMPRatio);
+	void ApplySkillCoolDownSlider(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum);
+
 	void InitViewModel();
 
 	UPROPERTY(Transient)

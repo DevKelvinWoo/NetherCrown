@@ -8,6 +8,7 @@
 #include "NetherCrownSkillComponent.generated.h"
 
 class ANetherCrownCharacter;
+enum class ENetherCrownSkillKeyEnum : uint8;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
@@ -15,6 +16,7 @@ class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
 	GENERATED_BODY()
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStopOrStartSkill, const bool);
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSkillCoolDownModified, const float, const ENetherCrownSkillKeyEnum);
 
 public:
 	UNetherCrownSkillComponent();
@@ -22,6 +24,7 @@ public:
 	void ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 	FOnStopOrStartSkill& GetOnStopOrStartSkill() { return OnStopOrStartSkill; }
+	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }
 
 	bool CanActivateSkill() const;
 
@@ -50,6 +53,8 @@ private:
 	UFUNCTION()
 	void OnRep_ReplicatedSkillObjects();
 
+	void HandleOnSkillCoolDownModified(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum);
+
 	UPROPERTY(EditDefaultsOnly, Category = "SkillObject")
 	TArray<TSubclassOf<UNetherCrownSkillObject>> SkillObjectClasses{};
 
@@ -66,4 +71,5 @@ private:
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
 	FOnStopOrStartSkill OnStopOrStartSkill;
+	FOnSkillCoolDownModified OnSkillCoolDownModified;
 };

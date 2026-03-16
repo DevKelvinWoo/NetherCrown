@@ -4,6 +4,7 @@
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
+#include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 
 void UNetherCrownPlayerStatusWidgetViewModel::InitWidget(ANetherCrownCharacter* InModelCharacter)
@@ -14,6 +15,12 @@ void UNetherCrownPlayerStatusWidgetViewModel::InitWidget(ANetherCrownCharacter* 
 	}
 
 	ModelCharacterWeak = MakeWeakObjectPtr(InModelCharacter);
+
+	UNetherCrownSkillComponent* SkillComponent{ InModelCharacter->GetSkillComponent() };
+	if (ensureAlways(IsValid(SkillComponent)))
+	{
+		SkillComponent->GetOnSkillCoolDownModified().AddUObject(this, &ThisClass::HandleOnSkillCoolDownModified);
+	}
 
 	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(InModelCharacter->GetPlayerState()) };
 	if (!ensureAlways(IsValid(OwnerPlayerState)))
@@ -39,5 +46,13 @@ void UNetherCrownPlayerStatusWidgetViewModel::HandleOnCharacterMPModified(const 
 	if (OnCharacterMPModified.IsBound())
 	{
 		OnCharacterMPModified.Broadcast(RemainMPRatio);
+	}
+}
+
+void UNetherCrownPlayerStatusWidgetViewModel::HandleOnSkillCoolDownModified(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum)
+{
+	if (OnSkillCoolDownModified.IsBound())
+	{
+		OnSkillCoolDownModified.Broadcast(CoolDownRatio, SkillKeyEnum);
 	}
 }
