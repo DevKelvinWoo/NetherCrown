@@ -6,9 +6,11 @@
 #include "Blueprint/UserWidget.h"
 #include "NetherCrownSkillIconComponent.generated.h"
 
+class UNetherCrownSkillTooltipView;
 class UProgressBar;
 class UImage;
 class UTextBlock;
+class UMenuAnchor;
 
 UCLASS()
 class NETHERCROWN_API UNetherCrownSkillIconComponent : public UUserWidget
@@ -25,6 +27,11 @@ public:
 	FText SkillKeyText{};
 
 protected:
+	virtual void NativeOnInitialized() override;
+
+	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
+	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
+
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UImage> NativeSkillThumbnailImage{};
 
@@ -33,4 +40,17 @@ protected:
 
 	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UTextBlock> NativeSkillKeyText{};
+
+	UPROPERTY(meta = (BindWidget))
+	TObjectPtr<UMenuAnchor> NativeSkillTooltipAnchor{};
+
+	UPROPERTY(EditAnywhere, meta = (MultiLine = true))
+	FText SkillToolTipText{};
+
+	UPROPERTY(EditAnywhere)
+	TSubclassOf<UNetherCrownSkillTooltipView> SkillTooltipWidgetClass{};
+
+private:
+	UFUNCTION()
+	UUserWidget* HandleOnGetSkillTooltipWidgetInMenuAnchor();
 };

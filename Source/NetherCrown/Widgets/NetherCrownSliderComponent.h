@@ -16,7 +16,10 @@ class NETHERCROWN_API UNetherCrownSliderComponent : public UUserWidget
 public:
 	void SetProgress(float Percent);
 
+	UPROPERTY(BlueprintReadWrite, EditAnywhere)
+	FLinearColor FillColor{};
+
 protected:
-	UPROPERTY(meta = (BindWidget))
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
 	TObjectPtr<UProgressBar> NativeProgressBar{};
 };
