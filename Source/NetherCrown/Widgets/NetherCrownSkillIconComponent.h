@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
+#include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrownSkillIconComponent.generated.h"
 
 class UNetherCrownSkillTooltipView;
@@ -18,13 +19,14 @@ class NETHERCROWN_API UNetherCrownSkillIconComponent : public UUserWidget
 	GENERATED_BODY()
 
 public:
+	void SetHandlingSkillObject(UNetherCrownSkillObject* InHandlingSkillObject);
 	void SetSkillCoolDownProgress(float Percent);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	TSoftObjectPtr<UTexture2D> SkillThumbnailTexture{};
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FText SkillKeyText{};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Skill")
+	ENetherCrownSkillKeyEnum SkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
 
 protected:
 	virtual void NativeOnInitialized() override;
@@ -44,13 +46,16 @@ protected:
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UMenuAnchor> NativeSkillTooltipAnchor{};
 
-	UPROPERTY(EditAnywhere, meta = (MultiLine = true))
-	FText SkillToolTipText{};
-
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UNetherCrownSkillTooltipView> SkillTooltipWidgetClass{};
 
 private:
+	void ApplySkillVisual();
+	void TryResolveHandlingSkillObject();
+
 	UFUNCTION()
 	UUserWidget* HandleOnGetSkillTooltipWidgetInMenuAnchor();
+
+	UPROPERTY(Transient)
+	TObjectPtr<UNetherCrownSkillObject> HandlingSkillObject{};
 };

@@ -18,8 +18,14 @@
 #include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 
 #define DEBUG_SPHERE 0
+
+UNetherCrownSkillDashAttack::UNetherCrownSkillDashAttack()
+{
+	SetSkillTag(NetherCrownTags::Skill_DashAttack);
+}
 
 void UNetherCrownSkillDashAttack::PlaySkillCosmetics()
 {

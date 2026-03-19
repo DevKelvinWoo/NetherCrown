@@ -10,7 +10,13 @@
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
+
+UNetherCrownFrozenTempest::UNetherCrownFrozenTempest()
+{
+	SetSkillTag(NetherCrownTags::Skill_FrozenTempest);
+}
 
 void UNetherCrownFrozenTempest::InitSkillObject()
 {
@@ -352,5 +358,5 @@ void UNetherCrownFrozenTempest::SetupFrozenTempestHitTimers()
 	FTimerManager& TimerManager{ World->GetTimerManager() };
 	TimerManager.ClearTimer(SkillHitTimerHandle);
 
-	TimerManager.SetTimer(SkillHitTimerHandle, this, &ThisClass::HandleOnHitFrozenTempestSkill, SkillHitTime, false);
+	TimerManager.SetTimer(SkillHitTimerHandle, this, &ThisClass::HandleOnHitFrozenTempestSkill, GetSkillHitTime(), false);
 }

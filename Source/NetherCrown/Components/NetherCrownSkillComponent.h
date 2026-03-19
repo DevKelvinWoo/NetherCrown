@@ -22,6 +22,7 @@ public:
 	UNetherCrownSkillComponent();
 
 	void ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
+	UNetherCrownSkillObject* GetSkillObject(const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
 
 	FOnStopOrStartSkill& GetOnStopOrStartSkill() { return OnStopOrStartSkill; }
 	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }

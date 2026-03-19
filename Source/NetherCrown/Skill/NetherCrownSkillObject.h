@@ -14,6 +14,16 @@ class ANetherCrownEnemy;
 enum class ENetherCrownCrowdControlType : uint8;
 enum class ENetherCrownPPType : uint8;
 
+UENUM()
+enum class ENetherCrownSkillKeyEnum : uint8
+{
+	None,
+	QSkill,
+	ESkill,
+	RSkill,
+	ShiftSkill
+};
+
 USTRUCT()
 struct FNetherCrownSkillData
 {
@@ -37,26 +47,51 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	float SkillMPCost{ 20.f };
-};
 
-USTRUCT()
-struct FNetherCrownSkillEffectTagData
-{
-	GENERATED_BODY()
+	UPROPERTY(EditDefaultsOnly)
+	ENetherCrownSkillKeyEnum SkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
 
-public:
+	UPROPERTY(EditDefaultsOnly)
+	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
+
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag SkillHitImpactEffectTag{};
-};
 
-UENUM()
-enum class ENetherCrownSkillKeyEnum : uint8
-{
-	None,
-	QSkill,
-	ESkill,
-	RSkill,
-	ShiftSkill
+	UPROPERTY(EditDefaultsOnly)
+	float SkillHitTime{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillStartTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillEndTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float CharacterMovementFlyTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float CharacterMovementWalkTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillAuraActiveTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillAuraDeactivateTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillMontageBeginSlowPlayRate{ 0.5f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillMontageBeginSlowTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillMontageEndSlowPlayRate{ 1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillMontageEndSlowTimeOffset{ -1.f };
+
+	UPROPERTY(EditDefaultsOnly)
+	float SkillCoolDownDecreaseOffset{ 0.1f };
 };
 
 UCLASS(Abstract)
@@ -74,9 +109,11 @@ public:
 	//@NOTE : Timeline
 	virtual void TickFloatTimeline(float DeltaTime){};
 
-	ENetherCrownSkillKeyEnum GetSkillEnum() const { return SkillKeyEnum; }
+	ENetherCrownSkillKeyEnum GetSkillEnum() const;
+	const FNetherCrownSkillData& GetSkillData() const;
 
-	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter) { SkillOwnerCharacterWeak = MakeWeakObjectPtr(SkillOwnerCharacter); }
+	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter);
+	void SetSkillTag(const FGameplayTag& InSkillTag) { SkillTag = InSkillTag; }
 
 	bool CanActiveSkill() const { return bCanActiveSkill; }
 
@@ -122,39 +159,28 @@ protected:
 	void DeactivateSkillWeaponAura();
 
 	void SpendMP();
+	void CacheSkillData();
 
-	UPROPERTY(EditDefaultsOnly, Category = "SkillAnimMontage")
-	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
+	const TSoftObjectPtr<UAnimMontage>& GetSkillAnimMontageSoft() const;
+	const FGameplayTag& GetSkillHitImpactEffectTag() const;
+	float GetSkillHitTime() const;
+	float GetSkillStartTimeOffset() const;
+	float GetSkillEndTimeOffset() const;
+	float GetCharacterMovementFlyTimeOffset() const;
+	float GetCharacterMovementWalkTimeOffset() const;
+	float GetSkillAuraActiveTimeOffset() const;
+	float GetSkillAuraDeactivateTimeOffset() const;
+	float GetSkillMontageBeginSlowPlayRate() const;
+	float GetSkillMontageBeginSlowTimeOffset() const;
+	float GetSkillMontageEndSlowPlayRate() const;
+	float GetSkillMontageEndSlowTimeOffset() const;
+	float GetSkillCoolDownDecreaseOffset() const;
 
 	UPROPERTY(Transient, Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> SkillOwnerCharacterWeak{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "TagData")
-	FNetherCrownSkillEffectTagData SkillEffectTagData{};
-
-	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillData")
+	UPROPERTY(Replicated)
 	FNetherCrownSkillData SkillData{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillHitTime{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillStartTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillEndTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float CharacterMovementFlyTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float CharacterMovementWalkTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillAuraActiveTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillAuraDeactivateTimeOffset{ -1.f };
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedSkillAnimMontage{};
@@ -185,25 +211,10 @@ private:
 	void Client_SkillCoolDownModify(const float CoolDownRatio);
 
 	UPROPERTY(EditDefaultsOnly, Replicated)
-	ENetherCrownSkillKeyEnum SkillKeyEnum{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillMontageBeginSlowPlayRate{ 0.5f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillMontageBeginSlowTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillMontageEndSlowPlayRate{ 1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillMontageEndSlowTimeOffset{ -1.f };
+	FGameplayTag SkillTag{};
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillData")
 	bool bCanActiveSkill{ true };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillTimerData")
-	float SkillCoolDownDecreaseOffset{ 0.1f };
 
 	UPROPERTY()
 	float SkillCoolDownAccumulator{ 0.f };

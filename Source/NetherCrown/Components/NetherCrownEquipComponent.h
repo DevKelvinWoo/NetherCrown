@@ -12,7 +12,6 @@ class UAnimMontage;
 
 class ANetherCrownWeapon;
 class ANetherCrownCharacter;
-struct FNetherCrownWeaponTagData;
 
 UENUM()
 enum class EStowWeaponPosition : uint8
@@ -52,8 +51,6 @@ public:
 
 	ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 	const UNetherCrownWeaponData* GetEquippedWeaponData() const;
-
-	const FNetherCrownWeaponTagData& GetEquippedWeaponTagData() const;
 
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
 	FOnEquipEndOrStart& GetOnEquipEndOrStart() { return OnEquipEndOrStart; }

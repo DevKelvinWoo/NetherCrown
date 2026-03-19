@@ -16,6 +16,9 @@ class NETHERCROWN_API UNetherCrownSkillSkyFallSlash : public UNetherCrownSkillOb
 {
 	GENERATED_BODY()
 
+public:
+	UNetherCrownSkillSkyFallSlash();
+
 protected:
 	virtual void InitSkillObject() override;
 	virtual void ExecuteSkillGameplay() override;

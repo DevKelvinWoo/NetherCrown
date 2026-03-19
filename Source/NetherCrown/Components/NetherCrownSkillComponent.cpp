@@ -24,6 +24,17 @@ void UNetherCrownSkillComponent::ActivateSkill(const ENetherCrownSkillKeyEnum Sk
 	Server_ActivateSkill(SkillKeyEnum);
 }
 
+UNetherCrownSkillObject* UNetherCrownSkillComponent::GetSkillObject(const ENetherCrownSkillKeyEnum SkillKeyEnum) const
+{
+	UNetherCrownSkillObject* const* FoundSkillObjectPtr{ SkillObjectMap.Find(SkillKeyEnum) };
+	if (!FoundSkillObjectPtr)
+	{
+		return nullptr;
+	}
+
+	return *FoundSkillObjectPtr;
+}
+
 bool UNetherCrownSkillComponent::CanActivateSkill() const
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())

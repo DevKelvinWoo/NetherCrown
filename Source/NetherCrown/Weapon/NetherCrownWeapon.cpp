@@ -3,6 +3,7 @@
 #include "NetherCrownWeapon.h"
 
 #include "NetherCrown/NetherCrown.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrownWeaponTraceComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
@@ -41,7 +42,8 @@ void ANetherCrownWeapon::BeginPlay()
 {
 	Super::BeginPlay();
 
-	WeaponData = FNetherCrownUtilManager::GetWeaponDataByGameplayTag(WeaponTagData.WeaponTag);
+	WeaponData = FNetherCrownUtilManager::GetWeaponDataByGameplayTag(WeaponTag);
+	check(WeaponData);
 
 	check(WeaponEquipSphereComponent);
 	WeaponEquipSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereBeginOverlap);
@@ -201,7 +203,12 @@ void ANetherCrownWeapon::CacheWeaponAuraMap()
 		return;
 	}
 
-	for (const auto& WeaponAuraPair : WeaponAuraMap)
+	if (!ensureAlways(IsValid(WeaponData)))
+	{
+		return;
+	}
+
+	for (const auto& WeaponAuraPair : WeaponData->GetWeaponAuraMap())
 	{
 		CachedWeaponAuraMap.Add(WeaponAuraPair.Key, WeaponAuraPair.Value.LoadSynchronous());
 	}

@@ -13,6 +13,9 @@ class NETHERCROWN_API UNetherCrownSkillDashAttack : public UNetherCrownSkillObje
 {
 	GENERATED_BODY()
 
+public:
+	UNetherCrownSkillDashAttack();
+
 protected:
 	virtual void PlaySkillCosmetics() override;
 	virtual void ExecuteSkillGameplay() override;

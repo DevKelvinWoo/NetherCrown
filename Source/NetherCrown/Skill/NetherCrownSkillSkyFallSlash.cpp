@@ -11,9 +11,15 @@
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
 #define DEBUG_SPHERE 0
+
+UNetherCrownSkillSkyFallSlash::UNetherCrownSkillSkyFallSlash()
+{
+	SetSkillTag(NetherCrownTags::Skill_SkyFallSlash);
+}
 
 void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 {
@@ -130,7 +136,7 @@ void UNetherCrownSkillSkyFallSlash::SetupSkyFallSlashHitTimers()
 	FTimerManager& TimerManager{ World->GetTimerManager() };
 	TimerManager.ClearTimer(SkillHitTimerHandle);
 
-	TimerManager.SetTimer(SkillHitTimerHandle, this, &ThisClass::HandleOnHitSkyFallSlashSkill, SkillHitTime, false);
+	TimerManager.SetTimer(SkillHitTimerHandle, this, &ThisClass::HandleOnHitSkyFallSlashSkill, GetSkillHitTime(), false);
 }
 
 void UNetherCrownSkillSkyFallSlash::Client_StartCameraShake_Implementation()

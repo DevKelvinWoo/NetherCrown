@@ -7,6 +7,9 @@
 #include "Engine/DataAsset.h"
 #include "NetherCrownWeaponData.generated.h"
 
+class UNiagaraSystem;
+enum class ENetherCrownSkillKeyEnum : uint8;
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownWeaponData : public UDataAsset
 {
@@ -15,6 +18,8 @@ class NETHERCROWN_API UNetherCrownWeaponData : public UDataAsset
 public:
 	int32 GetWeaponAttackDamage() const { return WeaponAttackDamage; }
 	int32 GetPhysicalPenetration() const { return PhysicalPenetration; }
+	const FGameplayTag& GetWeaponSwingSoundTag() const { return WeaponSwingSoundTag; }
+	const TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>>& GetWeaponAuraMap() const { return WeaponAuraMap; }
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -37,6 +42,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 WeaponCoolDownReduction{};
+
+	UPROPERTY(EditAnywhere, Category = "Sound")
+	FGameplayTag WeaponSwingSoundTag{};
+
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>> WeaponAuraMap{};
 };
 
 USTRUCT(BlueprintType)

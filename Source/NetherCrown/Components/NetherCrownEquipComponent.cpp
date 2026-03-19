@@ -114,11 +114,6 @@ const UNetherCrownWeaponData* UNetherCrownEquipComponent::GetEquippedWeaponData(
 	return EquippedWeapon->GetWeaponData();
 }
 
-const FNetherCrownWeaponTagData& UNetherCrownEquipComponent::GetEquippedWeaponTagData() const
-{
-	return EquippedWeapon->GetWeaponTagData();
-}
-
 void UNetherCrownEquipComponent::Server_ChangeWeapon_Implementation()
 {
 	ChangeWeaponInternal();

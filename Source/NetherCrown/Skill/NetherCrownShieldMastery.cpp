@@ -10,6 +10,11 @@
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "SkillActors/NetherCrownShield.h"
 
+UNetherCrownShieldMastery::UNetherCrownShieldMastery()
+{
+	SetSkillTag(NetherCrownTags::Skill_ShieldMastery);
+}
+
 void UNetherCrownShieldMastery::PlaySkillCosmetics()
 {
 	Super::PlaySkillCosmetics();

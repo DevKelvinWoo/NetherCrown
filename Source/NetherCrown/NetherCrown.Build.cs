@@ -13,10 +13,11 @@ public class NetherCrown : ModuleRules
 			"Core", "CoreUObject", "Engine", "FieldNotification", "InputCore", "EnhancedInput", "UMG", "DeveloperSettings", "GameplayTags", "Niagara", "ModelViewViewModel"
 		});
 
-		PrivateDependencyModuleNames.AddRange(new string[] {  });
-
-		// Uncomment if you are using Slate UI
-		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
+		PrivateDependencyModuleNames.AddRange(new string[]
+		{
+			"Slate",
+			"SlateCore"
+		});
 
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");

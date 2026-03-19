@@ -7,6 +7,7 @@
 #include "NetherCrownPlayerStatusWidgetViewModel.generated.h"
 
 class ANetherCrownCharacter;
+class UNetherCrownSkillObject;
 enum class ENetherCrownSkillKeyEnum : uint8;
 
 UCLASS()
@@ -18,7 +19,8 @@ class NETHERCROWN_API UNetherCrownPlayerStatusWidgetViewModel : public UMVVMView
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSkillCoolDownModified, const float, const ENetherCrownSkillKeyEnum);
 
 public:
-	void InitWidget(ANetherCrownCharacter* InModelCharacter);
+	void InitViewModel(ANetherCrownCharacter* InModelCharacter);
+	UNetherCrownSkillObject* GetSkillObject(const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
 
 	FOnChacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }
 	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }

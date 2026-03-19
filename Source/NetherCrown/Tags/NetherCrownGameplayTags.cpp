@@ -32,6 +32,14 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Weapon_Weapon3, "Weapon.Weapon3", "");
 #pragma endregion
 
+#pragma region Skill
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill, "Skill", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_SkyFallSlash, "Skill.SkyFallSlash", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_ShieldMastery, "Skill.ShieldMastery", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_FrozenTempest, "Skill.FrozenTempest", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_DashAttack, "Skill.DashAttack", "");
+#pragma endregion
+
 #pragma region UI
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer, "UI.Layer", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Layer_Game, "UI.Layer.Game", "");

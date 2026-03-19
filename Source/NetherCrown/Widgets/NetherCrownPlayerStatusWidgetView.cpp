@@ -5,7 +5,6 @@
 #include "NetherCrownSkillIconComponent.h"
 #include "NetherCrownSliderComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
-#include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "ViewModel/NetherCrownPlayerStatusWidgetViewModel.h"
 
 void UNetherCrownPlayerStatusWidgetView::NativeOnInitialized()
@@ -93,5 +92,25 @@ void UNetherCrownPlayerStatusWidgetView::InitViewModel()
 		return;
 	}
 
-	PlayerStatusWidgetViewModel->InitWidget(OwningCharacter);
+	PlayerStatusWidgetViewModel->InitViewModel(OwningCharacter);
+
+	if (ensureAlways(IsValid(NativeQSkillIcon)))
+	{
+		NativeQSkillIcon->SetHandlingSkillObject(PlayerStatusWidgetViewModel->GetSkillObject(ENetherCrownSkillKeyEnum::QSkill));
+	}
+
+	if (ensureAlways(IsValid(NativeESkillIcon)))
+	{
+		NativeESkillIcon->SetHandlingSkillObject(PlayerStatusWidgetViewModel->GetSkillObject(ENetherCrownSkillKeyEnum::ESkill));
+	}
+
+	if (ensureAlways(IsValid(NativeRSkillIcon)))
+	{
+		NativeRSkillIcon->SetHandlingSkillObject(PlayerStatusWidgetViewModel->GetSkillObject(ENetherCrownSkillKeyEnum::RSkill));
+	}
+
+	if (ensureAlways(IsValid(NativeShiftSkillIcon)))
+	{
+		NativeShiftSkillIcon->SetHandlingSkillObject(PlayerStatusWidgetViewModel->GetSkillObject(ENetherCrownSkillKeyEnum::ShiftSkill));
+	}
 }

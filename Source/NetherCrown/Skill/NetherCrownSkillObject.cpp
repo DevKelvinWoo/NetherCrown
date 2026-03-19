@@ -11,6 +11,7 @@
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
+#include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
@@ -20,14 +21,115 @@
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 
+void UNetherCrownSkillObject::SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter)
+{
+	SkillOwnerCharacterWeak = MakeWeakObjectPtr(SkillOwnerCharacter);
+}
+
 void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, SkillKeyEnum);
+	DOREPLIFETIME(ThisClass, SkillTag);
 	DOREPLIFETIME(ThisClass, SkillOwnerCharacterWeak);
 	DOREPLIFETIME(ThisClass, SkillData);
 	DOREPLIFETIME(ThisClass, bCanActiveSkill);
+}
+
+ENetherCrownSkillKeyEnum UNetherCrownSkillObject::GetSkillEnum() const
+{
+	return SkillData.SkillKeyEnum;
+}
+
+const FNetherCrownSkillData& UNetherCrownSkillObject::GetSkillData() const
+{
+	return SkillData;
+}
+
+void UNetherCrownSkillObject::CacheSkillData()
+{
+	if (!SkillTag.IsValid())
+	{
+		return;
+	}
+
+	const UNetherCrownSkillDataAsset* SkillDataAsset{ FNetherCrownUtilManager::GetSkillDataAssetByGameplayTag(SkillTag) };
+	if (!ensureAlways(IsValid(SkillDataAsset)))
+	{
+		return;
+	}
+
+	SkillData = SkillDataAsset->GetSkillData();
+}
+
+float UNetherCrownSkillObject::GetSkillHitTime() const
+{
+	return SkillData.SkillHitTime;
+}
+
+const TSoftObjectPtr<UAnimMontage>& UNetherCrownSkillObject::GetSkillAnimMontageSoft() const
+{
+	return SkillData.SkillAnimMontageSoft;
+}
+
+const FGameplayTag& UNetherCrownSkillObject::GetSkillHitImpactEffectTag() const
+{
+	return SkillData.SkillHitImpactEffectTag;
+}
+
+float UNetherCrownSkillObject::GetSkillStartTimeOffset() const
+{
+	return SkillData.SkillStartTimeOffset;
+}
+
+float UNetherCrownSkillObject::GetSkillEndTimeOffset() const
+{
+	return SkillData.SkillEndTimeOffset;
+}
+
+float UNetherCrownSkillObject::GetCharacterMovementFlyTimeOffset() const
+{
+	return SkillData.CharacterMovementFlyTimeOffset;
+}
+
+float UNetherCrownSkillObject::GetCharacterMovementWalkTimeOffset() const
+{
+	return SkillData.CharacterMovementWalkTimeOffset;
+}
+
+float UNetherCrownSkillObject::GetSkillAuraActiveTimeOffset() const
+{
+	return SkillData.SkillAuraActiveTimeOffset;
+}
+
+float UNetherCrownSkillObject::GetSkillAuraDeactivateTimeOffset() const
+{
+	return SkillData.SkillAuraDeactivateTimeOffset;
+}
+
+float UNetherCrownSkillObject::GetSkillMontageBeginSlowPlayRate() const
+{
+	return SkillData.SkillMontageBeginSlowPlayRate;
+}
+
+float UNetherCrownSkillObject::GetSkillMontageBeginSlowTimeOffset() const
+{
+	return SkillData.SkillMontageBeginSlowTimeOffset;
+}
+
+float UNetherCrownSkillObject::GetSkillMontageEndSlowPlayRate() const
+{
+	return SkillData.SkillMontageEndSlowPlayRate;
+}
+
+float UNetherCrownSkillObject::GetSkillMontageEndSlowTimeOffset() const
+{
+	return SkillData.SkillMontageEndSlowTimeOffset;
+}
+
+float UNetherCrownSkillObject::GetSkillCoolDownDecreaseOffset() const
+{
+	return SkillData.SkillCoolDownDecreaseOffset;
 }
 
 int32 UNetherCrownSkillObject::GetFunctionCallspace(UFunction* Function, FFrame* Stack)
@@ -96,9 +198,9 @@ void UNetherCrownSkillObject::PlaySkillHitImpactEffect(const ANetherCrownEnemy* 
 		return;
 	}
 
-	if (SkillEffectTagData.SkillHitImpactEffectTag.IsValid())
+	if (GetSkillHitImpactEffectTag().IsValid())
 	{
-		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, SkillEffectTagData.SkillHitImpactEffectTag, TargetEnemy->GetActorTransform());
+		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, GetSkillHitImpactEffectTag(), TargetEnemy->GetActorTransform());
 	}
 }
 
@@ -178,14 +280,14 @@ void UNetherCrownSkillObject::SetupSkillStateTimer()
 	TimerManager.ClearTimer(SkillStartTimerHandle);
 	TimerManager.ClearTimer(SkillEndTimerHandle);
 
-	if (SkillStartTimeOffset >= 0.f)
+	if (GetSkillStartTimeOffset() >= 0.f)
 	{
-		TimerManager.SetTimer(SkillStartTimerHandle, this, &ThisClass::StartSkillState, SkillStartTimeOffset, false);
+		TimerManager.SetTimer(SkillStartTimerHandle, this, &ThisClass::StartSkillState, GetSkillStartTimeOffset(), false);
 	}
 
-	if (SkillEndTimeOffset >= 0.f)
+	if (GetSkillEndTimeOffset() >= 0.f)
 	{
-		TimerManager.SetTimer(SkillEndTimerHandle, this, &ThisClass::EndSkillState, SkillEndTimeOffset, false);
+		TimerManager.SetTimer(SkillEndTimerHandle, this, &ThisClass::EndSkillState, GetSkillEndTimeOffset(), false);
 	}
 }
 
@@ -207,14 +309,14 @@ void UNetherCrownSkillObject::SetupSkillMovementModeTimer()
 	TimerManager.ClearTimer(CharacterMovementFlyTimerHandle);
 	TimerManager.ClearTimer(CharacterMovementWalkTimerHandle);
 
-	if (CharacterMovementFlyTimeOffset >= 0.f)
+	if (GetCharacterMovementFlyTimeOffset() >= 0.f)
 	{
-		TimerManager.SetTimer(CharacterMovementFlyTimerHandle, this, &ThisClass::SetCharacterMovementFly, CharacterMovementFlyTimeOffset, false);
+		TimerManager.SetTimer(CharacterMovementFlyTimerHandle, this, &ThisClass::SetCharacterMovementFly, GetCharacterMovementFlyTimeOffset(), false);
 	}
 
-	if (CharacterMovementWalkTimeOffset >= 0.f)
+	if (GetCharacterMovementWalkTimeOffset() >= 0.f)
 	{
-		TimerManager.SetTimer(CharacterMovementWalkTimerHandle, this, &ThisClass::SetCharacterMovementWalk, CharacterMovementWalkTimeOffset, false);
+		TimerManager.SetTimer(CharacterMovementWalkTimerHandle, this, &ThisClass::SetCharacterMovementWalk, GetCharacterMovementWalkTimeOffset(), false);
 	}
 }
 
@@ -236,14 +338,14 @@ void UNetherCrownSkillObject::SetupSkillSlowTimer()
 	TimerManager.ClearTimer(SkillAnimationSlowStartTimerHandle);
 	TimerManager.ClearTimer(SkillAnimationSlowEndTimerHandle);
 
-	if (SkillMontageBeginSlowTimeOffset >= 0.f)
+	if (GetSkillMontageBeginSlowTimeOffset() >= 0.f)
 	{
-		TimerManager.SetTimer(SkillAnimationSlowStartTimerHandle, this, &ThisClass::MakeSkillAnimationSlowly, SkillMontageBeginSlowTimeOffset, false);
+		TimerManager.SetTimer(SkillAnimationSlowStartTimerHandle, this, &ThisClass::MakeSkillAnimationSlowly, GetSkillMontageBeginSlowTimeOffset(), false);
 	}
 
-	if (SkillMontageEndSlowTimeOffset >= 0.f)
+	if (GetSkillMontageEndSlowTimeOffset() >= 0.f)
 	{
-		TimerManager.SetTimer(SkillAnimationSlowEndTimerHandle, this, &ThisClass::RestoreSkillAnimationPlayRate, SkillMontageEndSlowTimeOffset, false);
+		TimerManager.SetTimer(SkillAnimationSlowEndTimerHandle, this, &ThisClass::RestoreSkillAnimationPlayRate, GetSkillMontageEndSlowTimeOffset(), false);
 	}
 }
 
@@ -265,14 +367,14 @@ void UNetherCrownSkillObject::SetupSkillWeaponAuraTimer()
 	TimerManager.ClearTimer(SkillWeaponAuraActiveTimerHandle);
 	TimerManager.ClearTimer(SkillWeaponAuraDeactivateTimerHandle);
 
-	if (SkillAuraActiveTimeOffset >= 0.f)
+	if (GetSkillAuraActiveTimeOffset() >= 0.f)
 	{
-		TimerManager.SetTimer(SkillWeaponAuraActiveTimerHandle, this, &ThisClass::ActiveSkillWeaponAura, SkillAuraActiveTimeOffset, false);
+		TimerManager.SetTimer(SkillWeaponAuraActiveTimerHandle, this, &ThisClass::ActiveSkillWeaponAura, GetSkillAuraActiveTimeOffset(), false);
 	}
 
-	if (SkillAuraDeactivateTimeOffset >= 0.f)
+	if (GetSkillAuraDeactivateTimeOffset() >= 0.f)
 	{
-		TimerManager.SetTimer(SkillWeaponAuraDeactivateTimerHandle, this, &ThisClass::DeactivateSkillWeaponAura, SkillAuraDeactivateTimeOffset, false);
+		TimerManager.SetTimer(SkillWeaponAuraDeactivateTimerHandle, this, &ThisClass::DeactivateSkillWeaponAura, GetSkillAuraDeactivateTimeOffset(), false);
 	}
 }
 
@@ -334,7 +436,7 @@ void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
 		return;
 	}
 
-	SetSkillMontageSlowPlayRate(SkillMontageBeginSlowPlayRate);
+	SetSkillMontageSlowPlayRate(GetSkillMontageBeginSlowPlayRate());
 }
 
 void UNetherCrownSkillObject::RestoreSkillAnimationPlayRate()
@@ -345,7 +447,7 @@ void UNetherCrownSkillObject::RestoreSkillAnimationPlayRate()
 		return;
 	}
 
-	SetSkillMontageSlowPlayRate(SkillMontageEndSlowPlayRate);
+	SetSkillMontageSlowPlayRate(GetSkillMontageEndSlowPlayRate());
 }
 
 void UNetherCrownSkillObject::SetCharacterMovementFly()
@@ -402,7 +504,7 @@ void UNetherCrownSkillObject::SetSkillWeaponAura(const bool bIsActivate)
 		return;
 	}
 
-	EquippedWeapon->Multicast_ActiveWeaponAuraNiagara(bIsActivate, SkillKeyEnum);
+	EquippedWeapon->Multicast_ActiveWeaponAuraNiagara(bIsActivate, GetSkillEnum());
 }
 
 void UNetherCrownSkillObject::ActiveSkillWeaponAura()
@@ -452,6 +554,8 @@ void UNetherCrownSkillObject::SpendMP()
 
 void UNetherCrownSkillObject::InitSkillObject()
 {
+	CacheSkillData();
+
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
@@ -466,7 +570,7 @@ void UNetherCrownSkillObject::InitSkillObject()
 		return;
 	}
 
-	CachedSkillAnimMontage = SkillAnimMontageSoft.LoadSynchronous();
+	CachedSkillAnimMontage = GetSkillAnimMontageSoft().IsNull() ? nullptr : GetSkillAnimMontageSoft().LoadSynchronous();
 }
 
 void UNetherCrownSkillObject::PlaySkillCosmetics()
@@ -516,7 +620,7 @@ void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) cons
 		return;
 	}
 
-	UAnimMontage* SkillAnimMontage{ SkillAnimMontageSoft.LoadSynchronous() };
+	UAnimMontage* SkillAnimMontage{ GetSkillAnimMontageSoft().IsNull() ? nullptr : GetSkillAnimMontageSoft().LoadSynchronous() };
 	if (!ensureAlways(IsValid(SkillAnimMontage)))
 	{
 		return;
@@ -542,7 +646,7 @@ void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 	SkillCoolDownAccumulator = SkillData.SkillCooldown;
 	Client_SkillCoolDownModify(1.f);
 
-	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, SkillCoolDownDecreaseOffset, true);
+	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, GetSkillCoolDownDecreaseOffset(), true);
 
 	bCanActiveSkill = false;
 }
@@ -555,7 +659,7 @@ void UNetherCrownSkillObject::StopSkillCoolDownTimer()
 		return;
 	}
 
-	SkillCoolDownAccumulator -= SkillCoolDownDecreaseOffset;
+	SkillCoolDownAccumulator -= GetSkillCoolDownDecreaseOffset();
 
 	Client_SkillCoolDownModify(SkillCoolDownAccumulator / SkillData.SkillCooldown);
 
@@ -576,5 +680,5 @@ void UNetherCrownSkillObject::StopSkillCoolDownTimer()
 
 void UNetherCrownSkillObject::Client_SkillCoolDownModify_Implementation(const float CoolDownRatio)
 {
-	OnSkillCoolDownModified.Broadcast(CoolDownRatio, SkillKeyEnum);
+	OnSkillCoolDownModified.Broadcast(CoolDownRatio, GetSkillEnum());
 }

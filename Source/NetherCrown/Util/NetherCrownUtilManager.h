@@ -9,8 +9,10 @@ class USoundCue;
 class UNiagaraSystem;
 class UNiagaraComponent;
 
+class UNetherCrownSkillDataAsset;
 class UNetherCrownWeaponData;
 struct FNetherCrownEffectData;
+struct FNetherCrownSkillDataTableRow;
 struct FNetherCrownSoundData;
 struct FNetherCrownWeaponDataTableRow;
 struct FNetherCrownUIScreenDefinition;
@@ -21,6 +23,9 @@ public:
 	//Sound
 	static USoundCue* GetSoundCueByGameplayTag(const FGameplayTag& SoundTag);
 	static void PlaySound2DByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& SoundTag);
+
+	//SkillData
+	static UNetherCrownSkillDataAsset* GetSkillDataAssetByGameplayTag(const FGameplayTag& SkillTag);
 
 	//WeaponData
 	static UNetherCrownWeaponData* GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag);
@@ -38,11 +43,13 @@ private:
 
 	static bool bCacheInitialized;
 	static TMap<FGameplayTag, FNetherCrownSoundData*> CachedSoundDataByTag;
+	static TMap<FGameplayTag, FNetherCrownSkillDataTableRow*> CachedSkillDataByTag;
 	static TMap<FGameplayTag, FNetherCrownWeaponDataTableRow*> CachedWeaponDataByTag;
 	static TMap<FGameplayTag, FNetherCrownEffectData*> CachedEffectDataByTag;
 	static TMap<FGameplayTag, FNetherCrownUIScreenDefinition*> CachedScreenDefinitionDataByTag;
 
 	static TObjectPtr<UDataTable> CachedSoundDT;
+	static TObjectPtr<UDataTable> CachedSkillDT;
 	static TObjectPtr<UDataTable> CachedWeaponDT;
 	static TObjectPtr<UDataTable> CachedEffectDT;
 	static TObjectPtr<UDataTable> CachedScreenDefinitionDT;

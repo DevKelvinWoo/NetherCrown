@@ -5,6 +5,7 @@
 #include "NetherCrown/NetherCrown.h"
 #include "Kismet/GameplayStatics.h"
 #include "NetherCrown/Data/NetherCrownEffectData.h"
+#include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrown/Data/NetherCrownSoundData.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
@@ -15,11 +16,13 @@
 
 bool FNetherCrownUtilManager::bCacheInitialized{ false };
 TMap<FGameplayTag, FNetherCrownSoundData*> FNetherCrownUtilManager::CachedSoundDataByTag{};
+TMap<FGameplayTag, FNetherCrownSkillDataTableRow*> FNetherCrownUtilManager::CachedSkillDataByTag{};
 TMap<FGameplayTag, FNetherCrownWeaponDataTableRow*> FNetherCrownUtilManager::CachedWeaponDataByTag{};
 TMap<FGameplayTag, FNetherCrownEffectData*> FNetherCrownUtilManager::CachedEffectDataByTag{};
 TMap<FGameplayTag, FNetherCrownUIScreenDefinition*> FNetherCrownUtilManager::CachedScreenDefinitionDataByTag{};
 
 TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedSoundDT{};
+TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedSkillDT{};
 TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedWeaponDT{};
 TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedEffectDT{};
 TObjectPtr<UDataTable> FNetherCrownUtilManager::CachedScreenDefinitionDT{};
@@ -34,11 +37,11 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
-	const UDataTable* SoundDT{ DefaultSettings->CharacterSoundDT.LoadSynchronous() };
-	if (IsValid(SoundDT))
+	CachedSoundDT = DefaultSettings->CharacterSoundDT.LoadSynchronous();
+	if (IsValid(CachedSoundDT))
 	{
 		TArray<FNetherCrownSoundData*> OutRows{};
-		SoundDT->GetAllRows<FNetherCrownSoundData>(TEXT("SoundTag"), OutRows);
+		CachedSoundDT->GetAllRows<FNetherCrownSoundData>(TEXT("SoundTag"), OutRows);
 		for (FNetherCrownSoundData* Row : OutRows)
 		{
 			if (Row)
@@ -48,11 +51,11 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	const UDataTable* WeaponDT{ DefaultSettings->WeaponDT.LoadSynchronous() };
-	if (IsValid(WeaponDT))
+	CachedWeaponDT = DefaultSettings->WeaponDT.LoadSynchronous();
+	if (IsValid(CachedWeaponDT))
 	{
 		TArray<FNetherCrownWeaponDataTableRow*> OutRows{};
-		WeaponDT->GetAllRows<FNetherCrownWeaponDataTableRow>(TEXT("WeaponTag"), OutRows);
+		CachedWeaponDT->GetAllRows<FNetherCrownWeaponDataTableRow>(TEXT("WeaponTag"), OutRows);
 		for (FNetherCrownWeaponDataTableRow* Row : OutRows)
 		{
 			if (Row)
@@ -62,11 +65,25 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	const UDataTable* EffectDT{ DefaultSettings->EffectDT.LoadSynchronous() };
-	if (IsValid(EffectDT))
+	CachedSkillDT = DefaultSettings->SkillDT.LoadSynchronous();
+	if (IsValid(CachedSkillDT))
+	{
+		TArray<FNetherCrownSkillDataTableRow*> OutRows{};
+		CachedSkillDT->GetAllRows<FNetherCrownSkillDataTableRow>(TEXT("SkillTag"), OutRows);
+		for (FNetherCrownSkillDataTableRow* Row : OutRows)
+		{
+			if (Row)
+			{
+				CachedSkillDataByTag.Add(Row->GetSkillTag(), Row);
+			}
+		}
+	}
+
+	CachedEffectDT = DefaultSettings->EffectDT.LoadSynchronous();
+	if (IsValid(CachedEffectDT))
 	{
 		TArray<FNetherCrownEffectData*> OutRows{};
-		EffectDT->GetAllRows<FNetherCrownEffectData>(TEXT("EffectTag"), OutRows);
+		CachedEffectDT->GetAllRows<FNetherCrownEffectData>(TEXT("EffectTag"), OutRows);
 		for (FNetherCrownEffectData* Row : OutRows)
 		{
 			if (Row)
@@ -76,11 +93,11 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	const UDataTable* ScreenDefinitionDT{ DefaultSettings->ScreenDefinitionDT.LoadSynchronous() };
-	if (IsValid(ScreenDefinitionDT))
+	CachedScreenDefinitionDT = DefaultSettings->ScreenDefinitionDT.LoadSynchronous();
+	if (IsValid(CachedScreenDefinitionDT))
 	{
 		TArray<FNetherCrownUIScreenDefinition*> OutRows{};
-		ScreenDefinitionDT->GetAllRows<FNetherCrownUIScreenDefinition>(TEXT("ScreenDefinitionTag"), OutRows);
+		CachedScreenDefinitionDT->GetAllRows<FNetherCrownUIScreenDefinition>(TEXT("ScreenDefinitionTag"), OutRows);
 		for (FNetherCrownUIScreenDefinition* Row : OutRows)
 		{
 			if (Row)
@@ -89,11 +106,6 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 			}
 		}
 	}
-
-	CachedSoundDT = DefaultSettings->CharacterSoundDT.LoadSynchronous();
-	CachedWeaponDT = DefaultSettings->WeaponDT.LoadSynchronous();
-	CachedEffectDT = DefaultSettings->EffectDT.LoadSynchronous();
-	CachedScreenDefinitionDT = DefaultSettings->ScreenDefinitionDT.LoadSynchronous();
 
 	bCacheInitialized = true;
 }
@@ -147,6 +159,28 @@ void FNetherCrownUtilManager::PlaySound2DByGameplayTag(const UObject* WorldConte
 	}
 
 	UGameplayStatics::PlaySound2D(WorldContextObject, SoundCue);
+}
+
+UNetherCrownSkillDataAsset* FNetherCrownUtilManager::GetSkillDataAssetByGameplayTag(const FGameplayTag& SkillTag)
+{
+	EnsureCacheBuilt();
+
+	if (!ensureAlways(IsValid(CachedSkillDT)))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No SkillDataTable in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	FNetherCrownSkillDataTableRow** FoundSkillData{ CachedSkillDataByTag.Find(SkillTag) };
+	if (!FoundSkillData || !(*FoundSkillData))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No Found SkillDataTable in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	return (*FoundSkillData)->GetSkillDataAsset().LoadSynchronous();
 }
 
 UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag)

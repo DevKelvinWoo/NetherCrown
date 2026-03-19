@@ -14,6 +14,9 @@ class NETHERCROWN_API UNetherCrownShieldMastery : public UNetherCrownSkillObject
 {
 	GENERATED_BODY()
 
+public:
+	UNetherCrownShieldMastery();
+
 protected:
 	virtual void PlaySkillCosmetics() override;
 	virtual void ExecuteSkillGameplay() override;

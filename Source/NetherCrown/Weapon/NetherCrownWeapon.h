@@ -17,19 +17,6 @@ class UNetherCrownWeaponData;
 class UNetherCrownWeaponTraceComponent;
 enum class ENetherCrownSkillKeyEnum : uint8;
 
-USTRUCT()
-struct FNetherCrownWeaponTagData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag WeaponTag{};
-
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag WeaponSwingSound{};
-};
-
 UCLASS()
 class NETHERCROWN_API ANetherCrownWeapon : public AActor
 {
@@ -46,8 +33,6 @@ public:
 	void InitWeaponTraceComponentSettings() const;
 
 	const UNetherCrownWeaponData* GetWeaponData() const { return WeaponData; }
-
-	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum);
@@ -81,13 +66,10 @@ private:
 	TObjectPtr<UNetherCrownWeaponTraceComponent> WeaponTraceComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
-	FNetherCrownWeaponTagData WeaponTagData{};
+	FGameplayTag WeaponTag{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNiagaraComponent> WeaponAuraNiagaraComponent{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "WeaponAuraData")
-	TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>> WeaponAuraMap{};
 
 	UPROPERTY(Transient)
 	TMap<ENetherCrownSkillKeyEnum, TObjectPtr<UNiagaraSystem>> CachedWeaponAuraMap{};

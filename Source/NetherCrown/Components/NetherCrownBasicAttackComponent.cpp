@@ -388,7 +388,19 @@ void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
 		return;
 	}
 
-	const FGameplayTag& SwingWeaponSoundTag{ EquipComponent->GetEquippedWeaponTagData().WeaponSwingSound };
+	const ANetherCrownWeapon* EquippedWeapon{ EquipComponent->GetEquippedWeapon() };
+	if (!ensureAlways(IsValid(EquippedWeapon)))
+	{
+		return;
+	}
+
+	const UNetherCrownWeaponData* EquippedWeaponData{ EquippedWeapon->GetWeaponData() };
+	if (!ensureAlways(IsValid(EquippedWeaponData)))
+	{
+		return;
+	}
+
+	const FGameplayTag SwingWeaponSoundTag{ EquippedWeaponData->GetWeaponSwingSoundTag() };
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedCharacter, SwingWeaponSoundTag);
 }
 

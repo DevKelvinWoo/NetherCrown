@@ -14,6 +14,9 @@ class NETHERCROWN_API UNetherCrownFrozenTempest : public UNetherCrownSkillObject
 {
 	GENERATED_BODY()
 
+public:
+	UNetherCrownFrozenTempest();
+
 protected:
 	virtual void InitSkillObject() override;
 

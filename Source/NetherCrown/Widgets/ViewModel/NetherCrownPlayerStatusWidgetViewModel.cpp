@@ -6,8 +6,9 @@
 #include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
+#include "NetherCrown/Skill/NetherCrownSkillObject.h"
 
-void UNetherCrownPlayerStatusWidgetViewModel::InitWidget(ANetherCrownCharacter* InModelCharacter)
+void UNetherCrownPlayerStatusWidgetViewModel::InitViewModel(ANetherCrownCharacter* InModelCharacter)
 {
 	if (!ensureAlways(IsValid(InModelCharacter)))
 	{
@@ -39,6 +40,23 @@ void UNetherCrownPlayerStatusWidgetViewModel::InitWidget(ANetherCrownCharacter* 
 	const FNetherCrownPlayerStatData& PlayerStatData{ OwnerCharacterStatComponent->GetPlayerStatData() };
 	const float RemainMPRatio{ PlayerStatData.CharacterMaxMP > 0 ? (PlayerStatData.CharacterMP) / (PlayerStatData.CharacterMaxMP) : 0.0f };
 	HandleOnCharacterMPModified(RemainMPRatio);
+}
+
+UNetherCrownSkillObject* UNetherCrownPlayerStatusWidgetViewModel::GetSkillObject(const ENetherCrownSkillKeyEnum SkillKeyEnum) const
+{
+	const ANetherCrownCharacter* ModelCharacter{ ModelCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(ModelCharacter)))
+	{
+		return nullptr;
+	}
+
+	UNetherCrownSkillComponent* SkillComponent{ ModelCharacter->GetSkillComponent() };
+	if (!ensureAlways(IsValid(SkillComponent)))
+	{
+		return nullptr;
+	}
+
+	return SkillComponent->GetSkillObject(SkillKeyEnum);
 }
 
 void UNetherCrownPlayerStatusWidgetViewModel::HandleOnCharacterMPModified(const float RemainMPRatio)
