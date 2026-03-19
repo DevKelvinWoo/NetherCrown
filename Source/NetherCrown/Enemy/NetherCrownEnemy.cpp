@@ -6,6 +6,7 @@
 #include "NiagaraComponent.h"
 #include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
@@ -32,6 +33,8 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 
 	bNetLoadOnClient = true;
 	bReplicates = true;
+
+	SetEnemyMovementComponentValue();
 }
 
 UNetherCrownStatusEffectControlComponent* ANetherCrownEnemy::GetStatusEffectControlComponent() const
@@ -76,6 +79,19 @@ ENetherCrownCrowdControlType ANetherCrownEnemy::GetCrowdControlType() const
 	}
 
 	return CrowdControlComponent->GetCrowdControlType();
+}
+
+void ANetherCrownEnemy::SetEnemyMovementComponentValue()
+{
+	UCharacterMovementComponent* CharacterMovementComponent{ GetCharacterMovement() };
+	if (!ensureAlways(IsValid(CharacterMovementComponent)))
+	{
+		return;
+	}
+
+	CharacterMovementComponent->bOrientRotationToMovement = true;
+
+	bUseControllerRotationYaw = false;
 }
 
 void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount)

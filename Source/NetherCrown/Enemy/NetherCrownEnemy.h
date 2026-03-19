@@ -50,6 +50,8 @@ protected:
 	ENetherCrownCrowdControlType GetCrowdControlType() const;
 
 private:
+	void SetEnemyMovementComponentValue();
+
 	void ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount);
 
 	UFUNCTION(NetMulticast, Unreliable)
