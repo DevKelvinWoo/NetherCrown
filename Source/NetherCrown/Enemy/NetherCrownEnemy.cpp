@@ -6,6 +6,7 @@
 #include "NiagaraComponent.h"
 #include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
@@ -30,6 +31,8 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 	CrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
 
 	StatusEffectControlComponent = CreateDefaultSubobject<UNetherCrownStatusEffectControlComponent>(TEXT("StatusEffectControlComponent"));
+
+	BasicAttackComponent = CreateDefaultSubobject<UNetherCrownEnemyBasicAttackComponent>(TEXT("BasicAttackComponent"));
 
 	bNetLoadOnClient = true;
 	bReplicates = true;

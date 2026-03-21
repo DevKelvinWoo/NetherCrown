@@ -32,6 +32,11 @@ void ANetherCrownEnemyAIController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
 
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	if (!ensureAlways(IsValid(BehaviorTreeAsset)))
 	{
 		return;
@@ -55,33 +60,31 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 		return;
 	}
 
-	ANetherCrownCharacter* TargetCharacter{ Cast<ANetherCrownCharacter>(Actor) };
-	if (!IsValid(TargetCharacter))
+	if (!ensureAlways(IsValid(BlackboardComponentCached)))
 	{
 		return;
 	}
 
-	if (!ensureAlways(IsValid(BlackboardComponentCached)))
+	ANetherCrownCharacter* TargetCharacter{ Cast<ANetherCrownCharacter>(Actor) };
+	if (!IsValid(TargetCharacter))
 	{
+		BlackboardComponentCached->ClearValue(TargetActorBlackboardKey);
 		return;
 	}
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		BlackboardComponentCached->SetValueAsObject(TargetActorBlackboardKey, TargetCharacter);
-		return;
-	}
-
-	const UObject* CurrentTargetObject{ BlackboardComponentCached->GetValueAsObject(TargetActorBlackboardKey) };
-	if (CurrentTargetObject == TargetCharacter)
-	{
-		BlackboardComponentCached->ClearValue(TargetActorBlackboardKey);
-		StopMovement();
 	}
 }
 
 void ANetherCrownEnemyAIController::SetSightConfigAndPerceptionComponentValue()
 {
+	if (!HasAuthority())
+	{
+		return;
+	}
+
 	if (ensureAlways(IsValid(SightConfig)) && ensureAlways(IsValid(EnemyPerceptionComponent)))
 	{
 		SightConfig->SightRadius = SightRadius;

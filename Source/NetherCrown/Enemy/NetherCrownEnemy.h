@@ -8,6 +8,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
 
+class UNetherCrownEnemyBasicAttackComponent;
 class UNiagaraComponent;
 class UCapsuleComponent;
 
@@ -40,6 +41,7 @@ public:
 	void PlayTakeDamageSound() const;
 
 	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return CrowdControlComponent; }
+	UNetherCrownEnemyStatComponent* GetEnemyStatComponent() const { return EnemyStatComponent; }
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 protected:
@@ -74,6 +76,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownStatusEffectControlComponent> StatusEffectControlComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownEnemyBasicAttackComponent> BasicAttackComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
 	TSoftObjectPtr<UAnimMontage> TakeDamageAnimMontageSoft{};

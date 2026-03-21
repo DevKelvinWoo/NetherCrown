@@ -35,16 +35,13 @@ private:
 	float SightRadius{ 1200.0f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
-	float LoseSightRadius{ 1500.0f };
+	float LoseSightRadius{ 2500.0f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
-	float PeripheralVisionAngleDegrees{ 70.0f };
+	float PeripheralVisionAngleDegrees{ 360.0f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
 	float MaxSightAge{ 2.0f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
-	FName TargetActorBlackboardKey{ TEXT("TargetActor") };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
 	TObjectPtr<UAIPerceptionComponent> EnemyPerceptionComponent{};
@@ -52,7 +49,10 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
 	TObjectPtr<UAISenseConfig_Sight> SightConfig{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "AI")
+	UPROPERTY(EditDefaultsOnly, Category = "BlackboardKeyName")
+	FName TargetActorBlackboardKey{ TEXT("TargetActor") };
+
+	UPROPERTY(EditDefaultsOnly, Category = "BT")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset{};
 
 	UPROPERTY(Transient)

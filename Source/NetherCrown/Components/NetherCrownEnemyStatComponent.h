@@ -26,6 +26,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	int32 MagicArmor{ 10 };
+
+	UPROPERTY(EditAnywhere)
+	int32 AttackRange{ 200 };
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
