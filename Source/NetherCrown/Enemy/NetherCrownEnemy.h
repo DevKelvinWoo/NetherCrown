@@ -8,7 +8,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
 
-class UNetherCrownEnemyBasicAttackComponent;
+class ANetherCrownEnemyWeapon;
 class UNiagaraComponent;
 class UCapsuleComponent;
 
@@ -16,6 +16,7 @@ class ANetherCrownCharacter;
 class UNetherCrownStatusEffectControlComponent;
 class UNetherCrownEnemyStatComponent;
 class UNetherCrownCrowdControlComponent;
+class UNetherCrownEnemyBasicAttackComponent;
 
 USTRUCT()
 struct FNetherCrownEnemyTagData
@@ -52,6 +53,8 @@ protected:
 	ENetherCrownCrowdControlType GetCrowdControlType() const;
 
 private:
+	void AttachEnemyWeapon();
+
 	void SetEnemyMovementComponentValue();
 
 	void ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount);
@@ -85,4 +88,10 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownEnemyTagData EnemyTagData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyWeaponClass")
+	TSubclassOf<ANetherCrownEnemyWeapon> EnemyWeaponClass{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<ANetherCrownEnemyWeapon> EnemyWeapon{};
 };

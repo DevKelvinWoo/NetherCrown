@@ -90,6 +90,8 @@ protected:
 
 	virtual void OnRep_PlayerState() override;
 
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+
 private:
 	void DestroyVisualOnlyComponentsOnDS();
 

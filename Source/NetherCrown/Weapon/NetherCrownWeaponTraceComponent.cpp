@@ -69,7 +69,7 @@ void UNetherCrownWeaponTraceComponent::DetectWeaponHit()
 	}
 
 	AActor* Owner{ GetOwner() };
-	if (!Owner || Owner->HasAuthority())
+	if (!ensureAlways(IsValid(Owner)) || Owner->HasAuthority())
 	{
 		return;
 	}

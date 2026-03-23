@@ -415,6 +415,13 @@ void ANetherCrownCharacter::OnRep_PlayerState()
 	OnRepPlayerState.Broadcast();
 }
 
+float ANetherCrownCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+{
+	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	return ResultDamage;
+}
+
 void ANetherCrownCharacter::SetIsHardLanding()
 {
 	if (!HasAuthority())

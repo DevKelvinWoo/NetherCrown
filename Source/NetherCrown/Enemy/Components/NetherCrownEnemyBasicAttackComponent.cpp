@@ -2,12 +2,25 @@
 
 #include "NetherCrownEnemyBasicAttackComponent.h"
 
+#include "Kismet/GameplayStatics.h"
+#include "Net/UnrealNetwork.h"
+
+#include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Weapon/NetherCrownEnemyWeapon.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
+#include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
+#include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
 UNetherCrownEnemyBasicAttackComponent::UNetherCrownEnemyBasicAttackComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
+	SetIsReplicatedByDefault(true);
+}
+
+void UNetherCrownEnemyBasicAttackComponent::SetHandledEnemyWeapon(ANetherCrownEnemyWeapon* InWeapon)
+{
+	HandledEnemyWeaponWeak = MakeWeakObjectPtr(InWeapon);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::BeginPlay()
@@ -16,6 +29,147 @@ void UNetherCrownEnemyBasicAttackComponent::BeginPlay()
 
 	CachedOwnerEnemy = Cast<ANetherCrownEnemy>(GetOwner());
 	CacheBasicAttackAnimMontage();
+
+	SetWeaponTraceSocketName();
+}
+
+void UNetherCrownEnemyBasicAttackComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (bEnableHitTrace)
+	{
+		DetectHit();
+	}
+}
+
+void UNetherCrownEnemyBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, bEnableHitTrace);
+	DOREPLIFETIME(ThisClass, EnemyBasicAttackState);
+	DOREPLIFETIME(ThisClass, LastEndLocation);
+}
+
+void UNetherCrownEnemyBasicAttackComponent::SetupBasicAttackTimer()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+
+	TimerManager.ClearTimer(EnableHitTraceTimerHandle);
+	TimerManager.ClearTimer(DisableHitTraceTimerHandle);
+	TimerManager.ClearTimer(AttackEndTimerHandle);
+
+	TimerManager.SetTimer(EnableHitTraceTimerHandle, this, &ThisClass::EnableHitTrace, EnableHitTraceTime, false);
+	TimerManager.SetTimer(DisableHitTraceTimerHandle, this, &ThisClass::DisableHitTrace, DisableHitTraceTime, false);
+	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::EndAttack, EndAttackTime, false);
+}
+
+void UNetherCrownEnemyBasicAttackComponent::SetWeaponTraceSocketName()
+{
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSettings);
+
+	WeaponTraceSocketName = CharacterDefaultSettings->GetWeaponTraceSocketName();
+}
+
+void UNetherCrownEnemyBasicAttackComponent::EnableHitTrace()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	bEnableHitTrace = true;
+}
+
+void UNetherCrownEnemyBasicAttackComponent::DisableHitTrace()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	bEnableHitTrace = false;
+}
+
+void UNetherCrownEnemyBasicAttackComponent::EndAttack()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	EnemyBasicAttackState = ENetherCrownEnemyBasicAttackState::NotAttacking;
+}
+
+void UNetherCrownEnemyBasicAttackComponent::Server_ReportHit_Implementation(ANetherCrownCharacter* HitCharacter, const FVector& HitLocation)
+{
+	//@TODO : 데미지 계산 로직 필요
+	UGameplayStatics::ApplyDamage(HitCharacter, 10.f, CachedOwnerEnemy->GetInstigatorController(), CachedOwnerEnemy, UDamageType::StaticClass());
+}
+
+void UNetherCrownEnemyBasicAttackComponent::DetectHit()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	const FVector& CurrentEndLocation{ GetWeaponTraceSocketLocation() };
+
+	TArray<FHitResult> HitResults{};
+	FCollisionQueryParams Params{};
+	Params.AddIgnoredActor(CachedOwnerEnemy);
+
+	//@NOTE : bHit는 block일때만 true가 됨, overlap일때는 false
+	bool bHit = GetWorld()->SweepMultiByChannel(
+		HitResults,
+		LastEndLocation,
+		CurrentEndLocation,
+		FQuat::Identity,
+		ECC_WeaponHitCheck,
+		FCollisionShape::MakeSphere(TraceRadius),
+		Params
+	);
+
+#if 1
+	DrawDebugLine(GetWorld(), LastEndLocation, CurrentEndLocation, FColor::Red, false, 2.0f);
+	DrawDebugSphere(GetWorld(), LastEndLocation, TraceRadius, 8, FColor::Yellow, false, 2.0f);
+	DrawDebugSphere(GetWorld(), CurrentEndLocation, TraceRadius, 8, FColor::Blue, false, 2.0f);
+#endif
+
+	LastEndLocation = CurrentEndLocation;
+
+	if (HitResults.IsEmpty())
+	{
+		return;
+	}
+
+	TMap<ANetherCrownCharacter*, FVector> HitInfoMap{};
+	for(const FHitResult& Hit : HitResults)
+	{
+		if (ANetherCrownCharacter* HitCharacter = Cast<ANetherCrownCharacter>(Hit.GetActor()))
+		{
+			HitInfoMap.Add(HitCharacter, Hit.ImpactPoint);
+		}
+	}
+
+	for (const TPair<ANetherCrownCharacter*, FVector>& HitInfo : HitInfoMap)
+	{
+		Server_ReportHit(HitInfo.Key, HitInfo.Value);
+	}
 }
 
 void UNetherCrownEnemyBasicAttackComponent::CacheBasicAttackAnimMontage()
@@ -33,19 +187,34 @@ void UNetherCrownEnemyBasicAttackComponent::CacheBasicAttackAnimMontage()
 	CachedBasicAttackMontage = BasicAttackMontageSoft.LoadSynchronous();
 }
 
-void UNetherCrownEnemyBasicAttackComponent::TestFunc()
+FVector UNetherCrownEnemyBasicAttackComponent::GetWeaponTraceSocketLocation() const
 {
-	bCanAttack = true;
+	const ANetherCrownEnemyWeapon* HandledEnemyWeapon{ HandledEnemyWeaponWeak.Get() };
+	const USkeletalMeshComponent* HandledEnemyWeaponMesh{ HandledEnemyWeapon ? HandledEnemyWeapon->GetEnemyWeaponSkeletalMeshComponent() : nullptr };
+	if (!ensureAlways(IsValid(HandledEnemyWeaponMesh)))
+	{
+		return FVector::ZeroVector;
+	}
+
+	return HandledEnemyWeaponMesh->GetSocketLocation(WeaponTraceSocketName);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttack()
 {
-	if (bCanAttack)
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
-		Multicast_PlayBasicAttackMontage();
+		return;
+	}
 
-		bCanAttack = false;
-		GetWorld()->GetTimerManager().SetTimer(TestTimerHandle, this, &ThisClass::TestFunc, 1.f, false);
+	if (EnemyBasicAttackState != ENetherCrownEnemyBasicAttackState::Attacking)
+	{
+		LastEndLocation = GetWeaponTraceSocketLocation();
+
+		EnemyBasicAttackState = ENetherCrownEnemyBasicAttackState::Attacking;
+
+		SetupBasicAttackTimer();
+
+		Multicast_PlayBasicAttackMontage();
 	}
 }
 

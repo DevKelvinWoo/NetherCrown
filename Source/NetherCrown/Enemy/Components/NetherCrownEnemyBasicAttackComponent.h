@@ -4,10 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrownEnemyBasicAttackComponent.generated.h"
 
-class ANetherCrownEnemy;
 class UAnimMontage;
+
+class ANetherCrownEnemyWeapon;
+class ANetherCrownEnemy;
+
+UENUM()
+enum class ENetherCrownEnemyBasicAttackState : uint8
+{
+	Attacking,
+	NotAttacking
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownEnemyBasicAttackComponent : public UActorComponent
@@ -19,16 +29,34 @@ public:
 
 	void RequestEnemyAttack();
 
+	void SetHandledEnemyWeapon(ANetherCrownEnemyWeapon* InWeapon);
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	void SetupBasicAttackTimer();
+
+	void SetWeaponTraceSocketName();
+
+	void EnableHitTrace();
+	void DisableHitTrace();
+	void EndAttack();
+
+	UFUNCTION(Server, Reliable)
+	void Server_ReportHit(ANetherCrownCharacter* HitCharacter, const FVector& HitLocation);
+
+	void DetectHit();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayBasicAttackMontage();
 
 	void CacheBasicAttackAnimMontage();
 
-	void TestFunc();
+	FVector GetWeaponTraceSocketLocation() const;
 
 	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
 	TSoftObjectPtr<UAnimMontage> BasicAttackMontageSoft{};
@@ -39,7 +67,30 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
 
-	bool bCanAttack{ true };
+	UPROPERTY(Replicated)
+	bool bEnableHitTrace{ false };
 
-	FTimerHandle TestTimerHandle{};
+	UPROPERTY(Replicated)
+	ENetherCrownEnemyBasicAttackState EnemyBasicAttackState{ ENetherCrownEnemyBasicAttackState::NotAttacking };
+
+	UPROPERTY(Replicated)
+	FVector LastEndLocation{};
+
+	UPROPERTY(Transient)
+	FName WeaponTraceSocketName{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
+	float EnableHitTraceTime{ 0.f };
+	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
+	float DisableHitTraceTime{ 0.f };
+	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
+	float EndAttackTime{ 0.f };
+	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
+	float TraceRadius = 10.0f;
+
+	TWeakObjectPtr<ANetherCrownEnemyWeapon> HandledEnemyWeaponWeak{};
+
+	FTimerHandle AttackEndTimerHandle{};
+	FTimerHandle EnableHitTraceTimerHandle{};
+	FTimerHandle DisableHitTraceTimerHandle{};
 };

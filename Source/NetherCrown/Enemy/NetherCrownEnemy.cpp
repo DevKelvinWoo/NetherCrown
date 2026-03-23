@@ -6,6 +6,7 @@
 #include "NiagaraComponent.h"
 #include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
@@ -15,6 +16,7 @@
 #include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
+#include "NetherCrown/Weapon/NetherCrownEnemyWeapon.h"
 
 ANetherCrownEnemy::ANetherCrownEnemy()
 {
@@ -55,6 +57,8 @@ void ANetherCrownEnemy::BeginPlay()
 	}
 
 	SetReplicateMovement(true);
+
+	AttachEnemyWeapon();
 }
 
 float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
@@ -82,6 +86,41 @@ ENetherCrownCrowdControlType ANetherCrownEnemy::GetCrowdControlType() const
 	}
 
 	return CrowdControlComponent->GetCrowdControlType();
+}
+
+void ANetherCrownEnemy::AttachEnemyWeapon()
+{
+	UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FActorSpawnParameters SpawnParameters{};
+	SpawnParameters.ObjectFlags = RF_Transient;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	EnemyWeapon = World->SpawnActor<ANetherCrownEnemyWeapon>(EnemyWeaponClass, SpawnParameters);
+	if (!ensureAlways(IsValid(EnemyWeapon)))
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* EnemyMesh{ GetMesh() };
+	if (!ensureAlways(IsValid(EnemyMesh)))
+	{
+		return;
+	}
+
+	const FAttachmentTransformRules& AttachmentTransformRules{ EAttachmentRule::SnapToTarget, true };
+	EnemyWeapon->AttachToComponent(EnemyMesh, AttachmentTransformRules, TEXT("WEAPON_R"));
+
+	if (!ensureAlways(IsValid(BasicAttackComponent)))
+	{
+		return;
+	}
+
+	BasicAttackComponent->SetHandledEnemyWeapon(EnemyWeapon);
 }
 
 void ANetherCrownEnemy::SetEnemyMovementComponentValue()
