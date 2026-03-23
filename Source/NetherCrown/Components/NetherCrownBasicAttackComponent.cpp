@@ -332,7 +332,7 @@ int32 UNetherCrownBasicAttackComponent::CalculateBasicAttackDamage() const
 		return 0;
 	}
 
-	const FNetherCrownPlayerStatData& StatData{ OwnerCharacterStatComponent->GetPlayerStatData() };
+	const FNetherCrownPlayerStat& StatData{ OwnerCharacterStatComponent->GetPlayerStatData() };
 	const int32 AttackDamage{ StatData.AttackDamage };
 
 	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };

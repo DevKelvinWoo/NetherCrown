@@ -14,6 +14,15 @@ UNetherCrownPlayerStatComponent::UNetherCrownPlayerStatComponent()
 	SetIsReplicatedByDefault(true);
 }
 
+void UNetherCrownPlayerStatComponent::BeginPlay()
+{
+	Super::BeginPlay();
+
+	CacheOwnerCharacter();
+
+	LoadPlayerStatData();
+}
+
 void UNetherCrownPlayerStatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -21,7 +30,34 @@ void UNetherCrownPlayerStatComponent::GetLifetimeReplicatedProps(TArray<class FL
 	DOREPLIFETIME(ThisClass, PlayerStatData);
 }
 
-void UNetherCrownPlayerStatComponent::OnRep_PlayerStatData(const FNetherCrownPlayerStatData& OldPlayerStatData)
+void UNetherCrownPlayerStatComponent::CacheOwnerCharacter()
+{
+	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerPlayerState)))
+	{
+		return;
+	}
+
+	CachedOwnerCharacter = Cast<ANetherCrownCharacter>(OwnerPlayerState->GetPawn());
+}
+
+void UNetherCrownPlayerStatComponent::LoadPlayerStatData()
+{
+	if (PlayerStatDataAssetSoft.IsNull())
+	{
+		return;
+	}
+
+	const UNetherCrownPlayerStatData* PlayerStatDataAsset{ PlayerStatDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(PlayerStatDataAsset)))
+	{
+		return;
+	}
+
+	PlayerStatData = PlayerStatDataAsset->GetPlayerStatData();
+}
+
+void UNetherCrownPlayerStatComponent::OnRep_PlayerStatData(const FNetherCrownPlayerStat& OldPlayerStatData)
 {
 	if (PlayerStatData.CharacterMP != OldPlayerStatData.CharacterMP)
 	{
@@ -31,14 +67,9 @@ void UNetherCrownPlayerStatComponent::OnRep_PlayerStatData(const FNetherCrownPla
 
 void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
 {
-	ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerPlayerState)))
-	{
-		return;
-	}
+	CacheOwnerCharacter();
 
-	ANetherCrownCharacter* PlayerStateOwnerCharacter{ Cast<ANetherCrownCharacter>(OwnerPlayerState->GetPawn()) };
-	if (!ensureAlways(IsValid(PlayerStateOwnerCharacter)) || !PlayerStateOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -48,14 +79,9 @@ void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
 
 void UNetherCrownPlayerStatComponent::ClearPlayerShield()
 {
-	ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerPlayerState)))
-	{
-		return;
-	}
+	CacheOwnerCharacter();
 
-	ANetherCrownCharacter* PlayerStateOwnerCharacter{ Cast<ANetherCrownCharacter>(OwnerPlayerState->GetPawn()) };
-	if (!ensureAlways(IsValid(PlayerStateOwnerCharacter)) || !PlayerStateOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -65,14 +91,9 @@ void UNetherCrownPlayerStatComponent::ClearPlayerShield()
 
 void UNetherCrownPlayerStatComponent::ModifyMP(float MPDelta)
 {
-	ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerPlayerState)))
-	{
-		return;
-	}
+	CacheOwnerCharacter();
 
-	ANetherCrownCharacter* PlayerStateOwnerCharacter{ Cast<ANetherCrownCharacter>(OwnerPlayerState->GetPawn()) };
-	if (!ensureAlways(IsValid(PlayerStateOwnerCharacter)) || !PlayerStateOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
 	{
 		return;
 	}

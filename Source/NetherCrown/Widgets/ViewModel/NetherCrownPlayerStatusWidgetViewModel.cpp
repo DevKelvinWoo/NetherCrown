@@ -37,7 +37,7 @@ void UNetherCrownPlayerStatusWidgetViewModel::InitViewModel(ANetherCrownCharacte
 
 	OwnerCharacterStatComponent->GetOnCharacterMPModified().AddUObject(this, &ThisClass::HandleOnCharacterMPModified);
 
-	const FNetherCrownPlayerStatData& PlayerStatData{ OwnerCharacterStatComponent->GetPlayerStatData() };
+	const FNetherCrownPlayerStat& PlayerStatData{ OwnerCharacterStatComponent->GetPlayerStatData() };
 	const float RemainMPRatio{ PlayerStatData.CharacterMaxMP > 0 ? (PlayerStatData.CharacterMP) / (PlayerStatData.CharacterMaxMP) : 0.0f };
 	HandleOnCharacterMPModified(RemainMPRatio);
 }
