@@ -165,7 +165,7 @@ void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser
 	const int32 PhysicalPenetration{ WeaponData->GetPhysicalPenetration() };
 
 	check(EnemyStatComponent);
-	const FNetherCrownEnemyStatData& EnemyStatData{ EnemyStatComponent->GetEnemyStatData() };
+	const FNetherCrownEnemyStat& EnemyStatData{ EnemyStatComponent->GetEnemyStatData() };
 	const int32 EnemyArmor{ EnemyStatData.PhysicalArmor };
 
 	const int32 EffectiveArmor{ FMath::Max(0, EnemyArmor - PhysicalPenetration) };

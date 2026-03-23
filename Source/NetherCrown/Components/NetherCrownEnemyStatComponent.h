@@ -4,32 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "NetherCrown/Data/NetherCrownEnemyStatData.h"
 #include "NetherCrownEnemyStatComponent.generated.h"
 
-USTRUCT()
-struct FNetherCrownEnemyStatData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditAnywhere)
-	int32 EnemyHP{ 100 };
-
-	UPROPERTY(EditAnywhere)
-	int32 AttackDamage{ 10 };
-
-	UPROPERTY(EditAnywhere)
-	int32 MagicPower{ 10 };
-
-	UPROPERTY(EditAnywhere)
-	int32 PhysicalArmor{ 10 };
-
-	UPROPERTY(EditAnywhere)
-	int32 MagicArmor{ 10 };
-
-	UPROPERTY(EditAnywhere)
-	int32 AttackRange{ 200 };
-};
+class ANetherCrownEnemy;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownEnemyStatComponent : public UActorComponent
@@ -39,14 +17,24 @@ class NETHERCROWN_API UNetherCrownEnemyStatComponent : public UActorComponent
 public:
 	UNetherCrownEnemyStatComponent();
 
-	const FNetherCrownEnemyStatData& GetEnemyStatData() const { return EnemyStatData; }
+	const FNetherCrownEnemyStat& GetEnemyStatData() const { return EnemyStatData; }
 
-	void SetEnemyHp (int32 InHp);
+	void SetEnemyHp(int32 InHp);
 
 protected:
 	virtual void BeginPlay() override;
 
 private:
+	void CacheOwnerEnemy();
+
+	void LoadEnemyStatData();
+
 	UPROPERTY(EditDefaultsOnly, Category = "StatData")
-	FNetherCrownEnemyStatData EnemyStatData{};
+	FNetherCrownEnemyStat EnemyStatData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "StatDataAsset")
+	TSoftObjectPtr<UNetherCrownEnemyStatData> EnemyStatDataAssetSoft{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
 };
