@@ -5,19 +5,13 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/TimelineComponent.h"
+#include "NetherCrownPPTypes.h"
+#include "NetherCrown/Data/NetherCrownPostProcessCosmeticData.h"
 #include "NetherCrownControlPPComponent.generated.h"
 
 class ANetherCrownCharacter;
 class UPostProcessComponent;
-
-UENUM()
-enum class ENetherCrownPPType : uint8
-{
-	Default,
-	Frozen,
-	Charging,
-	Lightning,
-};
+class UCurveFloat;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownControlPPComponent : public UActorComponent
@@ -38,6 +32,7 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	void LoadPostProcessCosmeticData();
 	void BindTimelineFunctions();
 
 	void StartClearPostProcessTimer(float Duration);
@@ -53,18 +48,18 @@ private:
 	UFUNCTION()
 	void HandlePostProcessBlendEndTimelineFinished();
 
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	TMap<ENetherCrownPPType, FPostProcessSettings> PostProcessSettingsMap{};
+	UPROPERTY(EditDefaultsOnly, Category = "PostProcessCosmeticDataAsset")
+	TSoftObjectPtr<UNetherCrownPostProcessCosmeticDataAsset> PostProcessCosmeticDataAssetSoft{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "Curve")
-	TSoftObjectPtr<UCurveFloat> PostProcessStartCurveFloatSoft{};
-	UPROPERTY(EditDefaultsOnly, Category = "Curve")
-	TSoftObjectPtr<UCurveFloat> PostProcessEndCurveFloatSoft{};
+	UPROPERTY(Transient)
+	FNetherCrownPostProcessCosmeticData PostProcessCosmeticData{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedPostProcessStartCurveFloat{};
+
 	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedPostProcessEndCurveFloat{};
+
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 

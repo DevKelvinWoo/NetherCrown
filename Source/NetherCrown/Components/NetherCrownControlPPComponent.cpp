@@ -3,6 +3,7 @@
 #include "NetherCrownControlPPComponent.h"
 
 #include "Components/PostProcessComponent.h"
+#include "Curves/CurveFloat.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 
 UNetherCrownControlPPComponent::UNetherCrownControlPPComponent()
@@ -43,7 +44,7 @@ void UNetherCrownControlPPComponent::ApplyPostProcess(const ENetherCrownPPType P
 		return;
 	}
 
-	FPostProcessSettings* FindProcessSettings{ PostProcessSettingsMap.Find(PPType) };
+	FPostProcessSettings* FindProcessSettings{ PostProcessCosmeticData.PostProcessSettingsMap.Find(PPType) };
 	if (!ensureAlways(FindProcessSettings))
 	{
 		return;
@@ -84,10 +85,33 @@ void UNetherCrownControlPPComponent::BeginPlay()
 		return;
 	}
 
-	CachedPostProcessStartCurveFloat = PostProcessStartCurveFloatSoft.LoadSynchronous();
-	CachedPostProcessEndCurveFloat = PostProcessEndCurveFloatSoft.LoadSynchronous();
+	LoadPostProcessCosmeticData();
+
+	CachedPostProcessStartCurveFloat = PostProcessCosmeticData.PostProcessStartCurveFloatSoft.IsNull() ? nullptr : PostProcessCosmeticData.PostProcessStartCurveFloatSoft.LoadSynchronous();
+	CachedPostProcessEndCurveFloat = PostProcessCosmeticData.PostProcessEndCurveFloatSoft.IsNull() ? nullptr : PostProcessCosmeticData.PostProcessEndCurveFloatSoft.LoadSynchronous();
 
 	BindTimelineFunctions();
+}
+
+void UNetherCrownControlPPComponent::LoadPostProcessCosmeticData()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (PostProcessCosmeticDataAssetSoft.IsNull())
+	{
+		return;
+	}
+
+	const UNetherCrownPostProcessCosmeticDataAsset* PostProcessCosmeticDataAsset{ PostProcessCosmeticDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(PostProcessCosmeticDataAsset)))
+	{
+		return;
+	}
+
+	PostProcessCosmeticData = PostProcessCosmeticDataAsset->GetPostProcessCosmeticData();
 }
 
 void UNetherCrownControlPPComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -117,13 +141,19 @@ void UNetherCrownControlPPComponent::BindTimelineFunctions()
 		return;
 	}
 
-	FOnTimelineFloat PostProcessBlendStartProgressFunc{};
-	PostProcessBlendStartProgressFunc.BindUFunction(this, FName("SetPostProcessBlendStartByFloatTimeline"));
-	PostProcessBlendStartFloatTimeline.AddInterpFloat(CachedPostProcessStartCurveFloat, PostProcessBlendStartProgressFunc);
+	if (IsValid(CachedPostProcessStartCurveFloat))
+	{
+		FOnTimelineFloat PostProcessBlendStartProgressFunc{};
+		PostProcessBlendStartProgressFunc.BindUFunction(this, FName("SetPostProcessBlendStartByFloatTimeline"));
+		PostProcessBlendStartFloatTimeline.AddInterpFloat(CachedPostProcessStartCurveFloat, PostProcessBlendStartProgressFunc);
+	}
 
-	FOnTimelineFloat PostProcessBlendEndProgressFunc{};
-	PostProcessBlendEndProgressFunc.BindUFunction(this, FName("SetPostProcessBlendEndByFloatTimeline"));
-	PostProcessBlendEndFloatTimeline.AddInterpFloat(CachedPostProcessEndCurveFloat, PostProcessBlendEndProgressFunc);
+	if (IsValid(CachedPostProcessEndCurveFloat))
+	{
+		FOnTimelineFloat PostProcessBlendEndProgressFunc{};
+		PostProcessBlendEndProgressFunc.BindUFunction(this, FName("SetPostProcessBlendEndByFloatTimeline"));
+		PostProcessBlendEndFloatTimeline.AddInterpFloat(CachedPostProcessEndCurveFloat, PostProcessBlendEndProgressFunc);
+	}
 
 	FOnTimelineEvent PostProcessBlendEndFinishedFunc{};
 	PostProcessBlendEndFinishedFunc.BindUFunction(this, FName("HandlePostProcessBlendEndTimelineFinished"));
@@ -158,7 +188,7 @@ void UNetherCrownControlPPComponent::ResetPostProcess()
 		return;
 	}
 
-	FPostProcessSettings* DefaultProcessSettings{ PostProcessSettingsMap.Find(ENetherCrownPPType::Default) };
+	FPostProcessSettings* DefaultProcessSettings{ PostProcessCosmeticData.PostProcessSettingsMap.Find(ENetherCrownPPType::Default) };
 	if (!ensureAlways(DefaultProcessSettings))
 	{
 		return;
