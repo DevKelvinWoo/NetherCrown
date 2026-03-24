@@ -14,13 +14,13 @@ ANetherCrownEnemyAIController::ANetherCrownEnemyAIController()
 
 	EnemyPerceptionComponent = CreateDefaultSubobject<UAIPerceptionComponent>(TEXT("PerceptionComponent"));
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
-
-	SetSightConfigAndPerceptionComponentValue();
 }
 
 void ANetherCrownEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetSightConfigAndPerceptionComponentValue();
 
 	if (ensureAlways(IsValid(EnemyPerceptionComponent)))
 	{
@@ -37,20 +37,22 @@ void ANetherCrownEnemyAIController::OnPossess(APawn* InPawn)
 		return;
 	}
 
-	if (!ensureAlways(IsValid(BehaviorTreeAsset)))
+	LoadEnemyAITuningData();
+
+	if (!ensureAlways(IsValid(EnemyAITuningData.BehaviorTreeAsset)))
 	{
 		return;
 	}
 
 	UBlackboardComponent* BlackboardComponent{};
-	UseBlackboard(BehaviorTreeAsset->BlackboardAsset, BlackboardComponent);
+	UseBlackboard(EnemyAITuningData.BehaviorTreeAsset->BlackboardAsset, BlackboardComponent);
 	if (!ensureAlways(IsValid(BlackboardComponent)))
 	{
 		return;
 	}
 
 	BlackboardComponentCached = BlackboardComponent;
-	RunBehaviorTree(BehaviorTreeAsset);
+	RunBehaviorTree(EnemyAITuningData.BehaviorTreeAsset);
 }
 
 void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor, FAIStimulus Stimulus)
@@ -68,14 +70,30 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 	ANetherCrownCharacter* TargetCharacter{ Cast<ANetherCrownCharacter>(Actor) };
 	if (!IsValid(TargetCharacter))
 	{
-		BlackboardComponentCached->ClearValue(TargetActorBlackboardKey);
+		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKey);
 		return;
 	}
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		BlackboardComponentCached->SetValueAsObject(TargetActorBlackboardKey, TargetCharacter);
+		BlackboardComponentCached->SetValueAsObject(EnemyAITuningData.TargetActorBlackboardKey, TargetCharacter);
 	}
+}
+
+void ANetherCrownEnemyAIController::LoadEnemyAITuningData()
+{
+	if (EnemyAITuningDataAssetSoft.IsNull() || !HasAuthority())
+	{
+		return;
+	}
+
+	const UNetherCrownEnemyAITuningDataAsset* EnemyAITuningDataAsset{ EnemyAITuningDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(EnemyAITuningDataAsset)))
+	{
+		return;
+	}
+
+	EnemyAITuningData = EnemyAITuningDataAsset->GetEnemyAITuningData();
 }
 
 void ANetherCrownEnemyAIController::SetSightConfigAndPerceptionComponentValue()
@@ -87,10 +105,10 @@ void ANetherCrownEnemyAIController::SetSightConfigAndPerceptionComponentValue()
 
 	if (ensureAlways(IsValid(SightConfig)) && ensureAlways(IsValid(EnemyPerceptionComponent)))
 	{
-		SightConfig->SightRadius = SightRadius;
-		SightConfig->LoseSightRadius = LoseSightRadius;
-		SightConfig->PeripheralVisionAngleDegrees = PeripheralVisionAngleDegrees;
-		SightConfig->SetMaxAge(MaxSightAge);
+		SightConfig->SightRadius = EnemyAITuningData.PerceptionData.SightRadius;
+		SightConfig->LoseSightRadius = EnemyAITuningData.PerceptionData.LoseSightRadius;
+		SightConfig->PeripheralVisionAngleDegrees = EnemyAITuningData.PerceptionData.PeripheralVisionAngleDegrees;
+		SightConfig->SetMaxAge(EnemyAITuningData.PerceptionData.MaxSightAge);
 		SightConfig->AutoSuccessRangeFromLastSeenLocation = -1.0f;
 		SightConfig->DetectionByAffiliation.bDetectEnemies = true;
 		SightConfig->DetectionByAffiliation.bDetectFriendlies = false;

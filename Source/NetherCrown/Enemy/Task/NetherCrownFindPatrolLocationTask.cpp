@@ -5,6 +5,7 @@
 #include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
+#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 
 UNetherCrownFindPatrolLocationTask::UNetherCrownFindPatrolLocationTask()
 {
@@ -16,7 +17,7 @@ EBTNodeResult::Type UNetherCrownFindPatrolLocationTask::ExecuteTask(UBehaviorTre
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	AAIController* OwnerAIController{ OwnerComp.GetAIOwner() };
+	const ANetherCrownEnemyAIController* OwnerAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
 	if (!ensureAlways(IsValid(OwnerAIController)))
 	{
 		return EBTNodeResult::Failed;
@@ -35,7 +36,7 @@ EBTNodeResult::Type UNetherCrownFindPatrolLocationTask::ExecuteTask(UBehaviorTre
 	}
 
 	FNavLocation RandomPatrolLocation{};
-	const bool bFoundPatrolLocation{ NavigationSystem->GetRandomReachablePointInRadius(ControlledPawn->GetActorLocation(), PatrolRadius, RandomPatrolLocation) };
+	const bool bFoundPatrolLocation{ NavigationSystem->GetRandomReachablePointInRadius(ControlledPawn->GetActorLocation(), OwnerAIController->GetPatrolRadius(), RandomPatrolLocation) };
 	if (!bFoundPatrolLocation)
 	{
 		return EBTNodeResult::Failed;

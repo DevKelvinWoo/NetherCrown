@@ -21,7 +21,4 @@ protected:
 private:
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector PatrolLocationBlackboardKey{};
-
-	UPROPERTY(EditAnywhere, Category = "Patrol")
-	float PatrolRadius{ 1000.0f };
 };
