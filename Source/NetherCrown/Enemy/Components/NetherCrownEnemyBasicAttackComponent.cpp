@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
@@ -107,7 +108,7 @@ void UNetherCrownEnemyBasicAttackComponent::EndAttack()
 void UNetherCrownEnemyBasicAttackComponent::Server_ReportHit_Implementation(ANetherCrownCharacter* HitCharacter, const FVector& HitLocation)
 {
 	//@TODO : 데미지 계산 로직 필요
-	UGameplayStatics::ApplyDamage(HitCharacter, 10.f, CachedOwnerEnemy->GetInstigatorController(), CachedOwnerEnemy, UDamageType::StaticClass());
+	UGameplayStatics::ApplyDamage(HitCharacter, 10.f, CachedOwnerEnemy->GetInstigatorController(), CachedOwnerEnemy, UNetherCrownPhysicalDamageType::StaticClass());
 }
 
 void UNetherCrownEnemyBasicAttackComponent::DetectHit()

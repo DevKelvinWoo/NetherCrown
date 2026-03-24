@@ -18,6 +18,8 @@ class NETHERCROWN_API UNetherCrownWeaponData : public UDataAsset
 public:
 	int32 GetWeaponAttackDamage() const { return WeaponAttackDamage; }
 	int32 GetPhysicalPenetration() const { return PhysicalPenetration; }
+	int32 GetMagicPenetration() const { return MagicPenetration; }
+
 	const FGameplayTag& GetWeaponSwingSoundTag() const { return WeaponSwingSoundTag; }
 	const TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>>& GetWeaponAuraMap() const { return WeaponAuraMap; }
 

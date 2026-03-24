@@ -5,19 +5,17 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
-#include "NetherCrown/Data/NetherCrownEnemyDamageCosmeticData.h"
 #include "NetherCrownEnemy.generated.h"
 
 class ANetherCrownEnemyWeapon;
 class UNiagaraComponent;
 class UCapsuleComponent;
-class UAnimMontage;
 
-class ANetherCrownCharacter;
 class UNetherCrownStatusEffectControlComponent;
 class UNetherCrownEnemyStatComponent;
 class UNetherCrownCrowdControlComponent;
 class UNetherCrownEnemyBasicAttackComponent;
+class UNetherCrownEnemyDamageReceiverComponent;
 
 UCLASS()
 class NETHERCROWN_API ANetherCrownEnemy : public ACharacter, public INetherCrownCrowdControlInterface
@@ -26,8 +24,6 @@ class NETHERCROWN_API ANetherCrownEnemy : public ACharacter, public INetherCrown
 
 public:
 	ANetherCrownEnemy();
-
-	void PlayTakeDamageSound() const;
 
 	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return CrowdControlComponent; }
 	UNetherCrownEnemyStatComponent* GetEnemyStatComponent() const { return EnemyStatComponent; }
@@ -42,17 +38,8 @@ protected:
 
 private:
 	void AttachEnemyWeapon();
-	void LoadEnemyDamageCosmeticData();
 
 	void SetEnemyMovementComponentValue();
-
-	void ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount);
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayTakeDamageSound();
-
-	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayTakeDamageAnimation(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UCapsuleComponent> EnemyHitBoxComponent{};
@@ -72,14 +59,8 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownEnemyBasicAttackComponent> BasicAttackComponent{};
 
-	UPROPERTY(Transient)
-	FNetherCrownEnemyDamageCosmeticData EnemyDamageCosmeticData{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyDamageCosmeticDataAsset")
-	TSoftObjectPtr<UNetherCrownEnemyDamageCosmeticDataAsset> EnemyDamageCosmeticDataAssetSoft{};
-
-	UPROPERTY(Transient)
-	TObjectPtr<UAnimMontage> CachedTakeDamageAnimMontage{};
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownEnemyDamageReceiverComponent> EnemyDamageReceiverComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyWeaponClass")
 	TSubclassOf<ANetherCrownEnemyWeapon> EnemyWeaponClass{};

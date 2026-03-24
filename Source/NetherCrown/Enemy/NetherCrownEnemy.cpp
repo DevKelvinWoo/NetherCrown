@@ -2,20 +2,16 @@
 
 #include "NetherCrownEnemy.h"
 
-#include "NetherCrown/NetherCrown.h"
 #include "NiagaraComponent.h"
-#include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
+#include "NetherCrown/Components/NetherCrownEnemyDamageReceiverComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
-#include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
-#include "NetherCrown/Data/NetherCrownWeaponData.h"
-#include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownEnemyWeapon.h"
 
 ANetherCrownEnemy::ANetherCrownEnemy()
@@ -36,6 +32,8 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 
 	BasicAttackComponent = CreateDefaultSubobject<UNetherCrownEnemyBasicAttackComponent>(TEXT("BasicAttackComponent"));
 
+	EnemyDamageReceiverComponent = CreateDefaultSubobject<UNetherCrownEnemyDamageReceiverComponent>(TEXT("EnemyDamageReceiverComponent"));
+
 	bNetLoadOnClient = true;
 	bReplicates = true;
 
@@ -50,8 +48,6 @@ UNetherCrownStatusEffectControlComponent* ANetherCrownEnemy::GetStatusEffectCont
 void ANetherCrownEnemy::BeginPlay()
 {
 	Super::BeginPlay();
-
-	LoadEnemyDamageCosmeticData();
 
 	if (!HasAuthority() && ensureAlways(IsValid(StatusNiagaraComponent)))
 	{
@@ -68,14 +64,12 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	//@NOTE : This function is only executed by server RPC
 	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	Multicast_PlayTakeDamageSound();
-
-	if (ensureAlways(IsValid(CrowdControlComponent)))
+	if (!ensureAlways(IsValid(EnemyDamageReceiverComponent)) || !HasAuthority())
 	{
-		Multicast_PlayTakeDamageAnimation(CrowdControlComponent->GetCrowdControlType());
+		return ResultDamage;
 	}
 
-	ProcessIncomingPhysicalDamage(DamageCauser, ResultDamage);
+	EnemyDamageReceiverComponent->HandleIncomingDamage(ResultDamage, DamageEvent, DamageCauser);
 
 	return ResultDamage;
 }
@@ -125,27 +119,6 @@ void ANetherCrownEnemy::AttachEnemyWeapon()
 	BasicAttackComponent->SetHandledEnemyWeapon(EnemyWeapon);
 }
 
-void ANetherCrownEnemy::LoadEnemyDamageCosmeticData()
-{
-	if (EnemyDamageCosmeticDataAssetSoft.IsNull())
-	{
-		return;
-	}
-
-	const UNetherCrownEnemyDamageCosmeticDataAsset* EnemyDamageCosmeticDataAsset{ EnemyDamageCosmeticDataAssetSoft.LoadSynchronous() };
-	if (!ensureAlways(IsValid(EnemyDamageCosmeticDataAsset)))
-	{
-		return;
-	}
-
-	EnemyDamageCosmeticData = EnemyDamageCosmeticDataAsset->GetEnemyDamageCosmeticData();
-
-	if (!HasAuthority() && !EnemyDamageCosmeticData.TakeDamageAnimMontageSoft.IsNull())
-	{
-		CachedTakeDamageAnimMontage = EnemyDamageCosmeticData.TakeDamageAnimMontageSoft.LoadSynchronous();
-	}
-}
-
 void ANetherCrownEnemy::SetEnemyMovementComponentValue()
 {
 	UCharacterMovementComponent* CharacterMovementComponent{ GetCharacterMovement() };
@@ -157,97 +130,4 @@ void ANetherCrownEnemy::SetEnemyMovementComponentValue()
 	CharacterMovementComponent->bOrientRotationToMovement = true;
 
 	bUseControllerRotationYaw = false;
-}
-
-void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser, float DamageAmount)
-{
-	//@NOTE : This function is only executed by server RPC
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	const ANetherCrownCharacter* NetherCrownCharacter = Cast<ANetherCrownCharacter>(DamageCauser);
-	if (!ensureAlways(IsValid(NetherCrownCharacter)))
-	{
-		return;
-	}
-
-	UNetherCrownEquipComponent* EquipComponent{ NetherCrownCharacter->GetEquipComponent() };
-	if (!ensureAlways(IsValid(EquipComponent)))
-	{
-		return;
-	}
-
-	const UNetherCrownWeaponData* WeaponData{ EquipComponent->GetEquippedWeaponData() };
-	if (!ensureAlways(IsValid(WeaponData)))
-	{
-		return;
-	}
-
-	const int32 PhysicalPenetration{ WeaponData->GetPhysicalPenetration() };
-
-	check(EnemyStatComponent);
-	const FNetherCrownEnemyStat& EnemyStatData{ EnemyStatComponent->GetEnemyStatData() };
-	const int32 EnemyArmor{ EnemyStatData.PhysicalArmor };
-
-	const int32 EffectiveArmor{ FMath::Max(0, EnemyArmor - PhysicalPenetration) };
-	const float DamageMultiplier{ 100.f / (100.f + EffectiveArmor) };
-	const int32 FinalDamage{ FMath::RoundToInt(DamageAmount * DamageMultiplier) };
-
-	EnemyStatComponent->SetEnemyHp(EnemyStatData.EnemyHP - FinalDamage);
-
-	UE_LOG(LogNetherCrown, Warning, TEXT("FinalDamage : %d"), FinalDamage);
-	if (EnemyStatData.EnemyHP <= 0)
-	{
-		//Destroy(); //@NOTE : Temp Code
-	}
-}
-
-void ANetherCrownEnemy::Multicast_PlayTakeDamageAnimation_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
-{
-	if (HasAuthority())
-	{
-		return;
-	}
-
-	if (InCrowdControlType != ENetherCrownCrowdControlType::NONE)
-	{
-		return;
-	}
-
-	if (!ensureAlways(IsValid(CachedTakeDamageAnimMontage)))
-	{
-		return;
-	}
-
-	const USkeletalMeshComponent* SkeletalMeshComponent{ GetMesh() };
-	UNetherCrownEnemyAnimInstance* EnemyAnimInstance{ SkeletalMeshComponent ? Cast<UNetherCrownEnemyAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr };
-	if (!ensureAlways(IsValid(EnemyAnimInstance)))
-	{
-		return;
-	}
-
-	EnemyAnimInstance->Montage_Play(CachedTakeDamageAnimMontage);
-}
-
-void ANetherCrownEnemy::PlayTakeDamageSound() const
-{
-	if (HasAuthority())
-	{
-		return;
-	}
-
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageCosmeticData.DamageSoundTagData.EnemyHurtGruntSoundTag);
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageCosmeticData.DamageSoundTagData.EnemyHurtImpactSoundTag);
-}
-
-void ANetherCrownEnemy::Multicast_PlayTakeDamageSound_Implementation()
-{
-	if (HasAuthority())
-	{
-		return;
-	}
-
-	PlayTakeDamageSound();
 }

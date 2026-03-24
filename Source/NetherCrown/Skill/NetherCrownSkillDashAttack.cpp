@@ -18,6 +18,7 @@
 #include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
+#include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 
 #define DEBUG_SPHERE 0
@@ -441,7 +442,7 @@ void UNetherCrownSkillDashAttack::ApplyDashAttackDamageAndCrowdControl(const ANe
 	CrowdControlComponent->Stun();
 
 	ApplyCrowdControlToTarget(TargetEnemy, ENetherCrownCrowdControlType::STUN, StunDuration);
-	UGameplayStatics::ApplyDamage(CurrentTargetActor, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UDamageType::StaticClass());
+	UGameplayStatics::ApplyDamage(CurrentTargetActor, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
 
 	Multicast_SpawnSkillImpactEffect(TargetEnemy);
 	Client_ActiveSkillHitCameraShake();
