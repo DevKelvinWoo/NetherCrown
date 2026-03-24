@@ -42,7 +42,7 @@ private:
 	UFUNCTION()
 	void OnRep_PlayerStatData(const FNetherCrownPlayerStat& OldPlayerStatData);
 
-	UPROPERTY(EditDefaultsOnly, ReplicatedUsing=OnRep_PlayerStatData, Category = "StatData")
+	UPROPERTY(Transient, ReplicatedUsing=OnRep_PlayerStatData)
 	FNetherCrownPlayerStat PlayerStatData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "StatDataAsset")

@@ -3,6 +3,7 @@
 #include "NetherCrownEquipComponent.h"
 
 #include "NetherCrown/NetherCrown.h"
+#include "Animation/AnimMontage.h"
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
@@ -72,14 +73,14 @@ void UNetherCrownEquipComponent::SetupEquipStateTimer()
 	TimerManager.ClearTimer(EquipStartTimerHandle);
 	TimerManager.ClearTimer(EquipEndTimerHandle);
 
-	if (EquipStartTimeOffset >= 0.f)
+	if (EquipData.EquipStartTimeOffset >= 0.f)
 	{
-		TimerManager.SetTimer(EquipStartTimerHandle, this, &ThisClass::HandleEquipStart, EquipStartTimeOffset, false);
+		TimerManager.SetTimer(EquipStartTimerHandle, this, &ThisClass::HandleEquipStart, EquipData.EquipStartTimeOffset, false);
 	}
 
-	if (EquipEndTimeOffset >= 0.f)
+	if (EquipData.EquipEndTimeOffset >= 0.f)
 	{
-		TimerManager.SetTimer(EquipEndTimerHandle, this, &ThisClass::HandleEquipEnd, EquipEndTimeOffset, false);
+		TimerManager.SetTimer(EquipEndTimerHandle, this, &ThisClass::HandleEquipEnd, EquipData.EquipEndTimeOffset, false);
 	}
 }
 
@@ -158,7 +159,7 @@ void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementa
 
 	NetherCrownCharacterAnimInstance->Montage_Play(CachedEquipMontage);
 
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), EquipComponentTagData.EquipSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), EquipData.EquipTagData.EquipSoundTag);
 }
 
 void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const
@@ -274,8 +275,33 @@ void UNetherCrownEquipComponent::CacheInitData()
 {
 	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
 
-	if (!EquipAnimMontageSoft.IsNull() && !CachedCharacter->HasAuthority())
+	LoadEquipData();
+
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
 	{
-		CachedEquipMontage = EquipAnimMontageSoft.LoadSynchronous();
+		return;
 	}
+
+	if (EquipData.EquipAnimMontageSoft.IsNull())
+	{
+		return;
+	}
+
+	CachedEquipMontage = EquipData.EquipAnimMontageSoft.LoadSynchronous();
+}
+
+void UNetherCrownEquipComponent::LoadEquipData()
+{
+	if (EquipDataAssetSoft.IsNull())
+	{
+		return;
+	}
+
+	const UNetherCrownEquipDataAsset* EquipDataAsset{ EquipDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(EquipDataAsset)))
+	{
+		return;
+	}
+
+	EquipData = EquipDataAsset->GetEquipData();
 }

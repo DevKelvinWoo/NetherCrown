@@ -1,10 +1,10 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
+#include "NetherCrown/Data/NetherCrownEquipData.h"
 #include "NetherCrownEquipComponent.generated.h"
 
 class UNetherCrownWeaponData;
@@ -18,16 +18,6 @@ enum class EStowWeaponPosition : uint8
 {
 	Left,
 	Right
-};
-
-USTRUCT()
-struct FNetherCrownEquipComponentTagData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag EquipSoundTag{};
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -81,6 +71,7 @@ private:
 	void StowCurrentWeapon();
 
 	void CacheInitData();
+	void LoadEquipData();
 
 	bool bCanEquip{ false };
 
@@ -89,20 +80,14 @@ private:
 	UPROPERTY(Transient, Replicated)
 	TObjectPtr<ANetherCrownWeapon> EquippedWeapon{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
-	TSoftObjectPtr<UAnimMontage> EquipAnimMontageSoft{};
+	UPROPERTY(Transient)
+	FNetherCrownEquipData EquipData{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "TagData")
-	FNetherCrownEquipComponentTagData EquipComponentTagData{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "EquipTimerData")
-	float EquipStartTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "EquipTimerData")
-	float EquipEndTimeOffset{ -1.f };
+	UPROPERTY(EditDefaultsOnly, Category = "EquipDataAsset")
+	TSoftObjectPtr<UNetherCrownEquipDataAsset> EquipDataAssetSoft{};
 
 	UPROPERTY(Transient)
-	TObjectPtr<UAnimMontage> CachedEquipMontage;
+	TObjectPtr<UAnimMontage> CachedEquipMontage{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};

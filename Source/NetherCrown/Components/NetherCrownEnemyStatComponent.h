@@ -29,7 +29,7 @@ private:
 
 	void LoadEnemyStatData();
 
-	UPROPERTY(EditDefaultsOnly, Category = "StatData")
+	UPROPERTY(Transient)
 	FNetherCrownEnemyStat EnemyStatData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "StatDataAsset")

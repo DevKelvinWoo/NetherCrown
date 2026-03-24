@@ -95,7 +95,7 @@ private:
 	void ServerHandleAttackEnd();
 	void ServerHandleHitTraceEnable();
 
-	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
+	UPROPERTY(Transient)
 	FNetherCrownBasicAttackData BasicAttackData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackDataAsset")
