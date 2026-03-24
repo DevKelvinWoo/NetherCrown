@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownEnemyBasicAttackComponent.h"
 
@@ -6,11 +6,10 @@
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
-#include "NetherCrown/Weapon/NetherCrownEnemyWeapon.h"
-#include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
-#include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
+#include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
+#include "NetherCrown/Weapon/NetherCrownEnemyWeapon.h"
 
 UNetherCrownEnemyBasicAttackComponent::UNetherCrownEnemyBasicAttackComponent()
 {
@@ -28,9 +27,8 @@ void UNetherCrownEnemyBasicAttackComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CachedOwnerEnemy = Cast<ANetherCrownEnemy>(GetOwner());
+	LoadEnemyBasicAttackData();
 	CacheBasicAttackAnimMontage();
-
-	SetWeaponTraceSocketName();
 }
 
 void UNetherCrownEnemyBasicAttackComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -71,17 +69,9 @@ void UNetherCrownEnemyBasicAttackComponent::SetupBasicAttackTimer()
 	TimerManager.ClearTimer(DisableHitTraceTimerHandle);
 	TimerManager.ClearTimer(AttackEndTimerHandle);
 
-	TimerManager.SetTimer(EnableHitTraceTimerHandle, this, &ThisClass::EnableHitTrace, EnableHitTraceTime, false);
-	TimerManager.SetTimer(DisableHitTraceTimerHandle, this, &ThisClass::DisableHitTrace, DisableHitTraceTime, false);
-	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::EndAttack, EndAttackTime, false);
-}
-
-void UNetherCrownEnemyBasicAttackComponent::SetWeaponTraceSocketName()
-{
-	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
-	check(CharacterDefaultSettings);
-
-	WeaponTraceSocketName = CharacterDefaultSettings->GetWeaponTraceSocketName();
+	TimerManager.SetTimer(EnableHitTraceTimerHandle, this, &ThisClass::EnableHitTrace, EnemyBasicAttackData.EnableHitTraceTime, false);
+	TimerManager.SetTimer(DisableHitTraceTimerHandle, this, &ThisClass::DisableHitTrace, EnemyBasicAttackData.DisableHitTraceTime, false);
+	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::EndAttack, EnemyBasicAttackData.EndAttackTime, false);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::EnableHitTrace()
@@ -140,14 +130,14 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 		CurrentEndLocation,
 		FQuat::Identity,
 		ECC_WeaponHitCheck,
-		FCollisionShape::MakeSphere(TraceRadius),
+		FCollisionShape::MakeSphere(EnemyBasicAttackData.TraceRadius),
 		Params
 	);
 
 #if 1
 	DrawDebugLine(GetWorld(), LastEndLocation, CurrentEndLocation, FColor::Red, false, 2.0f);
-	DrawDebugSphere(GetWorld(), LastEndLocation, TraceRadius, 8, FColor::Yellow, false, 2.0f);
-	DrawDebugSphere(GetWorld(), CurrentEndLocation, TraceRadius, 8, FColor::Blue, false, 2.0f);
+	DrawDebugSphere(GetWorld(), LastEndLocation, EnemyBasicAttackData.TraceRadius, 8, FColor::Yellow, false, 2.0f);
+	DrawDebugSphere(GetWorld(), CurrentEndLocation, EnemyBasicAttackData.TraceRadius, 8, FColor::Blue, false, 2.0f);
 #endif
 
 	LastEndLocation = CurrentEndLocation;
@@ -158,7 +148,7 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 	}
 
 	TMap<ANetherCrownCharacter*, FVector> HitInfoMap{};
-	for(const FHitResult& Hit : HitResults)
+	for (const FHitResult& Hit : HitResults)
 	{
 		if (ANetherCrownCharacter* HitCharacter = Cast<ANetherCrownCharacter>(Hit.GetActor()))
 		{
@@ -172,6 +162,22 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 	}
 }
 
+void UNetherCrownEnemyBasicAttackComponent::LoadEnemyBasicAttackData()
+{
+	if (EnemyBasicAttackDataAssetSoft.IsNull())
+	{
+		return;
+	}
+
+	const UNetherCrownEnemyBasicAttackDataAsset* EnemyBasicAttackDataAsset{ EnemyBasicAttackDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(EnemyBasicAttackDataAsset)))
+	{
+		return;
+	}
+
+	EnemyBasicAttackData = EnemyBasicAttackDataAsset->GetEnemyBasicAttackData();
+}
+
 void UNetherCrownEnemyBasicAttackComponent::CacheBasicAttackAnimMontage()
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->HasAuthority())
@@ -179,12 +185,12 @@ void UNetherCrownEnemyBasicAttackComponent::CacheBasicAttackAnimMontage()
 		return;
 	}
 
-	if (BasicAttackMontageSoft.IsNull())
+	if (EnemyBasicAttackData.BasicAttackMontageSoft.IsNull())
 	{
 		return;
 	}
 
-	CachedBasicAttackMontage = BasicAttackMontageSoft.LoadSynchronous();
+	CachedBasicAttackMontage = EnemyBasicAttackData.BasicAttackMontageSoft.LoadSynchronous();
 }
 
 FVector UNetherCrownEnemyBasicAttackComponent::GetWeaponTraceSocketLocation() const
@@ -196,7 +202,7 @@ FVector UNetherCrownEnemyBasicAttackComponent::GetWeaponTraceSocketLocation() co
 		return FVector::ZeroVector;
 	}
 
-	return HandledEnemyWeaponMesh->GetSocketLocation(WeaponTraceSocketName);
+	return HandledEnemyWeaponMesh->GetSocketLocation(EnemyBasicAttackData.WeaponTraceSocketName);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttack()

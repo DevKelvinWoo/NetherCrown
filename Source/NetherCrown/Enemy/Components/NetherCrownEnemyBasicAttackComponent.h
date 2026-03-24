@@ -1,10 +1,11 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Data/NetherCrownEnemyBasicAttackData.h"
 #include "NetherCrownEnemyBasicAttackComponent.generated.h"
 
 class UAnimMontage;
@@ -40,8 +41,6 @@ protected:
 private:
 	void SetupBasicAttackTimer();
 
-	void SetWeaponTraceSocketName();
-
 	void EnableHitTrace();
 	void DisableHitTrace();
 	void EndAttack();
@@ -54,12 +53,16 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayBasicAttackMontage();
 
+	void LoadEnemyBasicAttackData();
 	void CacheBasicAttackAnimMontage();
 
 	FVector GetWeaponTraceSocketLocation() const;
 
-	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
-	TSoftObjectPtr<UAnimMontage> BasicAttackMontageSoft{};
+	UPROPERTY(Transient)
+	FNetherCrownEnemyBasicAttackData EnemyBasicAttackData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyBasicAttackDataAsset")
+	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> EnemyBasicAttackDataAssetSoft{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedBasicAttackMontage{};
@@ -75,18 +78,6 @@ private:
 
 	UPROPERTY(Replicated)
 	FVector LastEndLocation{};
-
-	UPROPERTY(Transient)
-	FName WeaponTraceSocketName{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
-	float EnableHitTraceTime{ 0.f };
-	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
-	float DisableHitTraceTime{ 0.f };
-	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
-	float EndAttackTime{ 0.f };
-	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
-	float TraceRadius = 10.0f;
 
 	TWeakObjectPtr<ANetherCrownEnemyWeapon> HandledEnemyWeaponWeak{};
 
