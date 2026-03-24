@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownBasicAttackComponent.h"
 
@@ -30,6 +30,7 @@ void UNetherCrownBasicAttackComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CacheCharacter();
+	LoadBasicAttackData();
 	CacheBasicAttackMontage();
 
 	if (!ensureAlways(IsValid(CachedCharacter)))
@@ -46,6 +47,22 @@ void UNetherCrownBasicAttackComponent::BeginPlay()
 	EquipComponent->GetOnEquipWeapon().AddUObject(this, &ThisClass::HandleOnEquipWeapon);
 }
 
+void UNetherCrownBasicAttackComponent::LoadBasicAttackData()
+{
+	if (BasicAttackDataAssetSoft.IsNull())
+	{
+		return;
+	}
+
+	const UNetherCrownBasicAttackDataAsset* BasicAttackDataAsset{ BasicAttackDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(BasicAttackDataAsset)))
+	{
+		return;
+	}
+
+	BasicAttackData = BasicAttackDataAsset->GetBasicAttackData();
+}
+
 void UNetherCrownBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -60,13 +77,13 @@ void UNetherCrownBasicAttackComponent::CacheBasicAttackMontage()
 		return;
 	}
 
-	if (BasicAttackAnimMontageSoft.IsNull())
+	if (BasicAttackData.BasicAttackAnimMontageSoft.IsNull())
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("BasicAttackAnimMontage is null %hs"), __FUNCTION__);
 		return;
 	}
 
-	CachedBasicAttackMontage = BasicAttackAnimMontageSoft.LoadSynchronous();
+	CachedBasicAttackMontage = BasicAttackData.BasicAttackAnimMontageSoft.LoadSynchronous();
 }
 
 void UNetherCrownBasicAttackComponent::CacheCharacter()
@@ -109,16 +126,22 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 
 	OnStopOrStartBasicAttackAnim.Broadcast(false);
 
-	if (ComboMontageSectionMap.IsEmpty())
+	if (BasicAttackData.ComboDataMap.IsEmpty())
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("ComboDataMap is Empty in %hs"), __FUNCTION__);
 		return;
 	}
 
 	CurrentComboCount = 1;
 
-	const FName* FirstComboMontageSectionName{ ComboMontageSectionMap.Find(1) };
-	Multicast_PlayAndJumpToComboMontageSection(*FirstComboMontageSectionName);
+	const FNetherCrownBasicAttackComboData* FirstComboData{ BasicAttackData.ComboDataMap.Find(1) };
+	if (!FirstComboData)
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("ComboData entry not found for combo 1 in %hs"), __FUNCTION__);
+		return;
+	}
+
+	Multicast_PlayAndJumpToComboMontageSection(FirstComboData->ComboMontageSectionName);
 
 	SetupBasicAttackTimers(CurrentComboCount);
 }
@@ -155,7 +178,7 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	}
 
 	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter->GetMesh() };
-	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr};
+	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr };
 	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ Cast<UNetherCrownCharacterAnimInstance>(AnimInstance) };
 	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
 	{
@@ -237,7 +260,7 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 
 	TArray<AActor*> OverlappedActors{};
 	const TArray<TEnumAsByte<EObjectTypeQuery>>& EnemyTypes{ UEngineTypes::ConvertToObjectType(ECC_Enemy) };
-	UKismetSystemLibrary::SphereOverlapActors(this, CachedCharacter->GetActorLocation(), AutoTargetingRadius, EnemyTypes,
+	UKismetSystemLibrary::SphereOverlapActors(this, CachedCharacter->GetActorLocation(), BasicAttackData.AutoTargetingRadius, EnemyTypes,
 		ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors);
 
 	if (OverlappedActors.IsEmpty())
@@ -250,8 +273,8 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 	{
 		if (IsValid(AutoTargetActor))
 		{
-			const double DistanceToOverlappedActor{ UKismetMathLibrary::Distance2D(FVector2D(CachedCharacter->GetActorLocation() ), FVector2D(OverlappedActor->GetActorLocation())) };
-			const double DistanceToAutoTargetActor{ UKismetMathLibrary::Distance2D(FVector2D(CachedCharacter->GetActorLocation() ), FVector2D(AutoTargetActor->GetActorLocation())) };
+			const double DistanceToOverlappedActor{ UKismetMathLibrary::Distance2D(FVector2D(CachedCharacter->GetActorLocation()), FVector2D(OverlappedActor->GetActorLocation())) };
+			const double DistanceToAutoTargetActor{ UKismetMathLibrary::Distance2D(FVector2D(CachedCharacter->GetActorLocation()), FVector2D(AutoTargetActor->GetActorLocation())) };
 
 			if (DistanceToOverlappedActor < DistanceToAutoTargetActor)
 			{
@@ -365,7 +388,7 @@ void UNetherCrownBasicAttackComponent::PlayHitImpactCameraShake() const
 	APlayerCameraManager* CameraManager{ OwnerPlayerController->PlayerCameraManager };
 	check(CameraManager);
 
-	CameraManager->StartCameraShake(ApplyDamageCameraShakeClass, 1.0f);
+	CameraManager->StartCameraShake(BasicAttackData.ApplyDamageCameraShakeClass, 1.0f);
 }
 
 void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
@@ -380,7 +403,7 @@ void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
 		return;
 	}
 
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedCharacter, BasicAttackComponentTagData.BasicAttackGruntSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedCharacter, BasicAttackData.BasicAttackTagData.BasicAttackGruntSoundTag);
 
 	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
 	if (!ensureAlways(EquipComponent))
@@ -421,7 +444,7 @@ void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLo
 	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
 	SpawnTransform.SetScale3D(FVector(1.0f));
 
-	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedCharacter, BasicAttackComponentTagData.BasicAttackImpactEffectTag, SpawnTransform);
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedCharacter, BasicAttackData.BasicAttackTagData.BasicAttackImpactEffectTag, SpawnTransform);
 }
 
 void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation)
@@ -444,7 +467,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, c
 
 void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 {
-	const int32 MaxComboCount{ ComboMontageSectionMap.Num() };
+	const int32 MaxComboCount{ BasicAttackData.ComboDataMap.Num() };
 	CurrentComboCount = CurrentComboCount >= MaxComboCount ? 1 : ++CurrentComboCount;
 }
 
@@ -465,10 +488,8 @@ void UNetherCrownBasicAttackComponent::SetupBasicAttackTimers(const int32 ComboC
 		return;
 	}
 
-	const FNetherCrownComboTimingData* ComboWindowTimingData{ ComboTimingDataMap.Find(ComboCount) };
-	const float* AttackEndTimingData{ AttackEndTimingDataMap.Find(ComboCount) };
-	const float* HitTraceEnableTimingData{ HitTraceEnableTimingDataMap.Find(ComboCount) };
-	if (!ComboWindowTimingData || !AttackEndTimingData || !HitTraceEnableTimingData)
+	const FNetherCrownBasicAttackComboData* ComboData{ BasicAttackData.ComboDataMap.Find(ComboCount) };
+	if (!ComboData)
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("Timing entry not found for combo %d in %hs"), ComboCount, __FUNCTION__);
 		return;
@@ -487,12 +508,10 @@ void UNetherCrownBasicAttackComponent::SetupBasicAttackTimers(const int32 ComboC
 	TimerManager.ClearTimer(AttackEndTimerHandle);
 	TimerManager.ClearTimer(HitTraceEnableHandle);
 
-	TimerManager.SetTimer(ComboWindowOpenTimerHandle, this, &ThisClass::ServerHandleComboWindowOpen,
-		ComboWindowTimingData->ComboWindowOpenTime, false);
-	TimerManager.SetTimer(ComboWindowCloseTimerHandle, this, &ThisClass::ServerHandleComboWindowClose,
-		ComboWindowTimingData->ComboWindowCloseTime, false);
-	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::ServerHandleAttackEnd, *AttackEndTimingData, false);
-	TimerManager.SetTimer(HitTraceEnableHandle, this, &ThisClass::ServerHandleHitTraceEnable, *HitTraceEnableTimingData, false);
+	TimerManager.SetTimer(ComboWindowOpenTimerHandle, this, &ThisClass::ServerHandleComboWindowOpen, ComboData->ComboWindowOpenTime, false);
+	TimerManager.SetTimer(ComboWindowCloseTimerHandle, this, &ThisClass::ServerHandleComboWindowClose, ComboData->ComboWindowCloseTime, false);
+	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::ServerHandleAttackEnd, ComboData->AttackEndTime, false);
+	TimerManager.SetTimer(HitTraceEnableHandle, this, &ThisClass::ServerHandleHitTraceEnable, ComboData->HitTraceEnableTime, false);
 }
 
 void UNetherCrownBasicAttackComponent::ServerHandleComboWindowOpen()
@@ -518,24 +537,24 @@ void UNetherCrownBasicAttackComponent::ServerHandleComboWindowClose()
 
 	CalculateNextComboCount();
 
-	if (ComboMontageSectionMap.IsEmpty())
+	if (BasicAttackData.ComboDataMap.IsEmpty())
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("ComboMontageSectionMap is Empty in %hs"), __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("ComboDataMap is Empty in %hs"), __FUNCTION__);
 		BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
 		CurrentComboCount = 1;
 		return;
 	}
 
-	const FName* NextComboMontageSectionName{ ComboMontageSectionMap.Find(CurrentComboCount) };
-	if (!NextComboMontageSectionName)
+	const FNetherCrownBasicAttackComboData* NextComboData{ BasicAttackData.ComboDataMap.Find(CurrentComboCount) };
+	if (!NextComboData)
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("ComboMontageSectionMap entry not found for combo %d in %hs"), CurrentComboCount, __FUNCTION__);
+		UE_LOG(LogNetherCrown, Warning, TEXT("ComboDataMap entry not found for combo %d in %hs"), CurrentComboCount, __FUNCTION__);
 		BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
 		CurrentComboCount = 1;
 		return;
 	}
 
-	Multicast_PlayAndJumpToComboMontageSection(*NextComboMontageSectionName);
+	Multicast_PlayAndJumpToComboMontageSection(NextComboData->ComboMontageSectionName);
 
 	SetupBasicAttackTimers(CurrentComboCount);
 }

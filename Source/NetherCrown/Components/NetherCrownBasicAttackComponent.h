@@ -3,43 +3,14 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "Components/ActorComponent.h"
+#include "NetherCrown/Data/NetherCrownBasicAttackData.h"
 #include "NetherCrownBasicAttackComponent.generated.h"
 
 class ANetherCrownCharacter;
 class UAnimMontage;
-class UCameraShakeBase;
 
 class ANetherCrownWeapon;
-
-USTRUCT()
-struct FNetherCrownBasicAttackComponentTagData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag BasicAttackGruntSoundTag{};
-
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag BasicAttackImpactEffectTag{};
-};
-
-USTRUCT()
-struct FNetherCrownComboTimingData
-{
-	GENERATED_BODY()
-
-public:
-	//@NOTE : Montage Section 시작 기준, 콤보 윈도우가 열리는 시간 (초)
-	UPROPERTY(EditDefaultsOnly)
-	float ComboWindowOpenTime = 0.0f;
-
-	//@NOTE : Montage Section 시작 기준, 콤보 윈도우가 닫히는 시간 (초)
-	UPROPERTY(EditDefaultsOnly)
-	float ComboWindowCloseTime = 0.0f;
-};
 
 UENUM()
 enum class ENetherCrownBasicAttackState : uint8
@@ -76,6 +47,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	void LoadBasicAttackData();
 	void CacheBasicAttackMontage();
 	void CacheCharacter();
 
@@ -123,29 +95,11 @@ private:
 	void ServerHandleAttackEnd();
 	void ServerHandleHitTraceEnable();
 
-	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
-	TSoftObjectPtr<UAnimMontage> BasicAttackAnimMontageSoft{};
+	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackData")
+	FNetherCrownBasicAttackData BasicAttackData{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "Combo")
-	TMap<int32, FName> ComboMontageSectionMap{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Combo")
-	TMap<int32, FNetherCrownComboTimingData> ComboTimingDataMap{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Combo")
-	TMap<int32, float> AttackEndTimingDataMap{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Combo")
-	TMap<int32, float> HitTraceEnableTimingDataMap{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
-	TSubclassOf<UCameraShakeBase> ApplyDamageCameraShakeClass{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	float AutoTargetingRadius{ 130.0f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "TagData")
-	FNetherCrownBasicAttackComponentTagData BasicAttackComponentTagData{};
+	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackDataAsset")
+	TSoftObjectPtr<UNetherCrownBasicAttackDataAsset> BasicAttackDataAssetSoft{};
 
 	int32 CurrentComboCount{ 1 };
 
