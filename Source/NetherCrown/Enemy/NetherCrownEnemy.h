@@ -1,35 +1,23 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
+#include "NetherCrown/Data/NetherCrownEnemyDamageCosmeticData.h"
 #include "NetherCrownEnemy.generated.h"
 
 class ANetherCrownEnemyWeapon;
 class UNiagaraComponent;
 class UCapsuleComponent;
+class UAnimMontage;
 
 class ANetherCrownCharacter;
 class UNetherCrownStatusEffectControlComponent;
 class UNetherCrownEnemyStatComponent;
 class UNetherCrownCrowdControlComponent;
 class UNetherCrownEnemyBasicAttackComponent;
-
-USTRUCT()
-struct FNetherCrownEnemyTagData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag EnemyHurtGruntSoundTag{};
-
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag EnemyHurtImpactSoundTag{};
-};
 
 UCLASS()
 class NETHERCROWN_API ANetherCrownEnemy : public ACharacter, public INetherCrownCrowdControlInterface
@@ -54,6 +42,7 @@ protected:
 
 private:
 	void AttachEnemyWeapon();
+	void LoadEnemyDamageCosmeticData();
 
 	void SetEnemyMovementComponentValue();
 
@@ -83,11 +72,14 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownEnemyBasicAttackComponent> BasicAttackComponent{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
-	TSoftObjectPtr<UAnimMontage> TakeDamageAnimMontageSoft{};
+	UPROPERTY(Transient)
+	FNetherCrownEnemyDamageCosmeticData EnemyDamageCosmeticData{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "TagData")
-	FNetherCrownEnemyTagData EnemyTagData{};
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDamageCosmeticDataAsset")
+	TSoftObjectPtr<UNetherCrownEnemyDamageCosmeticDataAsset> EnemyDamageCosmeticDataAssetSoft{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> CachedTakeDamageAnimMontage{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyWeaponClass")
 	TSubclassOf<ANetherCrownEnemyWeapon> EnemyWeaponClass{};

@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownEnemy.h"
 
@@ -50,6 +50,8 @@ UNetherCrownStatusEffectControlComponent* ANetherCrownEnemy::GetStatusEffectCont
 void ANetherCrownEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	LoadEnemyDamageCosmeticData();
 
 	if (!HasAuthority() && ensureAlways(IsValid(StatusNiagaraComponent)))
 	{
@@ -123,6 +125,27 @@ void ANetherCrownEnemy::AttachEnemyWeapon()
 	BasicAttackComponent->SetHandledEnemyWeapon(EnemyWeapon);
 }
 
+void ANetherCrownEnemy::LoadEnemyDamageCosmeticData()
+{
+	if (EnemyDamageCosmeticDataAssetSoft.IsNull())
+	{
+		return;
+	}
+
+	const UNetherCrownEnemyDamageCosmeticDataAsset* EnemyDamageCosmeticDataAsset{ EnemyDamageCosmeticDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(EnemyDamageCosmeticDataAsset)))
+	{
+		return;
+	}
+
+	EnemyDamageCosmeticData = EnemyDamageCosmeticDataAsset->GetEnemyDamageCosmeticData();
+
+	if (!HasAuthority() && !EnemyDamageCosmeticData.TakeDamageAnimMontageSoft.IsNull())
+	{
+		CachedTakeDamageAnimMontage = EnemyDamageCosmeticData.TakeDamageAnimMontageSoft.LoadSynchronous();
+	}
+}
+
 void ANetherCrownEnemy::SetEnemyMovementComponentValue()
 {
 	UCharacterMovementComponent* CharacterMovementComponent{ GetCharacterMovement() };
@@ -169,7 +192,7 @@ void ANetherCrownEnemy::ProcessIncomingPhysicalDamage(const AActor* DamageCauser
 	const int32 EnemyArmor{ EnemyStatData.PhysicalArmor };
 
 	const int32 EffectiveArmor{ FMath::Max(0, EnemyArmor - PhysicalPenetration) };
-	const float DamageMultiplier{ 100.f / (100.f + EffectiveArmor)};
+	const float DamageMultiplier{ 100.f / (100.f + EffectiveArmor) };
 	const int32 FinalDamage{ FMath::RoundToInt(DamageAmount * DamageMultiplier) };
 
 	EnemyStatComponent->SetEnemyHp(EnemyStatData.EnemyHP - FinalDamage);
@@ -193,8 +216,7 @@ void ANetherCrownEnemy::Multicast_PlayTakeDamageAnimation_Implementation(const E
 		return;
 	}
 
-	UAnimMontage* TakeDamageAnimMontage{ TakeDamageAnimMontageSoft.LoadSynchronous() };
-	if (!ensureAlways(IsValid(TakeDamageAnimMontage)))
+	if (!ensureAlways(IsValid(CachedTakeDamageAnimMontage)))
 	{
 		return;
 	}
@@ -206,7 +228,7 @@ void ANetherCrownEnemy::Multicast_PlayTakeDamageAnimation_Implementation(const E
 		return;
 	}
 
-	EnemyAnimInstance->Montage_Play(TakeDamageAnimMontage);
+	EnemyAnimInstance->Montage_Play(CachedTakeDamageAnimMontage);
 }
 
 void ANetherCrownEnemy::PlayTakeDamageSound() const
@@ -216,8 +238,8 @@ void ANetherCrownEnemy::PlayTakeDamageSound() const
 		return;
 	}
 
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtGruntSoundTag);
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyTagData.EnemyHurtImpactSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageCosmeticData.DamageSoundTagData.EnemyHurtGruntSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageCosmeticData.DamageSoundTagData.EnemyHurtImpactSoundTag);
 }
 
 void ANetherCrownEnemy::Multicast_PlayTakeDamageSound_Implementation()
