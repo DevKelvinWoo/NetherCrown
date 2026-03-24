@@ -4,6 +4,7 @@
 
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrownStatusEffectControlComponent.h"
+#include "Animation/AnimMontage.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -39,12 +40,41 @@ void UNetherCrownCrowdControlComponent::InitLoadData()
 		return;
 	}
 
+	LoadCrowdControlCosmeticData();
+
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
 	CachedFrozenTargetOverlayMaterialEndCurveFloat = DefaultSettings->TargetOverlayMaterialEndCurveFloatSoft.LoadSynchronous();
 
 	BindTimelineFunctions();
+}
+
+void UNetherCrownCrowdControlComponent::LoadCrowdControlCosmeticData()
+{
+	if (CrowdControlCosmeticDataAssetSoft.IsNull() || CachedOwner->HasAuthority())
+	{
+		return;
+	}
+
+	const UNetherCrownCrowdControlCosmeticDataAsset* CrowdControlCosmeticDataAsset{ CrowdControlCosmeticDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(CrowdControlCosmeticDataAsset)))
+	{
+		return;
+	}
+
+	CrowdControlCosmeticData = CrowdControlCosmeticDataAsset->GetCrowdControlCosmeticData();
+
+	CachedCrowdControlAnimMap.Empty();
+	for (const TPair<ENetherCrownCrowdControlType, TSoftObjectPtr<UAnimMontage>>& Pair : CrowdControlCosmeticData.CrowdControlMontageMap)
+	{
+		if (Pair.Value.IsNull())
+		{
+			continue;
+		}
+
+		CachedCrowdControlAnimMap.Add(Pair.Key, Pair.Value.LoadSynchronous());
+	}
 }
 
 void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
@@ -230,24 +260,18 @@ void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownC
 		return;
 	}
 
-	if (CrowdControlAnimMap.IsEmpty())
+	if (CachedCrowdControlAnimMap.IsEmpty())
 	{
 		return;
 	}
 
-	TSoftObjectPtr<UAnimMontage>* CrowdControlAnimMontageSoft{ CrowdControlAnimMap.Find(InCrowdControlType) };
-	if (!CrowdControlAnimMontageSoft)
+	TObjectPtr<UAnimMontage>* CrowdControlAnimMontage{ CachedCrowdControlAnimMap.Find(InCrowdControlType) };
+	if (!CrowdControlAnimMontage || !ensureAlways(IsValid(*CrowdControlAnimMontage)))
 	{
 		return;
 	}
 
-	UAnimMontage* FoundCrowdControlAnimMontage{ CrowdControlAnimMontageSoft->LoadSynchronous() };
-	if (!(IsValid(FoundCrowdControlAnimMontage)))
-	{
-		return;
-	}
-
-	CachedOwner->PlayAnimMontage(FoundCrowdControlAnimMontage);
+	CachedOwner->PlayAnimMontage(*CrowdControlAnimMontage);
 }
 
 void UNetherCrownCrowdControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)

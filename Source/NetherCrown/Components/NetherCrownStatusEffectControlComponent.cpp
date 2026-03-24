@@ -1,4 +1,4 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #include "NetherCrownStatusEffectControlComponent.h"
 
@@ -22,15 +22,33 @@ void UNetherCrownStatusEffectControlComponent::BeginPlay()
 		return;
 	}
 
-	for (const TPair<ENetherCrownCrowdControlType, TSoftObjectPtr<UNiagaraSystem>>& Pair : StatusNiagaraSystemMap)
+	LoadStatusEffectCosmeticData();
+}
+
+void UNetherCrownStatusEffectControlComponent::LoadStatusEffectCosmeticData()
+{
+	if (StatusEffectCosmeticDataAssetSoft.IsNull() || CachedOwnerCharacter->HasAuthority())
 	{
-		const TSoftObjectPtr<UNiagaraSystem> SoftNiagaraSystemPtr{ Pair.Value };
-		if (SoftNiagaraSystemPtr.IsNull())
+		return;
+	}
+
+	const UNetherCrownStatusEffectCosmeticDataAsset* StatusEffectCosmeticDataAsset{ StatusEffectCosmeticDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(StatusEffectCosmeticDataAsset)))
+	{
+		return;
+	}
+
+	StatusEffectCosmeticData = StatusEffectCosmeticDataAsset->GetStatusEffectCosmeticData();
+
+	CachedStatusNiagaraSystemMap.Empty();
+	for (const TPair<ENetherCrownCrowdControlType, TSoftObjectPtr<UNiagaraSystem>>& Pair : StatusEffectCosmeticData.StatusCosmeticMap)
+	{
+		if (Pair.Value.IsNull())
 		{
 			continue;
 		}
 
-		CachedStatusNiagaraSystemMap.Add(Pair.Key, SoftNiagaraSystemPtr.LoadSynchronous());
+		CachedStatusNiagaraSystemMap.Add(Pair.Key, Pair.Value.LoadSynchronous());
 	}
 }
 
@@ -50,6 +68,7 @@ void UNetherCrownStatusEffectControlComponent::SetActiveStatusNiagaraSystem(cons
 	if (!IsValid(HandledStatusNiagaraComponent))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("HandledStatusNiagaraComponent is null %hs"), __FUNCTION__);
+		return;
 	}
 
 	if (bEnable)

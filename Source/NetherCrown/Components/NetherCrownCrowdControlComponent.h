@@ -5,18 +5,10 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/TimelineComponent.h"
+#include "NetherCrown/Data/NetherCrownCrowdControlCosmeticData.h"
 #include "NetherCrownCrowdControlComponent.generated.h"
 
 class UAnimMontage;
-
-UENUM()
-enum class ENetherCrownCrowdControlType : uint8
-{
-	NONE,
-	KNOCK_BACK,
-	FROZEN,
-	STUN,
-};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownCrowdControlComponent : public UActorComponent
@@ -41,6 +33,7 @@ protected:
 
 private:
 	void InitLoadData();
+	void LoadCrowdControlCosmeticData();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
@@ -73,8 +66,14 @@ private:
 
 	FTimerHandle CrowdControlTimerHandle{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "CCAnimMap")
-	TMap<ENetherCrownCrowdControlType, TSoftObjectPtr<UAnimMontage>> CrowdControlAnimMap{};
+	UPROPERTY(Transient)
+	FNetherCrownCrowdControlCosmeticData CrowdControlCosmeticData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrowdControlCosmeticDataAsset")
+	TSoftObjectPtr<UNetherCrownCrowdControlCosmeticDataAsset> CrowdControlCosmeticDataAssetSoft{};
+
+	UPROPERTY(Transient)
+	TMap<ENetherCrownCrowdControlType, TObjectPtr<UAnimMontage>> CachedCrowdControlAnimMap{};
 
 	UPROPERTY(Replicated)
 	ENetherCrownCrowdControlType CrowdControlType{ ENetherCrownCrowdControlType::NONE };

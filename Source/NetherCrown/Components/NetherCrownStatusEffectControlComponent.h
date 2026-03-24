@@ -1,15 +1,14 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "NetherCrown/Data/NetherCrownStatusEffectCosmeticData.h"
 #include "NetherCrownStatusEffectControlComponent.generated.h"
 
 class UNiagaraSystem;
 class UNiagaraComponent;
-
-enum class ENetherCrownCrowdControlType : uint8;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownStatusEffectControlComponent : public UActorComponent
@@ -26,8 +25,13 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "StatusNiagaraData")
-	TMap<ENetherCrownCrowdControlType, TSoftObjectPtr<UNiagaraSystem>> StatusNiagaraSystemMap{};
+	void LoadStatusEffectCosmeticData();
+
+	UPROPERTY(Transient)
+	FNetherCrownStatusEffectCosmeticData StatusEffectCosmeticData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "StatusEffectCosmeticDataAsset")
+	TSoftObjectPtr<UNetherCrownStatusEffectCosmeticDataAsset> StatusEffectCosmeticDataAssetSoft{};
 
 	UPROPERTY(Transient)
 	TMap<ENetherCrownCrowdControlType, TObjectPtr<UNiagaraSystem>> CachedStatusNiagaraSystemMap{};
