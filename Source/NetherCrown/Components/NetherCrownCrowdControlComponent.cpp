@@ -5,10 +5,10 @@
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrownStatusEffectControlComponent.h"
 #include "Animation/AnimMontage.h"
+#include "Curves/CurveFloat.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 
 UNetherCrownCrowdControlComponent::UNetherCrownCrowdControlComponent()
 {
@@ -41,12 +41,6 @@ void UNetherCrownCrowdControlComponent::InitLoadData()
 	}
 
 	LoadCrowdControlCosmeticData();
-
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
-
-	CachedFrozenTargetOverlayMaterialEndCurveFloat = DefaultSettings->TargetOverlayMaterialEndCurveFloatSoft.LoadSynchronous();
-
 	BindTimelineFunctions();
 }
 
@@ -74,6 +68,11 @@ void UNetherCrownCrowdControlComponent::LoadCrowdControlCosmeticData()
 		}
 
 		CachedCrowdControlAnimMap.Add(Pair.Key, Pair.Value.LoadSynchronous());
+	}
+
+	if (!CrowdControlCosmeticData.FrozenCosmeticData.OverlayEndCurveFloatSoft.IsNull())
+	{
+		CachedFrozenTargetOverlayMaterialEndCurveFloat = CrowdControlCosmeticData.FrozenCosmeticData.OverlayEndCurveFloatSoft.LoadSynchronous();
 	}
 }
 
@@ -142,11 +141,7 @@ void UNetherCrownCrowdControlComponent::Frozen() const
 
 	SkeletalMeshComponent->bPauseAnims = true;
 	SkeletalMeshComponent->SetOverlayMaterial(DMI);
-
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
-
-	DMI->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, DefaultSettings->FrozenTempestTargetMaterialAlpha);
+	DMI->SetScalarParameterValue(CrowdControlCosmeticData.FrozenCosmeticData.OverlayMaterialParam, CrowdControlCosmeticData.FrozenCosmeticData.OverlayAlpha);
 }
 
 void UNetherCrownCrowdControlComponent::Stun() const
@@ -291,6 +286,11 @@ void UNetherCrownCrowdControlComponent::BindTimelineFunctions()
 		return;
 	}
 
+	if (!ensureAlways(IsValid(CachedFrozenTargetOverlayMaterialEndCurveFloat)))
+	{
+		return;
+	}
+
 	FOnTimelineFloat FrozenTargetOverlayEndMaterialProgressFunc{};
 	FrozenTargetOverlayEndMaterialProgressFunc.BindUFunction(this, FName("SetFrozenTargetOverlayEndMaterialByFloatTimeline"));
 	FrozenTargetOverlayEndMaterialFloatTimeline.AddInterpFloat(CachedFrozenTargetOverlayMaterialEndCurveFloat, FrozenTargetOverlayEndMaterialProgressFunc);
@@ -327,9 +327,5 @@ void UNetherCrownCrowdControlComponent::SetFrozenTargetOverlayEndMaterialByFloat
 	}
 
 	MeshComponent->SetOverlayMaterial(DynamicOverlayMaterial);
-
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
-
-	DynamicOverlayMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, FloatCurveValue);
+	DynamicOverlayMaterial->SetScalarParameterValue(CrowdControlCosmeticData.FrozenCosmeticData.OverlayMaterialParam, FloatCurveValue);
 }

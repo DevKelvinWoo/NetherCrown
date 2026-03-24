@@ -59,7 +59,7 @@ private:
 	UFUNCTION()
 	void SetFrozenTargetOverlayEndMaterialByFloatTimeline(float FloatCurveValue);
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedFrozenTargetOverlayMaterialEndCurveFloat{};
 
 	FTimeline FrozenTargetOverlayEndMaterialFloatTimeline{};

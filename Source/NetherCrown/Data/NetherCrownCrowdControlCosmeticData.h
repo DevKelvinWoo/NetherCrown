@@ -8,6 +8,23 @@
 #include "NetherCrownCrowdControlCosmeticData.generated.h"
 
 class UAnimMontage;
+class UCurveFloat;
+
+USTRUCT()
+struct FNetherCrownFrozenCosmeticData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "Frozen")
+	TSoftObjectPtr<UCurveFloat> OverlayEndCurveFloatSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Frozen")
+	FName OverlayMaterialParam{ TEXT("_VfxMix") };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Frozen")
+	float OverlayAlpha{ 0.85f };
+};
 
 USTRUCT()
 struct FNetherCrownCrowdControlCosmeticData
@@ -17,6 +34,9 @@ struct FNetherCrownCrowdControlCosmeticData
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "CCMontageMap")
 	TMap<ENetherCrownCrowdControlType, TSoftObjectPtr<UAnimMontage>> CrowdControlMontageMap{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Frozen")
+	FNetherCrownFrozenCosmeticData FrozenCosmeticData{};
 };
 
 UCLASS()
