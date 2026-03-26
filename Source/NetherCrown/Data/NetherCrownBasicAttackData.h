@@ -65,6 +65,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	float AutoTargetingRadius{ 130.0f };
 
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitStopAnimRate{ 0.12f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitStopDuration{ 0.09f };
+
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownBasicAttackTagData BasicAttackTagData{};
 };

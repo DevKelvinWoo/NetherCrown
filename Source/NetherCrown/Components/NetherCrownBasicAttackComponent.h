@@ -11,6 +11,7 @@ class ANetherCrownCharacter;
 class UAnimMontage;
 
 class ANetherCrownWeapon;
+class UNetherCrownCharacterAnimInstance;
 
 UENUM()
 enum class ENetherCrownBasicAttackState : uint8
@@ -40,7 +41,7 @@ public:
 
 	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
 
-	void ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation);
+	void ApplyHitCosmeticAndDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation);
 
 protected:
 	virtual void BeginPlay() override;
@@ -50,6 +51,8 @@ private:
 	void LoadBasicAttackData();
 	void CacheBasicAttackMontage();
 	void CacheCharacter();
+
+	UNetherCrownCharacterAnimInstance* GetOwnerCharacterAnimInstance() const;
 
 	void CalculateNextComboCount();
 	int32 CalculateBasicAttackDamage() const;
@@ -65,6 +68,12 @@ private:
 
 	UFUNCTION(Client, Unreliable)
 	void Client_PlayHitImpactCameraShake();
+
+	UFUNCTION(Client, Unreliable)
+	void Client_StartBasicAttackHitStop();
+
+	void ApplyBasicAttackHitStop();
+	void RestoreBasicAttackPlayRate();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AutoTargetEnemy();
@@ -118,4 +127,5 @@ private:
 	FTimerHandle ComboWindowCloseTimerHandle;
 	FTimerHandle AttackEndTimerHandle;
 	FTimerHandle HitTraceEnableHandle;
+	FTimerHandle HitStopTimer;
 };

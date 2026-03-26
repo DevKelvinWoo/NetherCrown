@@ -92,6 +92,30 @@ void UNetherCrownBasicAttackComponent::CacheCharacter()
 	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
 }
 
+UNetherCrownCharacterAnimInstance* UNetherCrownBasicAttackComponent::GetOwnerCharacterAnimInstance() const
+{
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("Montage section not found or CachedCharacter is invalid in %hs"), __FUNCTION__);
+		return nullptr;
+	}
+
+	if (CachedCharacter->HasAuthority())
+	{
+		return nullptr;
+	}
+
+	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter->GetMesh() };
+	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr };
+	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ Cast<UNetherCrownCharacterAnimInstance>(AnimInstance) };
+	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
+	{
+		return nullptr;
+	}
+
+	return NetherCrownCharacterAnimInstance;
+}
+
 void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 {
 	AutoTargetEnemy();
@@ -178,9 +202,7 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 		return;
 	}
 
-	const USkeletalMeshComponent* OwnerCharacterMesh{ CachedCharacter->GetMesh() };
-	UAnimInstance* AnimInstance{ OwnerCharacterMesh ? OwnerCharacterMesh->GetAnimInstance() : nullptr };
-	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ Cast<UNetherCrownCharacterAnimInstance>(AnimInstance) };
+	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ GetOwnerCharacterAnimInstance() };
 	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
 	{
 		return;
@@ -218,6 +240,75 @@ void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool b
 	}
 
 	EquippedWeapon->SetWeaponHitTraceEnable(bEnable);
+}
+
+void UNetherCrownBasicAttackComponent::ApplyBasicAttackHitStop()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("Montage section not found or CachedCharacter is invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ GetOwnerCharacterAnimInstance() };
+	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedBasicAttackMontage)))
+	{
+		return;
+	}
+
+	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(CachedBasicAttackMontage, BasicAttackData.HitStopAnimRate);
+}
+
+void UNetherCrownBasicAttackComponent::RestoreBasicAttackPlayRate()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("Montage section not found or CachedCharacter is invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{ GetOwnerCharacterAnimInstance() };
+	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedBasicAttackMontage)))
+	{
+		return;
+	}
+
+	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(CachedBasicAttackMontage, 1);
+}
+
+void UNetherCrownBasicAttackComponent::Client_StartBasicAttackHitStop_Implementation()
+{
+	ApplyBasicAttackHitStop();
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(HitStopTimer);
+	TimerManager.SetTimer(HitStopTimer, this, &ThisClass::RestoreBasicAttackPlayRate, BasicAttackData.HitStopDuration, false);
 }
 
 void UNetherCrownBasicAttackComponent::Client_InitWeaponTraceComponentSettings_Implementation()
@@ -448,7 +539,7 @@ void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLo
 	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedCharacter, BasicAttackData.BasicAttackTagData.BasicAttackImpactEffectTag, SpawnTransform);
 }
 
-void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation)
+void UNetherCrownBasicAttackComponent::ApplyHitCosmeticAndDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
@@ -461,6 +552,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageToHitEnemy(AActor* HitEnemy, c
 	}
 
 	Client_PlayHitImpactCameraShake();
+	Client_StartBasicAttackHitStop();
 	Multicast_PlayHitImpactEffect(HitLocation);
 
 	ApplyDamageInternal(HitEnemy);

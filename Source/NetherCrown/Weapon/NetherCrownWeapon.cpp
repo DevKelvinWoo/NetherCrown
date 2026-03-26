@@ -183,7 +183,7 @@ void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLo
 		return;
 	}
 
-	BasicAttackComponent->ApplyDamageToHitEnemy(HitEnemy, HitLocation);
+	BasicAttackComponent->ApplyHitCosmeticAndDamageToHitEnemy(HitEnemy, HitLocation);
 }
 
 void ANetherCrownWeapon::Multicast_ActiveWeaponAuraNiagara_Implementation(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum)
