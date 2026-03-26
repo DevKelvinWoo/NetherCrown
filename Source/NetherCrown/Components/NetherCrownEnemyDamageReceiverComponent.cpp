@@ -44,7 +44,7 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 
 	if (IsDead())
 	{
-		//@NOTE : Handling Death
+		HandleEnemyDead();
 	}
 	else
 	{
@@ -110,6 +110,25 @@ bool UNetherCrownEnemyDamageReceiverComponent::IsDead() const
 	return CurrentHP <= 0;
 }
 
+void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	CachedOwnerEnemy->SetIsDead(true);
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	const float DeathTimingOffset{ EnemyDeathCosmeticData.DestroyTimeOffset };
+	World->GetTimerManager().SetTimer(HandleDestroyTimerHandle, this, &ThisClass::HandleDeathTimer, DeathTimingOffset, false);
+}
+
 int32 UNetherCrownEnemyDamageReceiverComponent::GetWeaponPenetration(const bool bIsPhysicalDamage, const AActor* DamageCauser) const
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
@@ -158,28 +177,44 @@ int32 UNetherCrownEnemyDamageReceiverComponent::GetArmorStat(const bool bIsPhysi
 
 void UNetherCrownEnemyDamageReceiverComponent::LoadEnemyDamageCosmeticData()
 {
-	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)))
 	{
 		return;
 	}
 
-	if (EnemyDamageCosmeticDataAssetSoft.IsNull())
+	if (EnemyDamageAndDeathCosmeticDataAssetSoft.IsNull())
 	{
 		return;
 	}
 
-	const UNetherCrownEnemyDamageCosmeticDataAsset* EnemyDamageCosmeticDataAsset{ EnemyDamageCosmeticDataAssetSoft.LoadSynchronous() };
-	if (!ensureAlways(IsValid(EnemyDamageCosmeticDataAsset)))
+	const UNetherCrownEnemyDamageAndDeathCosmeticDataAsset* EnemyDamageAndDeathCosmeticDataAsset{ EnemyDamageAndDeathCosmeticDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(EnemyDamageAndDeathCosmeticDataAsset)))
 	{
 		return;
 	}
 
-	EnemyDamageCosmeticData = EnemyDamageCosmeticDataAsset->GetEnemyDamageCosmeticData();
+	EnemyDamageCosmeticData = EnemyDamageAndDeathCosmeticDataAsset->GetEnemyDamageCosmeticData();
+	EnemyDeathCosmeticData = EnemyDamageAndDeathCosmeticDataAsset->GetEnemyDeathCosmeticData();
+
+	if (CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
 
 	if (!(EnemyDamageCosmeticData.TakeDamageAnimMontageSoft.IsNull()))
 	{
 		CachedTakeDamageAnimMontage = EnemyDamageCosmeticData.TakeDamageAnimMontageSoft.LoadSynchronous();
 	}
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::HandleDeathTimer()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	CachedOwnerEnemy->Destroy();
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)

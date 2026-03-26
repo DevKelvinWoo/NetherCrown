@@ -7,6 +7,7 @@
 #include "Components/SkeletalMeshComponent.h"
 #include "Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyDamageReceiverComponent.h"
@@ -45,6 +46,14 @@ UNetherCrownStatusEffectControlComponent* ANetherCrownEnemy::GetStatusEffectCont
 	return StatusEffectControlComponent;
 }
 
+void ANetherCrownEnemy::SetIsDead(const bool InbIsDead)
+{
+	if (HasAuthority())
+	{
+		bIsDead = InbIsDead;
+	}
+}
+
 void ANetherCrownEnemy::BeginPlay()
 {
 	Super::BeginPlay();
@@ -72,6 +81,13 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 	EnemyDamageReceiverComponent->HandleIncomingDamage(ResultDamage, DamageEvent, DamageCauser);
 
 	return ResultDamage;
+}
+
+void ANetherCrownEnemy::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, bIsDead);
 }
 
 ENetherCrownCrowdControlType ANetherCrownEnemy::GetCrowdControlType() const

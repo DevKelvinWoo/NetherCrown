@@ -29,12 +29,19 @@ public:
 	UNetherCrownEnemyStatComponent* GetEnemyStatComponent() const { return EnemyStatComponent; }
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
+	void SetIsDead(const bool InbIsDead);
+
 protected:
 	virtual void BeginPlay() override;
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	ENetherCrownCrowdControlType GetCrowdControlType() const;
+
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsDead() const { return bIsDead; }
 
 private:
 	void AttachEnemyWeapon();
@@ -67,4 +74,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemyWeapon> EnemyWeapon{};
+
+	UPROPERTY(Transient, Replicated)
+	bool bIsDead{ false };
 };

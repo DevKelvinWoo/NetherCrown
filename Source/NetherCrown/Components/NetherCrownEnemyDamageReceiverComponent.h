@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
-#include "NetherCrown/Data/NetherCrownEnemyDamageCosmeticData.h"
+#include "NetherCrown/Data/UNetherCrownEnemyDamageAndDeathCosmeticData.h"
 #include "NetherCrownEnemyDamageReceiverComponent.generated.h"
 
 
@@ -30,6 +30,8 @@ private:
 	void ApplyFinalDamage(float FinalDamage);
 
 	bool IsDead() const;
+	void HandleEnemyDead();
+	void HandleDeathTimer();
 
 	int32 GetWeaponPenetration(const bool bIsPhysicalDamage, const AActor* DamageCauser) const;
 	int32 GetArmorStat(const bool bIsPhysicalDamage) const;
@@ -46,11 +48,16 @@ private:
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
 
 	UPROPERTY(Transient)
-	FNetherCrownEnemyDamageCosmeticData EnemyDamageCosmeticData{};
+	FUNetherCrownEnemyDamageCosmeticData EnemyDamageCosmeticData{};
+
+	UPROPERTY(Transient)
+	FNetherCrownEnemyDeathCosmeticData EnemyDeathCosmeticData{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedTakeDamageAnimMontage{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyDamageCosmeticDataAsset")
-	TSoftObjectPtr<UNetherCrownEnemyDamageCosmeticDataAsset> EnemyDamageCosmeticDataAssetSoft{};
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDamageAndDeathCosmeticDataAsset")
+	TSoftObjectPtr<UNetherCrownEnemyDamageAndDeathCosmeticDataAsset> EnemyDamageAndDeathCosmeticDataAssetSoft{};
+
+	FTimerHandle HandleDestroyTimerHandle{};
 };
