@@ -75,6 +75,12 @@ private:
 	void ApplyBasicAttackHitStop();
 	void RestoreBasicAttackPlayRate();
 
+	UFUNCTION(Client, Unreliable)
+	void Client_StartBasicAttackPushIn();
+
+	void ApplyBasicAttackPushIn();
+	void RestoreBasicAttackPushIn();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_AutoTargetEnemy();
 
@@ -128,4 +134,7 @@ private:
 	FTimerHandle AttackEndTimerHandle;
 	FTimerHandle HitTraceEnableHandle;
 	FTimerHandle HitStopTimer;
+	FTimerHandle PushInTimerHandle;
+
+	float CachedMainSpringArmLengthBeforePushIn{ 0.f };
 };

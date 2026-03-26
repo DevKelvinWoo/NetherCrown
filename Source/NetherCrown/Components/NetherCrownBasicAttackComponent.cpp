@@ -311,6 +311,77 @@ void UNetherCrownBasicAttackComponent::Client_StartBasicAttackHitStop_Implementa
 	TimerManager.SetTimer(HitStopTimer, this, &ThisClass::RestoreBasicAttackPlayRate, BasicAttackData.HitStopDuration, false);
 }
 
+void UNetherCrownBasicAttackComponent::ApplyBasicAttackPushIn()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	if (!TimerManager.IsTimerActive(PushInTimerHandle))
+	{
+		CachedMainSpringArmLengthBeforePushIn = CachedCharacter->GetMainSpringArmLength();
+	}
+
+	if (CachedMainSpringArmLengthBeforePushIn <= 0.f)
+	{
+		return;
+	}
+
+	const float PushInSpringArmLength{ FMath::Max(0.f, CachedMainSpringArmLengthBeforePushIn - BasicAttackData.HitPushInDistance) };
+	CachedCharacter->SetMainSpringArmLength(PushInSpringArmLength);
+}
+
+void UNetherCrownBasicAttackComponent::RestoreBasicAttackPushIn()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (CachedMainSpringArmLengthBeforePushIn <= 0.f)
+	{
+		return;
+	}
+
+	CachedCharacter->SetMainSpringArmLength(CachedMainSpringArmLengthBeforePushIn);
+	CachedMainSpringArmLengthBeforePushIn = 0.f;
+}
+
+void UNetherCrownBasicAttackComponent::Client_StartBasicAttackPushIn_Implementation()
+{
+	ApplyBasicAttackPushIn();
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(PushInTimerHandle);
+	TimerManager.SetTimer(PushInTimerHandle, this, &ThisClass::RestoreBasicAttackPushIn, BasicAttackData.HitPushInDuration, false);
+}
+
 void UNetherCrownBasicAttackComponent::Client_InitWeaponTraceComponentSettings_Implementation()
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
@@ -553,6 +624,7 @@ void UNetherCrownBasicAttackComponent::ApplyHitCosmeticAndDamageToHitEnemy(AActo
 
 	Client_PlayHitImpactCameraShake();
 	Client_StartBasicAttackHitStop();
+	Client_StartBasicAttackPushIn();
 	Multicast_PlayHitImpactEffect(HitLocation);
 
 	ApplyDamageInternal(HitEnemy);
@@ -664,6 +736,8 @@ void UNetherCrownBasicAttackComponent::ServerHandleAttackEnd()
 		World->GetTimerManager().ClearTimer(ComboWindowOpenTimerHandle);
 		World->GetTimerManager().ClearTimer(ComboWindowCloseTimerHandle);
 		World->GetTimerManager().ClearTimer(AttackEndTimerHandle);
+		World->GetTimerManager().ClearTimer(HitStopTimer);
+		World->GetTimerManager().ClearTimer(PushInTimerHandle);
 	}
 
 	CurrentComboCount = 1;

@@ -385,6 +385,16 @@ void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength
 	MainSpringArmComponent->TargetArmLength = InSpringArmLength;
 }
 
+float ANetherCrownCharacter::GetMainSpringArmLength() const
+{
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || HasAuthority())
+	{
+		return 0.f;
+	}
+
+	return MainSpringArmComponent->TargetArmLength;
+}
+
 bool ANetherCrownCharacter::IsEquippedWeapon() const
 {
 	if (!ensureAlways(IsValid(NetherCrownEquipComponent)))

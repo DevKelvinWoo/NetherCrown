@@ -61,6 +61,7 @@ public:
 
 	void SetMainSpringArmZOffset(const float InSpringArmZOffset);
 	void SetMainSpringArmLength(const float InSpringArmLength);
+	float GetMainSpringArmLength() const;
 
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}

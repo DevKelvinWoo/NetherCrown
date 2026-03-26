@@ -71,6 +71,12 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	float HitStopDuration{ 0.09f };
 
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitPushInDistance{ 20.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitPushInDuration{ 0.08f };
+
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownBasicAttackTagData BasicAttackTagData{};
 };
