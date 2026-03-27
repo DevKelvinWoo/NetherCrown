@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "NetherCrownWeapon.generated.h"
 
+enum class ENetherCrownTraceMode : uint8;
 class UNiagaraSystem;
 class UBoxComponent;
 class USphereComponent;
@@ -31,6 +32,8 @@ public:
 
 	void SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) const;
 	void InitWeaponTraceComponentSettings() const;
+
+	void SetTraceMode(const ENetherCrownTraceMode InTraceMode);
 
 	const UNetherCrownWeaponData* GetWeaponData() const { return WeaponData; }
 

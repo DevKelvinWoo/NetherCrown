@@ -8,7 +8,6 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
-#include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -67,16 +66,29 @@ void ANetherCrownWeapon::SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrac
 
 void ANetherCrownWeapon::InitWeaponTraceComponentSettings() const
 {
-	if (!ensureAlways(IsValid(WeaponTraceComponent)) || !ensureAlways(IsValid(WeaponMeshComponent)))
+	if (!ensureAlways(IsValid(WeaponTraceComponent)) || !ensureAlways(IsValid(WeaponMeshComponent)) || !ensureAlways(IsValid(WeaponData)))
 	{
 		return;
 	}
 
-	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings = GetDefault<UNetherCrownCharacterDefaultSettings>();
-	check(CharacterDefaultSettings);
-
-	const FName& TraceSocketName = CharacterDefaultSettings->GetWeaponTraceSocketName();
+	const FName& TraceSocketName{ WeaponData->GetWeaponTraceData().WeaponTraceSocketName };
 	WeaponTraceComponent->InitWeaponTraceComponentSettings(WeaponMeshComponent->GetSocketLocation(TraceSocketName));
+}
+
+void ANetherCrownWeapon::SetTraceMode(const ENetherCrownTraceMode InTraceMode)
+{
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)) || !OwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(WeaponTraceComponent)))
+	{
+		return;
+	}
+
+	WeaponTraceComponent->SetTraceMode(InTraceMode);
 }
 
 void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const

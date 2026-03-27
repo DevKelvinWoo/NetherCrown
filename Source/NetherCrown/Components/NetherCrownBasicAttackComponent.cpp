@@ -2,6 +2,7 @@
 
 #include "NetherCrownBasicAttackComponent.h"
 
+#include "NetherCrownControlPPComponent.h"
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrownEquipComponent.h"
 #include "NetherCrownPlayerStatComponent.h"
@@ -19,6 +20,7 @@
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
+#include "NetherCrown/Weapon/NetherCrownWeaponTraceComponent.h"
 
 UNetherCrownBasicAttackComponent::UNetherCrownBasicAttackComponent()
 {
@@ -69,6 +71,7 @@ void UNetherCrownBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class F
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, BasicAttackState);
+	DOREPLIFETIME(ThisClass, CurrentComboCount);
 }
 
 void UNetherCrownBasicAttackComponent::CacheBasicAttackMontage()
@@ -158,6 +161,7 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 	}
 
 	CurrentComboCount = 1;
+	SetWeaponTraceMode();
 
 	const FNetherCrownBasicAttackComboData* FirstComboData{ BasicAttackData.ComboDataMap.Find(1) };
 	if (!FirstComboData)
@@ -266,7 +270,8 @@ void UNetherCrownBasicAttackComponent::ApplyBasicAttackHitStop()
 		return;
 	}
 
-	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(CachedBasicAttackMontage, BasicAttackData.HitStopAnimRate);
+	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
+	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(CachedBasicAttackMontage, BasicAttackCosmeticData.HitStopAnimRate);
 }
 
 void UNetherCrownBasicAttackComponent::RestoreBasicAttackPlayRate()
@@ -308,7 +313,32 @@ void UNetherCrownBasicAttackComponent::Client_StartBasicAttackHitStop_Implementa
 
 	FTimerManager& TimerManager{ World->GetTimerManager() };
 	TimerManager.ClearTimer(HitStopTimer);
-	TimerManager.SetTimer(HitStopTimer, this, &ThisClass::RestoreBasicAttackPlayRate, BasicAttackData.HitStopDuration, false);
+
+	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
+	TimerManager.SetTimer(HitStopTimer, this, &ThisClass::RestoreBasicAttackPlayRate, BasicAttackCosmeticData.HitStopDuration, false);
+}
+
+void UNetherCrownBasicAttackComponent::ApplyLastComboHitPP()
+{
+	if (CurrentComboCount != BasicAttackData.ComboDataMap.Num())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	UNetherCrownControlPPComponent* ControlPPComponent{ CachedCharacter->GetControlPPComponent() };
+	if (!ensureAlways(IsValid(ControlPPComponent)))
+	{
+		return;
+	}
+
+	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
+	ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::LastComboAttack, BasicAttackCosmeticData.LastAttackPPDuration);
 }
 
 void UNetherCrownBasicAttackComponent::ApplyBasicAttackPushIn()
@@ -341,7 +371,9 @@ void UNetherCrownBasicAttackComponent::ApplyBasicAttackPushIn()
 		return;
 	}
 
-	const float PushInSpringArmLength{ FMath::Max(0.f, CachedMainSpringArmLengthBeforePushIn - BasicAttackData.HitPushInDistance) };
+	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
+	const float PushInSpringArmLength{ FMath::Max(0.f, CachedMainSpringArmLengthBeforePushIn - BasicAttackCosmeticData.HitPushInDistance) };
+
 	CachedCharacter->SetMainSpringArmLength(PushInSpringArmLength);
 }
 
@@ -379,7 +411,9 @@ void UNetherCrownBasicAttackComponent::Client_StartBasicAttackPushIn_Implementat
 
 	FTimerManager& TimerManager{ World->GetTimerManager() };
 	TimerManager.ClearTimer(PushInTimerHandle);
-	TimerManager.SetTimer(PushInTimerHandle, this, &ThisClass::RestoreBasicAttackPushIn, BasicAttackData.HitPushInDuration, false);
+
+	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
+	TimerManager.SetTimer(PushInTimerHandle, this, &ThisClass::RestoreBasicAttackPushIn, BasicAttackCosmeticData.HitPushInDuration, false);
 }
 
 void UNetherCrownBasicAttackComponent::Client_InitWeaponTraceComponentSettings_Implementation()
@@ -625,6 +659,7 @@ void UNetherCrownBasicAttackComponent::ApplyHitCosmeticAndDamageToHitEnemy(AActo
 	Client_PlayHitImpactCameraShake();
 	Client_StartBasicAttackHitStop();
 	Client_StartBasicAttackPushIn();
+
 	Multicast_PlayHitImpactEffect(HitLocation);
 
 	ApplyDamageInternal(HitEnemy);
@@ -634,6 +669,8 @@ void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 {
 	const int32 MaxComboCount{ BasicAttackData.ComboDataMap.Num() };
 	CurrentComboCount = CurrentComboCount >= MaxComboCount ? 1 : ++CurrentComboCount;
+
+	SetWeaponTraceMode();
 }
 
 void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
@@ -757,4 +794,38 @@ void UNetherCrownBasicAttackComponent::ServerHandleHitTraceEnable()
 	Client_InitWeaponTraceComponentSettings();
 
 	SetEquippedWeaponTraceEnable(true);
+}
+
+void UNetherCrownBasicAttackComponent::SetWeaponTraceMode()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
+	if (!ensureAlways(IsValid(EquipComponent)))
+	{
+		return;
+	}
+
+	ANetherCrownWeapon* EquippedWeapon{ EquipComponent->GetEquippedWeapon() };
+	if (!ensureAlways(IsValid(EquippedWeapon)))
+	{
+		return;
+	}
+
+	if (CurrentComboCount == BasicAttackData.ComboDataMap.Num())
+	{
+		EquippedWeapon->SetTraceMode(ENetherCrownTraceMode::Thrust);
+	}
+	else
+	{
+		EquippedWeapon->SetTraceMode(ENetherCrownTraceMode::Swing);
+	}
+}
+
+void UNetherCrownBasicAttackComponent::HandleCurrentComboCountReplicated()
+{
+	ApplyLastComboHitPP();
 }

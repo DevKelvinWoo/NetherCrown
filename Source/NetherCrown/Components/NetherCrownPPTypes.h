@@ -12,4 +12,5 @@ enum class ENetherCrownPPType : uint8
 	Frozen,
 	Charging,
 	Lightning,
+	LastComboAttack,
 };

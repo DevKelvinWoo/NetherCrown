@@ -48,6 +48,28 @@ public:
 };
 
 USTRUCT()
+struct FNetherCrownBasicAttackCosmeticData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitStopAnimRate{ 0.12f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitStopDuration{ 0.09f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitPushInDistance{ 20.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitPushInDuration{ 0.08f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float LastAttackPPDuration{ 1.f };
+};
+
+USTRUCT()
 struct FNetherCrownBasicAttackData
 {
 	GENERATED_BODY()
@@ -65,20 +87,11 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	float AutoTargetingRadius{ 130.0f };
 
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	float HitStopAnimRate{ 0.12f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	float HitStopDuration{ 0.09f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	float HitPushInDistance{ 20.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Settings")
-	float HitPushInDuration{ 0.08f };
-
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownBasicAttackTagData BasicAttackTagData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Cosmetic")
+	FNetherCrownBasicAttackCosmeticData BasicAttackCosmeticData{};
 };
 
 UCLASS()

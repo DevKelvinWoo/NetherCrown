@@ -4,11 +4,19 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrownWeaponTraceComponent.generated.h"
 
 class USkeletalMeshComponent;
 
 class ANetherCrownEnemy;
+
+UENUM()
+enum class ENetherCrownTraceMode : uint8
+{
+	Swing,
+	Thrust
+};
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownWeaponTraceComponent : public UActorComponent
@@ -23,6 +31,8 @@ public:
 	void SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) { bIsTraceEnabled = bEnableWeaponHitTrace; }
 	void InitWeaponTraceComponentSettings(const FVector& InLastEndLocation);
 
+	void SetTraceMode(const ENetherCrownTraceMode InTraceMode) { TraceMode = InTraceMode; }
+
 	FOnHitEnemy& GetOnHitEnemy() { return OnHitEnemy; }
 
 protected:
@@ -31,16 +41,16 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	void CacheWeaponTraceData();
 	void DetectWeaponHit();
+	void DetectWeaponSwingHit();
+	void DetectWeaponThrustHit();
 
 	UFUNCTION(Server, Reliable)
 	void Server_ReportHit(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation);
 
 	UPROPERTY(Replicated)
 	bool bIsTraceEnabled{ false };
-
-	UPROPERTY(EditDefaultsOnly, Category = "TraceData")
-	float TraceRadius = 10.0f;
 
 	UPROPERTY(Transient)
 	TObjectPtr<USkeletalMeshComponent> WeaponMesh{};
@@ -49,10 +59,13 @@ private:
 	FVector LastEndLocation{};
 
 	UPROPERTY(Transient)
-	FName WeaponTraceSocketName{};
+	FNetherCrownWeaponTraceData WeaponTraceData{};
 
 	UPROPERTY(Replicated)
 	TArray<TObjectPtr<ANetherCrownEnemy>> HitIgnoreEnemies{}; //TSet은 Replicate X
+
+	UPROPERTY(Transient, Replicated)
+	ENetherCrownTraceMode TraceMode{ ENetherCrownTraceMode::Swing };
 
 	FOnHitEnemy OnHitEnemy;
 };

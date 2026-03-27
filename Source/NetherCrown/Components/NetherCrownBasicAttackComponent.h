@@ -78,6 +78,8 @@ private:
 	UFUNCTION(Client, Unreliable)
 	void Client_StartBasicAttackPushIn();
 
+	void ApplyLastComboHitPP();
+
 	void ApplyBasicAttackPushIn();
 	void RestoreBasicAttackPushIn();
 
@@ -110,12 +112,18 @@ private:
 	void ServerHandleAttackEnd();
 	void ServerHandleHitTraceEnable();
 
+	void SetWeaponTraceMode();
+
+	UFUNCTION()
+	void HandleCurrentComboCountReplicated();
+
 	UPROPERTY(Transient)
 	FNetherCrownBasicAttackData BasicAttackData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackDataAsset")
 	TSoftObjectPtr<UNetherCrownBasicAttackDataAsset> BasicAttackDataAssetSoft{};
 
+	UPROPERTY(ReplicatedUsing=HandleCurrentComboCountReplicated)
 	int32 CurrentComboCount{ 1 };
 
 	UPROPERTY(Replicated)
