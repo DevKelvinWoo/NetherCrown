@@ -220,8 +220,6 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 	NetherCrownCharacterAnimInstance->Montage_Play(CachedBasicAttackMontage);
 	NetherCrownCharacterAnimInstance->Montage_JumpToSection(*SectionName);
-
-	PlayBasicAttackSounds();
 }
 
 void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool bEnable) const
@@ -246,7 +244,7 @@ void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool b
 	EquippedWeapon->SetWeaponHitTraceEnable(bEnable);
 }
 
-void UNetherCrownBasicAttackComponent::ApplyBasicAttackHitStop()
+void UNetherCrownBasicAttackComponent::ApplyBasicAttackPlayRate(const float AnimRate)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -270,8 +268,7 @@ void UNetherCrownBasicAttackComponent::ApplyBasicAttackHitStop()
 		return;
 	}
 
-	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
-	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(CachedBasicAttackMontage, BasicAttackCosmeticData.HitStopAnimRate);
+	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(CachedBasicAttackMontage, AnimRate);
 }
 
 void UNetherCrownBasicAttackComponent::RestoreBasicAttackPlayRate()
@@ -303,31 +300,30 @@ void UNetherCrownBasicAttackComponent::RestoreBasicAttackPlayRate()
 
 void UNetherCrownBasicAttackComponent::Client_StartBasicAttackHitStop_Implementation()
 {
-	ApplyBasicAttackHitStop();
-
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
 		return;
 	}
 
+	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
+	ApplyBasicAttackPlayRate(BasicAttackCosmeticData.HitStopAnimRate);
+
 	FTimerManager& TimerManager{ World->GetTimerManager() };
 	TimerManager.ClearTimer(HitStopTimer);
-
-	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
 	TimerManager.SetTimer(HitStopTimer, this, &ThisClass::RestoreBasicAttackPlayRate, BasicAttackCosmeticData.HitStopDuration, false);
 }
 
 void UNetherCrownBasicAttackComponent::ApplyLastComboHitPP()
 {
-	if (CurrentComboCount != BasicAttackData.ComboDataMap.Num())
-	{
-		return;
-	}
-
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("CachedCharacter is invalid in %hs"), __FUNCTION__);
+		return;
+	}
+
+	if (!CachedCharacter->IsLocallyControlled())
+	{
 		return;
 	}
 
@@ -339,6 +335,27 @@ void UNetherCrownBasicAttackComponent::ApplyLastComboHitPP()
 
 	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
 	ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::LastComboAttack, BasicAttackCosmeticData.LastAttackPPDuration);
+}
+
+void UNetherCrownBasicAttackComponent::SetupLastComboAnimRateTimer()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	const FNetherCrownBasicAttackCosmeticData& BasicAttackCosmeticData{ BasicAttackData.BasicAttackCosmeticData };
+	ApplyBasicAttackPlayRate(BasicAttackCosmeticData.LastComboPlayRate);
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(HitStopTimer);
+	TimerManager.SetTimer(HitStopTimer, this, &ThisClass::RestoreBasicAttackPlayRate, BasicAttackCosmeticData.LastComboPlayRateDuration, false);
 }
 
 void UNetherCrownBasicAttackComponent::ApplyBasicAttackPushIn()
@@ -588,42 +605,6 @@ void UNetherCrownBasicAttackComponent::PlayHitImpactCameraShake() const
 	CameraManager->StartCameraShake(BasicAttackData.ApplyDamageCameraShakeClass, 1.0f);
 }
 
-void UNetherCrownBasicAttackComponent::PlayBasicAttackSounds() const
-{
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
-	if (CachedCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedCharacter, BasicAttackData.BasicAttackTagData.BasicAttackGruntSoundTag);
-
-	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
-	if (!ensureAlways(EquipComponent))
-	{
-		return;
-	}
-
-	const ANetherCrownWeapon* EquippedWeapon{ EquipComponent->GetEquippedWeapon() };
-	if (!ensureAlways(IsValid(EquippedWeapon)))
-	{
-		return;
-	}
-
-	const UNetherCrownWeaponData* EquippedWeaponData{ EquippedWeapon->GetWeaponData() };
-	if (!ensureAlways(IsValid(EquippedWeaponData)))
-	{
-		return;
-	}
-
-	const FGameplayTag SwingWeaponSoundTag{ EquippedWeaponData->GetWeaponSwingSoundTag() };
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedCharacter, SwingWeaponSoundTag);
-}
-
 void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLocation) const
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
@@ -827,5 +808,9 @@ void UNetherCrownBasicAttackComponent::SetWeaponTraceMode()
 
 void UNetherCrownBasicAttackComponent::HandleCurrentComboCountReplicated()
 {
-	ApplyLastComboHitPP();
+	if (CurrentComboCount == BasicAttackData.ComboDataMap.Num())
+	{
+		SetupLastComboAnimRateTimer();
+		ApplyLastComboHitPP();
+	}
 }

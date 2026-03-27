@@ -72,13 +72,14 @@ private:
 	UFUNCTION(Client, Unreliable)
 	void Client_StartBasicAttackHitStop();
 
-	void ApplyBasicAttackHitStop();
+	void ApplyBasicAttackPlayRate(const float AnimRate);
 	void RestoreBasicAttackPlayRate();
 
 	UFUNCTION(Client, Unreliable)
 	void Client_StartBasicAttackPushIn();
 
 	void ApplyLastComboHitPP();
+	void SetupLastComboAnimRateTimer();
 
 	void ApplyBasicAttackPushIn();
 	void RestoreBasicAttackPushIn();
@@ -103,7 +104,6 @@ private:
 	void HandleOnEquipWeapon(const bool bEquipWeapon);
 
 	void PlayHitImpactCameraShake() const;
-	void PlayBasicAttackSounds() const;
 	void SpawnHitImpactEffect(const FVector& HitLocation) const;
 
 	void SetupBasicAttackTimers(const int32 ComboCount);

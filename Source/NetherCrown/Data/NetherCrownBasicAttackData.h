@@ -60,6 +60,12 @@ public:
 	float HitStopDuration{ 0.09f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float LastComboPlayRate{ 0.15f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float LastComboPlayRateDuration{ 0.1f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	float HitPushInDistance{ 20.f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
