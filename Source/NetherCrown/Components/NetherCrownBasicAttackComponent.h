@@ -59,7 +59,7 @@ private:
 
 	void StartAttackBasic();
 
-	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName);
+	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName, const bool bIsLastCombo = false);
 
 	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
 
@@ -88,7 +88,7 @@ private:
 	void Multicast_AutoTargetEnemy();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayAndJumpToComboMontageSection(const FName& SectionName);
+	void Multicast_PlayAndJumpToComboMontageSection(const FName& SectionName, const bool bIsLastCombo = false);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitImpactEffect(const FVector& HitLocation);

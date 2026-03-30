@@ -175,7 +175,7 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 	SetupBasicAttackTimers(CurrentComboCount);
 }
 
-void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSection_Implementation(const FName& SectionName)
+void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSection_Implementation(const FName& SectionName, const bool bIsLastCombo)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -193,10 +193,10 @@ void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSectio
 		return;
 	}
 
-	PlayAttackSoundAndJumpToComboMontageSection(&SectionName);
+	PlayAttackSoundAndJumpToComboMontageSection(&SectionName, bIsLastCombo);
 }
 
-void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName)
+void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName, const bool bIsLastCombo)
 {
 	if (!SectionName || !ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -223,6 +223,11 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 	//@NOTE : AnimMontage의 BlendOutTriggerTime을 0으로 Setting하여 Idle로 천천히 넘어가도록 제어하여 어색함을 없앰
 	NetherCrownCharacterAnimInstance->Montage_Play(CachedBasicAttackMontage);
 	NetherCrownCharacterAnimInstance->Montage_JumpToSection(*SectionName);
+
+	if (bIsLastCombo)
+	{
+		SetupLastComboAnimRateTimer();
+	}
 }
 
 void UNetherCrownBasicAttackComponent::SetEquippedWeaponTraceEnable(const bool bEnable) const
@@ -745,7 +750,8 @@ void UNetherCrownBasicAttackComponent::ServerHandleComboWindowClose()
 		return;
 	}
 
-	Multicast_PlayAndJumpToComboMontageSection(NextComboData->ComboMontageSectionName);
+	const bool bIsLastCombo{ CurrentComboCount == BasicAttackData.ComboDataMap.Num() };
+	Multicast_PlayAndJumpToComboMontageSection(NextComboData->ComboMontageSectionName, bIsLastCombo);
 
 	SetupBasicAttackTimers(CurrentComboCount);
 }
@@ -818,7 +824,6 @@ void UNetherCrownBasicAttackComponent::HandleCurrentComboCountReplicated()
 {
 	if (CurrentComboCount == BasicAttackData.ComboDataMap.Num())
 	{
-		SetupLastComboAnimRateTimer();
 		ApplyLastComboHitPP();
 	}
 }
