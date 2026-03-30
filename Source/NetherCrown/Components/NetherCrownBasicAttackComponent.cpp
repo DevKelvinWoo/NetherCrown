@@ -385,7 +385,7 @@ void UNetherCrownBasicAttackComponent::SetupLastComboAttackAuraTimer()
 		return;
 	}
 
-	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->GetNetMode() != NM_DedicatedServer)
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -436,7 +436,7 @@ void UNetherCrownBasicAttackComponent::ActiveLastComboAttackWeaponAura()
 		return;
 	}
 
-	if (CachedCharacter->GetNetMode() != NM_DedicatedServer)
+	if (!CachedCharacter->HasAuthority())
 	{
 		return;
 	}
@@ -452,7 +452,7 @@ void UNetherCrownBasicAttackComponent::DeactivateLastComboAttackWeaponAura()
 		return;
 	}
 
-	if (CachedCharacter->GetNetMode() != NM_DedicatedServer)
+	if (!CachedCharacter->HasAuthority())
 	{
 		return;
 	}
