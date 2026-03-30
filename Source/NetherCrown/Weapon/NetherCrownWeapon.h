@@ -38,7 +38,10 @@ public:
 	const UNetherCrownWeaponData* GetWeaponData() const { return WeaponData; }
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum);
+	void Multicast_ActiveWeaponSkillAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_ActiveWeaponLastComboAttackAuraNiagara(const bool bActive);
 
 protected:
 	virtual void BeginPlay() override;
@@ -55,9 +58,11 @@ private:
 
 	void SetEquipComponentSetting(AActor* OtherActor, const bool bCanEquip);
 
-	void ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
+	void ActiveWeaponSkillAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
+	void ActiveWeaponLastComboAttackAuraNiagara(const bool bActive) const;
 
-	void CacheWeaponAuraMap();
+	void CacheWeaponSkillAuraMap();
+	void CacheWeaponLastComboAttackAura();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USkeletalMeshComponent> WeaponMeshComponent{};
@@ -75,7 +80,10 @@ private:
 	TObjectPtr<UNiagaraComponent> WeaponAuraNiagaraComponent{};
 
 	UPROPERTY(Transient)
-	TMap<ENetherCrownSkillKeyEnum, TObjectPtr<UNiagaraSystem>> CachedWeaponAuraMap{};
+	TMap<ENetherCrownSkillKeyEnum, TObjectPtr<UNiagaraSystem>> CachedWeaponSkillAuraMap{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UNiagaraSystem> CachedWeaponLastComboAttackAura{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownWeaponData> WeaponData{};

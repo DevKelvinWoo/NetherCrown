@@ -504,7 +504,7 @@ void UNetherCrownSkillObject::SetSkillWeaponAura(const bool bIsActivate)
 		return;
 	}
 
-	EquippedWeapon->Multicast_ActiveWeaponAuraNiagara(bIsActivate, GetSkillEnum());
+	EquippedWeapon->Multicast_ActiveWeaponSkillAuraNiagara(bIsActivate, GetSkillEnum());
 }
 
 void UNetherCrownSkillObject::ActiveSkillWeaponAura()

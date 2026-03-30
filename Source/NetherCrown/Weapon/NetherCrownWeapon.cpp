@@ -37,6 +37,16 @@ ANetherCrownWeapon::ANetherCrownWeapon()
 	SetReplicatingMovement(true);
 }
 
+void ANetherCrownWeapon::Multicast_ActiveWeaponLastComboAttackAuraNiagara_Implementation(const bool bActive)
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	ActiveWeaponLastComboAttackAuraNiagara(bActive);
+}
+
 void ANetherCrownWeapon::BeginPlay()
 {
 	Super::BeginPlay();
@@ -51,7 +61,8 @@ void ANetherCrownWeapon::BeginPlay()
 	check(WeaponTraceComponent);
 	WeaponTraceComponent->GetOnHitEnemy().AddUObject(this, &ThisClass::HandleOnHitEnemy);
 
-	CacheWeaponAuraMap();
+	CacheWeaponSkillAuraMap();
+	CacheWeaponLastComboAttackAura();
 }
 
 void ANetherCrownWeapon::SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) const
@@ -91,9 +102,9 @@ void ANetherCrownWeapon::SetTraceMode(const ENetherCrownTraceMode InTraceMode)
 	WeaponTraceComponent->SetTraceMode(InTraceMode);
 }
 
-void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const
+void ANetherCrownWeapon::ActiveWeaponSkillAuraNiagara(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum) const
 {
-	if (CachedWeaponAuraMap.IsEmpty())
+	if (CachedWeaponSkillAuraMap.IsEmpty())
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("CachedWeaponAuraMap is Empty in %hs"), __FUNCTION__);
 		return;
@@ -112,7 +123,7 @@ void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENeth
 
 	if (bActive && SkillKeyEnum != ENetherCrownSkillKeyEnum::None)
 	{
-		const TObjectPtr<UNiagaraSystem>* FoundWeaponAuraNiagaraSystem = CachedWeaponAuraMap.Find(SkillKeyEnum);
+		const TObjectPtr<UNiagaraSystem>* FoundWeaponAuraNiagaraSystem = CachedWeaponSkillAuraMap.Find(SkillKeyEnum);
 		if (FoundWeaponAuraNiagaraSystem)
 		{
 			WeaponAuraNiagaraComponent->SetAsset(*FoundWeaponAuraNiagaraSystem);
@@ -126,9 +137,42 @@ void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENeth
 	}
 }
 
+void ANetherCrownWeapon::ActiveWeaponLastComboAttackAuraNiagara(const bool bActive) const
+{
+	if (!ensureAlways(IsValid(CachedWeaponLastComboAttackAura)))
+	{
+		return;
+	}
+
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(WeaponAuraNiagaraComponent)))
+	{
+		return;
+	}
+
+	if (bActive)
+	{
+		if (CachedWeaponLastComboAttackAura)
+		{
+			WeaponAuraNiagaraComponent->SetAsset(CachedWeaponLastComboAttackAura);
+			WeaponAuraNiagaraComponent->Activate();
+		}
+	}
+	else
+	{
+		WeaponAuraNiagaraComponent->SetAsset(nullptr);
+		WeaponAuraNiagaraComponent->Deactivate();
+	}
+}
+
 void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap,
-	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	const FHitResult& SweepResult)
+                                                         AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                         const FHitResult& SweepResult)
 {
 	if (!(OtherActor->IsA<ANetherCrownCharacter>()))
 	{
@@ -198,17 +242,17 @@ void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLo
 	BasicAttackComponent->ApplyHitCosmeticAndDamageToHitEnemy(HitEnemy, HitLocation);
 }
 
-void ANetherCrownWeapon::Multicast_ActiveWeaponAuraNiagara_Implementation(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum)
+void ANetherCrownWeapon::Multicast_ActiveWeaponSkillAuraNiagara_Implementation(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
 	if (GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
 
-	ActiveWeaponAuraNiagara(bActive, SkillKeyEnum);
+	ActiveWeaponSkillAuraNiagara(bActive, SkillKeyEnum);
 }
 
-void ANetherCrownWeapon::CacheWeaponAuraMap()
+void ANetherCrownWeapon::CacheWeaponSkillAuraMap()
 {
 	if (GetNetMode() == NM_DedicatedServer)
 	{
@@ -220,10 +264,25 @@ void ANetherCrownWeapon::CacheWeaponAuraMap()
 		return;
 	}
 
-	for (const auto& WeaponAuraPair : WeaponData->GetWeaponAuraMap())
+	for (const auto& WeaponAuraPair : WeaponData->GetWeaponSkillAuraMap())
 	{
-		CachedWeaponAuraMap.Add(WeaponAuraPair.Key, WeaponAuraPair.Value.LoadSynchronous());
+		CachedWeaponSkillAuraMap.Add(WeaponAuraPair.Key, WeaponAuraPair.Value.LoadSynchronous());
 	}
+}
+
+void ANetherCrownWeapon::CacheWeaponLastComboAttackAura()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(WeaponData)))
+	{
+		return;
+	}
+
+	CachedWeaponLastComboAttackAura = WeaponData->GetWeaponLastComboAttackAura().LoadSynchronous();
 }
 
 void ANetherCrownWeapon::DisableEquipSphereCollision() const

@@ -47,7 +47,8 @@ public:
 
 	const FGameplayTag& GetWeaponSwingSoundTag() const { return WeaponSwingSoundTag; }
 	const FNetherCrownWeaponTraceData& GetWeaponTraceData() const { return WeaponTraceData; }
-	const TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>>& GetWeaponAuraMap() const { return WeaponAuraMap; }
+	const TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>>& GetWeaponSkillAuraMap() const { return WeaponSkillAuraMap; }
+	const TSoftObjectPtr<UNiagaraSystem>& GetWeaponLastComboAttackAura() { return WeaponLastComboAttackAuraSoft; }
 
 private:
 	UPROPERTY(EditAnywhere)
@@ -78,7 +79,10 @@ private:
 	FNetherCrownWeaponTraceData WeaponTraceData{};
 
 	UPROPERTY(EditAnywhere, Category = "Effect")
-	TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>> WeaponAuraMap{};
+	TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>> WeaponSkillAuraMap{};
+
+	UPROPERTY(EditAnywhere, Category = "Effect")
+	TSoftObjectPtr<UNiagaraSystem> WeaponLastComboAttackAuraSoft{};
 };
 
 USTRUCT(BlueprintType)

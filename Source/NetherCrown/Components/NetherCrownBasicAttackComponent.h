@@ -19,6 +19,7 @@ enum class ENetherCrownBasicAttackState : uint8
 	CanAttack,
 	CannotAttack,
 	Attacking,
+	LastComboAttacking,
 	CanQueueNextCombo,
 	ComboQueued
 };
@@ -37,7 +38,10 @@ public:
 
 	void SetCanAttack(const bool InbCanAttack);
 
-	bool IsAttacking() const { return BasicAttackState == ENetherCrownBasicAttackState::Attacking; }
+	bool IsAttacking() const
+	{
+		return BasicAttackState == ENetherCrownBasicAttackState::Attacking || BasicAttackState == ENetherCrownBasicAttackState::LastComboAttacking;
+	}
 
 	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
 
@@ -51,6 +55,7 @@ private:
 	void LoadBasicAttackData();
 	void CacheBasicAttackMontage();
 	void CacheCharacter();
+	void UpdateAttackStateByCurrentComboCount();
 
 	UNetherCrownCharacterAnimInstance* GetOwnerCharacterAnimInstance() const;
 
@@ -80,6 +85,11 @@ private:
 
 	void ApplyLastComboHitPP();
 	void SetupLastComboAnimRateTimer();
+	void SetupLastComboAttackAuraTimer();
+
+	void SetLastComboAttackWeaponAura(const bool bIsActivate);
+	void ActiveLastComboAttackWeaponAura();
+	void DeactivateLastComboAttackWeaponAura();
 
 	void ApplyBasicAttackPushIn();
 	void RestoreBasicAttackPushIn();
@@ -113,6 +123,7 @@ private:
 	void ServerHandleHitTraceEnable();
 
 	void SetWeaponTraceMode();
+	bool IsLastComboAttackState() const { return BasicAttackState == ENetherCrownBasicAttackState::LastComboAttacking; }
 
 	UFUNCTION()
 	void HandleCurrentComboCountReplicated();
@@ -143,6 +154,7 @@ private:
 	FTimerHandle HitTraceEnableHandle;
 	FTimerHandle HitStopTimer;
 	FTimerHandle PushInTimerHandle;
+	FTimerHandle LastComboAttackAuraTimer;
 
 	float CachedMainSpringArmLengthBeforePushIn{ 0.f };
 };
