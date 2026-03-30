@@ -58,7 +58,7 @@ void ANetherCrownEnemy::BeginPlay()
 {
 	Super::BeginPlay();
 
-	if (!HasAuthority() && ensureAlways(IsValid(StatusNiagaraComponent)))
+	if (GetNetMode() != NM_DedicatedServer && ensureAlways(IsValid(StatusNiagaraComponent)))
 	{
 		StatusEffectControlComponent->SetHandledStatusNiagaraComponent(StatusNiagaraComponent);
 	}

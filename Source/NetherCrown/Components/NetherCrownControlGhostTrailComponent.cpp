@@ -21,7 +21,7 @@ void UNetherCrownControlGhostTrailComponent::SetHandledGhostTrailNiagaraComponen
 void UNetherCrownControlGhostTrailComponent::ActivateGhostTrail(const bool bActivate, UNiagaraSystem* InGhostTrailNiagaraSystem/*nullptr*/) const
 {
 	ACharacter* OwnerCharacter{ Cast<ACharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

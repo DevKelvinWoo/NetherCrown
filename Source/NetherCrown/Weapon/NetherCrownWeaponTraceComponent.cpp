@@ -97,7 +97,7 @@ void UNetherCrownWeaponTraceComponent::DetectWeaponSwingHit()
 	}
 
 	AActor* Owner{ GetOwner() };
-	if (!ensureAlways(IsValid(Owner)) || Owner->HasAuthority())
+	if (!ensureAlways(IsValid(Owner)) || Owner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -163,7 +163,7 @@ void UNetherCrownWeaponTraceComponent::DetectWeaponThrustHit()
 	}
 
 	AActor* Owner{ GetOwner() };
-	if (!ensureAlways(IsValid(Owner)) || Owner->HasAuthority())
+	if (!ensureAlways(IsValid(Owner)) || Owner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

@@ -162,18 +162,21 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 {
 	Super::Landed(Hit);
 
-	if (!HasAuthority())
+	if (HasAuthority())
 	{
-		return;
+		if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
+		{
+			NetherCrownBasicAttackComponent->SetCanAttack(true);
+		}
+
+		SetIsHardLanding();
+		DisableMovementAndSetResetTimerWhenHardLanding();
 	}
 
-	if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
+	if (bIsHardLanding && IsLocallyControlled())
 	{
-		NetherCrownBasicAttackComponent->SetCanAttack(true);
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, CharacterTagData.HardLandingSoundTag);
 	}
-
-	SetIsHardLanding();
-	DisableMovementAndSetResetTimerWhenHardLanding();
 }
 
 void ANetherCrownCharacter::OnJumped_Implementation()
@@ -190,7 +193,8 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 		bIsHardLanding = false;
 		JumpStartLocation = GetActorLocation();
 	}
-	else if (IsLocallyControlled())
+
+	if (IsLocallyControlled())
 	{
 		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, CharacterTagData.JumpStartSoundTag);
 	}
@@ -367,7 +371,7 @@ void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value) con
 
 void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffset)
 {
-	if (!ensureAlways(IsValid(MainSpringArmComponent)) || HasAuthority())
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -377,7 +381,7 @@ void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffs
 
 void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength)
 {
-	if (!ensureAlways(IsValid(MainSpringArmComponent)) || HasAuthority())
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -387,7 +391,7 @@ void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength
 
 float ANetherCrownCharacter::GetMainSpringArmLength() const
 {
-	if (!ensureAlways(IsValid(MainSpringArmComponent)) || HasAuthority())
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || GetNetMode() == NM_DedicatedServer)
 	{
 		return 0.f;
 	}

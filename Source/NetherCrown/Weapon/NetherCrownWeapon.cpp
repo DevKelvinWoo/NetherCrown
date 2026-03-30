@@ -100,7 +100,7 @@ void ANetherCrownWeapon::ActiveWeaponAuraNiagara(const bool bActive, const ENeth
 	}
 
 	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -200,7 +200,7 @@ void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLo
 
 void ANetherCrownWeapon::Multicast_ActiveWeaponAuraNiagara_Implementation(const bool bActive, const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
-	if (HasAuthority())
+	if (GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -210,7 +210,7 @@ void ANetherCrownWeapon::Multicast_ActiveWeaponAuraNiagara_Implementation(const 
 
 void ANetherCrownWeapon::CacheWeaponAuraMap()
 {
-	if (HasAuthority())
+	if (GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

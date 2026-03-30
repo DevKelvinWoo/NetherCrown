@@ -35,7 +35,7 @@ void UNetherCrownCrowdControlComponent::GetLifetimeReplicatedProps(TArray<class 
 
 void UNetherCrownCrowdControlComponent::InitLoadData()
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -46,7 +46,7 @@ void UNetherCrownCrowdControlComponent::InitLoadData()
 
 void UNetherCrownCrowdControlComponent::LoadCrowdControlCosmeticData()
 {
-	if (CrowdControlCosmeticDataAssetSoft.IsNull() || CachedOwner->HasAuthority())
+	if (CrowdControlCosmeticDataAssetSoft.IsNull() || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -78,7 +78,7 @@ void UNetherCrownCrowdControlComponent::LoadCrowdControlCosmeticData()
 
 void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -124,7 +124,15 @@ void UNetherCrownCrowdControlComponent::Frozen() const
 		return;
 	}
 
-	MovementComponent->DisableMovement();
+	if (CachedOwner->HasAuthority())
+	{
+		MovementComponent->DisableMovement();
+	}
+
+	if (CachedOwner->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
 
 	USkeletalMeshComponent* SkeletalMeshComponent{ CachedOwner->GetMesh() };
 	UMaterialInterface* MaterialInterface{ SkeletalMeshComponent ? SkeletalMeshComponent->GetOverlayMaterial() : nullptr };
@@ -189,19 +197,22 @@ void UNetherCrownCrowdControlComponent::ResetMovementAndAnimationSettings() cons
 		check(MovementComponent);
 		MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
 	}
-	else
+
+	if (CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
-		USkeletalMeshComponent* SkeletalMeshComponent{ CachedOwner->GetMesh() };
-		if (IsValid(SkeletalMeshComponent))
-		{
-			SkeletalMeshComponent->bPauseAnims = false;
-		}
+		return;
+	}
+
+	USkeletalMeshComponent* SkeletalMeshComponent{ CachedOwner->GetMesh() };
+	if (IsValid(SkeletalMeshComponent))
+	{
+		SkeletalMeshComponent->bPauseAnims = false;
 	}
 }
 
 void UNetherCrownCrowdControlComponent::ClearFrozenCosmetics()
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -216,7 +227,7 @@ void UNetherCrownCrowdControlComponent::ClearStunCosmetics()
 
 void UNetherCrownCrowdControlComponent::Multicast_SetActiveStatusNiagaraSystem_Implementation(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable) const
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -245,7 +256,7 @@ void UNetherCrownCrowdControlComponent::ClearCrowdControl()
 
 void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType)
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -281,7 +292,7 @@ void UNetherCrownCrowdControlComponent::TickComponent(float DeltaTime, ELevelTic
 
 void UNetherCrownCrowdControlComponent::BindTimelineFunctions()
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -298,7 +309,7 @@ void UNetherCrownCrowdControlComponent::BindTimelineFunctions()
 
 void UNetherCrownCrowdControlComponent::StartSetFrozenTargetOverlayEndMaterialTimeline()
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -308,7 +319,7 @@ void UNetherCrownCrowdControlComponent::StartSetFrozenTargetOverlayEndMaterialTi
 
 void UNetherCrownCrowdControlComponent::SetFrozenTargetOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

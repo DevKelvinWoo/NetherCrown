@@ -38,7 +38,7 @@ void UNetherCrownSkillDashAttack::PlaySkillCosmetics()
 		return;
 	}
 
-	if (SkillOwnerCharacter->HasAuthority())
+	if (SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -56,6 +56,12 @@ void UNetherCrownSkillDashAttack::ExecuteSkillGameplay()
 void UNetherCrownSkillDashAttack::InitSkillObject()
 {
 	Super::InitSkillObject();
+
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
 
 	if (!GhostTrailNiagaraSystemSoft.IsNull())
 	{
@@ -185,7 +191,7 @@ void UNetherCrownSkillDashAttack::LastDashAttack()
 void UNetherCrownSkillDashAttack::Multicast_DeactivateDashAttackGhostTrail_Implementation()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -326,7 +332,7 @@ void UNetherCrownSkillDashAttack::Client_SetCameraViewLastDashAttack_Implementat
 void UNetherCrownSkillDashAttack::Multicast_PlayLastDashAttackMontage_Implementation() const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -382,7 +388,7 @@ void UNetherCrownSkillDashAttack::AttackLastDashAttack()
 void UNetherCrownSkillDashAttack::PlayDashAttackMontage(UAnimMontage* SkillAnimMontage) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

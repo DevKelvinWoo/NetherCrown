@@ -39,7 +39,7 @@ void UNetherCrownShieldMastery::ActiveShieldEffectAndActor()
 	}
 
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -67,7 +67,7 @@ void UNetherCrownShieldMastery::ActiveShieldEffectAndActor()
 void UNetherCrownShieldMastery::DeactivateShieldEffectAndActor()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -91,7 +91,7 @@ void UNetherCrownShieldMastery::DeactivateShieldEffectAndActor()
 void UNetherCrownShieldMastery::PlayShieldOnSound() const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

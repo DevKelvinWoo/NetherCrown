@@ -17,7 +17,7 @@ void UNetherCrownStatusEffectControlComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CachedOwnerCharacter = Cast<ACharacter>(GetOwner());
-	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || CachedOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || CachedOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -27,7 +27,7 @@ void UNetherCrownStatusEffectControlComponent::BeginPlay()
 
 void UNetherCrownStatusEffectControlComponent::LoadStatusEffectCosmeticData()
 {
-	if (StatusEffectCosmeticDataAssetSoft.IsNull() || CachedOwnerCharacter->HasAuthority())
+	if (StatusEffectCosmeticDataAssetSoft.IsNull() || CachedOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -59,7 +59,7 @@ void UNetherCrownStatusEffectControlComponent::SetHandledStatusNiagaraComponent(
 
 void UNetherCrownStatusEffectControlComponent::SetActiveStatusNiagaraSystem(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable)
 {
-	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || CachedOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || CachedOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

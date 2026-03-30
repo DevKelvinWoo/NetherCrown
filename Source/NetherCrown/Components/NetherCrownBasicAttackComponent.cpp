@@ -76,7 +76,7 @@ void UNetherCrownBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class F
 
 void UNetherCrownBasicAttackComponent::CacheBasicAttackMontage()
 {
-	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -103,7 +103,7 @@ UNetherCrownCharacterAnimInstance* UNetherCrownBasicAttackComponent::GetOwnerCha
 		return nullptr;
 	}
 
-	if (CachedCharacter->HasAuthority())
+	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return nullptr;
 	}
@@ -187,10 +187,13 @@ void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSectio
 	{
 		BasicAttackState = ENetherCrownBasicAttackState::Attacking;
 	}
-	else
+
+	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
-		PlayAttackSoundAndJumpToComboMontageSection(&SectionName);
+		return;
 	}
+
+	PlayAttackSoundAndJumpToComboMontageSection(&SectionName);
 }
 
 void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName)
@@ -201,7 +204,7 @@ void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSecti
 		return;
 	}
 
-	if (CachedCharacter->HasAuthority())
+	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -252,7 +255,7 @@ void UNetherCrownBasicAttackComponent::ApplyBasicAttackPlayRate(const float Anim
 		return;
 	}
 
-	if (CachedCharacter->HasAuthority())
+	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -279,7 +282,7 @@ void UNetherCrownBasicAttackComponent::RestoreBasicAttackPlayRate()
 		return;
 	}
 
-	if (CachedCharacter->HasAuthority())
+	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -339,7 +342,7 @@ void UNetherCrownBasicAttackComponent::ApplyLastComboHitPP()
 
 void UNetherCrownBasicAttackComponent::SetupLastComboAnimRateTimer()
 {
-	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -366,7 +369,7 @@ void UNetherCrownBasicAttackComponent::ApplyBasicAttackPushIn()
 		return;
 	}
 
-	if (CachedCharacter->HasAuthority())
+	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -402,7 +405,7 @@ void UNetherCrownBasicAttackComponent::RestoreBasicAttackPushIn()
 		return;
 	}
 
-	if (CachedCharacter->HasAuthority())
+	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -507,7 +510,7 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 
 void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactEffect_Implementation(const FVector& HitLocation)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -612,7 +615,7 @@ void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLo
 		return;
 	}
 
-	if (CachedCharacter->HasAuthority())
+	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -652,6 +655,11 @@ void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 	CurrentComboCount = CurrentComboCount >= MaxComboCount ? 1 : ++CurrentComboCount;
 
 	SetWeaponTraceMode();
+
+	if (ensureAlways(IsValid(CachedCharacter)) && CachedCharacter->IsLocallyControlled())
+	{
+		HandleCurrentComboCountReplicated();
+	}
 }
 
 void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)

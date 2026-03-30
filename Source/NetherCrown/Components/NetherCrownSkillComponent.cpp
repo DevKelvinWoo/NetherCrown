@@ -224,7 +224,7 @@ void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()
 
 void UNetherCrownSkillComponent::HandleOnSkillCoolDownModified(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
 	{
 		return;
 	}

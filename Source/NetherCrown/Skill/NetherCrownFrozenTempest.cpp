@@ -28,7 +28,7 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 		return;
 	}
 
-	if (!SkillOwnerCharacter->HasAuthority())
+	if (SkillOwnerCharacter->GetNetMode() != NM_DedicatedServer)
 	{
 		CachedSkillCameraZoomCurveVector = SkillCameraZoomCurveVectorSoft.LoadSynchronous();
 		CachedFrozenTempestTargetOverlayMaterial = FrozenTempestTargetOverlayMaterialSoft.LoadSynchronous();
@@ -58,7 +58,7 @@ void UNetherCrownFrozenTempest::PlaySkillCosmetics()
 		return;
 	}
 
-	if (SkillOwnerCharacter->HasAuthority())
+	if (SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -108,7 +108,7 @@ void UNetherCrownFrozenTempest::BindTimelineFunctions()
 void UNetherCrownFrozenTempest::StartSetSkillCameraZoomTimeline()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -119,7 +119,7 @@ void UNetherCrownFrozenTempest::StartSetSkillCameraZoomTimeline()
 void UNetherCrownFrozenTempest::StartSetCharacterOverlayStartMaterialTimeline()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -132,7 +132,7 @@ void UNetherCrownFrozenTempest::StartSetCharacterOverlayStartMaterialTimeline()
 void UNetherCrownFrozenTempest::StartSetCharacterOverlayEndMaterialTimeline()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -143,7 +143,7 @@ void UNetherCrownFrozenTempest::StartSetCharacterOverlayEndMaterialTimeline()
 void UNetherCrownFrozenTempest::Multicast_StartFrozenTempestHitCosmetics_Implementation()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -174,7 +174,7 @@ void UNetherCrownFrozenTempest::Multicast_StartFrozenTempestHitCosmetics_Impleme
 void UNetherCrownFrozenTempest::Multicast_SetDetectedEnemyOverlayMaterial_Implementation()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -208,7 +208,7 @@ void UNetherCrownFrozenTempest::Multicast_SetDetectedEnemyOverlayMaterial_Implem
 void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector VectorCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -220,7 +220,7 @@ void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector Vecto
 void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -248,7 +248,7 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(
 void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

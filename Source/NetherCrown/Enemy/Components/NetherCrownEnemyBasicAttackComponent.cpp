@@ -113,7 +113,7 @@ void UNetherCrownEnemyBasicAttackComponent::Server_ReportHit_Implementation(ANet
 
 void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 {
-	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -181,7 +181,7 @@ void UNetherCrownEnemyBasicAttackComponent::LoadEnemyBasicAttackData()
 
 void UNetherCrownEnemyBasicAttackComponent::CacheBasicAttackAnimMontage()
 {
-	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -227,7 +227,7 @@ void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttack()
 
 void UNetherCrownEnemyBasicAttackComponent::Multicast_PlayBasicAttackMontage_Implementation()
 {
-	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

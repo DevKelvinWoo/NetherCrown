@@ -196,7 +196,7 @@ void UNetherCrownEnemyDamageReceiverComponent::LoadEnemyDamageCosmeticData()
 	EnemyDamageCosmeticData = EnemyDamageAndDeathCosmeticDataAsset->GetEnemyDamageCosmeticData();
 	EnemyDeathCosmeticData = EnemyDamageAndDeathCosmeticDataAsset->GetEnemyDeathCosmeticData();
 
-	if (CachedOwnerEnemy->HasAuthority())
+	if (CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -219,7 +219,7 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleDeathTimer()
 
 void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
-	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -246,7 +246,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation
 
 void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageSound_Implementation()
 {
-	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->HasAuthority())
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

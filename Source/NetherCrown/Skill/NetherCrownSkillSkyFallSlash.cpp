@@ -32,7 +32,7 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 		return;
 	}
 
-	if (!SkillOwnerCharacter->HasAuthority())
+	if (SkillOwnerCharacter->GetNetMode() != NM_DedicatedServer)
 	{
 		CreateArmMaterialInstanceDynamic();
 
@@ -59,7 +59,7 @@ void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics()
 	//@NOTE : Only cometics logic (all client)
 
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -90,7 +90,7 @@ void UNetherCrownSkillSkyFallSlash::TickFloatTimeline(float DeltaTime)
 void UNetherCrownSkillSkyFallSlash::StartSetSpringArmZOffsetTimeline()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -101,7 +101,7 @@ void UNetherCrownSkillSkyFallSlash::StartSetSpringArmZOffsetTimeline()
 void UNetherCrownSkillSkyFallSlash::StartSetArmMaterialParamTimeline()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -161,7 +161,7 @@ void UNetherCrownSkillSkyFallSlash::Client_StartCameraShake_Implementation()
 void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -272,7 +272,7 @@ const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetected
 void UNetherCrownSkillSkyFallSlash::CreateArmMaterialInstanceDynamic()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -287,7 +287,7 @@ void UNetherCrownSkillSkyFallSlash::CreateArmMaterialInstanceDynamic()
 void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

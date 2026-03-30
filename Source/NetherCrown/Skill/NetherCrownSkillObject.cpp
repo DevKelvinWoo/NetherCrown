@@ -160,7 +160,7 @@ bool UNetherCrownSkillObject::CallRemoteFunction(UFunction* Function, void* Parm
 void UNetherCrownSkillObject::Multicast_SpawnSkillImpactEffect_Implementation(const ANetherCrownEnemy* TargetEnemy) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -193,7 +193,7 @@ void UNetherCrownSkillObject::ApplyCrowdControlToTarget(const ANetherCrownEnemy*
 void UNetherCrownSkillObject::PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -323,7 +323,7 @@ void UNetherCrownSkillObject::SetupSkillMovementModeTimer()
 void UNetherCrownSkillObject::SetupSkillSlowTimer()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -431,7 +431,7 @@ void UNetherCrownSkillObject::EndSkillState()
 void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -442,7 +442,7 @@ void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
 void UNetherCrownSkillObject::RestoreSkillAnimationPlayRate()
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -589,7 +589,7 @@ void UNetherCrownSkillObject::PlaySkillCosmetics()
 		return;
 	}
 
-	if (SkillOwnerCharacter->HasAuthority() && !CachedSkillAnimMontage->HasRootMotion())
+	if (SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer && !CachedSkillAnimMontage->HasRootMotion())
 	{
 		return;
 	}
@@ -607,7 +607,7 @@ void UNetherCrownSkillObject::ExecuteSkillGameplay()
 void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

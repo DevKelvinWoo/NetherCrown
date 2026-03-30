@@ -134,7 +134,7 @@ void UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Implementation()
 
 void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementation()
 {
-	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -277,7 +277,7 @@ void UNetherCrownEquipComponent::CacheInitData()
 
 	LoadEquipData();
 
-	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}

@@ -3,7 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
+#include "NetherCrown/Data/NetherCrownEffectData.h"
+#include "NetherCrown/Data/NetherCrownSkillData.h"
+#include "NetherCrown/Data/NetherCrownSoundData.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
+#include "NetherCrown/UI/NetherCrownUITypes.h"
 
 class USoundCue;
 class UNiagaraSystem;
@@ -11,11 +17,6 @@ class UNiagaraComponent;
 
 class UNetherCrownSkillDataAsset;
 class UNetherCrownWeaponData;
-struct FNetherCrownEffectData;
-struct FNetherCrownSkillDataTableRow;
-struct FNetherCrownSoundData;
-struct FNetherCrownWeaponDataTableRow;
-struct FNetherCrownUIScreenDefinition;
 
 class FNetherCrownUtilManager
 {
@@ -42,15 +43,9 @@ private:
 	static void EnsureCacheBuilt();
 
 	static bool bCacheInitialized;
-	static TMap<FGameplayTag, FNetherCrownSoundData*> CachedSoundDataByTag;
-	static TMap<FGameplayTag, FNetherCrownSkillDataTableRow*> CachedSkillDataByTag;
-	static TMap<FGameplayTag, FNetherCrownWeaponDataTableRow*> CachedWeaponDataByTag;
-	static TMap<FGameplayTag, FNetherCrownEffectData*> CachedEffectDataByTag;
-	static TMap<FGameplayTag, FNetherCrownUIScreenDefinition*> CachedScreenDefinitionDataByTag;
-
-	static TObjectPtr<UDataTable> CachedSoundDT;
-	static TObjectPtr<UDataTable> CachedSkillDT;
-	static TObjectPtr<UDataTable> CachedWeaponDT;
-	static TObjectPtr<UDataTable> CachedEffectDT;
-	static TObjectPtr<UDataTable> CachedScreenDefinitionDT;
+	static TMap<FGameplayTag, FNetherCrownSoundData> CachedSoundDataByTag;
+	static TMap<FGameplayTag, FNetherCrownSkillDataTableRow> CachedSkillDataByTag;
+	static TMap<FGameplayTag, FNetherCrownWeaponDataTableRow> CachedWeaponDataByTag;
+	static TMap<FGameplayTag, FNetherCrownEffectData> CachedEffectDataByTag;
+	static TMap<FGameplayTag, FNetherCrownUIScreenDefinition> CachedScreenDefinitionDataByTag;
 };
