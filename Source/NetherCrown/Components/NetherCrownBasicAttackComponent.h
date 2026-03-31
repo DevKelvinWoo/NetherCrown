@@ -19,7 +19,6 @@ enum class ENetherCrownBasicAttackState : uint8
 	CanAttack,
 	CannotAttack,
 	Attacking,
-	LastComboAttacking,
 	CanQueueNextCombo,
 	ComboQueued
 };
@@ -40,7 +39,7 @@ public:
 
 	bool IsAttacking() const
 	{
-		return BasicAttackState == ENetherCrownBasicAttackState::Attacking || BasicAttackState == ENetherCrownBasicAttackState::LastComboAttacking;
+		return BasicAttackState == ENetherCrownBasicAttackState::Attacking;
 	}
 
 	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
@@ -55,7 +54,6 @@ private:
 	void LoadBasicAttackData();
 	void CacheBasicAttackMontage();
 	void CacheCharacter();
-	void UpdateAttackStateByCurrentComboCount();
 
 	UNetherCrownCharacterAnimInstance* GetOwnerCharacterAnimInstance() const;
 
@@ -64,7 +62,7 @@ private:
 
 	void StartAttackBasic();
 
-	void PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName, const bool bIsLastCombo = false);
+	void PlayAndJumpToComboMontageSection(const FName* SectionName, const bool bIsLastCombo = false);
 
 	void SetEquippedWeaponTraceEnable(const bool bEnable) const;
 
@@ -123,7 +121,8 @@ private:
 	void ServerHandleHitTraceEnable();
 
 	void SetWeaponTraceMode();
-	bool IsLastComboAttackState() const { return BasicAttackState == ENetherCrownBasicAttackState::LastComboAttacking; }
+	bool IsLastComboAttack() const;
+	int32 GetMaxComboCount() const;
 
 	UFUNCTION()
 	void HandleCurrentComboCountReplicated();

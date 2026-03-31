@@ -15,6 +15,7 @@
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
+#include "NetherCrown/DamageTypes/UNetherCrownCriticalPhysicalDamageType.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
@@ -95,15 +96,15 @@ void UNetherCrownBasicAttackComponent::CacheCharacter()
 	CachedCharacter = Cast<ANetherCrownCharacter>(GetOwner());
 }
 
-void UNetherCrownBasicAttackComponent::UpdateAttackStateByCurrentComboCount()
+bool UNetherCrownBasicAttackComponent::IsLastComboAttack() const
 {
-	if (BasicAttackData.ComboDataMap.IsEmpty())
-	{
-		return;
-	}
+	const int32 MaxComboCount{ GetMaxComboCount() };
+	return MaxComboCount > 0 && CurrentComboCount >= MaxComboCount;
+}
 
-	const int32 MaxComboCount{ BasicAttackData.ComboDataMap.Num() };
-	BasicAttackState = CurrentComboCount >= MaxComboCount ? ENetherCrownBasicAttackState::LastComboAttacking : ENetherCrownBasicAttackState::Attacking;
+int32 UNetherCrownBasicAttackComponent::GetMaxComboCount() const
+{
+	return BasicAttackData.ComboDataMap.Num();
 }
 
 UNetherCrownCharacterAnimInstance* UNetherCrownBasicAttackComponent::GetOwnerCharacterAnimInstance() const
@@ -172,7 +173,8 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 	}
 
 	CurrentComboCount = 1;
-	UpdateAttackStateByCurrentComboCount();
+	BasicAttackState = ENetherCrownBasicAttackState::Attacking;
+
 	SetWeaponTraceMode();
 
 	const FNetherCrownBasicAttackComboData* FirstComboData{ BasicAttackData.ComboDataMap.Find(1) };
@@ -197,7 +199,7 @@ void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSectio
 
 	if (CachedCharacter->HasAuthority())
 	{
-		UpdateAttackStateByCurrentComboCount();
+		BasicAttackState = ENetherCrownBasicAttackState::Attacking;
 	}
 
 	if (CachedCharacter->GetNetMode() == NM_DedicatedServer)
@@ -205,10 +207,10 @@ void UNetherCrownBasicAttackComponent::Multicast_PlayAndJumpToComboMontageSectio
 		return;
 	}
 
-	PlayAttackSoundAndJumpToComboMontageSection(&SectionName, bIsLastCombo);
+	PlayAndJumpToComboMontageSection(&SectionName, bIsLastCombo);
 }
 
-void UNetherCrownBasicAttackComponent::PlayAttackSoundAndJumpToComboMontageSection(const FName* SectionName, const bool bIsLastCombo)
+void UNetherCrownBasicAttackComponent::PlayAndJumpToComboMontageSection(const FName* SectionName, const bool bIsLastCombo)
 {
 	if (!SectionName || !ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -380,7 +382,7 @@ void UNetherCrownBasicAttackComponent::SetupLastComboAnimRateTimer()
 
 void UNetherCrownBasicAttackComponent::SetupLastComboAttackAuraTimer()
 {
-	if (!IsLastComboAttackState())
+	if (!IsLastComboAttack())
 	{
 		return;
 	}
@@ -635,7 +637,8 @@ void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) con
 		return;
 	}
 
-	UGameplayStatics::ApplyDamage(HitEnemy, CalculateBasicAttackDamage(), CachedCharacter->GetInstigatorController(), CachedCharacter, UNetherCrownPhysicalDamageType::StaticClass());
+	TSubclassOf<UDamageType> DamageTypeClass{ IsLastComboAttack() ? UNetherCrownCriticalPhysicalDamageType::StaticClass() : UNetherCrownPhysicalDamageType::StaticClass() };
+	UGameplayStatics::ApplyDamage(HitEnemy, CalculateBasicAttackDamage(), CachedCharacter->GetInstigatorController(), CachedCharacter, DamageTypeClass);
 }
 
 void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeapon)
@@ -750,9 +753,10 @@ void UNetherCrownBasicAttackComponent::ApplyHitCosmeticAndDamageToHitEnemy(AActo
 
 void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 {
-	const int32 MaxComboCount{ BasicAttackData.ComboDataMap.Num() };
+	const int32 MaxComboCount{ GetMaxComboCount() };
 	CurrentComboCount = CurrentComboCount >= MaxComboCount ? 1 : ++CurrentComboCount;
-	UpdateAttackStateByCurrentComboCount();
+
+	BasicAttackState = ENetherCrownBasicAttackState::Attacking;
 
 	SetWeaponTraceMode();
 
@@ -845,7 +849,7 @@ void UNetherCrownBasicAttackComponent::ServerHandleComboWindowClose()
 		return;
 	}
 
-	const bool bIsLastCombo{ IsLastComboAttackState() };
+	const bool bIsLastCombo{ IsLastComboAttack() };
 	Multicast_PlayAndJumpToComboMontageSection(NextComboData->ComboMontageSectionName, bIsLastCombo);
 
 	SetupBasicAttackTimers(CurrentComboCount);
@@ -907,7 +911,7 @@ void UNetherCrownBasicAttackComponent::SetWeaponTraceMode()
 		return;
 	}
 
-	if (IsLastComboAttackState())
+	if (IsLastComboAttack())
 	{
 		EquippedWeapon->SetTraceMode(ENetherCrownTraceMode::Thrust);
 	}
@@ -919,7 +923,7 @@ void UNetherCrownBasicAttackComponent::SetWeaponTraceMode()
 
 void UNetherCrownBasicAttackComponent::HandleCurrentComboCountReplicated()
 {
-	if (IsLastComboAttackState())
+	if (IsLastComboAttack())
 	{
 		ApplyLastComboHitPP();
 	}

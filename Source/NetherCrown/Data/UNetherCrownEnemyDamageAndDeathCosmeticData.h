@@ -44,6 +44,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
 	TSoftObjectPtr<UAnimMontage> TakeDamageAnimMontageSoft{};
 
+	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
+	TSoftObjectPtr<UAnimMontage> TakeCriticalDamageAnimMontageSoft{};
+
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownEnemyDamageSoundTagData DamageSoundTagData{};
 };

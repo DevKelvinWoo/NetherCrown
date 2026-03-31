@@ -9,6 +9,7 @@
 #include "NetherCrownEnemyStatComponent.h"
 #include "NetherCrownEquipComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/DamageTypes/UNetherCrownCriticalPhysicalDamageType.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -48,7 +49,8 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 	}
 	else
 	{
-		Multicast_PlayTakeDamageAnimation(ENetherCrownCrowdControlType::NONE);
+		const bool bIsCriticalDamage{ DamageEvent.DamageTypeClass == UNetherCrownCriticalPhysicalDamageType::StaticClass() };
+		Multicast_PlayTakeDamageAnimation(ENetherCrownCrowdControlType::NONE, bIsCriticalDamage);
 		Multicast_PlayTakeDamageSound();
 	}
 
@@ -62,7 +64,7 @@ float UNetherCrownEnemyDamageReceiverComponent::CalculateFinalDamage(float Damag
 		return 0.f;
 	}
 
-	const bool bIsPhysicalDamage{ DamageEvent.DamageTypeClass == UNetherCrownPhysicalDamageType::StaticClass() };
+	const bool bIsPhysicalDamage{ DamageEvent.DamageTypeClass->IsChildOf(UNetherCrownPhysicalDamageType::StaticClass()) };
 
 	const int32 ArmorStat{ GetArmorStat(bIsPhysicalDamage) };
 	const int32 EffectiveArmor{ FMath::Max(0, ArmorStat - GetWeaponPenetration(bIsPhysicalDamage, DamageCauser)) };
@@ -205,6 +207,11 @@ void UNetherCrownEnemyDamageReceiverComponent::LoadEnemyDamageCosmeticData()
 	{
 		CachedTakeDamageAnimMontage = EnemyDamageCosmeticData.TakeDamageAnimMontageSoft.LoadSynchronous();
 	}
+
+	if (!(EnemyDamageCosmeticData.TakeCriticalDamageAnimMontageSoft.IsNull()))
+	{
+		CachedTakeCriticalDamageAnimMontage = EnemyDamageCosmeticData.TakeCriticalDamageAnimMontageSoft.LoadSynchronous();
+	}
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::HandleDeathTimer()
@@ -217,7 +224,7 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleDeathTimer()
 	CachedOwnerEnemy->Destroy();
 }
 
-void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
+void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation_Implementation(const ENetherCrownCrowdControlType InCrowdControlType, const bool bIsCriticalDamage)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
@@ -229,7 +236,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation
 		return;
 	}
 
-	if (!ensureAlways(IsValid(CachedTakeDamageAnimMontage)))
+	if (!ensureAlways(IsValid(CachedTakeDamageAnimMontage)) || !ensureAlways(IsValid(CachedTakeCriticalDamageAnimMontage)))
 	{
 		return;
 	}
@@ -241,7 +248,8 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation
 		return;
 	}
 
-	EnemyAnimInstance->Montage_Play(CachedTakeDamageAnimMontage);
+	UAnimMontage* TakeDamageAnimMontage{ bIsCriticalDamage ? CachedTakeCriticalDamageAnimMontage : CachedTakeDamageAnimMontage };
+	EnemyAnimInstance->Montage_Play(TakeDamageAnimMontage);
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageSound_Implementation()

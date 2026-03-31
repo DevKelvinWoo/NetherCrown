@@ -42,7 +42,7 @@ private:
 	void Multicast_PlayTakeDamageSound();
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayTakeDamageAnimation(const ENetherCrownCrowdControlType InCrowdControlType);
+	void Multicast_PlayTakeDamageAnimation(const ENetherCrownCrowdControlType InCrowdControlType, const bool bIsCriticalDamage);
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
@@ -55,6 +55,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedTakeDamageAnimMontage{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> CachedTakeCriticalDamageAnimMontage{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDamageAndDeathCosmeticDataAsset")
 	TSoftObjectPtr<UNetherCrownEnemyDamageAndDeathCosmeticDataAsset> EnemyDamageAndDeathCosmeticDataAssetSoft{};
