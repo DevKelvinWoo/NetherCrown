@@ -93,6 +93,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "Settings")
 	float AutoTargetingRadius{ 130.0f };
 
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float LastComboAttackKnockBackVelocity{ 2000.f };
+
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownBasicAttackTagData BasicAttackTagData{};
 

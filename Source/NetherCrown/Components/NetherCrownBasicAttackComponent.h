@@ -85,6 +85,8 @@ private:
 	void SetupLastComboAnimRateTimer();
 	void SetupLastComboAttackAuraTimer();
 
+	void ApplyLastComboAttackKnockBack(AActor* HitEnemy);
+
 	void SetLastComboAttackWeaponAura(const bool bIsActivate);
 	void ActiveLastComboAttackWeaponAura();
 	void DeactivateLastComboAttackWeaponAura();

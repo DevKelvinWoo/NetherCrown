@@ -3,6 +3,7 @@
 #include "NetherCrownBasicAttackComponent.h"
 
 #include "NetherCrownControlPPComponent.h"
+#include "NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrownEquipComponent.h"
 #include "NetherCrownPlayerStatComponent.h"
@@ -407,6 +408,36 @@ void UNetherCrownBasicAttackComponent::SetupLastComboAttackAuraTimer()
 	TimerManager.SetTimer(LastComboAttackAuraTimer, this, &ThisClass::DeactivateLastComboAttackWeaponAura, BasicAttackCosmeticData.LastAttackPPDuration, false);
 }
 
+void UNetherCrownBasicAttackComponent::ApplyLastComboAttackKnockBack(AActor* HitEnemy)
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (!IsLastComboAttack())
+	{
+		return;
+	}
+
+	const ANetherCrownEnemy* TargetEnemy{ Cast<ANetherCrownEnemy>(HitEnemy) };
+	if (!ensureAlways(IsValid(TargetEnemy)))
+	{
+		return;
+	}
+
+	UNetherCrownCrowdControlComponent* CCControlComponent{ TargetEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCControlComponent)))
+	{
+		return;
+	}
+
+	CCControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::KNOCK_BACK, 1.f);
+
+	const FVector KnockBackDirection{ TargetEnemy->GetActorForwardVector() * -1.f };
+	CCControlComponent->KnockBack(KnockBackDirection * BasicAttackData.LastComboAttackKnockBackVelocity);
+}
+
 void UNetherCrownBasicAttackComponent::SetLastComboAttackWeaponAura(const bool bIsActivate)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
@@ -741,6 +772,8 @@ void UNetherCrownBasicAttackComponent::ApplyHitCosmeticAndDamageToHitEnemy(AActo
 	{
 		return;
 	}
+
+	ApplyLastComboAttackKnockBack(HitEnemy);
 
 	Client_PlayHitImpactCameraShake();
 	Client_StartBasicAttackHitStop();
