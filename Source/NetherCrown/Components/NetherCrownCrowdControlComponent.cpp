@@ -99,6 +99,8 @@ void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrow
 	check(World);
 
 	World->GetTimerManager().SetTimer(CrowdControlTimerHandle, this, &ThisClass::ClearCrowdControl, DurationTime, false);
+
+	Multicast_PlayCrowdControlAnim(InCrowdControlType);
 }
 
 void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector) const

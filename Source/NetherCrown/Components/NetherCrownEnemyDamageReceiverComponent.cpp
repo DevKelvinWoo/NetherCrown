@@ -3,6 +3,7 @@
 
 #include "NetherCrownEnemyDamageReceiverComponent.h"
 
+#include "NetherCrownCrowdControlComponent.h"
 #include "Engine/DamageEvents.h"
 
 #include "NetherCrownCrowdControlTypes.h"
@@ -50,7 +51,7 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 	else
 	{
 		const bool bIsCriticalDamage{ DamageEvent.DamageTypeClass == UNetherCrownCriticalPhysicalDamageType::StaticClass() };
-		Multicast_PlayTakeDamageAnimation(ENetherCrownCrowdControlType::NONE, bIsCriticalDamage);
+		Multicast_PlayTakeDamageAnimation(bIsCriticalDamage);
 		Multicast_PlayTakeDamageSound();
 	}
 
@@ -224,14 +225,20 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleDeathTimer()
 	CachedOwnerEnemy->Destroy();
 }
 
-void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation_Implementation(const ENetherCrownCrowdControlType InCrowdControlType, const bool bIsCriticalDamage)
+void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation_Implementation(const bool bIsCriticalDamage)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
 
-	if (InCrowdControlType != ENetherCrownCrowdControlType::NONE)
+	const UNetherCrownCrowdControlComponent* CCControlComponent{ CachedOwnerEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCControlComponent)))
+	{
+		return;
+	}
+
+	if (CCControlComponent->GetCrowdControlType() != ENetherCrownCrowdControlType::NONE)
 	{
 		return;
 	}
@@ -248,8 +255,9 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation
 		return;
 	}
 
-	UAnimMontage* TakeDamageAnimMontage{ bIsCriticalDamage ? CachedTakeCriticalDamageAnimMontage : CachedTakeDamageAnimMontage };
-	EnemyAnimInstance->Montage_Play(TakeDamageAnimMontage);
+	//@NOTE : Critical Damage AnimMontage Code
+	//UAnimMontage* TakeDamageAnimMontage{ bIsCriticalDamage ? CachedTakeCriticalDamageAnimMontage : CachedTakeDamageAnimMontage };
+	EnemyAnimInstance->Montage_Play(CachedTakeDamageAnimMontage);
 
 	if (bIsCriticalDamage)
 	{
@@ -265,7 +273,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation
 	const int32 RandomMontageSectionNum{ FMath::RandRange(0, TakeDamageSectionNameMap.Num() - 1) };
 	if (TakeDamageSectionNameMap.Contains(RandomMontageSectionNum))
 	{
-		EnemyAnimInstance->Montage_JumpToSection(*TakeDamageSectionNameMap.Find(RandomMontageSectionNum), TakeDamageAnimMontage);
+		EnemyAnimInstance->Montage_JumpToSection(*TakeDamageSectionNameMap.Find(RandomMontageSectionNum), CachedTakeDamageAnimMontage);
 	}
 }
 

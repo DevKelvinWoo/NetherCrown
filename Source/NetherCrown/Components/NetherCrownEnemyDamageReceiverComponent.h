@@ -42,7 +42,7 @@ private:
 	void Multicast_PlayTakeDamageSound();
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayTakeDamageAnimation(const ENetherCrownCrowdControlType InCrowdControlType, const bool bIsCriticalDamage);
+	void Multicast_PlayTakeDamageAnimation(const bool bIsCriticalDamage);
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
