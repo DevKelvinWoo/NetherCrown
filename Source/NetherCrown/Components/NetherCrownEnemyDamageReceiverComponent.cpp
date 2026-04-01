@@ -250,6 +250,23 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation
 
 	UAnimMontage* TakeDamageAnimMontage{ bIsCriticalDamage ? CachedTakeCriticalDamageAnimMontage : CachedTakeDamageAnimMontage };
 	EnemyAnimInstance->Montage_Play(TakeDamageAnimMontage);
+
+	if (bIsCriticalDamage)
+	{
+		return;
+	}
+
+	const TMap<int32, FName>& TakeDamageSectionNameMap{ EnemyDamageCosmeticData.TakeDamageSectionNameMap };
+	if (TakeDamageSectionNameMap.IsEmpty())
+	{
+		return;
+	}
+
+	const int32 RandomMontageSectionNum{ FMath::RandRange(0, TakeDamageSectionNameMap.Num() - 1) };
+	if (TakeDamageSectionNameMap.Contains(RandomMontageSectionNum))
+	{
+		EnemyAnimInstance->Montage_JumpToSection(*TakeDamageSectionNameMap.Find(RandomMontageSectionNum), TakeDamageAnimMontage);
+	}
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageSound_Implementation()

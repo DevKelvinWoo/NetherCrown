@@ -44,6 +44,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
 	TSoftObjectPtr<UAnimMontage> TakeDamageAnimMontageSoft{};
 
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	TMap<int32, FName> TakeDamageSectionNameMap{};
+
 	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
 	TSoftObjectPtr<UAnimMontage> TakeCriticalDamageAnimMontageSoft{};
 
