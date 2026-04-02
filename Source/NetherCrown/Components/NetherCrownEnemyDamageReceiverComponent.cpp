@@ -135,6 +135,7 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead()
 
 	CachedOwnerEnemy->SetIsDead(true);
 
+	Multicast_PlayDeathSound();
 	Multicast_StartDeathDissolve();
 
 	const UWorld* World{ GetWorld() };
@@ -274,6 +275,16 @@ void UNetherCrownEnemyDamageReceiverComponent::BindTimelineFunctions()
 	FOnTimelineFloat OnTimelineFloat{};
 	OnTimelineFloat.BindUFunction(this, FName("ApplyDeadMaterialParam"));
 	DeathMaterialParamTimeline.AddInterpFloat(CachedDeathMaterialParamCurveFloat, OnTimelineFloat);
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayDeathSound_Implementation()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDeathCosmeticData.EnemyDeathSoundTag);
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::Multicast_StartDeathDissolve_Implementation()

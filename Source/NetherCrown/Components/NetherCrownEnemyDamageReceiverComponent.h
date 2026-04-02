@@ -47,6 +47,9 @@ private:
 	void Multicast_PlayTakeDamageSound();
 
 	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayDeathSound();
+
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayTakeDamageAnimation(const bool bIsCriticalDamage);
 
 	UFUNCTION(NetMulticast, Unreliable)

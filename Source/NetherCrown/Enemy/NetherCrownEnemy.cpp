@@ -67,8 +67,6 @@ void ANetherCrownEnemy::BeginPlay()
 	}
 
 	SetReplicateMovement(true);
-
-	AttachEnemyWeapon();
 }
 
 float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
