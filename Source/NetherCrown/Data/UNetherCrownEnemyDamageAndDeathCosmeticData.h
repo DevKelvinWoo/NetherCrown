@@ -33,6 +33,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Timing")
 	float DestroyTimeOffset{};
+
+	UPROPERTY(EditdefaultsOnly, Category = "ParamName")
+	FName DestroyMaterialParamName{"DissolveAmount"};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
+	TSoftObjectPtr<UCurveFloat> DestroyMaterialParamCurveFloatSoft{};
 };
 
 USTRUCT()

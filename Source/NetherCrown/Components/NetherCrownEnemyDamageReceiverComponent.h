@@ -4,12 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "Components/TimelineComponent.h"
 #include "NetherCrown/Data/UNetherCrownEnemyDamageAndDeathCosmeticData.h"
 #include "NetherCrownEnemyDamageReceiverComponent.generated.h"
 
 
 class ANetherCrownEnemy;
 class UNetherCrownDamageType;
+class UMaterialInstanceDynamic;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownEnemyDamageReceiverComponent : public UActorComponent
@@ -23,6 +25,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
@@ -37,12 +40,20 @@ private:
 	int32 GetArmorStat(const bool bIsPhysicalDamage) const;
 
 	void LoadEnemyDamageCosmeticData();
+	void CacheDeathMaterialInstances();
+	void BindTimelineFunctions();
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayTakeDamageSound();
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayTakeDamageAnimation(const bool bIsCriticalDamage);
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_StartDeathDissolve();
+
+	UFUNCTION()
+	void ApplyDeadMaterialParam(float FloatCurveValue);
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
@@ -59,8 +70,16 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedTakeCriticalDamageAnimMontage{};
 
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveFloat> CachedDeathMaterialParamCurveFloat{};
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UMaterialInstanceDynamic>> CachedDeathMaterialInstances{};
+
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDamageAndDeathCosmeticDataAsset")
 	TSoftObjectPtr<UNetherCrownEnemyDamageAndDeathCosmeticDataAsset> EnemyDamageAndDeathCosmeticDataAssetSoft{};
 
 	FTimerHandle HandleDestroyTimerHandle{};
+
+	FTimeline DeathMaterialParamTimeline{};
 };

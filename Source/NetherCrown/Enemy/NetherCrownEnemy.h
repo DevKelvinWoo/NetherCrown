@@ -48,6 +48,12 @@ private:
 
 	void SetEnemyMovementComponentValue();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetHitBoxCollisionEnabled(const bool bEnable);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetCapsuleCollisionResponse(const ECollisionChannel Channel, const ECollisionResponse Response);
+
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UCapsuleComponent> EnemyHitBoxComponent{};
 

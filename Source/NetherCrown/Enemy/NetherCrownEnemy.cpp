@@ -51,6 +51,9 @@ void ANetherCrownEnemy::SetIsDead(const bool InbIsDead)
 	if (HasAuthority())
 	{
 		bIsDead = InbIsDead;
+
+		Multicast_SetHitBoxCollisionEnabled(false);
+		Multicast_SetCapsuleCollisionResponse(ECC_Pawn, ECR_Ignore);
 	}
 }
 
@@ -146,4 +149,25 @@ void ANetherCrownEnemy::SetEnemyMovementComponentValue()
 	CharacterMovementComponent->bOrientRotationToMovement = true;
 
 	bUseControllerRotationYaw = false;
+}
+
+void ANetherCrownEnemy::Multicast_SetCapsuleCollisionResponse_Implementation(const ECollisionChannel Channel, const ECollisionResponse Response)
+{
+	UCapsuleComponent* EnemyCapsuleComponent{ GetCapsuleComponent() };
+	if (!ensureAlways(IsValid(EnemyCapsuleComponent)))
+	{
+		return;
+	}
+
+	EnemyCapsuleComponent->SetCollisionResponseToChannel(Channel, Response);
+}
+
+void ANetherCrownEnemy::Multicast_SetHitBoxCollisionEnabled_Implementation(const bool bEnable)
+{
+	if (!ensureAlways((IsValid(EnemyHitBoxComponent))))
+	{
+		return;
+	}
+
+	EnemyHitBoxComponent->SetCollisionEnabled(bEnable ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
 }

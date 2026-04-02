@@ -5,6 +5,7 @@
 
 #include "NetherCrownCrowdControlComponent.h"
 #include "Engine/DamageEvents.h"
+#include "Materials/MaterialInstanceDynamic.h"
 
 #include "NetherCrownCrowdControlTypes.h"
 #include "NetherCrownEnemyStatComponent.h"
@@ -19,7 +20,7 @@
 
 UNetherCrownEnemyDamageReceiverComponent::UNetherCrownEnemyDamageReceiverComponent()
 {
-	PrimaryComponentTick.bCanEverTick = false;
+	PrimaryComponentTick.bCanEverTick = true;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -31,6 +32,18 @@ void UNetherCrownEnemyDamageReceiverComponent::BeginPlay()
 	CachedOwnerEnemy = Cast<ANetherCrownEnemy>(GetOwner());
 
 	LoadEnemyDamageCosmeticData();
+	CacheDeathMaterialInstances();
+	BindTimelineFunctions();
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+{
+	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
+
+	if (DeathMaterialParamTimeline.IsPlaying())
+	{
+		DeathMaterialParamTimeline.TickTimeline(DeltaTime);
+	}
 }
 
 float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser)
@@ -122,6 +135,8 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead()
 
 	CachedOwnerEnemy->SetIsDead(true);
 
+	Multicast_StartDeathDissolve();
+
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
@@ -212,6 +227,85 @@ void UNetherCrownEnemyDamageReceiverComponent::LoadEnemyDamageCosmeticData()
 	if (!(EnemyDamageCosmeticData.TakeCriticalDamageAnimMontageSoft.IsNull()))
 	{
 		CachedTakeCriticalDamageAnimMontage = EnemyDamageCosmeticData.TakeCriticalDamageAnimMontageSoft.LoadSynchronous();
+	}
+
+	if (!(EnemyDeathCosmeticData.DestroyMaterialParamCurveFloatSoft.IsNull()))
+	{
+		CachedDeathMaterialParamCurveFloat = EnemyDeathCosmeticData.DestroyMaterialParamCurveFloatSoft.LoadSynchronous();
+	}
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::CacheDeathMaterialInstances()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	USkeletalMeshComponent* EnemyMesh{ CachedOwnerEnemy->GetMesh() };
+	if (!ensureAlways(IsValid(EnemyMesh)))
+	{
+		return;
+	}
+
+	CachedDeathMaterialInstances.Reset();
+
+	const int32 MaterialNum{ EnemyMesh->GetNumMaterials() };
+	for (int32 MaterialIndex{ 0 }; MaterialIndex < MaterialNum; ++MaterialIndex)
+	{
+		UMaterialInstanceDynamic* DynamicMaterial{ EnemyMesh->CreateDynamicMaterialInstance(MaterialIndex) };
+		if (!IsValid(DynamicMaterial))
+		{
+			continue;
+		}
+
+		DynamicMaterial->SetScalarParameterValue(EnemyDeathCosmeticData.DestroyMaterialParamName, 0.f);
+		CachedDeathMaterialInstances.Add(DynamicMaterial);
+	}
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::BindTimelineFunctions()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	FOnTimelineFloat OnTimelineFloat{};
+	OnTimelineFloat.BindUFunction(this, FName("ApplyDeadMaterialParam"));
+	DeathMaterialParamTimeline.AddInterpFloat(CachedDeathMaterialParamCurveFloat, OnTimelineFloat);
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::Multicast_StartDeathDissolve_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	DeathMaterialParamTimeline.PlayFromStart();
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::ApplyDeadMaterialParam(float FloatCurveValue)
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (CachedDeathMaterialInstances.IsEmpty())
+	{
+		return;
+	}
+
+	for (UMaterialInstanceDynamic* DynamicMaterial : CachedDeathMaterialInstances)
+	{
+		if (!IsValid(DynamicMaterial))
+		{
+			continue;
+		}
+
+		DynamicMaterial->SetScalarParameterValue(TEXT("DissolveAmount"), FloatCurveValue);
 	}
 }
 
