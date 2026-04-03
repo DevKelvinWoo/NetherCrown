@@ -5,6 +5,7 @@
 #include "NetherCrownSkillIconComponent.h"
 #include "NetherCrownSliderComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "ViewModel/NetherCrownPlayerStatusWidgetViewModel.h"
 
 void UNetherCrownPlayerStatusWidgetView::NativeOnInitialized()
@@ -23,7 +24,13 @@ void UNetherCrownPlayerStatusWidgetView::NativeOnInitialized()
 	ANetherCrownCharacter* OwningCharacter{ GetOwningNetherCrownCharacter() };
 	if (ensureAlways(IsValid(OwningCharacter)))
 	{
-		OwningCharacter->GetOnRepPlayerState().AddUObject(this, &ThisClass::HandleOnRepPlayerState);
+		OwningCharacter->GetOnRepPlayerState().AddUObject(this, &ThisClass::InitViewModel);
+	}
+
+	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter->GetSkillComponent() };
+	if (ensureAlways(IsValid(SkillComponent)))
+	{
+		SkillComponent->GetOnSkillObjectLoaded().AddUObject(this, &ThisClass::InitViewModel);
 	}
 }
 
@@ -36,11 +43,6 @@ void UNetherCrownPlayerStatusWidgetView::NativeDestruct()
 	}
 
 	Super::NativeDestruct();
-}
-
-void UNetherCrownPlayerStatusWidgetView::HandleOnRepPlayerState()
-{
-	InitViewModel();
 }
 
 void UNetherCrownPlayerStatusWidgetView::ApplyMPSlider(const float RemainMPRatio)

@@ -17,6 +17,7 @@ class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStopOrStartSkill, const bool);
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSkillCoolDownModified, const float, const ENetherCrownSkillKeyEnum);
+	DECLARE_MULTICAST_DELEGATE(FOnSkillObjectLoaded);
 
 public:
 	UNetherCrownSkillComponent();
@@ -26,6 +27,7 @@ public:
 
 	FOnStopOrStartSkill& GetOnStopOrStartSkill() { return OnStopOrStartSkill; }
 	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }
+	FOnSkillObjectLoaded& GetOnSkillObjectLoaded() { return OnSkillObjectLoaded; }
 
 	bool CanActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
 
@@ -73,4 +75,5 @@ private:
 
 	FOnStopOrStartSkill OnStopOrStartSkill;
 	FOnSkillCoolDownModified OnSkillCoolDownModified;
+	FOnSkillObjectLoaded OnSkillObjectLoaded;
 };

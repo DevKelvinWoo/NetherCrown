@@ -151,11 +151,14 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 
 		SkillObject->SetSkillOwnerCharacter(CachedCharacter);
 		SkillObject->InitSkillObject();
+		SkillObject->GetOnSkillCoolDownModified().AddUObject(this, &ThisClass::HandleOnSkillCoolDownModified);
 
 		//@NOTE : Server에서만 SkillObjects, ReplicatedSkillObjects를 구축한다
 		//이때 ReplicatedSkillObjects는 Replicate가 되기 때문에 OnRep_ReplicatedSKillObjects가 호출된다 (클라에서)
 		const ENetherCrownSkillKeyEnum SkillEnum{ SkillObject->GetSkillEnum() };
 		SkillObjectMap.Add(SkillEnum, SkillObject);
+		OnSkillObjectLoaded.Broadcast();
+
 		ReplicatedSkillObjects.Add(SkillObject);
 	}
 }
@@ -240,6 +243,7 @@ void UNetherCrownSkillComponent::OnRep_ReplicatedSkillObjects()
 			Obj->GetOnSkillCoolDownModified().AddUObject(this, &ThisClass::HandleOnSkillCoolDownModified);
 
 			SkillObjectMap.Add(Obj->GetSkillEnum(), Obj);
+			OnSkillObjectLoaded.Broadcast();
 		}
 	}
 }

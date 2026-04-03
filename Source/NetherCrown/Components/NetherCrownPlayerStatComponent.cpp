@@ -99,4 +99,6 @@ void UNetherCrownPlayerStatComponent::ModifyMP(float MPDelta)
 	}
 
 	PlayerStatData.CharacterMP += MPDelta;
+
+	OnCharacterMPModified.Broadcast(PlayerStatData.CharacterMP / PlayerStatData.CharacterMaxMP);
 }

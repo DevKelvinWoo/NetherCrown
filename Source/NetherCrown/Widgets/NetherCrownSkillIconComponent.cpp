@@ -21,7 +21,6 @@ void UNetherCrownSkillIconComponent::NativeOnInitialized()
 	Super::NativeOnInitialized();
 
 	TryResolveHandlingSkillObject();
-	ApplySkillVisual();
 
 	if (ensureAlways(NativeSkillTooltipAnchor))
 	{

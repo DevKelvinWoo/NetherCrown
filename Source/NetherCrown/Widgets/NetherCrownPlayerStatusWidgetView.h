@@ -16,9 +16,6 @@ class NETHERCROWN_API UNetherCrownPlayerStatusWidgetView : public UNetherCrownUI
 {
 	GENERATED_BODY()
 
-public:
-	void HandleOnRepPlayerState();
-
 protected:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeDestruct() override;
