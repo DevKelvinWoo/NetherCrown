@@ -448,7 +448,7 @@ void UNetherCrownSkillDashAttack::ApplyDashAttackDamageAndCrowdControl(const ANe
 	CrowdControlComponent->Stun();
 
 	ApplyCrowdControlToTarget(TargetEnemy, ENetherCrownCrowdControlType::STUN, StunDuration);
-	UGameplayStatics::ApplyDamage(CurrentTargetActor, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
+	UGameplayStatics::ApplyDamage(CurrentTargetActor, CalculateSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
 
 	Multicast_SpawnSkillImpactEffect(TargetEnemy);
 	Client_ActiveSkillHitCameraShake();

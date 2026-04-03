@@ -183,7 +183,6 @@ void UNetherCrownSkillSkyFallSlash::DetectAndHitSkyFallSlashSkill()
 	const TArray<AActor*> DetectedActors{ GetSkillDetectedTargets() };
 	if (DetectedActors.IsEmpty())
 	{
-		UE_LOG(LogNetherCrown, Warning, TEXT("DetectAndHitSkyFallSlashSkill - DetectedActors is empty"));
 		return;
 	}
 
@@ -199,7 +198,7 @@ void UNetherCrownSkillSkyFallSlash::DetectAndHitSkyFallSlashSkill()
 				CrowdControlComponent->KnockBack(DetectedEnemy->GetActorForwardVector() * -SkillKnockBackDistance);
 			}
 
-			UGameplayStatics::ApplyDamage(DetectedEnemy, CalculatePhysicalSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
+			UGameplayStatics::ApplyDamage(DetectedEnemy, CalculateSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
 
 			//@NOTE : Skill Hit Sound is played by TakeDamage function, So only Spawn VFX
 			Multicast_SpawnSkillImpactEffect(DetectedEnemy);

@@ -5,10 +5,12 @@
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrownBasicAttackComponent.h"
 #include "NetherCrownEquipComponent.h"
+#include "NetherCrownPlayerStatComponent.h"
 #include "Engine/ActorChannel.h"
 #include "GameFramework/PawnMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
@@ -35,7 +37,7 @@ UNetherCrownSkillObject* UNetherCrownSkillComponent::GetSkillObject(const ENethe
 	return *FoundSkillObjectPtr;
 }
 
-bool UNetherCrownSkillComponent::CanActivateSkill() const
+bool UNetherCrownSkillComponent::CanActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum) const
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
@@ -56,6 +58,25 @@ bool UNetherCrownSkillComponent::CanActivateSkill() const
 
 	const UPawnMovementComponent* MovementComponent{ CachedCharacter->GetMovementComponent() };
 	if (!ensureAlways(IsValid(MovementComponent)) || MovementComponent->IsFalling())
+	{
+		return false;
+	}
+
+	const UNetherCrownSkillObject* SkillObject{ GetSkillObject(SkillKeyEnum) };
+	if (!ensureAlways(IsValid(SkillObject)))
+	{
+		return false;
+	}
+
+	ANetherCrownPlayerState* PlayerState{ Cast<ANetherCrownPlayerState>(CachedCharacter->GetPlayerState()) };
+	UNetherCrownPlayerStatComponent* PlayerStatComponent{ PlayerState ? PlayerState->GetNetherCrownPlayerStatComponent() : nullptr };
+	if (!ensureAlways(IsValid(PlayerStatComponent)))
+	{
+		return false;
+	}
+
+	const float SkillMPCost{ SkillObject->GetSkillData().SkillMPCost };
+	if (PlayerStatComponent->GetPlayerStatData().CharacterMP < SkillMPCost)
 	{
 		return false;
 	}
@@ -146,11 +167,6 @@ void UNetherCrownSkillComponent::CacheInitData()
 
 void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENetherCrownSkillKeyEnum SkillKeyEnum)
 {
-	if (!CanActivateSkill())
-	{
-		return;
-	}
-
 	if (SkillObjectMap.IsEmpty())
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("SkillObjectMap is Empty in %hs"), __FUNCTION__);
@@ -159,10 +175,9 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 
 	if (SkillKeyEnum == ENetherCrownSkillKeyEnum::None)
 	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("SkillKeyEnum is None in %hs"), __FUNCTION__);
 		return;
 	}
-
-	Client_SetActiveSkillKeyEnum(SkillKeyEnum);
 
 	UNetherCrownSkillObject** FoundSkillObjectPtr{ SkillObjectMap.Find(SkillKeyEnum) };
 	if (!IsValid(*FoundSkillObjectPtr))
@@ -172,10 +187,17 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 	}
 
 	UNetherCrownSkillObject* FoundSkillObject{ *FoundSkillObjectPtr };
-	if (!FoundSkillObject->CanActiveSkill())
+	if (!ensureAlways(IsValid(FoundSkillObject)))
 	{
 		return;
 	}
+
+	if (!CanActivateSkill(SkillKeyEnum) || FoundSkillObject->IsSkillCoolDown())
+	{
+		return;
+	}
+
+	Client_SetActiveSkillKeyEnum(SkillKeyEnum);
 
 	FoundSkillObject->ExecuteSkillGameplay();
 	Multicast_PlaySkillCosmetics(FoundSkillObject);

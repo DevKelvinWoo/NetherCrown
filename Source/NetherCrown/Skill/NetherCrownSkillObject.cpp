@@ -33,7 +33,7 @@ void UNetherCrownSkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, SkillTag);
 	DOREPLIFETIME(ThisClass, SkillOwnerCharacterWeak);
 	DOREPLIFETIME(ThisClass, SkillData);
-	DOREPLIFETIME(ThisClass, bCanActiveSkill);
+	DOREPLIFETIME(ThisClass, bIsCoolDown);
 }
 
 ENetherCrownSkillKeyEnum UNetherCrownSkillObject::GetSkillEnum() const
@@ -204,7 +204,7 @@ void UNetherCrownSkillObject::PlaySkillHitImpactEffect(const ANetherCrownEnemy* 
 	}
 }
 
-int32 UNetherCrownSkillObject::CalculatePhysicalSkillDamage() const
+int32 UNetherCrownSkillObject::CalculateSkillDamage() const
 {
 	//Character의 Stat + Weapon의 Damage + SkillDamage
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
@@ -648,7 +648,7 @@ void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 
 	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, GetSkillCoolDownDecreaseOffset(), true);
 
-	bCanActiveSkill = false;
+	bIsCoolDown = true;
 }
 
 void UNetherCrownSkillObject::StopSkillCoolDownTimer()
@@ -674,7 +674,7 @@ void UNetherCrownSkillObject::StopSkillCoolDownTimer()
 		}
 
 		World->GetTimerManager().ClearTimer(SkillCoolDownTimerHandle);
-		bCanActiveSkill = true;
+		bIsCoolDown = false;
 	}
 }
 

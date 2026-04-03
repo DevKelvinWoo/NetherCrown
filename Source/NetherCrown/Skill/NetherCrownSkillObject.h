@@ -115,7 +115,7 @@ public:
 	void SetSkillOwnerCharacter(ANetherCrownCharacter* SkillOwnerCharacter);
 	void SetSkillTag(const FGameplayTag& InSkillTag) { SkillTag = InSkillTag; }
 
-	bool CanActiveSkill() const { return bCanActiveSkill; }
+	bool IsSkillCoolDown() const { return bIsCoolDown; }
 
 	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }
 
@@ -136,7 +136,7 @@ protected:
 
 	void PlaySkillHitImpactEffect(const ANetherCrownEnemy* TargetEnemy) const;
 
-	int32 CalculatePhysicalSkillDamage() const;
+	int32 CalculateSkillDamage() const;
 
 	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true) const;
 
@@ -214,7 +214,7 @@ private:
 	FGameplayTag SkillTag{};
 
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillData")
-	bool bCanActiveSkill{ true };
+	bool bIsCoolDown{ false };
 
 	UPROPERTY()
 	float SkillCoolDownAccumulator{ 0.f };

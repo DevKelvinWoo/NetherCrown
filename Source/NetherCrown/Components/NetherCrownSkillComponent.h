@@ -27,7 +27,7 @@ public:
 	FOnStopOrStartSkill& GetOnStopOrStartSkill() { return OnStopOrStartSkill; }
 	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }
 
-	bool CanActivateSkill() const;
+	bool CanActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
 
 	ENetherCrownSkillKeyEnum GetActiveSkillKeyEnum() const { return ActiveSkillKeyEnum; }
 
