@@ -4,9 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "NetherCrownSkillObject.h"
+#include "Components/TimelineComponent.h"
 #include "NetherCrownSkillDashAttack.generated.h"
 
 class UNiagaraSystem;
+class UCurveVector;
 
 UCLASS(Blueprintable)
 class NETHERCROWN_API UNetherCrownSkillDashAttack : public UNetherCrownSkillObject
@@ -22,6 +24,8 @@ protected:
 
 	virtual void InitSkillObject() override;
 
+	virtual void TickFloatTimeline(float DeltaTime) override;
+
 private:
 	TArray<AActor*> DetectDashAttackTargets() const;
 
@@ -29,6 +33,18 @@ private:
 	void DashAttackToTargets();
 
 	void LastDashAttack();
+
+	void CacheDashAttackCosmeticData();
+
+	void BindTimelineFunctions();
+
+	void StartDashAttackCameraPosBeginTimeline();
+
+	UFUNCTION(Client, Reliable)
+	void Client_StartDashAttackCameraPosEndTimeline();
+
+	UFUNCTION()
+	void ApplyDashAttackCameraPos(const FVector& VectorCurveValue);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetOwnerCharacterRotToTarget(const FRotator& InTargetRot);
@@ -60,7 +76,7 @@ private:
 	void PlayDashAttackMontage(UAnimMontage* SkillAnimMontage) const;
 
 	void HitDashAttack();
-	void ApplyDashAttackDamageAndCrowdControl(const ANetherCrownEnemy* TargetEnemy);
+	void ApplyDashAttackDamageAndCrowdControl(ANetherCrownEnemy* TargetEnemy);
 
 	void ClearDashAttackData();
 
@@ -97,6 +113,12 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
 	TSoftObjectPtr<UAnimMontage> LastDashAttackAnimMontageSoft{};
 
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
+	TSoftObjectPtr<UCurveVector> DashAttackCameraPosBeginCurveSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
+	TSoftObjectPtr<UCurveVector> DashAttackCameraPosEndCurveSoft{};
+
 	int32 CurrentTargetIndex{ 0 };
 
 	UPROPERTY(Transient)
@@ -111,6 +133,15 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedLastDashAttackAnimMontage{};
 
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveVector> CachedDashAttackCameraPosBeginCurve{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveVector> CachedDashAttackCameraPosEndCurve{};
+
 	FTimerHandle LastDashAttackCameraTimerHandle{};
 	FTimerHandle LastDashAttackHitStartTimerHandle{};
+
+	FTimeline DashAttackCameraPosBeginTimeline{};
+	FTimeline DashAttackCameraPosEndTimeline{};
 };

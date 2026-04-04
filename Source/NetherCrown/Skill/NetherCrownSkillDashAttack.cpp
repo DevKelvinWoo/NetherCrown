@@ -2,7 +2,6 @@
 
 #include "NetherCrownSkillDashAttack.h"
 
-#include "NetherCrown/NetherCrown.h"
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -10,6 +9,9 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "NiagaraSystem.h"
 #include "Camera/CameraActor.h"
+#include "Curves/CurveVector.h"
+
+#include "NetherCrown/NetherCrown.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
@@ -44,6 +46,8 @@ void UNetherCrownSkillDashAttack::PlaySkillCosmetics()
 	}
 
 	ApplyPostProcess(ENetherCrownPPType::Charging, 2.5f, false);
+
+	StartDashAttackCameraPosBeginTimeline();
 }
 
 void UNetherCrownSkillDashAttack::ExecuteSkillGameplay()
@@ -57,20 +61,22 @@ void UNetherCrownSkillDashAttack::InitSkillObject()
 {
 	Super::InitSkillObject();
 
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	CacheDashAttackCosmeticData();
+	BindTimelineFunctions();
+}
+
+void UNetherCrownSkillDashAttack::TickFloatTimeline(float DeltaTime)
+{
+	Super::TickFloatTimeline(DeltaTime);
+
+	if (DashAttackCameraPosBeginTimeline.IsPlaying())
 	{
-		return;
+		DashAttackCameraPosBeginTimeline.TickTimeline(DeltaTime);
 	}
 
-	if (!GhostTrailNiagaraSystemSoft.IsNull())
+	if (DashAttackCameraPosEndTimeline.IsPlaying())
 	{
-		GhostTrailNiagaraSystem = GhostTrailNiagaraSystemSoft.LoadSynchronous();
-	}
-
-	if (!LastDashAttackAnimMontageSoft.IsNull())
-	{
-		CachedLastDashAttackAnimMontage = LastDashAttackAnimMontageSoft.LoadSynchronous();
+		DashAttackCameraPosEndTimeline.TickTimeline(DeltaTime);
 	}
 }
 
@@ -107,6 +113,13 @@ TArray<AActor*> UNetherCrownSkillDashAttack::DetectDashAttackTargets() const
 
 void UNetherCrownSkillDashAttack::DashAttackToTargets()
 {
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
+	{
+		ClearDashAttackData();
+		return;
+	}
+
 	if (CachedTargetActors.IsEmpty())
 	{
 		return;
@@ -124,6 +137,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	}
 	else
 	{
+		Client_StartDashAttackCameraPosEndTimeline();
 		LastDashAttack();
 		return;
 	}
@@ -134,14 +148,6 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 	{
 		ClearDashAttackData();
 		UE_LOG(LogNetherCrown, Warning, TEXT("Current Target Actor is InValid! : %hs"), __FUNCTION__);
-		return;
-	}
-
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		ClearDashAttackData();
-		UE_LOG(LogNetherCrown, Warning, TEXT("SkillOwnerCharacter is InValid! : %hs"), __FUNCTION__);
 		return;
 	}
 
@@ -183,9 +189,105 @@ void UNetherCrownSkillDashAttack::LastDashAttack()
 	World->GetTimerManager().ClearTimer(DashAttackTimerHandle);
 	World->GetTimerManager().ClearTimer(DashAttackHitTimerHandle);
 
+	bool bCachedTargetAlive{ false };
+	for (AActor* CachedTargetActor : CachedTargetActors)
+	{
+		ANetherCrownEnemy* CachedTargetEnemy = Cast<ANetherCrownEnemy>(CachedTargetActor);
+		if (!IsValid(CachedTargetActor))
+		{
+			bCachedTargetAlive = false;
+			continue;
+		}
+
+		bCachedTargetAlive = !CachedTargetEnemy->IsDead();
+	}
+
+	if (!bCachedTargetAlive)
+	{
+		ClearDashAttackData();
+		Client_StartPostProcessBlendEndTimer();
+
+		return;
+	}
+
 	Client_SetCameraViewLastDashAttack();
 	Multicast_PlayLastDashAttackMontage();
 	SetAttackLastDashAttackTimer();
+}
+
+void UNetherCrownSkillDashAttack::CacheDashAttackCosmeticData()
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!GhostTrailNiagaraSystemSoft.IsNull())
+	{
+		GhostTrailNiagaraSystem = GhostTrailNiagaraSystemSoft.LoadSynchronous();
+	}
+
+	if (!LastDashAttackAnimMontageSoft.IsNull())
+	{
+		CachedLastDashAttackAnimMontage = LastDashAttackAnimMontageSoft.LoadSynchronous();
+	}
+
+	if (!DashAttackCameraPosBeginCurveSoft.IsNull())
+	{
+		CachedDashAttackCameraPosBeginCurve = DashAttackCameraPosBeginCurveSoft.LoadSynchronous();
+	}
+
+	if (!DashAttackCameraPosEndCurveSoft.IsNull())
+	{
+		CachedDashAttackCameraPosEndCurve = DashAttackCameraPosEndCurveSoft.LoadSynchronous();
+	}
+}
+
+void UNetherCrownSkillDashAttack::BindTimelineFunctions()
+{
+	FOnTimelineVector TimelineVector{};
+	TimelineVector.BindUFunction(this, "ApplyDashAttackCameraPos");
+
+	if (IsValid(CachedDashAttackCameraPosBeginCurve) && IsValid(CachedDashAttackCameraPosEndCurve))
+	{
+		DashAttackCameraPosBeginTimeline.AddInterpVector(CachedDashAttackCameraPosBeginCurve, TimelineVector);
+		DashAttackCameraPosEndTimeline.AddInterpVector(CachedDashAttackCameraPosEndCurve, TimelineVector);
+	}
+}
+
+void UNetherCrownSkillDashAttack::StartDashAttackCameraPosBeginTimeline()
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	DashAttackCameraPosBeginTimeline.PlayFromStart();
+}
+
+void UNetherCrownSkillDashAttack::Client_StartDashAttackCameraPosEndTimeline_Implementation()
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	DashAttackCameraPosEndTimeline.PlayFromStart();
+}
+
+void UNetherCrownSkillDashAttack::ApplyDashAttackCameraPos(const FVector& VectorCurveValue)
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	SkillOwnerCharacter->SetMainSpringArmLength(VectorCurveValue.X);
+	SkillOwnerCharacter->SetMainSpringArmZOffset(VectorCurveValue.Z);
 }
 
 void UNetherCrownSkillDashAttack::Multicast_DeactivateDashAttackGhostTrail_Implementation()
@@ -375,10 +477,13 @@ void UNetherCrownSkillDashAttack::AttackLastDashAttack()
 
 	for (AActor* CachedTargetActor : CachedTargetActors)
 	{
-		if (ANetherCrownEnemy* TargetEnemy = Cast<ANetherCrownEnemy>(CachedTargetActor))
+		ANetherCrownEnemy* TargetEnemy = Cast<ANetherCrownEnemy>(CachedTargetActor);
+		if (!ensureAlways(IsValid(TargetEnemy)) || TargetEnemy->IsDead())
 		{
-			ApplyDashAttackDamageAndCrowdControl(TargetEnemy);
+			continue;
 		}
+
+		ApplyDashAttackDamageAndCrowdControl(TargetEnemy);
 	}
 
 	ClearDashAttackData();
@@ -426,7 +531,7 @@ void UNetherCrownSkillDashAttack::HitDashAttack()
 	ApplyDashAttackDamageAndCrowdControl(CurrentTargetEnemy);
 }
 
-void UNetherCrownSkillDashAttack::ApplyDashAttackDamageAndCrowdControl(const ANetherCrownEnemy* TargetEnemy)
+void UNetherCrownSkillDashAttack::ApplyDashAttackDamageAndCrowdControl(ANetherCrownEnemy* TargetEnemy)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())
@@ -448,7 +553,7 @@ void UNetherCrownSkillDashAttack::ApplyDashAttackDamageAndCrowdControl(const ANe
 	CrowdControlComponent->Stun();
 
 	ApplyCrowdControlToTarget(TargetEnemy, ENetherCrownCrowdControlType::STUN, StunDuration);
-	UGameplayStatics::ApplyDamage(CurrentTargetActor, CalculateSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
+	UGameplayStatics::ApplyDamage(TargetEnemy, CalculateSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
 
 	Multicast_SpawnSkillImpactEffect(TargetEnemy);
 	Client_ActiveSkillHitCameraShake();

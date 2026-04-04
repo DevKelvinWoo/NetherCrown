@@ -30,6 +30,7 @@ public:
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 	void SetIsDead(const bool InbIsDead);
+	bool IsDead() { return bIsDead; }
 
 protected:
 	virtual void BeginPlay() override;
