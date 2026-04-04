@@ -54,6 +54,7 @@ void ANetherCrownEnemy::SetIsDead(const bool InbIsDead)
 
 		Multicast_SetHitBoxCollisionEnabled(false);
 		Multicast_SetCapsuleCollisionResponse(ECC_Pawn, ECR_Ignore);
+		Multicast_DeActiveStatusNiagaraSystem();
 	}
 }
 
@@ -147,6 +148,21 @@ void ANetherCrownEnemy::SetEnemyMovementComponentValue()
 	CharacterMovementComponent->bOrientRotationToMovement = true;
 
 	bUseControllerRotationYaw = false;
+}
+
+void ANetherCrownEnemy::Multicast_DeActiveStatusNiagaraSystem_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(StatusEffectControlComponent)))
+	{
+		return;
+	}
+
+	StatusEffectControlComponent->SetActiveStatusNiagaraSystem(false);
 }
 
 void ANetherCrownEnemy::Multicast_SetCapsuleCollisionResponse_Implementation(const ECollisionChannel Channel, const ECollisionResponse Response)

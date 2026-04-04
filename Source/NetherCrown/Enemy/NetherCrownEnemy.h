@@ -55,6 +55,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCapsuleCollisionResponse(const ECollisionChannel Channel, const ECollisionResponse Response);
 
+	UFUNCTION(NetMulticast, UnReliable)
+	void Multicast_DeActiveStatusNiagaraSystem();
+
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UCapsuleComponent> EnemyHitBoxComponent{};
 

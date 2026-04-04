@@ -168,7 +168,7 @@ void UNetherCrownCrowdControlComponent::Stun() const
 		OwnerCharacterMovementComponent->DisableMovement();
 	}
 
-	Multicast_SetActiveStatusNiagaraSystem(ENetherCrownCrowdControlType::STUN, true);
+	Multicast_SetActiveStatusNiagaraSystem(true, ENetherCrownCrowdControlType::STUN);
 }
 
 void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Implementation()
@@ -226,10 +226,10 @@ void UNetherCrownCrowdControlComponent::ClearFrozenCosmetics()
 
 void UNetherCrownCrowdControlComponent::ClearStunCosmetics()
 {
-	Multicast_SetActiveStatusNiagaraSystem(ENetherCrownCrowdControlType::STUN, false);
+	Multicast_SetActiveStatusNiagaraSystem(false);
 }
 
-void UNetherCrownCrowdControlComponent::Multicast_SetActiveStatusNiagaraSystem_Implementation(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable) const
+void UNetherCrownCrowdControlComponent::Multicast_SetActiveStatusNiagaraSystem_Implementation(const bool bEnable, const ENetherCrownCrowdControlType InCrowdControlType) const
 {
 	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
@@ -248,7 +248,7 @@ void UNetherCrownCrowdControlComponent::Multicast_SetActiveStatusNiagaraSystem_I
 		return;
 	}
 
-	StatusEffectControlComponent->SetActiveStatusNiagaraSystem(InCrowdControlType, bEnable);
+	StatusEffectControlComponent->SetActiveStatusNiagaraSystem(bEnable, InCrowdControlType);
 }
 
 void UNetherCrownCrowdControlComponent::ClearCrowdControl()

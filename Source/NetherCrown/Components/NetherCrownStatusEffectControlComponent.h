@@ -19,7 +19,7 @@ public:
 	UNetherCrownStatusEffectControlComponent();
 
 	void SetHandledStatusNiagaraComponent(UNiagaraComponent* HandledStatusNiagaraComponent);
-	void SetActiveStatusNiagaraSystem(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable);
+	void SetActiveStatusNiagaraSystem(const bool bEnable, const ENetherCrownCrowdControlType InCrowdControlType = ENetherCrownCrowdControlType::NONE);
 
 protected:
 	virtual void BeginPlay() override;

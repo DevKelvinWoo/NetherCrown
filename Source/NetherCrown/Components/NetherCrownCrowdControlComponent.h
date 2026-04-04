@@ -50,7 +50,7 @@ private:
 	void ClearStunCosmetics();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetActiveStatusNiagaraSystem(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable) const;
+	void Multicast_SetActiveStatusNiagaraSystem(const bool bEnable, const ENetherCrownCrowdControlType InCrowdControlType = ENetherCrownCrowdControlType::NONE) const;
 
 	void BindTimelineFunctions();
 

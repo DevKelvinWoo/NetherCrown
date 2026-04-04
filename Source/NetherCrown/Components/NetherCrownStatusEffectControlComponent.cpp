@@ -57,7 +57,7 @@ void UNetherCrownStatusEffectControlComponent::SetHandledStatusNiagaraComponent(
 	HandledStatusNiagaraComponentWeak = MakeWeakObjectPtr(HandledStatusNiagaraComponent);
 }
 
-void UNetherCrownStatusEffectControlComponent::SetActiveStatusNiagaraSystem(const ENetherCrownCrowdControlType InCrowdControlType, const bool bEnable)
+void UNetherCrownStatusEffectControlComponent::SetActiveStatusNiagaraSystem(const bool bEnable, const ENetherCrownCrowdControlType InCrowdControlType)
 {
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || CachedOwnerCharacter->GetNetMode() == NM_DedicatedServer)
 	{
