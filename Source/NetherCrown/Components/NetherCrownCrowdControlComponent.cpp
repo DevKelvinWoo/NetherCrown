@@ -110,6 +110,7 @@ void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector
 		return;
 	}
 
+	ResetMovementAndAnimationSettings();
 	CachedOwner->LaunchCharacter(KnockBackVector, true, true);
 }
 
@@ -180,6 +181,7 @@ void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Im
 		break;
 	case ENetherCrownCrowdControlType::STUN:
 		ClearStunCosmetics();
+		ResetMovementAndAnimationSettings();
 		break;
 	default:
 		break;
