@@ -337,14 +337,18 @@ ENetherCrownCrowdControlType UNetherCrownCrowdControlComponent::GetHighestPriori
 int32 UNetherCrownCrowdControlComponent::GetCrowdControlPriority(const ENetherCrownCrowdControlType InCrowdControlType) const
 {
 	//@NOTE : 겹치는 CC 중 대표 상태는 Frozen > Stun > KnockBack 순서로 유지한다.
+	constexpr int32 FROZEN_PRIORITY{ 300 };
+	constexpr int32 STUN_PRIORITY{ 200 };
+	constexpr int32 KNOCK_BACK_PRIORITY{ 100 };
+
 	switch (InCrowdControlType)
 	{
 	case ENetherCrownCrowdControlType::FROZEN:
-		return 300;
+		return FROZEN_PRIORITY;
 	case ENetherCrownCrowdControlType::STUN:
-		return 200;
+		return STUN_PRIORITY;
 	case ENetherCrownCrowdControlType::KNOCK_BACK:
-		return 100;
+		return KNOCK_BACK_PRIORITY;
 	default:
 		return 0;
 	}
