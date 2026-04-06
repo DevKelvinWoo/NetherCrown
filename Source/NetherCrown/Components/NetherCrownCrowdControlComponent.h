@@ -19,6 +19,7 @@ public:
 	UNetherCrownCrowdControlComponent();
 
 	ENetherCrownCrowdControlType GetCrowdControlType() const { return CrowdControlType; }
+	bool IsCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType) const;
 	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime);
 
 	//@NOTE : CC Implements
@@ -39,13 +40,18 @@ private:
 	void Multicast_PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_ClearCrowdControl_Cosmetics();
+	void Multicast_ClearCrowdControl_Cosmetics(const ENetherCrownCrowdControlType InCrowdControlType);
 
-	void ClearCrowdControl();
+	void ClearCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	void PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
+	void RefreshCrowdControlType();
+	void RefreshMovementAndAnimationSettings() const;
+	void SetCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType, const bool bActive);
+	FTimerHandle* GetCrowdControlTimerHandle(const ENetherCrownCrowdControlType InCrowdControlType);
+	ENetherCrownCrowdControlType GetHighestPriorityCrowdControlType() const;
+	int32 GetCrowdControlPriority(const ENetherCrownCrowdControlType InCrowdControlType) const;
 
-	void ResetMovementAndAnimationSettings() const;
 	void ClearFrozenCosmetics();
 	void ClearStunCosmetics();
 
@@ -64,8 +70,6 @@ private:
 
 	FTimeline FrozenTargetOverlayEndMaterialFloatTimeline{};
 
-	FTimerHandle CrowdControlTimerHandle{};
-
 	UPROPERTY(Transient)
 	FNetherCrownCrowdControlCosmeticData CrowdControlCosmeticData{};
 
@@ -77,6 +81,12 @@ private:
 
 	UPROPERTY(Replicated)
 	ENetherCrownCrowdControlType CrowdControlType{ ENetherCrownCrowdControlType::NONE };
+
+	uint8 ActiveCrowdControlFlags{};
+
+	FTimerHandle KnockBackCrowdControlTimerHandle{};
+	FTimerHandle FrozenCrowdControlTimerHandle{};
+	FTimerHandle StunCrowdControlTimerHandle{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<ACharacter> CachedOwner{};

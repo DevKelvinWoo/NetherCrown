@@ -78,7 +78,17 @@ void UNetherCrownCrowdControlComponent::LoadCrowdControlCosmeticData()
 
 void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
+	if (!ensureAlways(IsValid(CachedOwner)))
+	{
+		return;
+	}
+
+	const bool bWasActive{ IsCrowdControlActive(InCrowdControlType) };
+	SetCrowdControlActive(InCrowdControlType, true);
+	RefreshCrowdControlType();
+	RefreshMovementAndAnimationSettings();
+
+	if (bWasActive || CrowdControlType != InCrowdControlType || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
@@ -93,12 +103,21 @@ void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrow
 		return;
 	}
 
-	CrowdControlType = InCrowdControlType;
+	SetCrowdControlActive(InCrowdControlType, true);
+	RefreshCrowdControlType();
 
 	const UWorld* World{ GetWorld() };
 	check(World);
 
-	World->GetTimerManager().SetTimer(CrowdControlTimerHandle, this, &ThisClass::ClearCrowdControl, DurationTime, false);
+	FTimerHandle* CrowdControlTimerHandle{ GetCrowdControlTimerHandle(InCrowdControlType) };
+	if (!ensureAlways(CrowdControlTimerHandle))
+	{
+		return;
+	}
+
+	FTimerDelegate CrowdControlTimerDelegate{};
+	CrowdControlTimerDelegate.BindUObject(this, &ThisClass::ClearCrowdControl, InCrowdControlType);
+	World->GetTimerManager().SetTimer(*CrowdControlTimerHandle, CrowdControlTimerDelegate, DurationTime, false);
 
 	Multicast_PlayCrowdControlAnim(InCrowdControlType);
 }
@@ -110,7 +129,13 @@ void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector
 		return;
 	}
 
-	ResetMovementAndAnimationSettings();
+	UCharacterMovementComponent* MovementComponent{ CachedOwner->GetCharacterMovement() };
+	if (!ensureAlways(IsValid(MovementComponent)))
+	{
+		return;
+	}
+
+	MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
 	CachedOwner->LaunchCharacter(KnockBackVector, true, true);
 }
 
@@ -171,24 +196,48 @@ void UNetherCrownCrowdControlComponent::Stun() const
 	Multicast_SetActiveStatusNiagaraSystem(true, ENetherCrownCrowdControlType::STUN);
 }
 
-void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Implementation()
+bool UNetherCrownCrowdControlComponent::IsCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType) const
 {
-	switch (CrowdControlType)
+	if (InCrowdControlType == ENetherCrownCrowdControlType::NONE)
+	{
+		return false;
+	}
+
+	const uint8 BitMask{ static_cast<uint8>(1 << static_cast<uint8>(InCrowdControlType)) };
+	return (ActiveCrowdControlFlags & BitMask) != 0;
+}
+
+void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
+{
+	if (!ensureAlways(IsValid(CachedOwner)))
+	{
+		return;
+	}
+
+	SetCrowdControlActive(InCrowdControlType, false);
+
+	switch (InCrowdControlType)
 	{
 	case ENetherCrownCrowdControlType::FROZEN:
 		ClearFrozenCosmetics();
-		ResetMovementAndAnimationSettings();
 		break;
 	case ENetherCrownCrowdControlType::STUN:
 		ClearStunCosmetics();
-		ResetMovementAndAnimationSettings();
 		break;
 	default:
 		break;
 	}
+
+	RefreshCrowdControlType();
+	RefreshMovementAndAnimationSettings();
 }
 
-void UNetherCrownCrowdControlComponent::ResetMovementAndAnimationSettings() const
+void UNetherCrownCrowdControlComponent::RefreshCrowdControlType()
+{
+	CrowdControlType = GetHighestPriorityCrowdControlType();
+}
+
+void UNetherCrownCrowdControlComponent::RefreshMovementAndAnimationSettings() const
 {
 	if (!ensureAlways(IsValid(CachedOwner)))
 	{
@@ -198,8 +247,20 @@ void UNetherCrownCrowdControlComponent::ResetMovementAndAnimationSettings() cons
 	if (CachedOwner->HasAuthority())
 	{
 		UCharacterMovementComponent* MovementComponent{ CachedOwner->GetCharacterMovement() };
-		check(MovementComponent);
-		MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+		if (!ensureAlways(IsValid(MovementComponent)))
+		{
+			return;
+		}
+
+		const bool bHasBlockingMovementCrowdControl{ IsCrowdControlActive(ENetherCrownCrowdControlType::FROZEN) || IsCrowdControlActive(ENetherCrownCrowdControlType::STUN) };
+		if (bHasBlockingMovementCrowdControl && !IsCrowdControlActive(ENetherCrownCrowdControlType::KNOCK_BACK))
+		{
+			MovementComponent->DisableMovement();
+		}
+		else
+		{
+			MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+		}
 	}
 
 	if (CachedOwner->GetNetMode() == NM_DedicatedServer)
@@ -208,9 +269,84 @@ void UNetherCrownCrowdControlComponent::ResetMovementAndAnimationSettings() cons
 	}
 
 	USkeletalMeshComponent* SkeletalMeshComponent{ CachedOwner->GetMesh() };
-	if (IsValid(SkeletalMeshComponent))
+	if (!ensureAlways(IsValid(SkeletalMeshComponent)))
 	{
-		SkeletalMeshComponent->bPauseAnims = false;
+		return;
+	}
+
+	SkeletalMeshComponent->bPauseAnims = IsCrowdControlActive(ENetherCrownCrowdControlType::FROZEN);
+}
+
+void UNetherCrownCrowdControlComponent::SetCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType, const bool bActive)
+{
+	if (InCrowdControlType == ENetherCrownCrowdControlType::NONE)
+	{
+		return;
+	}
+
+	const uint8 BitMask{ static_cast<uint8>(1 << static_cast<uint8>(InCrowdControlType)) };
+	if (bActive)
+	{
+		ActiveCrowdControlFlags |= BitMask;
+		return;
+	}
+
+	ActiveCrowdControlFlags &= ~BitMask;
+}
+
+FTimerHandle* UNetherCrownCrowdControlComponent::GetCrowdControlTimerHandle(const ENetherCrownCrowdControlType InCrowdControlType)
+{
+	switch (InCrowdControlType)
+	{
+	case ENetherCrownCrowdControlType::KNOCK_BACK:
+		return &KnockBackCrowdControlTimerHandle;
+	case ENetherCrownCrowdControlType::FROZEN:
+		return &FrozenCrowdControlTimerHandle;
+	case ENetherCrownCrowdControlType::STUN:
+		return &StunCrowdControlTimerHandle;
+	default:
+		return nullptr;
+	}
+}
+
+ENetherCrownCrowdControlType UNetherCrownCrowdControlComponent::GetHighestPriorityCrowdControlType() const
+{
+	ENetherCrownCrowdControlType HighestPriorityCrowdControlType{ ENetherCrownCrowdControlType::NONE };
+	int32 HighestPriority{ GetCrowdControlPriority(HighestPriorityCrowdControlType) };
+
+	for (const ENetherCrownCrowdControlType CandidateCrowdControlType : { ENetherCrownCrowdControlType::KNOCK_BACK, ENetherCrownCrowdControlType::FROZEN, ENetherCrownCrowdControlType::STUN })
+	{
+		if (!IsCrowdControlActive(CandidateCrowdControlType))
+		{
+			continue;
+		}
+
+		const int32 CandidatePriority{ GetCrowdControlPriority(CandidateCrowdControlType) };
+		if (CandidatePriority <= HighestPriority)
+		{
+			continue;
+		}
+
+		HighestPriority = CandidatePriority;
+		HighestPriorityCrowdControlType = CandidateCrowdControlType;
+	}
+
+	return HighestPriorityCrowdControlType;
+}
+
+int32 UNetherCrownCrowdControlComponent::GetCrowdControlPriority(const ENetherCrownCrowdControlType InCrowdControlType) const
+{
+	//@NOTE : 겹치는 CC 중 대표 상태는 Frozen > Stun > KnockBack 순서로 유지한다.
+	switch (InCrowdControlType)
+	{
+	case ENetherCrownCrowdControlType::FROZEN:
+		return 300;
+	case ENetherCrownCrowdControlType::STUN:
+		return 200;
+	case ENetherCrownCrowdControlType::KNOCK_BACK:
+		return 100;
+	default:
+		return 0;
 	}
 }
 
@@ -251,11 +387,26 @@ void UNetherCrownCrowdControlComponent::Multicast_SetActiveStatusNiagaraSystem_I
 	StatusEffectControlComponent->SetActiveStatusNiagaraSystem(bEnable, InCrowdControlType);
 }
 
-void UNetherCrownCrowdControlComponent::ClearCrowdControl()
+void UNetherCrownCrowdControlComponent::ClearCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType)
 {
-	Multicast_ClearCrowdControl_Cosmetics();
+	if (!ensureAlways(IsValid(CachedOwner)) || !CachedOwner->HasAuthority() || !IsCrowdControlActive(InCrowdControlType))
+	{
+		return;
+	}
 
-	CrowdControlType = ENetherCrownCrowdControlType::NONE;
+	UWorld* World{ GetWorld() };
+	check(World);
+
+	FTimerHandle* CrowdControlTimerHandle{ GetCrowdControlTimerHandle(InCrowdControlType) };
+	if (CrowdControlTimerHandle)
+	{
+		World->GetTimerManager().ClearTimer(*CrowdControlTimerHandle);
+	}
+
+	SetCrowdControlActive(InCrowdControlType, false);
+	RefreshCrowdControlType();
+
+	Multicast_ClearCrowdControl_Cosmetics(InCrowdControlType);
 }
 
 void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType)
