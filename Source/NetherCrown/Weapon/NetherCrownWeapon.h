@@ -16,6 +16,7 @@ class UNiagaraComponent;
 
 class UNetherCrownWeaponData;
 class UNetherCrownWeaponTraceComponent;
+class ANetherCrownEnemy;
 enum class ENetherCrownSkillKeyEnum : uint8;
 
 UCLASS()
@@ -54,7 +55,7 @@ private:
 	void HandleOnEquipSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 	UFUNCTION()
-	void HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLocation) const;
+	void HandleOnHitEnemy(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation) const;
 
 	void SetEquipComponentSetting(AActor* OtherActor, const bool bCanEquip);
 

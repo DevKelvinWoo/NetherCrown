@@ -408,7 +408,7 @@ void UNetherCrownBasicAttackComponent::SetupLastComboAttackAuraTimer()
 	TimerManager.SetTimer(LastComboAttackAuraTimer, this, &ThisClass::DeactivateLastComboAttackWeaponAura, BasicAttackCosmeticData.LastAttackPPDuration, false);
 }
 
-void UNetherCrownBasicAttackComponent::ApplyLastComboAttackKnockBack(AActor* HitEnemy)
+void UNetherCrownBasicAttackComponent::ApplyLastComboAttackKnockBack(const ANetherCrownEnemy* HitEnemy)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
@@ -420,13 +420,12 @@ void UNetherCrownBasicAttackComponent::ApplyLastComboAttackKnockBack(AActor* Hit
 		return;
 	}
 
-	const ANetherCrownEnemy* TargetEnemy{ Cast<ANetherCrownEnemy>(HitEnemy) };
-	if (!ensureAlways(IsValid(TargetEnemy)))
+	if (!ensureAlways(IsValid(HitEnemy)))
 	{
 		return;
 	}
 
-	UNetherCrownCrowdControlComponent* CCControlComponent{ TargetEnemy->GetCrowdControlComponent() };
+	UNetherCrownCrowdControlComponent* CCControlComponent{ HitEnemy->GetCrowdControlComponent() };
 	if (!ensureAlways(IsValid(CCControlComponent)))
 	{
 		return;
@@ -434,7 +433,7 @@ void UNetherCrownBasicAttackComponent::ApplyLastComboAttackKnockBack(AActor* Hit
 
 	CCControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::KNOCK_BACK, 1.f);
 
-	const FVector KnockBackDirection{ TargetEnemy->GetActorForwardVector() * -1.f };
+	const FVector KnockBackDirection{ HitEnemy->GetActorForwardVector() * -1.f };
 	CCControlComponent->KnockBack(KnockBackDirection * BasicAttackData.LastComboAttackKnockBackVelocity);
 }
 
@@ -640,14 +639,14 @@ void UNetherCrownBasicAttackComponent::AutoTargetEnemy() const
 	CachedCharacter->SetActorRotation(AutoTargetRotation);
 }
 
-void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactEffect_Implementation(const FVector& HitLocation)
+void UNetherCrownBasicAttackComponent::Multicast_PlayHitImpactEffect_Implementation(const FVector& HitLocation, const ANetherCrownEnemy* HitEnemy)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || CachedCharacter->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
 
-	SpawnHitImpactEffect(HitLocation);
+	SpawnHitImpactEffect(HitLocation, HitEnemy);
 }
 
 void UNetherCrownBasicAttackComponent::Client_PlayHitImpactCameraShake_Implementation()
@@ -741,9 +740,9 @@ void UNetherCrownBasicAttackComponent::PlayHitImpactCameraShake() const
 	CameraManager->StartCameraShake(BasicAttackData.ApplyDamageCameraShakeClass, 1.0f);
 }
 
-void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLocation) const
+void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLocation, const ANetherCrownEnemy* HitEnemy) const
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
+	if (!ensureAlways(IsValid(CachedCharacter)) || !IsValid(HitEnemy))
 	{
 		return;
 	}
@@ -758,10 +757,20 @@ void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLo
 	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
 	SpawnTransform.SetScale3D(FVector(1.0f));
 
-	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedCharacter, BasicAttackData.BasicAttackTagData.BasicAttackImpactEffectTag, SpawnTransform);
+	const UNetherCrownCrowdControlComponent* CCComponent{ HitEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCComponent)))
+	{
+		return;
+	}
+
+	const ENetherCrownCrowdControlType CCType{ CCComponent->GetCrowdControlType() };
+	const FNetherCrownBasicAttackTagData& BasicAttackTagData{ BasicAttackData.BasicAttackTagData };
+	const FGameplayTag HitImpactEffectTag{ CCType == ENetherCrownCrowdControlType::FROZEN ? BasicAttackTagData.FrozenBasicAttackImpactEffectTag : BasicAttackTagData.BasicAttackImpactEffectTag };
+
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedCharacter, HitImpactEffectTag, SpawnTransform);
 }
 
-void UNetherCrownBasicAttackComponent::ApplyHitCosmeticAndDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation)
+void UNetherCrownBasicAttackComponent::ApplyHitCosmeticAndDamageToHitEnemy(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
@@ -779,7 +788,7 @@ void UNetherCrownBasicAttackComponent::ApplyHitCosmeticAndDamageToHitEnemy(AActo
 	Client_StartBasicAttackHitStop();
 	Client_StartBasicAttackPushIn();
 
-	Multicast_PlayHitImpactEffect(HitLocation);
+	Multicast_PlayHitImpactEffect(HitLocation, HitEnemy);
 
 	ApplyDamageInternal(HitEnemy);
 }

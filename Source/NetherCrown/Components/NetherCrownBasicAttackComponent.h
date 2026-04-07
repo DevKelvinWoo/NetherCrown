@@ -7,11 +7,14 @@
 #include "NetherCrown/Data/NetherCrownBasicAttackData.h"
 #include "NetherCrownBasicAttackComponent.generated.h"
 
-class ANetherCrownCharacter;
 class UAnimMontage;
 
 class ANetherCrownWeapon;
+class ANetherCrownEnemy;
+class ANetherCrownCharacter;
 class UNetherCrownCharacterAnimInstance;
+
+enum class ENetherCrownCrowdControlType : uint8;
 
 UENUM()
 enum class ENetherCrownBasicAttackState : uint8
@@ -44,7 +47,7 @@ public:
 
 	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
 
-	void ApplyHitCosmeticAndDamageToHitEnemy(AActor* HitEnemy, const FVector& HitLocation);
+	void ApplyHitCosmeticAndDamageToHitEnemy(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation);
 
 protected:
 	virtual void BeginPlay() override;
@@ -85,7 +88,7 @@ private:
 	void SetupLastComboAnimRateTimer();
 	void SetupLastComboAttackAuraTimer();
 
-	void ApplyLastComboAttackKnockBack(AActor* HitEnemy);
+	void ApplyLastComboAttackKnockBack(const ANetherCrownEnemy* HitEnemy);
 
 	void SetLastComboAttackWeaponAura(const bool bIsActivate);
 	void ActiveLastComboAttackWeaponAura();
@@ -101,7 +104,7 @@ private:
 	void Multicast_PlayAndJumpToComboMontageSection(const FName& SectionName, const bool bIsLastCombo = false);
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayHitImpactEffect(const FVector& HitLocation);
+	void Multicast_PlayHitImpactEffect(const FVector& HitLocation, const ANetherCrownEnemy* HitEnemy);
 
 	UFUNCTION(Server, Reliable)
 	void Server_RequestBasicAttack();
@@ -114,7 +117,7 @@ private:
 	void HandleOnEquipWeapon(const bool bEquipWeapon);
 
 	void PlayHitImpactCameraShake() const;
-	void SpawnHitImpactEffect(const FVector& HitLocation) const;
+	void SpawnHitImpactEffect(const FVector& HitLocation, const ANetherCrownEnemy* HitEnemy) const;
 
 	void SetupBasicAttackTimers(const int32 ComboCount);
 	void ServerHandleComboWindowOpen();

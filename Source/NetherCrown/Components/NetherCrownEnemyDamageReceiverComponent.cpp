@@ -136,7 +136,12 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead()
 	CachedOwnerEnemy->SetIsDead(true);
 
 	Multicast_PlayDeathSound();
-	Multicast_StartDeathDissolve();
+
+	const UNetherCrownCrowdControlComponent* CCComponent{ CachedOwnerEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCComponent)))
+	{
+		return;
+	}
 
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
@@ -144,8 +149,20 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead()
 		return;
 	}
 
-	const float DeathTimingOffset{ EnemyDeathCosmeticData.DestroyTimeOffset };
-	World->GetTimerManager().SetTimer(HandleDestroyTimerHandle, this, &ThisClass::HandleDeathTimer, DeathTimingOffset, false);
+	const bool bIsFrozen{ CCComponent->GetCrowdControlType() == ENetherCrownCrowdControlType::FROZEN };
+	if (bIsFrozen)
+	{
+		Multicast_SpawnDeathEffectAndSound();
+		CachedOwnerEnemy->Destroy();
+	}
+	else
+	{
+		Multicast_StartDeathDissolve();
+
+		const float DeathTimingOffset{ EnemyDeathCosmeticData.DestroyTimeOffset };
+		World->GetTimerManager().ClearTimer(HandleDestroyTimerHandle);
+		World->GetTimerManager().SetTimer(HandleDestroyTimerHandle, this, &ThisClass::HandleDeathTimer, DeathTimingOffset, false);
+	}
 }
 
 int32 UNetherCrownEnemyDamageReceiverComponent::GetWeaponPenetration(const bool bIsPhysicalDamage, const AActor* DamageCauser) const
@@ -297,6 +314,34 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_StartDeathDissolve_Impl
 	DeathMaterialParamTimeline.PlayFromStart();
 }
 
+void UNetherCrownEnemyDamageReceiverComponent::Multicast_SpawnDeathEffectAndSound_Implementation()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	FTransform SpawnTransform{};
+	SpawnTransform.SetLocation(CachedOwnerEnemy->GetActorLocation());
+	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
+	SpawnTransform.SetScale3D(FVector(1.0f));
+
+	UNetherCrownCrowdControlComponent* CCComponent{ CachedOwnerEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCComponent)))
+	{
+		return;
+	}
+
+	const ENetherCrownCrowdControlType CCType{ CCComponent->GetCrowdControlType() };
+	if (CCType == ENetherCrownCrowdControlType::FROZEN)
+	{
+		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.FrozenEnemyDeathEffectTag, SpawnTransform);
+		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.FrozenEnemyDeathEffectBackGround, SpawnTransform);
+
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.FrozenEnemyDeathSoundTag);
+	}
+}
+
 void UNetherCrownEnemyDamageReceiverComponent::ApplyDeadMaterialParam(float FloatCurveValue)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || GetNetMode() == NM_DedicatedServer)
@@ -389,6 +434,20 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageSound_Imp
 		return;
 	}
 
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageCosmeticData.DamageSoundTagData.EnemyHurtGruntSoundTag);
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageCosmeticData.DamageSoundTagData.EnemyHurtImpactSoundTag);
+	const UNetherCrownCrowdControlComponent* CCComponent{ CachedOwnerEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCComponent)))
+	{
+		return;
+	}
+
+	const bool bIsFrozen{ CCComponent->GetCrowdControlType() == ENetherCrownCrowdControlType::FROZEN };
+	const FNetherCrownEnemyDamageSoundTagData& DamageCosmeticSoundTagData = EnemyDamageCosmeticData.DamageSoundTagData;
+	const FGameplayTag HurtImpactSoundTag = bIsFrozen ? DamageCosmeticSoundTagData.FrozenEnemyHurtImpactSoundTag : DamageCosmeticSoundTagData.EnemyHurtImpactSoundTag;
+
+	if (!bIsFrozen)
+	{
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageCosmeticData.DamageSoundTagData.EnemyHurtGruntSoundTag);
+	}
+
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, HurtImpactSoundTag);
 }

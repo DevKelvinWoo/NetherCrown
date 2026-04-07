@@ -21,6 +21,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag BasicAttackImpactEffectTag{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag FrozenBasicAttackImpactEffectTag{};
 };
 
 USTRUCT()

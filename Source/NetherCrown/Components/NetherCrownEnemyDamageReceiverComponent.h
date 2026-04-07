@@ -55,6 +55,9 @@ private:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_StartDeathDissolve();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnDeathEffectAndSound();
+
 	UFUNCTION()
 	void ApplyDeadMaterialParam(float FloatCurveValue);
 

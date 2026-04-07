@@ -20,6 +20,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag EnemyHurtImpactSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag FrozenEnemyHurtImpactSoundTag{};
 };
 
 USTRUCT()
@@ -30,6 +33,15 @@ struct FNetherCrownEnemyDeathCosmeticData
 public:
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag EnemyDeathSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag FrozenEnemyDeathEffectTag{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag FrozenEnemyDeathEffectBackGround{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag FrozenEnemyDeathSoundTag{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Timing")
 	float DestroyTimeOffset{};

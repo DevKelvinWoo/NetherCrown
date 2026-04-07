@@ -14,6 +14,7 @@
 #include "NiagaraSystem.h"
 #include "NiagaraComponent.h"
 #include "Components/SphereComponent.h"
+#include "NetherCrown/Enemy/NetherCrownEnemy.h"
 
 ANetherCrownWeapon::ANetherCrownWeapon()
 {
@@ -219,7 +220,7 @@ void ANetherCrownWeapon::SetEquipComponentSetting(AActor* OtherActor, const bool
 	bCanEquip ? EquipComponent->SetEquipableWeapon(this) : EquipComponent->SetEquipableWeapon(nullptr);
 }
 
-void ANetherCrownWeapon::HandleOnHitEnemy(AActor* HitEnemy, const FVector& HitLocation) const
+void ANetherCrownWeapon::HandleOnHitEnemy(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation) const
 {
 	if (!IsValid(HitEnemy))
 	{

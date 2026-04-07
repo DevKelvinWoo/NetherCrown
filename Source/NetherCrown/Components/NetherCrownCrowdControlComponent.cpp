@@ -83,12 +83,11 @@ void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implement
 		return;
 	}
 
-	const bool bWasActive{ IsCrowdControlActive(InCrowdControlType) };
 	SetCrowdControlActive(InCrowdControlType, true);
 	RefreshCrowdControlType();
 	RefreshMovementAndAnimationSettings();
 
-	if (bWasActive || CrowdControlType != InCrowdControlType || CachedOwner->GetNetMode() == NM_DedicatedServer)
+	if (CrowdControlType != InCrowdControlType || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
