@@ -27,7 +27,7 @@ void UNetherCrownShieldMastery::ExecuteSkillGameplay()
 {
 	Super::ExecuteSkillGameplay();
 
-	AddPlayerShieldAndSetShieldEndTimer(ShieldValue);
+	AddPlayerShieldAndSetShieldEndTimer(ShieldMasteryData.ShieldValue);
 }
 
 void UNetherCrownShieldMastery::ActiveShieldEffectAndActor()
@@ -50,18 +50,18 @@ void UNetherCrownShieldMastery::ActiveShieldEffectAndActor()
 		return;
 	}
 
-	HandledShieldMasteryNiagaraComponent = FNetherCrownUtilManager::AttachNiagaraSystemByGameplayTag(World, NetherCrownTags::Effect_ShieldMastery, SkeletalMeshComponent, ShieldEffectSocketName);
+	HandledShieldMasteryNiagaraComponent = FNetherCrownUtilManager::AttachNiagaraSystemByGameplayTag(World, NetherCrownTags::Effect_ShieldMastery, SkeletalMeshComponent, ShieldMasteryData.ShieldEffectSocketName);
 
 	FTimerHandle ShieldMasteryTimerHandle{};
-	World->GetTimerManager().SetTimer(ShieldMasteryTimerHandle, this, &ThisClass::DeactivateShieldEffectAndActor, ShieldDuration, false);
+	World->GetTimerManager().SetTimer(ShieldMasteryTimerHandle, this, &ThisClass::DeactivateShieldEffectAndActor, ShieldMasteryData.ShieldDuration, false);
 
-	HandledShieldMasteryActor = World->SpawnActor<ANetherCrownShield>(ShieldActorClass);
+	HandledShieldMasteryActor = World->SpawnActor<ANetherCrownShield>(ShieldMasteryData.ShieldActorClass);
 	if (!ensureAlways(IsValid(HandledShieldMasteryActor)))
 	{
 		return;
 	}
 
-	HandledShieldMasteryActor->AttachToActor(SkillOwnerCharacter, FAttachmentTransformRules::SnapToTargetNotIncludingScale, ShieldEffectSocketName);
+	HandledShieldMasteryActor->AttachToActor(SkillOwnerCharacter, FAttachmentTransformRules::SnapToTargetNotIncludingScale, ShieldMasteryData.ShieldEffectSocketName);
 }
 
 void UNetherCrownShieldMastery::DeactivateShieldEffectAndActor()
@@ -128,7 +128,7 @@ void UNetherCrownShieldMastery::AddPlayerShieldAndSetShieldEndTimer(int32 InShie
 	}
 
 	FTimerHandle ShieldMasteryEndTimerHandle{};
-	World->GetTimerManager().SetTimer(ShieldMasteryEndTimerHandle, this, &ThisClass::ClearPlayerShield, ShieldDuration, false);
+	World->GetTimerManager().SetTimer(ShieldMasteryEndTimerHandle, this, &ThisClass::ClearPlayerShield, ShieldMasteryData.ShieldDuration, false);
 }
 
 void UNetherCrownShieldMastery::ClearPlayerShield() const
