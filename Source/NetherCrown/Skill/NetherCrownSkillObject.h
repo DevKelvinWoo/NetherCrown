@@ -223,7 +223,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	FGameplayTag SkillTag{};
 
-	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillData")
+	UPROPERTY(Replicated)
 	bool bIsCoolDown{ false };
 
 	UPROPERTY()
