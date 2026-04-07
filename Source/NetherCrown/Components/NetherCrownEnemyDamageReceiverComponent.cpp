@@ -301,7 +301,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayDeathSound_Implemen
 		return;
 	}
 
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDeathCosmeticData.EnemyDeathSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDeathCosmeticData.EnemyDeathTagData.EnemyDeathSoundTag);
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::Multicast_StartDeathDissolve_Implementation()
@@ -335,10 +335,10 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_SpawnDeathEffectAndSoun
 	const ENetherCrownCrowdControlType CCType{ CCComponent->GetCrowdControlType() };
 	if (CCType == ENetherCrownCrowdControlType::FROZEN)
 	{
-		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.FrozenEnemyDeathEffectTag, SpawnTransform);
-		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.FrozenEnemyDeathEffectBackGround, SpawnTransform);
+		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.EnemyDeathTagData.FrozenEnemyDeathEffectTag, SpawnTransform);
+		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.EnemyDeathTagData.FrozenEnemyDeathEffectBackGround, SpawnTransform);
 
-		FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.FrozenEnemyDeathSoundTag);
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.EnemyDeathTagData.FrozenEnemyDeathSoundTag);
 	}
 }
 
@@ -441,12 +441,12 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageSound_Imp
 	}
 
 	const bool bIsFrozen{ CCComponent->GetCrowdControlType() == ENetherCrownCrowdControlType::FROZEN };
-	const FNetherCrownEnemyDamageSoundTagData& DamageCosmeticSoundTagData = EnemyDamageCosmeticData.DamageSoundTagData;
-	const FGameplayTag HurtImpactSoundTag = bIsFrozen ? DamageCosmeticSoundTagData.FrozenEnemyHurtImpactSoundTag : DamageCosmeticSoundTagData.EnemyHurtImpactSoundTag;
+	const FNetherCrownEnemyDamageTagData& EnemyDamageTagData{ EnemyDamageCosmeticData.EnemyDamageTagData };
+	const FGameplayTag HurtImpactSoundTag{ bIsFrozen ? EnemyDamageTagData.FrozenEnemyHurtImpactSoundTag : EnemyDamageTagData.EnemyHurtImpactSoundTag };
 
 	if (!bIsFrozen)
 	{
-		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageCosmeticData.DamageSoundTagData.EnemyHurtGruntSoundTag);
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, EnemyDamageTagData.EnemyHurtGruntSoundTag);
 	}
 
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, HurtImpactSoundTag);

@@ -25,6 +25,16 @@ enum class ENetherCrownSkillKeyEnum : uint8
 };
 
 USTRUCT()
+struct FNetherCrownSkillTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag SkillHitImpactEffectTag{};
+};
+
+USTRUCT()
 struct FNetherCrownSkillData
 {
 	GENERATED_BODY()
@@ -54,8 +64,8 @@ public:
 	UPROPERTY(EditDefaultsOnly)
 	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
 
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag SkillHitImpactEffectTag{};
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FNetherCrownSkillTagData SkillTagData{};
 
 	UPROPERTY(EditDefaultsOnly)
 	float SkillHitTime{ -1.f };

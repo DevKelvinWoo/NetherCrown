@@ -35,6 +35,16 @@ public:
 	float ThrustTraceRadius{ 35.0f };
 };
 
+USTRUCT(BlueprintType)
+struct FNetherCrownWeaponTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere)
+	FGameplayTag WeaponSwingSoundTag{};
+};
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownWeaponData : public UDataAsset
 {
@@ -45,7 +55,8 @@ public:
 	int32 GetPhysicalPenetration() const { return PhysicalPenetration; }
 	int32 GetMagicPenetration() const { return MagicPenetration; }
 
-	const FGameplayTag& GetWeaponSwingSoundTag() const { return WeaponSwingSoundTag; }
+	const FGameplayTag& GetWeaponSwingSoundTag() const { return WeaponTagData.WeaponSwingSoundTag; }
+	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 	const FNetherCrownWeaponTraceData& GetWeaponTraceData() const { return WeaponTraceData; }
 	const TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>>& GetWeaponSkillAuraMap() const { return WeaponSkillAuraMap; }
 	const TSoftObjectPtr<UNiagaraSystem>& GetWeaponLastComboAttackAura() { return WeaponLastComboAttackAuraSoft; }
@@ -72,8 +83,8 @@ private:
 	UPROPERTY(EditAnywhere)
 	int32 WeaponCoolDownReduction{};
 
-	UPROPERTY(EditAnywhere, Category = "Sound")
-	FGameplayTag WeaponSwingSoundTag{};
+	UPROPERTY(EditAnywhere, Category = "TagData")
+	FNetherCrownWeaponTagData WeaponTagData{};
 
 	UPROPERTY(EditAnywhere, Category = "TraceData")
 	FNetherCrownWeaponTraceData WeaponTraceData{};

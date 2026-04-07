@@ -10,7 +10,7 @@
 class UAnimMontage;
 
 USTRUCT()
-struct FNetherCrownEnemyDamageSoundTagData
+struct FNetherCrownEnemyDamageTagData
 {
 	GENERATED_BODY()
 
@@ -26,7 +26,7 @@ public:
 };
 
 USTRUCT()
-struct FNetherCrownEnemyDeathCosmeticData
+struct FNetherCrownEnemyDeathTagData
 {
 	GENERATED_BODY()
 
@@ -42,6 +42,16 @@ public:
 
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag FrozenEnemyDeathSoundTag{};
+};
+
+USTRUCT()
+struct FNetherCrownEnemyDeathCosmeticData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FNetherCrownEnemyDeathTagData EnemyDeathTagData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Timing")
 	float DestroyTimeOffset{};
@@ -69,7 +79,7 @@ public:
 	TSoftObjectPtr<UAnimMontage> TakeCriticalDamageAnimMontageSoft{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
-	FNetherCrownEnemyDamageSoundTagData DamageSoundTagData{};
+	FNetherCrownEnemyDamageTagData EnemyDamageTagData{};
 };
 
 UCLASS()

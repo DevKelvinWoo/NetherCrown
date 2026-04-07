@@ -74,7 +74,7 @@ const TSoftObjectPtr<UAnimMontage>& UNetherCrownSkillObject::GetSkillAnimMontage
 
 const FGameplayTag& UNetherCrownSkillObject::GetSkillHitImpactEffectTag() const
 {
-	return SkillData.SkillHitImpactEffectTag;
+	return SkillData.SkillTagData.SkillHitImpactEffectTag;
 }
 
 float UNetherCrownSkillObject::GetSkillStartTimeOffset() const
