@@ -38,10 +38,14 @@ private:
 
 	void BindTimelineFunctions();
 
-	void StartDashAttackCameraPosBeginTimeline();
+	UFUNCTION(Client, Reliable)
+	void Client_StartDashAttackCameraPosBeginTimeline();
 
 	UFUNCTION(Client, Reliable)
 	void Client_StartDashAttackCameraPosEndTimeline();
+
+	UFUNCTION(Client, UnReliable)
+	void Client_ApplyPostProcess();
 
 	UFUNCTION()
 	void ApplyDashAttackCameraPos(const FVector& VectorCurveValue);

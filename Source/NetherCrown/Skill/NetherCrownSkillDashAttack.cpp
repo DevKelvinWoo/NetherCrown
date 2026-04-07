@@ -33,21 +33,6 @@ UNetherCrownSkillDashAttack::UNetherCrownSkillDashAttack()
 void UNetherCrownSkillDashAttack::PlaySkillCosmetics()
 {
 	Super::PlaySkillCosmetics();
-
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	if (SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	ApplyPostProcess(ENetherCrownPPType::Charging, 2.5f, false);
-
-	StartDashAttackCameraPosBeginTimeline();
 }
 
 void UNetherCrownSkillDashAttack::ExecuteSkillGameplay()
@@ -256,14 +241,8 @@ void UNetherCrownSkillDashAttack::BindTimelineFunctions()
 	}
 }
 
-void UNetherCrownSkillDashAttack::StartDashAttackCameraPosBeginTimeline()
+void UNetherCrownSkillDashAttack::Client_StartDashAttackCameraPosBeginTimeline_Implementation()
 {
-	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
 	DashAttackCameraPosBeginTimeline.PlayFromStart();
 }
 
@@ -276,6 +255,11 @@ void UNetherCrownSkillDashAttack::Client_StartDashAttackCameraPosEndTimeline_Imp
 	}
 
 	DashAttackCameraPosEndTimeline.PlayFromStart();
+}
+
+void UNetherCrownSkillDashAttack::Client_ApplyPostProcess_Implementation()
+{
+	ApplyPostProcess(ENetherCrownPPType::Charging, 2.5f, false);
 }
 
 void UNetherCrownSkillDashAttack::ApplyDashAttackCameraPos(const FVector& VectorCurveValue)
@@ -667,6 +651,9 @@ void UNetherCrownSkillDashAttack::StartDashAttackTimer()
 	{
 		return;
 	}
+
+	Client_ApplyPostProcess();
+	Client_StartDashAttackCameraPosBeginTimeline();
 
 	World->GetTimerManager().SetTimer(DashAttackTimerHandle, this, &ThisClass::DashAttackToTargets, DashTimerRate, true, 0.f);
 }
