@@ -3,30 +3,10 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NetherCrownSkillObject.h"
+#include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrownShieldMastery.generated.h"
 
-class ANetherCrownShield;
 class UNiagaraComponent;
-
-USTRUCT()
-struct FNetherCrownShieldMasteryData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
-	int32 ShieldDuration{ 10 };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
-	int32 ShieldValue{ 50 };
-
-	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
-	FName ShieldEffectSocketName{ TEXT("root") };
-
-	UPROPERTY(EditDefaultsOnly, Category = "ShieldActor")
-	TSubclassOf<ANetherCrownShield> ShieldActorClass{};
-};
 
 UCLASS(Blueprintable)
 class NETHERCROWN_API UNetherCrownShieldMastery : public UNetherCrownSkillObject
@@ -37,10 +17,13 @@ public:
 	UNetherCrownShieldMastery();
 
 protected:
+	virtual void InitSkillObject() override;
 	virtual void PlaySkillCosmetics() override;
 	virtual void ExecuteSkillGameplay() override;
 
 private:
+	void CacheShieldMasteryData();
+
 	void ActiveShieldEffectAndActor();
 	void DeactivateShieldEffectAndActor();
 
@@ -49,7 +32,7 @@ private:
 	void AddPlayerShieldAndSetShieldEndTimer(int32 InShieldValue) const;
 	void ClearPlayerShield() const;
 
-	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
+	UPROPERTY(Transient)
 	FNetherCrownShieldMasteryData ShieldMasteryData{};
 
 	UPROPERTY(Transient)

@@ -13,6 +13,7 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 #define DEBUG_SPHERE 0
 
@@ -24,6 +25,8 @@ UNetherCrownSkillSkyFallSlash::UNetherCrownSkillSkyFallSlash()
 void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 {
 	Super::InitSkillObject();
+
+	CacheSkyFallSlashData();
 
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
@@ -40,6 +43,18 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 
 		BindTimelineFunctions();
 	}
+}
+
+void UNetherCrownSkillSkyFallSlash::CacheSkyFallSlashData()
+{
+	const UNetherCrownSkillDataAsset* SkillDataAsset{ FNetherCrownUtilManager::GetSkillDataAssetByGameplayTag(NetherCrownTags::Skill_SkyFallSlash) };
+	const UNetherCrownSkyFallSlashDataAsset* SkyFallSlashDataAsset{ Cast<UNetherCrownSkyFallSlashDataAsset>(SkillDataAsset) };
+	if (!ensureAlways(IsValid(SkyFallSlashDataAsset)))
+	{
+		return;
+	}
+
+	SkyFallSlashData = SkyFallSlashDataAsset->GetSkyFallSlashData();
 }
 
 void UNetherCrownSkillSkyFallSlash::ExecuteSkillGameplay()

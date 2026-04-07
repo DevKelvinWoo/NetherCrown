@@ -15,6 +15,25 @@ UNetherCrownShieldMastery::UNetherCrownShieldMastery()
 	SetSkillTag(NetherCrownTags::Skill_ShieldMastery);
 }
 
+void UNetherCrownShieldMastery::InitSkillObject()
+{
+	Super::InitSkillObject();
+
+	CacheShieldMasteryData();
+}
+
+void UNetherCrownShieldMastery::CacheShieldMasteryData()
+{
+	const UNetherCrownSkillDataAsset* SkillDataAsset{ FNetherCrownUtilManager::GetSkillDataAssetByGameplayTag(NetherCrownTags::Skill_ShieldMastery) };
+	const UNetherCrownShieldMasteryDataAsset* ShieldMasteryDataAsset{ Cast<UNetherCrownShieldMasteryDataAsset>(SkillDataAsset) };
+	if (!ensureAlways(IsValid(ShieldMasteryDataAsset)))
+	{
+		return;
+	}
+
+	ShieldMasteryData = ShieldMasteryDataAsset->GetShieldMasteryData();
+}
+
 void UNetherCrownShieldMastery::PlaySkillCosmetics()
 {
 	Super::PlaySkillCosmetics();

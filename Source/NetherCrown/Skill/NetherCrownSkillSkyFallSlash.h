@@ -3,44 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NetherCrownSkillObject.h"
 #include "Components/TimelineComponent.h"
+#include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrownSkillSkyFallSlash.generated.h"
 
 class UCurveFloat;
 
 class ANetherCrownEnemy;
-
-USTRUCT()
-struct FNetherCrownSkyFallSlashData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
-	TSoftObjectPtr<UCurveFloat> SkillCameraCurveFloatSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
-	TSoftObjectPtr<UCurveFloat> SkillArmMaterialCurveFloatSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
-	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	float SkillDetectingSphereRadius{ 225.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	double SkillDetectingThresholdDegrees{ 45.0 };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	float SkillKnockBackDistance{ 2400.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	float KnockBackDuration{ 1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "MaterialParam")
-	FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
-};
 
 UCLASS(Blueprintable)
 class NETHERCROWN_API UNetherCrownSkillSkyFallSlash : public UNetherCrownSkillObject
@@ -58,6 +27,8 @@ protected:
 	virtual void TickFloatTimeline(float DeltaTime) override;
 
 private:
+	void CacheSkyFallSlashData();
+
 	void StartSetSpringArmZOffsetTimeline();
 	void StartSetArmMaterialParamTimeline();
 	void BindTimelineFunctions();
@@ -80,7 +51,7 @@ private:
 
 	void CreateArmMaterialInstanceDynamic();
 
-	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
+	UPROPERTY(Transient)
 	FNetherCrownSkyFallSlashData SkyFallSlashData{};
 
 	UPROPERTY(Transient)
