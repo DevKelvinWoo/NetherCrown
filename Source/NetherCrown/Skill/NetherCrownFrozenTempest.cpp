@@ -9,9 +9,9 @@
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 UNetherCrownFrozenTempest::UNetherCrownFrozenTempest()
 {
@@ -22,6 +22,8 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 {
 	Super::InitSkillObject();
 
+	CacheFrozenTempestData();
+
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
 	{
@@ -30,13 +32,25 @@ void UNetherCrownFrozenTempest::InitSkillObject()
 
 	if (SkillOwnerCharacter->GetNetMode() != NM_DedicatedServer)
 	{
-		CachedSkillCameraZoomCurveVector = SkillCameraZoomCurveVectorSoft.LoadSynchronous();
-		CachedFrozenTempestTargetOverlayMaterial = FrozenTempestTargetOverlayMaterialSoft.LoadSynchronous();
-		CachedCharacterOverlayMaterialStartCurveFloat = CharacterOverlayMaterialStartCurveFloatSoft.LoadSynchronous();
-		CachedCharacterOverlayMaterialEndCurveFloat = CharacterOverlayMaterialEndCurveFloatSoft.LoadSynchronous();
+		CachedSkillCameraZoomCurveVector = FrozenTempestData.SkillCameraZoomCurveVectorSoft.LoadSynchronous();
+		CachedFrozenTempestTargetOverlayMaterial = FrozenTempestData.FrozenTempestTargetOverlayMaterialSoft.LoadSynchronous();
+		CachedCharacterOverlayMaterialStartCurveFloat = FrozenTempestData.CharacterOverlayMaterialStartCurveFloatSoft.LoadSynchronous();
+		CachedCharacterOverlayMaterialEndCurveFloat = FrozenTempestData.CharacterOverlayMaterialEndCurveFloatSoft.LoadSynchronous();
 
 		BindTimelineFunctions();
 	}
+}
+
+void UNetherCrownFrozenTempest::CacheFrozenTempestData()
+{
+	const UNetherCrownSkillDataAsset* SkillDataAsset{ FNetherCrownUtilManager::GetSkillDataAssetByGameplayTag(NetherCrownTags::Skill_FrozenTempest) };
+	const UNetherCrownFrozenTempestDataAsset* FrozenTempestDataAsset{ Cast<UNetherCrownFrozenTempestDataAsset>(SkillDataAsset) };
+	if (!ensureAlways(IsValid(FrozenTempestDataAsset)))
+	{
+		return;
+	}
+
+	FrozenTempestData = FrozenTempestDataAsset->GetFrozenTempestData();
 }
 
 void UNetherCrownFrozenTempest::ExecuteSkillGameplay()
@@ -63,7 +77,7 @@ void UNetherCrownFrozenTempest::PlaySkillCosmetics()
 		return;
 	}
 
-	ApplyPostProcess(ENetherCrownPPType::Charging, 2.5f);
+	ApplyPostProcess(ENetherCrownPPType::Charging, FrozenTempestData.ChargingPostProcessDuration);
 
 	StartSetSkillCameraZoomTimeline();
 	StartSetCharacterOverlayStartMaterialTimeline();
@@ -159,7 +173,7 @@ void UNetherCrownFrozenTempest::Multicast_StartFrozenTempestHitCosmetics_Impleme
 			return;
 		}
 
-		CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
+		CameraManager->StartCameraShake(FrozenTempestData.SkillCameraShakeBaseClass, 1.f);
 
 		UNetherCrownControlPPComponent* ControlPPComponent{ SkillOwnerCharacter->GetControlPPComponent() };
 		if (!ensureAlways(IsValid(ControlPPComponent)))
@@ -167,7 +181,7 @@ void UNetherCrownFrozenTempest::Multicast_StartFrozenTempestHitCosmetics_Impleme
 			return;
 		}
 
-		ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::Frozen, FrozenDuration);
+		ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::Frozen, FrozenTempestData.FrozenDuration);
 	}
 }
 
@@ -239,10 +253,7 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(
 
 	SkillOwnerMeshComponent->SetOverlayMaterial(CachedDynamicFrozenTempestMaterial);
 
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
-
-	CachedDynamicFrozenTempestMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, FloatCurveValue);
+	CachedDynamicFrozenTempestMaterial->SetScalarParameterValue(FrozenTempestData.FrozenTempestTargetMaterialParam, FloatCurveValue);
 }
 
 void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
@@ -268,10 +279,7 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(fl
 
 	SkillOwnerMeshComponent->SetOverlayMaterial(DynamicOverlayMaterial);
 
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
-
-	DynamicOverlayMaterial->SetScalarParameterValue(DefaultSettings->FrozenTempestTargetMaterialParam, FloatCurveValue);
+	DynamicOverlayMaterial->SetScalarParameterValue(FrozenTempestData.FrozenTempestTargetMaterialParam, FloatCurveValue);
 }
 
 void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
@@ -287,7 +295,7 @@ void UNetherCrownFrozenTempest::HandleOnHitFrozenTempestSkill()
 
 	for (ANetherCrownEnemy* DetectedEnemy : GetSkillDetectedTargets())
 	{
-		ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::FROZEN, FrozenDuration);
+		ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::FROZEN, FrozenTempestData.FrozenDuration);
 	}
 }
 
@@ -311,7 +319,7 @@ void UNetherCrownFrozenTempest::PlayChargeCameraShake()
 		return;
 	}
 
-	PlayerCameraManager->StartCameraShake(SkillChargeCameraShakeBaseClass);
+	PlayerCameraManager->StartCameraShake(FrozenTempestData.SkillChargeCameraShakeBaseClass);
 }
 
 const TArray<ANetherCrownEnemy*> UNetherCrownFrozenTempest::GetSkillDetectedTargets() const
@@ -327,10 +335,10 @@ const TArray<ANetherCrownEnemy*> UNetherCrownFrozenTempest::GetSkillDetectedTarg
 	TArray<AActor*> OverlappedActors{};
 	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECC_Enemy) };
 	const bool bDetectEnemy{ UKismetSystemLibrary::SphereOverlapActors(this, SkillOwnerCharacterLocation,
-		SkillDetectingSphereRadius, ObjectTypes, ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors) };
+		FrozenTempestData.SkillDetectingSphereRadius, ObjectTypes, ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors) };
 
 #if 0
-	UKismetSystemLibrary::DrawDebugSphere(this, SkillOwnerCharacterLocation, SkillDetectingSphereRadius, 16, FColor::Red, 10.f);
+	UKismetSystemLibrary::DrawDebugSphere(this, SkillOwnerCharacterLocation, FrozenTempestData.SkillDetectingSphereRadius, 16, FColor::Red, 10.f);
 #endif
 
 	if (!bDetectEnemy)

@@ -22,6 +22,7 @@
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 #define DEBUG_SPHERE 0
 
@@ -46,8 +47,21 @@ void UNetherCrownSkillDashAttack::InitSkillObject()
 {
 	Super::InitSkillObject();
 
+	CacheDashAttackData();
 	CacheDashAttackCosmeticData();
 	BindTimelineFunctions();
+}
+
+void UNetherCrownSkillDashAttack::CacheDashAttackData()
+{
+	const UNetherCrownSkillDataAsset* SkillDataAsset{ FNetherCrownUtilManager::GetSkillDataAssetByGameplayTag(NetherCrownTags::Skill_DashAttack) };
+	const UNetherCrownDashAttackDataAsset* DashAttackDataAsset{ Cast<UNetherCrownDashAttackDataAsset>(SkillDataAsset) };
+	if (!ensureAlways(IsValid(DashAttackDataAsset)))
+	{
+		return;
+	}
+
+	DashAttackData = DashAttackDataAsset->GetDashAttackData();
 }
 
 void UNetherCrownSkillDashAttack::TickFloatTimeline(float DeltaTime)
@@ -74,9 +88,9 @@ TArray<AActor*> UNetherCrownSkillDashAttack::DetectDashAttackTargets() const
 	}
 
 	TArray<AActor*> OverlappedActors{};
-	const FVector DetectSpherePos{ SkillOwnerCharacter->GetActorLocation() + SkillOwnerCharacter->GetActorForwardVector() * SkillDetectSphereOffset };
+	const FVector DetectSpherePos{ SkillOwnerCharacter->GetActorLocation() + SkillOwnerCharacter->GetActorForwardVector() * DashAttackData.SkillDetectSphereOffset };
 	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECC_Enemy) };
-	UKismetSystemLibrary::SphereOverlapActors(this, DetectSpherePos, SkillDetectSphereOffset, ObjectTypes, ANetherCrownEnemy::StaticClass(),
+	UKismetSystemLibrary::SphereOverlapActors(this, DetectSpherePos, DashAttackData.SkillDetectSphereOffset, ObjectTypes, ANetherCrownEnemy::StaticClass(),
 		TArray<AActor*>(), OverlappedActors);
 
 	OverlappedActors.Sort([&SkillOwnerCharacter](const AActor& A, const AActor& B)
@@ -85,12 +99,12 @@ TArray<AActor*> UNetherCrownSkillDashAttack::DetectDashAttackTargets() const
 	});
 
 #if DEBUG_SPHERE
-	UKismetSystemLibrary::DrawDebugSphere(this, DetectSpherePos, SkillDetectSphereOffset, 16, FColor::Red, 10.f);
+	UKismetSystemLibrary::DrawDebugSphere(this, DetectSpherePos, DashAttackData.SkillDetectSphereOffset, 16, FColor::Red, 10.f);
 #endif
 
-	if (OverlappedActors.Num() > MaxTargetNum)
+	if (OverlappedActors.Num() > DashAttackData.MaxTargetNum)
 	{
-		OverlappedActors.RemoveAt(MaxTargetNum, OverlappedActors.Num() - MaxTargetNum);
+		OverlappedActors.RemoveAt(DashAttackData.MaxTargetNum, OverlappedActors.Num() - DashAttackData.MaxTargetNum);
 	}
 
 	return OverlappedActors;
@@ -136,7 +150,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 		return;
 	}
 
-	World->GetTimerManager().SetTimer(DashAttackHitTimerHandle, this, &ThisClass::HitDashAttack, DashDuration, false, 0.f);
+	World->GetTimerManager().SetTimer(DashAttackHitTimerHandle, this, &ThisClass::HitDashAttack, DashAttackData.DashDuration, false, 0.f);
 
 	const FVector CurrentTargetLocation{ CurrentTargetActor->GetActorLocation() };
 	const FVector SkillOwnerLocation{ SkillOwnerCharacter->GetActorLocation() };
@@ -152,7 +166,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 		CurrentTargetCapsuleRadius = CurrentTargetEnemyCapsule->GetScaledCapsuleRadius();
 	}
 
-	const FVector DashOffsetByDirection{ SkillOwnerCharacter->GetActorForwardVector() * (CurrentTargetCapsuleRadius + EndLocationOffset) };
+	const FVector DashOffsetByDirection{ SkillOwnerCharacter->GetActorForwardVector() * (CurrentTargetCapsuleRadius + DashAttackData.EndLocationOffset) };
 	const FVector DashEndLocation{ CurrentTargetLocation + DashOffsetByDirection };
 	Multicast_DashOwnerCharacter(SkillOwnerLocation, DashEndLocation); //@NOTE : Server에서만 호출 시 네트워크 복제 지연으로 끊김 발생
 }
@@ -208,24 +222,24 @@ void UNetherCrownSkillDashAttack::CacheDashAttackCosmeticData()
 		return;
 	}
 
-	if (!GhostTrailNiagaraSystemSoft.IsNull())
+	if (!DashAttackData.GhostTrailNiagaraSystemSoft.IsNull())
 	{
-		GhostTrailNiagaraSystem = GhostTrailNiagaraSystemSoft.LoadSynchronous();
+		GhostTrailNiagaraSystem = DashAttackData.GhostTrailNiagaraSystemSoft.LoadSynchronous();
 	}
 
-	if (!LastDashAttackAnimMontageSoft.IsNull())
+	if (!DashAttackData.LastDashAttackAnimMontageSoft.IsNull())
 	{
-		CachedLastDashAttackAnimMontage = LastDashAttackAnimMontageSoft.LoadSynchronous();
+		CachedLastDashAttackAnimMontage = DashAttackData.LastDashAttackAnimMontageSoft.LoadSynchronous();
 	}
 
-	if (!DashAttackCameraPosBeginCurveSoft.IsNull())
+	if (!DashAttackData.DashAttackCameraPosBeginCurveSoft.IsNull())
 	{
-		CachedDashAttackCameraPosBeginCurve = DashAttackCameraPosBeginCurveSoft.LoadSynchronous();
+		CachedDashAttackCameraPosBeginCurve = DashAttackData.DashAttackCameraPosBeginCurveSoft.LoadSynchronous();
 	}
 
-	if (!DashAttackCameraPosEndCurveSoft.IsNull())
+	if (!DashAttackData.DashAttackCameraPosEndCurveSoft.IsNull())
 	{
-		CachedDashAttackCameraPosEndCurve = DashAttackCameraPosEndCurveSoft.LoadSynchronous();
+		CachedDashAttackCameraPosEndCurve = DashAttackData.DashAttackCameraPosEndCurveSoft.LoadSynchronous();
 	}
 }
 
@@ -259,7 +273,7 @@ void UNetherCrownSkillDashAttack::Client_StartDashAttackCameraPosEndTimeline_Imp
 
 void UNetherCrownSkillDashAttack::Client_ApplyPostProcess_Implementation()
 {
-	ApplyPostProcess(ENetherCrownPPType::Charging, 2.5f, false);
+	ApplyPostProcess(ENetherCrownPPType::Charging, DashAttackData.ChargingPostProcessDuration, false);
 }
 
 void UNetherCrownSkillDashAttack::ApplyDashAttackCameraPos(const FVector& VectorCurveValue)
@@ -306,7 +320,7 @@ void UNetherCrownSkillDashAttack::Client_ActiveSkillHitCameraShake_Implementatio
 		return;
 	}
 
-	CameraManager->StartCameraShake(DashAttackHitCameraShakeClass, 1.f);
+	CameraManager->StartCameraShake(DashAttackData.DashAttackHitCameraShakeClass, 1.f);
 }
 
 void UNetherCrownSkillDashAttack::Client_StartPostProcessBlendEndTimer_Implementation()
@@ -344,7 +358,7 @@ void UNetherCrownSkillDashAttack::Client_SetCameraViewLastDashAttack_Implementat
 	SpawnParameters.ObjectFlags = RF_Transient;
 	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
-	const FVector LastDashAttackCameraLocation{ SkillOwnerCharacter->GetActorLocation() + (SkillOwnerCharacter->GetActorForwardVector() * LastDashAttackCameraDistance) };
+	const FVector LastDashAttackCameraLocation{ SkillOwnerCharacter->GetActorLocation() + (SkillOwnerCharacter->GetActorForwardVector() * DashAttackData.LastDashAttackCameraDistance) };
 	const FRotator LastDashAttackCameraRotation{ UKismetMathLibrary::FindLookAtRotation(LastDashAttackCameraLocation, SkillOwnerCharacter->GetActorLocation()) };
 	ACameraActor* DashAttackFinishCameraActor{ World->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), LastDashAttackCameraLocation, LastDashAttackCameraRotation, SpawnParameters) };
 	if (!ensureAlways(IsValid(DashAttackFinishCameraActor)))
@@ -392,12 +406,12 @@ void UNetherCrownSkillDashAttack::Client_SetCameraViewLastDashAttack_Implementat
 		LastDashAttackCameraComponent->SetAspectRatio(static_cast<float>(ViewportSizeX) / static_cast<float>(ViewportSizeY));
 	}
 
-	constexpr float CameraBlendTime{ 0.5f };
-	constexpr float CameraBlendExp{ 2.f };
+	const float CameraBlendTime{ DashAttackData.LastDashAttackCameraBlendTime };
+	const float CameraBlendExp{ DashAttackData.LastDashAttackCameraBlendExp };
 	SkillOwnerController->SetViewTargetWithBlend(DashAttackFinishCameraActor, CameraBlendTime, VTBlend_Cubic, CameraBlendExp, true);
 
 	FTimerDelegate RestoreCameraTimerDelegate{};
-	RestoreCameraTimerDelegate.BindWeakLambda(this, [DashAttackFinishCameraActor, SkillOwnerController, PreviousViewTarget, World]()
+	RestoreCameraTimerDelegate.BindWeakLambda(this, [CameraBlendTime, CameraBlendExp, DashAttackFinishCameraActor, SkillOwnerController, PreviousViewTarget]()
 	{
 		if (IsValid(SkillOwnerController) && IsValid(PreviousViewTarget))
 		{
@@ -410,7 +424,7 @@ void UNetherCrownSkillDashAttack::Client_SetCameraViewLastDashAttack_Implementat
 		}
 	});
 
-	constexpr float RestoreCameraTimerDuration{ 2.f };
+	const float RestoreCameraTimerDuration{ DashAttackData.LastDashAttackCameraRestoreDuration };
 	World->GetTimerManager().ClearTimer(LastDashAttackCameraTimerHandle);
 	World->GetTimerManager().SetTimer(LastDashAttackCameraTimerHandle, RestoreCameraTimerDelegate, RestoreCameraTimerDuration, false);
 }
@@ -446,9 +460,8 @@ void UNetherCrownSkillDashAttack::SetAttackLastDashAttackTimer()
 		return;
 	}
 
-	constexpr float LastDashAttackTimeOffset{ 1.f };
 	World->GetTimerManager().ClearTimer(LastDashAttackHitStartTimerHandle);
-	World->GetTimerManager().SetTimer(LastDashAttackHitStartTimerHandle, this, &ThisClass::AttackLastDashAttack, LastDashAttackTimeOffset, false);
+	World->GetTimerManager().SetTimer(LastDashAttackHitStartTimerHandle, this, &ThisClass::AttackLastDashAttack, DashAttackData.LastDashAttackTimeOffset, false);
 }
 
 void UNetherCrownSkillDashAttack::AttackLastDashAttack()
@@ -536,7 +549,7 @@ void UNetherCrownSkillDashAttack::ApplyDashAttackDamageAndCrowdControl(ANetherCr
 
 	CrowdControlComponent->Stun();
 
-	ApplyCrowdControlToTarget(TargetEnemy, ENetherCrownCrowdControlType::STUN, StunDuration);
+	ApplyCrowdControlToTarget(TargetEnemy, ENetherCrownCrowdControlType::STUN, DashAttackData.StunDuration);
 	UGameplayStatics::ApplyDamage(TargetEnemy, CalculateSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
 
 	Multicast_SpawnSkillImpactEffect(TargetEnemy);
@@ -610,7 +623,7 @@ void UNetherCrownSkillDashAttack::Multicast_DashOwnerCharacter_Implementation(co
 	MoveToForce->Priority = 5;
 	MoveToForce->StartLocation = StartLoc;
 	MoveToForce->TargetLocation = TargetVec;
-	MoveToForce->Duration = DashDuration;
+	MoveToForce->Duration = DashAttackData.DashDuration;
 	MoveToForce->bRestrictSpeedToExpected = true;
 
 	MoveToForce->FinishVelocityParams.Mode = ERootMotionFinishVelocityMode::SetVelocity;
@@ -655,5 +668,5 @@ void UNetherCrownSkillDashAttack::StartDashAttackTimer()
 	Client_ApplyPostProcess();
 	Client_StartDashAttackCameraPosBeginTimeline();
 
-	World->GetTimerManager().SetTimer(DashAttackTimerHandle, this, &ThisClass::DashAttackToTargets, DashTimerRate, true, 0.f);
+	World->GetTimerManager().SetTimer(DashAttackTimerHandle, this, &ThisClass::DashAttackToTargets, DashAttackData.DashTimerRate, true, 0.f);
 }

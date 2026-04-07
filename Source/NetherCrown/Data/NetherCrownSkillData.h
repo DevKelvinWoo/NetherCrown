@@ -10,6 +10,9 @@
 
 class UCameraShakeBase;
 class UCurveFloat;
+class UCurveVector;
+class UMaterialInterface;
+class UNiagaraSystem;
 
 class ANetherCrownShield;
 
@@ -63,6 +66,101 @@ public:
 	FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
 };
 
+USTRUCT()
+struct FNetherCrownFrozenTempestData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, Category = "CurveData")
+	TSoftObjectPtr<UCurveVector> SkillCameraZoomCurveVectorSoft{};
+
+	UPROPERTY(EditAnywhere, Category = "CurveData")
+	TSoftObjectPtr<UCurveFloat> CharacterOverlayMaterialStartCurveFloatSoft{};
+
+	UPROPERTY(EditAnywhere, Category = "CurveData")
+	TSoftObjectPtr<UCurveFloat> CharacterOverlayMaterialEndCurveFloatSoft{};
+
+	UPROPERTY(EditAnywhere, Category = "CameraShakeClass")
+	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
+
+	UPROPERTY(EditAnywhere, Category = "CameraShakeClass")
+	TSubclassOf<UCameraShakeBase> SkillChargeCameraShakeBaseClass{};
+
+	UPROPERTY(EditAnywhere, Category = "Skill Settings|Range")
+	float SkillDetectingSphereRadius{ 500.f };
+
+	UPROPERTY(EditAnywhere, Category = "Skill Settings|Duration")
+	float FrozenDuration{ 5.f };
+
+	UPROPERTY(EditAnywhere, Category = "Skill Settings|Duration")
+	float ChargingPostProcessDuration{ 2.5f };
+
+	UPROPERTY(EditAnywhere, Category = "MaterialData")
+	TSoftObjectPtr<UMaterialInterface> FrozenTempestTargetOverlayMaterialSoft{};
+
+	UPROPERTY(EditAnywhere, Category = "MaterialParam")
+	FName FrozenTempestTargetMaterialParam{ TEXT("_VfxMix") };
+};
+
+USTRUCT()
+struct FNetherCrownDashAttackData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	float SkillDetectSphereOffset{ 750.f };
+
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	float EndLocationOffset{ 50.f };
+
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	float DashTimerRate{ 0.4f };
+
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	float DashDuration{ 0.2f };
+
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	int32 MaxTargetNum{ 5 };
+
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	float StunDuration{ 3.f };
+
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	float LastDashAttackTimeOffset{ 1.f };
+
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	float ChargingPostProcessDuration{ 2.5f };
+
+	UPROPERTY(EditAnywhere, Category = "CameraData")
+	float LastDashAttackCameraDistance{ 500.f };
+
+	UPROPERTY(EditAnywhere, Category = "CameraData")
+	float LastDashAttackCameraBlendTime{ 0.5f };
+
+	UPROPERTY(EditAnywhere, Category = "CameraData")
+	float LastDashAttackCameraBlendExp{ 2.f };
+
+	UPROPERTY(EditAnywhere, Category = "CameraData")
+	float LastDashAttackCameraRestoreDuration{ 2.f };
+
+	UPROPERTY(EditAnywhere, Category = "NiagaraSystem")
+	TSoftObjectPtr<UNiagaraSystem> GhostTrailNiagaraSystemSoft{};
+
+	UPROPERTY(EditAnywhere, Category = "CameraShakeClass")
+	TSubclassOf<UCameraShakeBase> DashAttackHitCameraShakeClass{};
+
+	UPROPERTY(EditAnywhere, Category = "AnimMontage")
+	TSoftObjectPtr<UAnimMontage> LastDashAttackAnimMontageSoft{};
+
+	UPROPERTY(EditAnywhere, Category = "CurveData")
+	TSoftObjectPtr<UCurveVector> DashAttackCameraPosBeginCurveSoft{};
+
+	UPROPERTY(EditAnywhere, Category = "CurveData")
+	TSoftObjectPtr<UCurveVector> DashAttackCameraPosEndCurveSoft{};
+};
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownSkillDataAsset : public UDataAsset
 {
@@ -100,6 +198,32 @@ public:
 private:
 	UPROPERTY(EditAnywhere, Category = "SkyFallSlashData")
 	FNetherCrownSkyFallSlashData SkyFallSlashData{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownFrozenTempestDataAsset : public UNetherCrownSkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownFrozenTempestData& GetFrozenTempestData() const { return FrozenTempestData; }
+
+private:
+	UPROPERTY(EditAnywhere, Category = "FrozenTempestData")
+	FNetherCrownFrozenTempestData FrozenTempestData{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownDashAttackDataAsset : public UNetherCrownSkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownDashAttackData& GetDashAttackData() const { return DashAttackData; }
+
+private:
+	UPROPERTY(EditAnywhere, Category = "DashAttackData")
+	FNetherCrownDashAttackData DashAttackData{};
 };
 
 USTRUCT(BlueprintType)

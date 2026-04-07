@@ -3,8 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NetherCrownSkillObject.h"
 #include "Components/TimelineComponent.h"
+#include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrownFrozenTempest.generated.h"
 
 class UCurveVector;
@@ -26,6 +26,8 @@ protected:
 	virtual void TickFloatTimeline(float DeltaTime) override;
 
 private:
+	void CacheFrozenTempestData();
+
 	void BindTimelineFunctions();
 
 	void StartSetSkillCameraZoomTimeline();
@@ -55,29 +57,8 @@ private:
 
 	void SetupFrozenTempestHitTimers();
 
-	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
-	TSoftObjectPtr<UCurveVector> SkillCameraZoomCurveVectorSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
-	TSoftObjectPtr<UCurveFloat> CharacterOverlayMaterialStartCurveFloatSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
-	TSoftObjectPtr<UCurveFloat> CharacterOverlayMaterialEndCurveFloatSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
-	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
-	TSubclassOf<UCameraShakeBase> SkillChargeCameraShakeBaseClass{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	float SkillDetectingSphereRadius{ 500.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Duration")
-	float FrozenDuration{ 5.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "MaterialData")
-	TSoftObjectPtr<UMaterialInterface> FrozenTempestTargetOverlayMaterialSoft{};
+	UPROPERTY(Transient)
+	FNetherCrownFrozenTempestData FrozenTempestData{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedCharacterOverlayMaterialStartCurveFloat{};
