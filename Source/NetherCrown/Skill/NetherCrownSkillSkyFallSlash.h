@@ -11,6 +11,37 @@ class UCurveFloat;
 
 class ANetherCrownEnemy;
 
+USTRUCT()
+struct FNetherCrownSkyFallSlashData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
+	TSoftObjectPtr<UCurveFloat> SkillCameraCurveFloatSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
+	TSoftObjectPtr<UCurveFloat> SkillArmMaterialCurveFloatSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
+	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
+	float SkillDetectingSphereRadius{ 225.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
+	double SkillDetectingThresholdDegrees{ 45.0 };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
+	float SkillKnockBackDistance{ 2400.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
+	float KnockBackDuration{ 1.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "MaterialParam")
+	FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
+};
+
 UCLASS(Blueprintable)
 class NETHERCROWN_API UNetherCrownSkillSkyFallSlash : public UNetherCrownSkillObject
 {
@@ -49,29 +80,8 @@ private:
 
 	void CreateArmMaterialInstanceDynamic();
 
-	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
-	TSoftObjectPtr<UCurveFloat> SkillCameraCurveFloatSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
-	TSoftObjectPtr<UCurveFloat> SkillArmMaterialCurveFloatSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "CameraShakeClass")
-	TSubclassOf<UCameraShakeBase> SkillCameraShakeBaseClass{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	float SkillDetectingSphereRadius{ 225.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	double SkillDetectingThresholdDegrees{ 45.0 };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	float SkillKnockBackDistance{ 2400.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "Skill Settings|Range")
-	float KnockBackDuration{ 1.f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "MaterialParam")
-	FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
+	UPROPERTY(EditDefaultsOnly, Category = "SkillData")
+	FNetherCrownSkyFallSlashData SkyFallSlashData{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedSkillCameraCurveFloat{};

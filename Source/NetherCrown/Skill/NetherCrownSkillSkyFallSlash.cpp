@@ -11,7 +11,6 @@
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 
@@ -36,8 +35,8 @@ void UNetherCrownSkillSkyFallSlash::InitSkillObject()
 	{
 		CreateArmMaterialInstanceDynamic();
 
-		CachedSkillCameraCurveFloat = SkillCameraCurveFloatSoft.LoadSynchronous();
-		CachedSkillArmMaterialCurveFloat = SkillArmMaterialCurveFloatSoft.LoadSynchronous();
+		CachedSkillCameraCurveFloat = SkyFallSlashData.SkillCameraCurveFloatSoft.LoadSynchronous();
+		CachedSkillArmMaterialCurveFloat = SkyFallSlashData.SkillArmMaterialCurveFloatSoft.LoadSynchronous();
 
 		BindTimelineFunctions();
 	}
@@ -155,7 +154,7 @@ void UNetherCrownSkillSkyFallSlash::Client_StartCameraShake_Implementation()
 		return;
 	}
 
-	CameraManager->StartCameraShake(SkillCameraShakeBaseClass, 1.f);
+	CameraManager->StartCameraShake(SkyFallSlashData.SkillCameraShakeBaseClass, 1.f);
 }
 
 void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float FloatCurveValue)
@@ -166,10 +165,7 @@ void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float Flo
 		return;
 	}
 
-	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
-	check(DefaultSettings);
-
-	ArmMaterialInstanceDynamic->SetScalarParameterValue(DefaultSettings->SkyFallSlashArmMaterialParam, FloatCurveValue);
+	ArmMaterialInstanceDynamic->SetScalarParameterValue(SkyFallSlashData.ArmMaterialScalarParameterName, FloatCurveValue);
 }
 
 void UNetherCrownSkillSkyFallSlash::DetectAndHitSkyFallSlashSkill()
@@ -190,12 +186,12 @@ void UNetherCrownSkillSkyFallSlash::DetectAndHitSkyFallSlashSkill()
 	{
 		if (ANetherCrownEnemy* DetectedEnemy = Cast<ANetherCrownEnemy>(DetectedActor))
 		{
-			ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::KNOCK_BACK, KnockBackDuration);
+			ApplyCrowdControlToTarget(DetectedEnemy, ENetherCrownCrowdControlType::KNOCK_BACK, SkyFallSlashData.KnockBackDuration);
 
 			const UNetherCrownCrowdControlComponent* CrowdControlComponent{ DetectedEnemy->GetCrowdControlComponent() };
 			if (IsValid(CrowdControlComponent))
 			{
-				CrowdControlComponent->KnockBack(DetectedEnemy->GetActorForwardVector() * -SkillKnockBackDistance);
+				CrowdControlComponent->KnockBack(DetectedEnemy->GetActorForwardVector() * -SkyFallSlashData.SkillKnockBackDistance);
 			}
 
 			UGameplayStatics::ApplyDamage(DetectedEnemy, CalculateSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
@@ -233,15 +229,15 @@ const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetected
 	const FVector& SkillOwnerCharacterForwardVector{ SkillOwnerCharacter->GetActorForwardVector() };
 
 	FVector DetectSphereLocation{};
-	const FVector& DetectSphereLocationOffset{ SkillOwnerCharacterForwardVector * SkillDetectingSphereRadius / 2.f };
+	const FVector& DetectSphereLocationOffset{ SkillOwnerCharacterForwardVector * SkyFallSlashData.SkillDetectingSphereRadius / 2.f };
 	DetectSphereLocation = SkillOwnerCharacterLocation + DetectSphereLocationOffset;
 
 	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECC_Enemy) };
 	const bool bDetectEnemy{ UKismetSystemLibrary::SphereOverlapActors(this, DetectSphereLocation,
-		SkillDetectingSphereRadius, ObjectTypes, ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors) };
+		SkyFallSlashData.SkillDetectingSphereRadius, ObjectTypes, ANetherCrownEnemy::StaticClass(), TArray<AActor*>(), OverlappedActors) };
 
 #if DEBUG_SPHERE
-	UKismetSystemLibrary::DrawDebugSphere(this, DetectSphereLocation, SkillDetectingSphereRadius, 16, FColor::Red, 10.f);
+	UKismetSystemLibrary::DrawDebugSphere(this, DetectSphereLocation, SkyFallSlashData.SkillDetectingSphereRadius, 16, FColor::Red, 10.f);
 #endif
 
 	if (!bDetectEnemy)
@@ -249,7 +245,7 @@ const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetected
 		return {};
 	}
 
-	const float CosThreshold = FMath::Cos(FMath::DegreesToRadians(SkillDetectingThresholdDegrees));
+	const float CosThreshold = FMath::Cos(FMath::DegreesToRadians(SkyFallSlashData.SkillDetectingThresholdDegrees));
 
 	TArray<ANetherCrownEnemy*> DetectedEnemies{};
 	for (AActor* OverlappedActor : OverlappedActors)
