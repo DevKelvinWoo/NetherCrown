@@ -88,6 +88,7 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 	}
 	else
 	{
+		BlackboardComponentCached->ClearValue(EnemyAITuningData.ChaseTypeBlackboardKeyName);
 		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKeyName);
 	}
 }
