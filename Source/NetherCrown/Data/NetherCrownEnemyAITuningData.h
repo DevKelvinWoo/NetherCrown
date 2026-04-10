@@ -15,10 +15,10 @@ struct FNetherCrownEnemyPerceptionData
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
-	float SightRadius{ 1200.0f };
+	float SightRadius{ 1500.0f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
-	float LoseSightRadius{ 2500.0f };
+	float LoseSightRadius{ 2000.0f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "Perception")
 	float PeripheralVisionAngleDegrees{ 360.0f };
@@ -37,7 +37,13 @@ public:
 	FNetherCrownEnemyPerceptionData PerceptionData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "BlackboardKeyName")
-	FName TargetActorBlackboardKey{ TEXT("TargetActor") };
+	FName TargetActorBlackboardKeyName{ TEXT("TargetActor") };
+
+	UPROPERTY(EditDefaultsOnly, Category = "BlackboardKeyName")
+	FName NeedFoundReactionBlackboardKeyName{ TEXT("bNeedFoundReaction") };
+
+	UPROPERTY(EditDefaultsOnly, Category = "BlackboardKeyName")
+	FName ChaseTypeBlackboardKeyName{ TEXT("ChaseType") };
 
 	UPROPERTY(EditDefaultsOnly, Category = "BT")
 	TObjectPtr<UBehaviorTree> BehaviorTreeAsset{};

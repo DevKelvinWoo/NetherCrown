@@ -22,7 +22,7 @@ public:
 	ANetherCrownEnemyAIController();
 
 	float GetPatrolRadius() const { return EnemyAITuningData.PatrolRadius; }
-	const FName& GetTargetActorBlackboardKey() const { return EnemyAITuningData.TargetActorBlackboardKey; }
+	const FName& GetTargetActorBlackboardKey() const { return EnemyAITuningData.TargetActorBlackboardKeyName; }
 
 protected:
 	virtual void BeginPlay() override;

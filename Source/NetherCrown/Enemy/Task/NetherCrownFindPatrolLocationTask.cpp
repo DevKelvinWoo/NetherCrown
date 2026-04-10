@@ -23,13 +23,13 @@ EBTNodeResult::Type UNetherCrownFindPatrolLocationTask::ExecuteTask(UBehaviorTre
 		return EBTNodeResult::Failed;
 	}
 
-	APawn* ControlledPawn{ OwnerAIController->GetPawn() };
+	const APawn* ControlledPawn{ OwnerAIController->GetPawn() };
 	if (!ensureAlways(IsValid(ControlledPawn)))
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	UNavigationSystemV1* NavigationSystem{ FNavigationSystem::GetCurrent<UNavigationSystemV1>(ControlledPawn->GetWorld()) };
+	const UNavigationSystemV1* NavigationSystem{ FNavigationSystem::GetCurrent<UNavigationSystemV1>(ControlledPawn->GetWorld()) };
 	if (!ensureAlways(IsValid(NavigationSystem)))
 	{
 		return EBTNodeResult::Failed;

@@ -10,6 +10,7 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
+#include "NetherCrown/Components/NetherCrownEnemyBTCosmeticComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyDamageReceiverComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
 #include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
@@ -34,6 +35,8 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 	BasicAttackComponent = CreateDefaultSubobject<UNetherCrownEnemyBasicAttackComponent>(TEXT("BasicAttackComponent"));
 
 	EnemyDamageReceiverComponent = CreateDefaultSubobject<UNetherCrownEnemyDamageReceiverComponent>(TEXT("EnemyDamageReceiverComponent"));
+
+	EnemyBTCosmeticComponent = CreateDefaultSubobject<UNetherCrownEnemyBTCosmeticComponent>(TEXT("EnemyBTCosmeticComponent"));
 
 	bNetLoadOnClient = true;
 	bReplicates = true;
@@ -144,6 +147,11 @@ void ANetherCrownEnemy::SetEnemyMovementComponentValue()
 	{
 		return;
 	}
+
+	CharacterMovementComponent->MaxWalkSpeed = 300.f;
+	CharacterMovementComponent->MaxAcceleration = 300.f;
+	CharacterMovementComponent->BrakingDecelerationWalking = 1200.f;
+	CharacterMovementComponent->bUseSeparateBrakingFriction = true;
 
 	CharacterMovementComponent->bOrientRotationToMovement = true;
 

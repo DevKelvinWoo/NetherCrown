@@ -15,6 +15,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_HurtGrunt, "Sound.Enemy.HurtGrunt", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_HurtImpact, "Sound.Enemy.HurtImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_DeathGrunt, "Sound.Enemy.DeathGrunt", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Enemy_Found, "Sound.Enemy.Found", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_FrozenEnemy_HurtImpact, "Sound.FrozenEnemy.HurtImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_FrozenEnemy_Death, "Sound.FrozenEnemy.Death", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Shield_On, "Sound.Shield.On", "");

@@ -70,13 +70,25 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 	ANetherCrownCharacter* TargetCharacter{ Cast<ANetherCrownCharacter>(Actor) };
 	if (!IsValid(TargetCharacter))
 	{
-		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKey);
+		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKeyName);
+		BlackboardComponentCached->ClearValue(EnemyAITuningData.NeedFoundReactionBlackboardKeyName);
+
 		return;
 	}
 
 	if (Stimulus.WasSuccessfullySensed())
 	{
-		BlackboardComponentCached->SetValueAsObject(EnemyAITuningData.TargetActorBlackboardKey, TargetCharacter);
+		const UObject* TargetActor{ BlackboardComponentCached->GetValueAsObject(EnemyAITuningData.TargetActorBlackboardKeyName) };
+		if (!IsValid(TargetActor))
+		{
+			BlackboardComponentCached->SetValueAsBool(EnemyAITuningData.NeedFoundReactionBlackboardKeyName, true);
+		}
+
+		BlackboardComponentCached->SetValueAsObject(EnemyAITuningData.TargetActorBlackboardKeyName, TargetCharacter);
+	}
+	else
+	{
+		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKeyName);
 	}
 }
 

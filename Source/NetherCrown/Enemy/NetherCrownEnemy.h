@@ -7,6 +7,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
 
+class UNetherCrownEnemyBTCosmeticComponent;
 class ANetherCrownEnemyWeapon;
 class UNiagaraComponent;
 class UCapsuleComponent;
@@ -27,6 +28,8 @@ public:
 
 	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return CrowdControlComponent; }
 	UNetherCrownEnemyStatComponent* GetEnemyStatComponent() const { return EnemyStatComponent; }
+	UNetherCrownEnemyBTCosmeticComponent* GetEnemyBTCosmeticComponent() const { return EnemyBTCosmeticComponent; }
+
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 	void SetIsDead(const bool InbIsDead);
@@ -78,6 +81,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownEnemyDamageReceiverComponent> EnemyDamageReceiverComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownEnemyBTCosmeticComponent> EnemyBTCosmeticComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyWeaponClass")
 	TSubclassOf<ANetherCrownEnemyWeapon> EnemyWeaponClass{};
