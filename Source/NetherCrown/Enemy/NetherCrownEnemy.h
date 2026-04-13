@@ -7,6 +7,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
 
+class UNetherCrownEnemySkillComponent;
 class UNetherCrownEnemyBTCosmeticComponent;
 class ANetherCrownEnemyWeapon;
 class UNiagaraComponent;
@@ -84,6 +85,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownEnemyBTCosmeticComponent> EnemyBTCosmeticComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownEnemySkillComponent> EnemySkillComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyWeaponClass")
 	TSubclassOf<ANetherCrownEnemyWeapon> EnemyWeaponClass{};

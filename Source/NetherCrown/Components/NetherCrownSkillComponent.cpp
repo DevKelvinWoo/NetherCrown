@@ -141,7 +141,7 @@ void UNetherCrownSkillComponent::ConstructSkillObjects()
 		return;
 	}
 
-	for (TSubclassOf<UNetherCrownSkillObject> SkillObjectClass : SkillObjectClasses)
+	for (const TSubclassOf<UNetherCrownSkillObject>& SkillObjectClass : SkillObjectClasses)
 	{
 		UNetherCrownSkillObject* SkillObject{ NewObject<UNetherCrownSkillObject>(this, SkillObjectClass) };
 		if (!ensureAlways(IsValid(SkillObject)))
@@ -208,11 +208,6 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 
 void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNetherCrownSkillObject* FoundSkillObject)
 {
-	if (!ensureAlways(IsValid(CachedCharacter)))
-	{
-		return;
-	}
-
 	if (!IsValid(FoundSkillObject))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("FoundSkillObject is Invalid in %hs"), __FUNCTION__);

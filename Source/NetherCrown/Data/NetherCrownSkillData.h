@@ -233,12 +233,12 @@ struct FNetherCrownSkillDataTableRow : public FTableRowBase
 
 public:
 	const FGameplayTag& GetSkillTag() const { return SkillTag; }
-	TSoftObjectPtr<UNetherCrownSkillDataAsset> GetSkillDataAsset() const { return SkillDataAsset; }
+	TSoftObjectPtr<UNetherCrownSkillDataAsset> GetSkillDataAsset() const { return SkillDataAssetSoft; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "SkillTag")
 	FGameplayTag SkillTag{};
 
 	UPROPERTY(EditAnywhere, Category = "SkillData")
-	TSoftObjectPtr<UNetherCrownSkillDataAsset> SkillDataAsset{};
+	TSoftObjectPtr<UNetherCrownSkillDataAsset> SkillDataAssetSoft{};
 };

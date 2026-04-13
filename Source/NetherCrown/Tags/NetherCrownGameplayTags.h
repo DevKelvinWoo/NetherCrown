@@ -59,4 +59,8 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(UI_Screen_HUD);
 #pragma endregion
 
+#pragma region EnemySkill
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_DashAttack);
+#pragma endregion
+
 }

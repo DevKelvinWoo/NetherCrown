@@ -6,6 +6,7 @@
 #include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
 #include "NetherCrown/Data/NetherCrownEffectData.h"
+#include "NetherCrown/Data/NetherCrownEnemySkillData.h"
 #include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrown/Data/NetherCrownSoundData.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
@@ -27,6 +28,7 @@ public:
 
 	//SkillData
 	static UNetherCrownSkillDataAsset* GetSkillDataAssetByGameplayTag(const FGameplayTag& SkillTag);
+	static UNetherCrownEnemySkillDataAsset* GetEnemySkillDataAssetByGameplayTag(const FGameplayTag& SkillTag);
 
 	//WeaponData
 	static UNetherCrownWeaponData* GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag);
@@ -45,6 +47,7 @@ private:
 	static bool bCacheInitialized;
 	static TMap<FGameplayTag, FNetherCrownSoundData> CachedSoundDataByTag;
 	static TMap<FGameplayTag, FNetherCrownSkillDataTableRow> CachedSkillDataByTag;
+	static TMap<FGameplayTag, FNetherCrownEnemySkillDataTableRow> CachedEnemySkillDataByTag;
 	static TMap<FGameplayTag, FNetherCrownWeaponDataTableRow> CachedWeaponDataByTag;
 	static TMap<FGameplayTag, FNetherCrownEffectData> CachedEffectDataByTag;
 	static TMap<FGameplayTag, FNetherCrownUIScreenDefinition> CachedScreenDefinitionDataByTag;

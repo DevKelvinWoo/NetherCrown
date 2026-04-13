@@ -58,4 +58,8 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Screen_HUD, "UI.Screen.HUD", "");
 #pragma endregion
 
+#pragma region EnemySkill
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_DashAttack, "Enemy.Skill.DashAttack", "");
+#pragma endregion
+
 }

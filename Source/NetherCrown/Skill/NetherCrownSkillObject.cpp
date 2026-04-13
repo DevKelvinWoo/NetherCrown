@@ -556,20 +556,6 @@ void UNetherCrownSkillObject::InitSkillObject()
 {
 	CacheSkillData();
 
-	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
-	{
-		return;
-	}
-
-	const USkeletalMeshComponent* SkeletalMeshComponent{ SkillOwnerCharacter->GetMesh() };
-	UNetherCrownCharacterAnimInstance* NetherCrownCharacterAnimInstance{};
-	NetherCrownCharacterAnimInstance = SkeletalMeshComponent ? Cast<UNetherCrownCharacterAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) : nullptr;
-	if (!ensureAlways(IsValid(NetherCrownCharacterAnimInstance)))
-	{
-		return;
-	}
-
 	CachedSkillAnimMontage = GetSkillAnimMontageSoft().IsNull() ? nullptr : GetSkillAnimMontageSoft().LoadSynchronous();
 }
 

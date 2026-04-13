@@ -27,6 +27,9 @@ public:
 	TSoftObjectPtr<UDataTable> SkillDT;
 
 	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
+	TSoftObjectPtr<UDataTable> EnemySkillDT;
+
+	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
 	TSoftObjectPtr<UDataTable> EffectDT;
 
 	UPROPERTY(Config, EditAnywhere, Category = "DataTable")

@@ -186,7 +186,7 @@ protected:
 	float GetSkillMontageEndSlowTimeOffset() const;
 	float GetSkillCoolDownDecreaseOffset() const;
 
-	UPROPERTY(Transient, Replicated)
+	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> SkillOwnerCharacterWeak{};
 
 	UPROPERTY(Replicated)

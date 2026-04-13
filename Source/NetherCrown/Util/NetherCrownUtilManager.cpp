@@ -20,6 +20,7 @@ TMap<FGameplayTag, FNetherCrownSkillDataTableRow> FNetherCrownUtilManager::Cache
 TMap<FGameplayTag, FNetherCrownWeaponDataTableRow> FNetherCrownUtilManager::CachedWeaponDataByTag{};
 TMap<FGameplayTag, FNetherCrownEffectData> FNetherCrownUtilManager::CachedEffectDataByTag{};
 TMap<FGameplayTag, FNetherCrownUIScreenDefinition> FNetherCrownUtilManager::CachedScreenDefinitionDataByTag{};
+TMap<FGameplayTag, FNetherCrownEnemySkillDataTableRow> FNetherCrownUtilManager::CachedEnemySkillDataByTag{};
 
 void FNetherCrownUtilManager::EnsureCacheBuilt()
 {
@@ -33,6 +34,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 
 	CachedSoundDataByTag.Empty();
 	CachedSkillDataByTag.Empty();
+	CachedEnemySkillDataByTag.Empty();
 	CachedWeaponDataByTag.Empty();
 	CachedEffectDataByTag.Empty();
 	CachedScreenDefinitionDataByTag.Empty();
@@ -75,6 +77,20 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 			if (Row)
 			{
 				CachedSkillDataByTag.Add(Row->GetSkillTag(), *Row);
+			}
+		}
+	}
+
+	UDataTable* EnemySkillDT{ DefaultSettings->EnemySkillDT.LoadSynchronous() };
+	if (IsValid(EnemySkillDT))
+	{
+		TArray<FNetherCrownEnemySkillDataTableRow*> OutRows{};
+		EnemySkillDT->GetAllRows<FNetherCrownEnemySkillDataTableRow>(TEXT("EnemySkillTag"), OutRows);
+		for (FNetherCrownEnemySkillDataTableRow* Row : OutRows)
+		{
+			if (Row)
+			{
+				CachedEnemySkillDataByTag.Add(Row->GetEnemySkillTag(), *Row);
 			}
 		}
 	}
@@ -182,6 +198,28 @@ UNetherCrownSkillDataAsset* FNetherCrownUtilManager::GetSkillDataAssetByGameplay
 	}
 
 	return FoundSkillData->GetSkillDataAsset().LoadSynchronous();
+}
+
+UNetherCrownEnemySkillDataAsset* FNetherCrownUtilManager::GetEnemySkillDataAssetByGameplayTag(const FGameplayTag& SkillTag)
+{
+	EnsureCacheBuilt();
+
+	if (!ensureAlways(!CachedEnemySkillDataByTag.IsEmpty()))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No EnemySkillData in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	const FNetherCrownEnemySkillDataTableRow* FoundSkillData{ CachedEnemySkillDataByTag.Find(SkillTag) };
+	if (!FoundSkillData)
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No Found SkillDataTable in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	return FoundSkillData->GetEnemySkillDataAsset().LoadSynchronous();
 }
 
 UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag)
