@@ -8,6 +8,7 @@ UNetherCrownEnemySelectChaseTypeTask::UNetherCrownEnemySelectChaseTypeTask()
 {
 	NodeName = TEXT("SelectChaseType");
 	ChaseTypeBlackboardKey.AddEnumFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, ChaseTypeBlackboardKey), StaticEnum<ENetherCrownEnemyChaseType>());
+	NeedDashAttackBlackboardKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, NeedDashAttackBlackboardKey));
 }
 
 EBTNodeResult::Type UNetherCrownEnemySelectChaseTypeTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -26,6 +27,7 @@ EBTNodeResult::Type UNetherCrownEnemySelectChaseTypeTask::ExecuteTask(UBehaviorT
 
 	const ENetherCrownEnemyChaseType SelectedChaseType{ FMath::FRand() <= 0.25f ? ENetherCrownEnemyChaseType::DashChase : ENetherCrownEnemyChaseType::RunChase };
 	BlackboardComponent->SetValueAsEnum(ChaseTypeBlackboardKey.SelectedKeyName, static_cast<uint8>(SelectedChaseType));
+	BlackboardComponent->SetValueAsBool(NeedDashAttackBlackboardKey.SelectedKeyName, true);
 
 	return Super::ExecuteTask(OwnerComp, NodeMemory);
 }

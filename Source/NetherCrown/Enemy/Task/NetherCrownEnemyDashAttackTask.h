@@ -4,31 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "NetherCrownEnemySelectChaseTypeTask.generated.h"
-
-UENUM(BlueprintType)
-enum class ENetherCrownEnemyChaseType : uint8
-{
-	None,
-	DashChase,
-	RunChase
-};
+#include "NetherCrownEnemyDashAttackTask.generated.h"
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownEnemySelectChaseTypeTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownEnemyDashAttackTask : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UNetherCrownEnemySelectChaseTypeTask();
+	UNetherCrownEnemyDashAttackTask();
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
-	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector ChaseTypeBlackboardKey{};
-
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector NeedDashAttackBlackboardKey{};
 };
