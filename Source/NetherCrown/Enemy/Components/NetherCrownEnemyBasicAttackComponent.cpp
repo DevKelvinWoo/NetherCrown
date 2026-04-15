@@ -196,14 +196,19 @@ void UNetherCrownEnemyBasicAttackComponent::CacheBasicAttackAnimMontage()
 
 FVector UNetherCrownEnemyBasicAttackComponent::GetWeaponTraceSocketLocation() const
 {
-	const ANetherCrownEnemyWeapon* HandledEnemyWeapon{ HandledEnemyWeaponWeak.Get() };
-	const USkeletalMeshComponent* HandledEnemyWeaponMesh{ HandledEnemyWeapon ? HandledEnemyWeapon->GetEnemyWeaponSkeletalMeshComponent() : nullptr };
-	if (!ensureAlways(IsValid(HandledEnemyWeaponMesh)))
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)))
 	{
 		return FVector::ZeroVector;
 	}
 
-	return HandledEnemyWeaponMesh->GetSocketLocation(EnemyBasicAttackData.WeaponTraceSocketName);
+	const ANetherCrownEnemyWeapon* HandledEnemyWeapon{ HandledEnemyWeaponWeak.Get() };
+	const USkeletalMeshComponent* WeaponOrBodySkeletalMeshComponent{ HandledEnemyWeapon ? HandledEnemyWeapon->GetEnemyWeaponSkeletalMeshComponent() : CachedOwnerEnemy->GetMesh() };
+	if (!ensureAlways(IsValid(WeaponOrBodySkeletalMeshComponent)))
+	{
+		return FVector::ZeroVector;
+	}
+
+	return WeaponOrBodySkeletalMeshComponent->GetSocketLocation(EnemyBasicAttackData.WeaponTraceSocketName);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttack()
