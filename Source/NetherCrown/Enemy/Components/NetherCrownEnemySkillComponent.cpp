@@ -44,6 +44,17 @@ void UNetherCrownEnemySkillComponent::ActivateEnemySkill(const FGameplayTag& Ski
 	Multicast_PlayEnemySkillCosmetics(FoundEnemySkillObject);
 }
 
+UNetherCrownEnemySkillObject* UNetherCrownEnemySkillComponent::GetEnemySkillObject(const FGameplayTag& SkillTag) const
+{
+	if (!SkillTag.IsValid() || EnemySkillObjectMap.IsEmpty())
+	{
+		return nullptr;
+	}
+
+	UNetherCrownEnemySkillObject* const* FoundEnemySkillObjectPtr{ EnemySkillObjectMap.Find(SkillTag) };
+	return FoundEnemySkillObjectPtr ? *FoundEnemySkillObjectPtr : nullptr;
+}
+
 void UNetherCrownEnemySkillComponent::BeginPlay()
 {
 	Super::BeginPlay();

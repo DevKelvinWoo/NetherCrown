@@ -45,9 +45,6 @@ private:
 	void DisableHitTrace();
 	void EndAttack();
 
-	UFUNCTION(Server, Reliable)
-	void Server_ReportHit(ANetherCrownCharacter* HitCharacter, const FVector& HitLocation);
-
 	void DetectHit();
 
 	UFUNCTION(NetMulticast, Reliable)

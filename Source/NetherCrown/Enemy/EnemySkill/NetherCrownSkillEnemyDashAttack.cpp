@@ -2,6 +2,7 @@
 
 #include "NetherCrownSkillEnemyDashAttack.h"
 
+#include "TimerManager.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
@@ -54,12 +55,14 @@ void UNetherCrownSkillEnemyDashAttack::EnemyDashAttack()
 	ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.IsValid() ? SkillOwnerEnemyWeak.Get() : nullptr };
 	if (!ensureAlways(IsValid(SkillOwnerEnemy)))
 	{
+		BroadcastDashAttackFinished();
 		return;
 	}
 
 	const ANetherCrownCharacter* CurrentTargetCharacter{ SkillOwnerEnemy->GetCurrentTargetCharacter() };
 	if (!ensureAlways(IsValid(CurrentTargetCharacter)))
 	{
+		BroadcastDashAttackFinished();
 		return;
 	}
 
@@ -87,7 +90,39 @@ void UNetherCrownSkillEnemyDashAttack::EnemyDashAttack()
 	UCharacterMovementComponent* SkillOwnerEnemyMovementComponent{ SkillOwnerEnemy->GetCharacterMovement() };
 	if (!ensureAlways(IsValid(SkillOwnerEnemyMovementComponent)))
 	{
+		BroadcastDashAttackFinished();
 		return;
 	}
 	SkillOwnerEnemyMovementComponent->ApplyRootMotionSource(MoveToForceRootMotionSource);
+
+	if (!SkillOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ SkillOwnerEnemy->GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		BroadcastDashAttackFinished();
+		return;
+	}
+
+	World->GetTimerManager().ClearTimer(TimerHandle_DashAttackFinished);
+	World->GetTimerManager().SetTimer(TimerHandle_DashAttackFinished, this, &ThisClass::BroadcastDashAttackFinished, CachedEnemyDashAttackData.DashAttackDuration, false);
+}
+
+void UNetherCrownSkillEnemyDashAttack::BroadcastDashAttackFinished()
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.IsValid() ? SkillOwnerEnemyWeak.Get() : nullptr };
+	if (!IsValid(SkillOwnerEnemy) || !SkillOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	if (const UWorld* World = SkillOwnerEnemy->GetWorld())
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle_DashAttackFinished);
+	}
+
+	OnEnemyDashAttackFinished.Broadcast();
 }

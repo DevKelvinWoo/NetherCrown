@@ -105,12 +105,6 @@ void UNetherCrownEnemyBasicAttackComponent::EndAttack()
 	EnemyBasicAttackState = ENetherCrownEnemyBasicAttackState::NotAttacking;
 }
 
-void UNetherCrownEnemyBasicAttackComponent::Server_ReportHit_Implementation(ANetherCrownCharacter* HitCharacter, const FVector& HitLocation)
-{
-	//@TODO : 데미지 계산 로직 필요
-	UGameplayStatics::ApplyDamage(HitCharacter, 10.f, CachedOwnerEnemy->GetInstigatorController(), CachedOwnerEnemy, UNetherCrownPhysicalDamageType::StaticClass());
-}
-
 void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
@@ -159,7 +153,11 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 
 	for (const TPair<ANetherCrownCharacter*, FVector>& HitInfo : HitInfoMap)
 	{
-		Server_ReportHit(HitInfo.Key, HitInfo.Value);
+		ANetherCrownCharacter* HitCharacter{ HitInfo.Key };
+		if (ensureAlways(IsValid(HitCharacter)))
+		{
+			HitCharacter->Server_ReportHitByEnemy(CachedOwnerEnemy);
+		}
 	}
 }
 

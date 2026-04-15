@@ -9,6 +9,8 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownCharacter.generated.h"
 
+class ANetherCrownEnemy;
+class UNetherCrownDamageReceiverComponent;
 class UNiagaraComponent;
 class USpringArmComponent;
 class UCameraComponent;
@@ -71,6 +73,9 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 	bool IsEquippedWeapon() const;
+
+	UFUNCTION(Server, Reliable)
+	void Server_ReportHitByEnemy(ANetherCrownEnemy* HitCauserEnemy);
 
 	UNetherCrownBasicAttackComponent* GetBasicAttackComponent() const { return NetherCrownBasicAttackComponent; }
 	UNetherCrownEquipComponent* GetEquipComponent() const { return NetherCrownEquipComponent; }
@@ -151,6 +156,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownControlGhostTrailComponent> NetherCrownControlGhostTrailComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownDamageReceiverComponent> NetherCrownDamageReceiverComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownCharacterTagData CharacterTagData{};

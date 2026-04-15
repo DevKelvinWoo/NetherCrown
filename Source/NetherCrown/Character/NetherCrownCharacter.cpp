@@ -7,6 +7,7 @@
 #include "Components/PostProcessComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/NetherCrown.h"
 
@@ -14,8 +15,11 @@
 #include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
+#include "NetherCrown/Components/NetherCrownDamageReceiverComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
+#include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
+#include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -29,6 +33,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownEquipComponent = CreateDefaultSubobject<UNetherCrownEquipComponent>(TEXT("EquipComponent"));
 	NetherCrownSkillComponent = CreateDefaultSubobject<UNetherCrownSkillComponent>(TEXT("SkillComponent"));
 	NetherCrownCrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
+	NetherCrownDamageReceiverComponent = CreateDefaultSubobject<UNetherCrownDamageReceiverComponent>(TEXT("DamageReceiverComponent"));
 
 	SetCharacterDefaultMovementSettings();
 
@@ -409,6 +414,16 @@ bool ANetherCrownCharacter::IsEquippedWeapon() const
 	return NetherCrownEquipComponent->GetEquippedWeapon() ? true : false;
 }
 
+void ANetherCrownCharacter::Server_ReportHitByEnemy_Implementation(ANetherCrownEnemy* HitCauserEnemy)
+{
+	if (!ensureAlways(IsValid(HitCauserEnemy)))
+	{
+		return;
+	}
+
+	UGameplayStatics::ApplyDamage(this, 10.f, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
+}
+
 UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const
 {
 	//@TODO : Need to implements Status Effect Control Component in NetherCrownCharacter class (now only for enemy class)
@@ -433,7 +448,12 @@ float ANetherCrownCharacter::TakeDamage(float DamageAmount, struct FDamageEvent 
 {
 	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 
-	return ResultDamage;
+	if (!ensureAlways(IsValid(NetherCrownDamageReceiverComponent)) || !HasAuthority())
+	{
+		return 0.f;
+	}
+
+	return NetherCrownDamageReceiverComponent->HandleIncomingDamage(ResultDamage, DamageEvent, DamageCauser);
 }
 
 void ANetherCrownCharacter::SetIsHardLanding()

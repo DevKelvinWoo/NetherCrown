@@ -47,6 +47,9 @@ public:
 	float DashDuration{ 0.3f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
+	float DashAttackDuration{ 1.5f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	float DashOffset{ 100.f };
 };
 

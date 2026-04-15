@@ -89,12 +89,10 @@ float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& Dama
 
 	if (!ensureAlways(IsValid(EnemyDamageReceiverComponent)) || !HasAuthority())
 	{
-		return ResultDamage;
+		return 0.f;
 	}
 
-	EnemyDamageReceiverComponent->HandleIncomingDamage(ResultDamage, DamageEvent, DamageCauser);
-
-	return ResultDamage;
+	return EnemyDamageReceiverComponent->HandleIncomingDamage(ResultDamage, DamageEvent, DamageCauser);
 }
 
 void ANetherCrownEnemy::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
