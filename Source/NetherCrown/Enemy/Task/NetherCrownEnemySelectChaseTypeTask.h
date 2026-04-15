@@ -31,4 +31,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector NeedDashAttackBlackboardKey{};
+
+	UPROPERTY(EditAnywhere, Category = "Data")
+	float DashChaseProbability{ 0.5f };
 };

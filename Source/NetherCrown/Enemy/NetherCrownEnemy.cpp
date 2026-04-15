@@ -53,6 +53,11 @@ UNetherCrownStatusEffectControlComponent* ANetherCrownEnemy::GetStatusEffectCont
 	return StatusEffectControlComponent;
 }
 
+void ANetherCrownEnemy::SetCurrentTargetCharacter(ANetherCrownCharacter* InTargetCharacter)
+{
+	CurrentTargetCharacterWeak = MakeWeakObjectPtr(InTargetCharacter);
+}
+
 void ANetherCrownEnemy::SetIsDead(const bool InbIsDead)
 {
 	if (HasAuthority())
@@ -97,6 +102,7 @@ void ANetherCrownEnemy::GetLifetimeReplicatedProps(TArray<class FLifetimePropert
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, bIsDead);
+	DOREPLIFETIME(ThisClass, CurrentTargetCharacterWeak);
 }
 
 ENetherCrownCrowdControlType ANetherCrownEnemy::GetCrowdControlType() const

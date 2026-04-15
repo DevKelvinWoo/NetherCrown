@@ -5,6 +5,8 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
+#include "Net/UnrealNetwork.h"
+#include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
 
@@ -76,6 +78,12 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 		return;
 	}
 
+	ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(GetPawn()) };
+	if (!ensureAlways(IsValid(OwnerEnemy)))
+	{
+		return;
+	}
+
 	if (Stimulus.WasSuccessfullySensed())
 	{
 		const UObject* TargetActor{ BlackboardComponentCached->GetValueAsObject(EnemyAITuningData.TargetActorBlackboardKeyName) };
@@ -85,11 +93,14 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 		}
 
 		BlackboardComponentCached->SetValueAsObject(EnemyAITuningData.TargetActorBlackboardKeyName, TargetCharacter);
+		OwnerEnemy->SetCurrentTargetCharacter(TargetCharacter);
 	}
 	else
 	{
 		BlackboardComponentCached->ClearValue(EnemyAITuningData.ChaseTypeBlackboardKeyName);
 		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKeyName);
+
+		OwnerEnemy->SetCurrentTargetCharacter(nullptr);
 	}
 }
 

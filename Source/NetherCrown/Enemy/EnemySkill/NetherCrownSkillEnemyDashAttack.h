@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "NetherCrownEnemySkillObject.h"
+#include "NetherCrown/Data/NetherCrownEnemySkillData.h"
 #include "NetherCrownSkillEnemyDashAttack.generated.h"
 
 class ANetherCrownEnemy;
@@ -15,9 +16,20 @@ class NETHERCROWN_API UNetherCrownSkillEnemyDashAttack : public UNetherCrownEnem
 	GENERATED_BODY()
 
 public:
-	void EnemyDashAttack(const ANetherCrownCharacter* TargetCharacter);
+	void EnemyDashAttack();
 
 protected:
+	virtual void InitEnemySkillObject() override;
+
 	virtual void PlayEnemySkillCosmetics() override;
 	virtual void ExecuteEnemySkillGameplay() override;
+
+private:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_EnemyDashAttack();
+
+	void CacheEnemyDashAttackData();
+
+	UPROPERTY(Transient)
+	FNetherCrownEnemyDashAttackData CachedEnemyDashAttackData{};
 };

@@ -25,9 +25,9 @@ EBTNodeResult::Type UNetherCrownEnemySelectChaseTypeTask::ExecuteTask(UBehaviorT
 		return EBTNodeResult::Succeeded;
 	}
 
-	const ENetherCrownEnemyChaseType SelectedChaseType{ FMath::FRand() <= 0.25f ? ENetherCrownEnemyChaseType::DashChase : ENetherCrownEnemyChaseType::RunChase };
+	const ENetherCrownEnemyChaseType SelectedChaseType{ FMath::FRand() <= DashChaseProbability ? ENetherCrownEnemyChaseType::DashChase : ENetherCrownEnemyChaseType::RunChase };
 	BlackboardComponent->SetValueAsEnum(ChaseTypeBlackboardKey.SelectedKeyName, static_cast<uint8>(SelectedChaseType));
-	BlackboardComponent->SetValueAsBool(NeedDashAttackBlackboardKey.SelectedKeyName, true);
+	BlackboardComponent->SetValueAsBool(NeedDashAttackBlackboardKey.SelectedKeyName, SelectedChaseType == ENetherCrownEnemyChaseType::DashChase);
 
-	return Super::ExecuteTask(OwnerComp, NodeMemory);
+	return EBTNodeResult::Succeeded;
 }

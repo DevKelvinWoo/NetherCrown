@@ -7,7 +7,6 @@
 #include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemySkillObject.h"
 #include "NetherCrownEnemySkillData.generated.h"
 
-
 UCLASS()
 class NETHERCROWN_API UNetherCrownEnemySkillDataAsset : public UDataAsset
 {
@@ -36,4 +35,30 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillData")
 	TSoftObjectPtr<UNetherCrownEnemySkillDataAsset> EnemySkillDataAssetSoft{};
+};
+
+USTRUCT()
+struct FNetherCrownEnemyDashAttackData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
+	float DashDuration{ 0.3f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
+	float DashOffset{ 100.f };
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownEnemyDashAttackDataAsset : public UNetherCrownEnemySkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownEnemyDashAttackData& GetEnemyDashAttackData() const { return EnemyDashAttackData; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
+	FNetherCrownEnemyDashAttackData EnemyDashAttackData{};
 };

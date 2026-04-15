@@ -7,6 +7,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
 
+class ANetherCrownCharacter;
 class UNetherCrownEnemySkillComponent;
 class UNetherCrownEnemyBTCosmeticComponent;
 class ANetherCrownEnemyWeapon;
@@ -33,6 +34,9 @@ public:
 	UNetherCrownEnemySkillComponent* GetEnemySkillComponent() const { return EnemySkillComponent; }
 
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
+
+	void SetCurrentTargetCharacter(ANetherCrownCharacter* InTargetCharacter);
+	const ANetherCrownCharacter* GetCurrentTargetCharacter() const { return CurrentTargetCharacterWeak.Get(); }
 
 	void SetIsDead(const bool InbIsDead);
 	bool IsDead() { return bIsDead; }
@@ -98,4 +102,7 @@ private:
 
 	UPROPERTY(Transient, Replicated)
 	bool bIsDead{ false };
+
+	UPROPERTY(Replicated)
+	TWeakObjectPtr<ANetherCrownCharacter> CurrentTargetCharacterWeak{};
 };
