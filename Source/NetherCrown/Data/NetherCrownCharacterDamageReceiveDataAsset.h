@@ -17,6 +17,9 @@ struct FNetherCrownDamageReceiveTagData
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveTagData")
 	FGameplayTag HitImpactTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveTagData")
+	FGameplayTag HitGruntSoundTag{};
 };
 
 USTRUCT()
@@ -29,7 +32,13 @@ public:
 	TSubclassOf<UCameraShakeBase> HitCameraShakeClass{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveData")
+	TSoftObjectPtr<UAnimMontage> HitReactAnimMontageSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveData")
 	FNetherCrownDamageReceiveTagData DamageReceiveTagData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveData")
+	TMap<int32, FName> HitReactSectionNameMap{};
 };
 
 UCLASS()

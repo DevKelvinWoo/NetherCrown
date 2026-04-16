@@ -7,6 +7,7 @@
 #include "Engine/DamageEvents.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
+#include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Data/NetherCrownCharacterDamageReceiveDataAsset.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
@@ -34,12 +35,13 @@ float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmou
 
 	if (IsDead())
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Character is dead"));
 		//HandleEnemyDead();
 	}
 	else
 	{
-		UE_LOG(LogTemp, Warning, TEXT("Character is alive, just damaged"));
+		Multicast_PlayHitImpactSound();
+		Multicast_PlayHitReactAnimation();
+
 		// const bool bIsCriticalDamage{ DamageEvent.DamageTypeClass == UNetherCrownCriticalPhysicalDamageType::StaticClass() };
 		// Multicast_PlayTakeDamageAnimation(bIsCriticalDamage);
 		// Multicast_PlayTakeDamageSound();
@@ -54,6 +56,7 @@ void UNetherCrownDamageReceiverComponent::BeginPlay()
 
 	CacheOwnerCharacter();
 	CacheDamageReceiveDataAsset();
+	CacheHitReactAnimMontage();
 }
 
 void UNetherCrownDamageReceiverComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -76,6 +79,25 @@ void UNetherCrownDamageReceiverComponent::CacheDamageReceiveDataAsset()
 	if (!DamageReceiveDataAssetSoft.IsNull())
 	{
 		CachedDamageReceiveDataAsset = DamageReceiveDataAssetSoft.LoadSynchronous();
+	}
+}
+
+void UNetherCrownDamageReceiverComponent::CacheHitReactAnimMontage()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedDamageReceiveDataAsset)))
+	{
+		return;
+	}
+
+	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
+	if (!DamageReceiveData.HitReactAnimMontageSoft.IsNull())
+	{
+		CachedHitReactAnimMontage = DamageReceiveData.HitReactAnimMontageSoft.LoadSynchronous();
 	}
 }
 
@@ -111,6 +133,72 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactEffect_Implemen
 
 	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
 	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitImpactTag, CachedOwnerCharacter->GetActorTransform());
+}
+
+void UNetherCrownDamageReceiverComponent::Multicast_PlayHitReactAnimation_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)))
+	{
+		return;
+	}
+
+	const USkeletalMeshComponent* OwnerSkeletalMeshComponent{ CachedOwnerCharacter->GetMesh() };
+	if (!ensureAlways(IsValid(OwnerSkeletalMeshComponent)))
+	{
+		return;
+	}
+
+	UNetherCrownKnightAnimInstance* OwnerKnightAnimInstance{ Cast<UNetherCrownKnightAnimInstance>(OwnerSkeletalMeshComponent->GetAnimInstance()) };
+	if (!ensureAlways(IsValid(OwnerKnightAnimInstance)))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedHitReactAnimMontage)))
+	{
+		return;
+	}
+
+	OwnerKnightAnimInstance->Montage_Play(CachedHitReactAnimMontage);
+
+	if (!ensureAlways(IsValid(CachedDamageReceiveDataAsset)))
+	{
+		return;
+	}
+
+	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
+	const TMap<int32, FName>& HitReactSectionNameMap{ DamageReceiveData.HitReactSectionNameMap };
+	const int32 RandomMontageSectionNum{ FMath::RandRange(0, HitReactSectionNameMap.Num() - 1) };
+	if (HitReactSectionNameMap.Contains(RandomMontageSectionNum))
+	{
+		OwnerKnightAnimInstance->Montage_JumpToSection(*HitReactSectionNameMap.Find(RandomMontageSectionNum), CachedHitReactAnimMontage);
+	}
+}
+
+void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactSound_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedDamageReceiveDataAsset)))
+	{
+		return;
+	}
+
+	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitGruntSoundTag);
 }
 
 float UNetherCrownDamageReceiverComponent::CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const

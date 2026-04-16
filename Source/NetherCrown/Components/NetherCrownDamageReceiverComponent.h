@@ -27,12 +27,19 @@ protected:
 private:
 	void CacheOwnerCharacter();
 	void CacheDamageReceiveDataAsset();
+	void CacheHitReactAnimMontage();
 
 	UFUNCTION(Client, Unreliable)
 	void Client_PlayHitCameraShake();
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitImpactEffect();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayHitReactAnimation();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayHitImpactSound();
 
 	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
 	void ApplyFinalDamage(float FinalDamage);
@@ -46,6 +53,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownCharacterDamageReceiveDataAsset> CachedDamageReceiveDataAsset{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> CachedHitReactAnimMontage{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiverData")
 	TSoftObjectPtr<UNetherCrownCharacterDamageReceiveDataAsset> DamageReceiveDataAssetSoft{};
