@@ -7,6 +7,7 @@
 #include "Kismet/KismetMathLibrary.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Enemy/Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -15,6 +16,29 @@ void UNetherCrownSkillEnemyDashAttack::InitEnemySkillObject()
 	Super::InitEnemySkillObject();
 
 	CacheEnemyDashAttackData();
+}
+
+void UNetherCrownSkillEnemyDashAttack::DetectTargetAndAttack()
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.IsValid() ? SkillOwnerEnemyWeak.Get() : nullptr };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	UNetherCrownEnemyBasicAttackComponent* EnemyBasicAttackComponent{ SkillOwnerEnemy->GetEnemyBasicAttackComponent() };
+	if (!ensureAlways(IsValid(EnemyBasicAttackComponent)))
+	{
+		return;
+	}
+
+	const UNetherCrownEnemyBasicAttackDataAsset* DashFollowUpBasicAttackDataAsset{ CachedEnemyDashAttackData.DashFollowUpBasicAttackDataAssetSoft.LoadSynchronous() };
+	if (!ensureAlways(IsValid(DashFollowUpBasicAttackDataAsset)))
+	{
+		return;
+	}
+
+	EnemyBasicAttackComponent->RequestEnemyAttackByDA(DashFollowUpBasicAttackDataAsset);
 }
 
 void UNetherCrownSkillEnemyDashAttack::CacheEnemyDashAttackData()
@@ -43,6 +67,7 @@ void UNetherCrownSkillEnemyDashAttack::ExecuteEnemySkillGameplay()
 	UE_LOG(LogTemp, Warning, TEXT("Execute Enemy SkillGameplay!!!"));
 
 	Multicast_EnemyDashAttack();
+	DetectTargetAndAttack();
 }
 
 void UNetherCrownSkillEnemyDashAttack::Multicast_EnemyDashAttack_Implementation()

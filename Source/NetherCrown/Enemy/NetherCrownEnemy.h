@@ -32,6 +32,7 @@ public:
 	UNetherCrownEnemyStatComponent* GetEnemyStatComponent() const { return EnemyStatComponent; }
 	UNetherCrownEnemyBTCosmeticComponent* GetEnemyBTCosmeticComponent() const { return EnemyBTCosmeticComponent; }
 	UNetherCrownEnemySkillComponent* GetEnemySkillComponent() const { return EnemySkillComponent; }
+	UNetherCrownEnemyBasicAttackComponent* GetEnemyBasicAttackComponent() const { return BasicAttackComponent; }
 
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 

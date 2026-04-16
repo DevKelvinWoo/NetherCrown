@@ -29,6 +29,7 @@ public:
 	UNetherCrownEnemyBasicAttackComponent();
 
 	void RequestEnemyAttack();
+	void RequestEnemyAttackByDA(const UNetherCrownEnemyBasicAttackDataAsset* InEnemyBasicAttackDataAsset);
 
 	void SetHandledEnemyWeapon(ANetherCrownEnemyWeapon* InWeapon);
 
@@ -39,6 +40,7 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	void StartEnemyAttack(const FNetherCrownEnemyBasicAttackData& InEnemyBasicAttackData, UAnimMontage* InAttackMontage, const bool bNeedAttackAnimMontage = true);
 	void SetupBasicAttackTimer();
 
 	void EnableHitTrace();
@@ -58,11 +60,17 @@ private:
 	UPROPERTY(Transient)
 	FNetherCrownEnemyBasicAttackData EnemyBasicAttackData{};
 
+	UPROPERTY(Transient)
+	FNetherCrownEnemyBasicAttackData ActiveEnemyBasicAttackData{};
+
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyBasicAttackDataAsset")
 	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> EnemyBasicAttackDataAssetSoft{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedBasicAttackMontage{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UAnimMontage> CachedActiveAttackMontage{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};

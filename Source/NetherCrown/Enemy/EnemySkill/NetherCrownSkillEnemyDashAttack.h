@@ -30,6 +30,8 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_EnemyDashAttack();
 
+	void DetectTargetAndAttack();
+
 	void CacheEnemyDashAttackData();
 	void BroadcastDashAttackFinished();
 

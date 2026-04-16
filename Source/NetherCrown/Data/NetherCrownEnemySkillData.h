@@ -7,6 +7,8 @@
 #include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemySkillObject.h"
 #include "NetherCrownEnemySkillData.generated.h"
 
+class UNetherCrownEnemyBasicAttackDataAsset;
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownEnemySkillDataAsset : public UDataAsset
 {
@@ -51,6 +53,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	float DashOffset{ 100.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
+	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> DashFollowUpBasicAttackDataAssetSoft{};
 };
 
 UCLASS()

@@ -2,11 +2,9 @@
 
 #include "NetherCrownEnemyBasicAttackComponent.h"
 
-#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
-#include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
@@ -30,6 +28,9 @@ void UNetherCrownEnemyBasicAttackComponent::BeginPlay()
 	CachedOwnerEnemy = Cast<ANetherCrownEnemy>(GetOwner());
 	LoadEnemyBasicAttackData();
 	CacheBasicAttackAnimMontage();
+
+	ActiveEnemyBasicAttackData = EnemyBasicAttackData;
+	CachedActiveAttackMontage = CachedBasicAttackMontage;
 }
 
 void UNetherCrownEnemyBasicAttackComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -70,9 +71,9 @@ void UNetherCrownEnemyBasicAttackComponent::SetupBasicAttackTimer()
 	TimerManager.ClearTimer(DisableHitTraceTimerHandle);
 	TimerManager.ClearTimer(AttackEndTimerHandle);
 
-	TimerManager.SetTimer(EnableHitTraceTimerHandle, this, &ThisClass::EnableHitTrace, EnemyBasicAttackData.EnableHitTraceTime, false);
-	TimerManager.SetTimer(DisableHitTraceTimerHandle, this, &ThisClass::DisableHitTrace, EnemyBasicAttackData.DisableHitTraceTime, false);
-	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::EndAttack, EnemyBasicAttackData.EndAttackTime, false);
+	TimerManager.SetTimer(EnableHitTraceTimerHandle, this, &ThisClass::EnableHitTrace, ActiveEnemyBasicAttackData.EnableHitTraceTime, false);
+	TimerManager.SetTimer(DisableHitTraceTimerHandle, this, &ThisClass::DisableHitTrace, ActiveEnemyBasicAttackData.DisableHitTraceTime, false);
+	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::EndAttack, ActiveEnemyBasicAttackData.EndAttackTime, false);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::EnableHitTrace()
@@ -125,14 +126,14 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 		CurrentEndLocation,
 		FQuat::Identity,
 		ECC_WeaponHitCheck,
-		FCollisionShape::MakeSphere(EnemyBasicAttackData.TraceRadius),
+		FCollisionShape::MakeSphere(ActiveEnemyBasicAttackData.TraceRadius),
 		Params
 	);
 
 #if 1
 	DrawDebugLine(GetWorld(), LastEndLocation, CurrentEndLocation, FColor::Red, false, 2.0f);
-	DrawDebugSphere(GetWorld(), LastEndLocation, EnemyBasicAttackData.TraceRadius, 8, FColor::Yellow, false, 2.0f);
-	DrawDebugSphere(GetWorld(), CurrentEndLocation, EnemyBasicAttackData.TraceRadius, 8, FColor::Blue, false, 2.0f);
+	DrawDebugSphere(GetWorld(), LastEndLocation, ActiveEnemyBasicAttackData.TraceRadius, 8, FColor::Yellow, false, 2.0f);
+	DrawDebugSphere(GetWorld(), CurrentEndLocation, ActiveEnemyBasicAttackData.TraceRadius, 8, FColor::Blue, false, 2.0f);
 #endif
 
 	LastEndLocation = CurrentEndLocation;
@@ -206,7 +207,7 @@ FVector UNetherCrownEnemyBasicAttackComponent::GetWeaponTraceSocketLocation() co
 		return FVector::ZeroVector;
 	}
 
-	return WeaponOrBodySkeletalMeshComponent->GetSocketLocation(EnemyBasicAttackData.WeaponTraceSocketName);
+	return WeaponOrBodySkeletalMeshComponent->GetSocketLocation(ActiveEnemyBasicAttackData.WeaponTraceSocketName);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttack()
@@ -216,15 +217,48 @@ void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttack()
 		return;
 	}
 
+	StartEnemyAttack(EnemyBasicAttackData, CachedBasicAttackMontage);
+}
+
+void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttackByDA(const UNetherCrownEnemyBasicAttackDataAsset* InEnemyBasicAttackDataAsset)
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(InEnemyBasicAttackDataAsset)))
+	{
+		return;
+	}
+
+	const FNetherCrownEnemyBasicAttackData DashEnemyBasicAttackData{ InEnemyBasicAttackDataAsset->GetEnemyBasicAttackData() };
+	UAnimMontage* DashEnemyBasicAttackMontage{ DashEnemyBasicAttackData.BasicAttackMontageSoft.IsNull() ? nullptr : DashEnemyBasicAttackData.BasicAttackMontageSoft.LoadSynchronous() };
+
+	StartEnemyAttack(DashEnemyBasicAttackData, DashEnemyBasicAttackMontage);
+}
+
+void UNetherCrownEnemyBasicAttackComponent::StartEnemyAttack(const FNetherCrownEnemyBasicAttackData& InEnemyBasicAttackData, UAnimMontage* InAttackMontage, const bool bNeedAttackAnimMontage/*true*/)
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
 	if (EnemyBasicAttackState != ENetherCrownEnemyBasicAttackState::Attacking)
 	{
+		ActiveEnemyBasicAttackData = InEnemyBasicAttackData;
+		CachedActiveAttackMontage = InAttackMontage;
 		LastEndLocation = GetWeaponTraceSocketLocation();
 
 		EnemyBasicAttackState = ENetherCrownEnemyBasicAttackState::Attacking;
 
 		SetupBasicAttackTimer();
 
-		Multicast_PlayBasicAttackMontage();
+		if (bNeedAttackAnimMontage)
+		{
+			Multicast_PlayBasicAttackMontage();
+		}
 	}
 }
 
@@ -247,10 +281,10 @@ void UNetherCrownEnemyBasicAttackComponent::Multicast_PlayBasicAttackMontage_Imp
 		return;
 	}
 
-	if (!ensureAlways(IsValid(CachedBasicAttackMontage)))
+	if (!ensureAlways(IsValid(CachedActiveAttackMontage)))
 	{
 		return;
 	}
 
-	EnemyAnimInstance->Montage_Play(CachedBasicAttackMontage);
+	EnemyAnimInstance->Montage_Play(CachedActiveAttackMontage);
 }
