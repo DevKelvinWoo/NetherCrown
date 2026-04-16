@@ -3,10 +3,21 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "NetherCrownCharacterDamageReceiveDataAsset.generated.h"
 
 class UCameraShakeBase;
+
+USTRUCT()
+struct FNetherCrownDamageReceiveTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveTagData")
+	FGameplayTag HitImpactTag{};
+};
 
 USTRUCT()
 struct FNetherCrownCharacterDamageReceiveData
@@ -16,6 +27,9 @@ struct FNetherCrownCharacterDamageReceiveData
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveData")
 	TSubclassOf<UCameraShakeBase> HitCameraShakeClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveData")
+	FNetherCrownDamageReceiveTagData DamageReceiveTagData{};
 };
 
 UCLASS()

@@ -31,6 +31,9 @@ private:
 	UFUNCTION(Client, Unreliable)
 	void Client_PlayHitCameraShake();
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayHitImpactEffect();
+
 	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
 	void ApplyFinalDamage(float FinalDamage);
 

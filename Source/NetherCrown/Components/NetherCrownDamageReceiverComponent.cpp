@@ -10,6 +10,7 @@
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Data/NetherCrownCharacterDamageReceiveDataAsset.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 UNetherCrownDamageReceiverComponent::UNetherCrownDamageReceiverComponent()
 {
@@ -28,6 +29,7 @@ float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmou
 	const float FinalDamage{ CalculateFinalDamage(DamageAmount, DamageEvent, DamageCauser) };
 	ApplyFinalDamage(FinalDamage);
 
+	Multicast_PlayHitImpactEffect();
 	Client_PlayHitCameraShake();
 
 	if (IsDead())
@@ -98,6 +100,17 @@ void UNetherCrownDamageReceiverComponent::Client_PlayHitCameraShake_Implementati
 
 	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
 	CameraManager->StartCameraShake(DamageReceiveData.HitCameraShakeClass, 1.0f);
+}
+
+void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactEffect_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitImpactTag, CachedOwnerCharacter->GetActorTransform());
 }
 
 float UNetherCrownDamageReceiverComponent::CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const

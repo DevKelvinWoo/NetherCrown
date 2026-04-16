@@ -31,6 +31,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_DashAttack_Impact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_FrozenDeath_Impact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_FrozenDeath_Impact_BackGround);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Knight_HitImpact);
 #pragma endregion
 
 #pragma region Weapon
