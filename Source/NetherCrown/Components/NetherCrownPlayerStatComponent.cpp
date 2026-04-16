@@ -102,3 +102,15 @@ void UNetherCrownPlayerStatComponent::ModifyMP(float MPDelta)
 
 	OnCharacterMPModified.Broadcast(PlayerStatData.CharacterMP / PlayerStatData.CharacterMaxMP);
 }
+
+void UNetherCrownPlayerStatComponent::ModifyHp(float HpDelta)
+{
+	CacheOwnerCharacter();
+
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	PlayerStatData.CharacterHP += HpDelta;
+}

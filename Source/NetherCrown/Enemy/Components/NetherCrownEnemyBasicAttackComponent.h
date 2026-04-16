@@ -50,6 +50,9 @@ private:
 	void DetectHit();
 
 	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_InitHitTraceState(const FVector& InLastEndLocation);
+
+	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayBasicAttackMontage();
 
 	void LoadEnemyBasicAttackData();
@@ -83,6 +86,9 @@ private:
 
 	UPROPERTY(Replicated)
 	FVector LastEndLocation{};
+
+	UPROPERTY(Replicated)
+	TArray<TObjectPtr<ANetherCrownCharacter>> HitIgnoreCharacters{}; //TSet은 Replicate X
 
 	TWeakObjectPtr<ANetherCrownEnemyWeapon> HandledEnemyWeaponWeak{};
 

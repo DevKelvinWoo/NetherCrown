@@ -39,12 +39,12 @@ void UNetherCrownEnemyStatComponent::LoadEnemyStatData()
 	EnemyStatData = PlayerStatDataAsset->GetEnemyStatData();
 }
 
-void UNetherCrownEnemyStatComponent::SetEnemyHp(int32 InHp)
+void UNetherCrownEnemyStatComponent::ModifyEnemyHp(float HpDelta)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
 		return;
 	}
 
-	EnemyStatData.EnemyHP = InHp;
+	EnemyStatData.EnemyHP += HpDelta;
 }

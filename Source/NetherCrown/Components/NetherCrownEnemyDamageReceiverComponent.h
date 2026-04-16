@@ -39,6 +39,7 @@ private:
 	int32 GetWeaponPenetration(const bool bIsPhysicalDamage, const AActor* DamageCauser) const;
 	int32 GetArmorStat(const bool bIsPhysicalDamage) const;
 
+	void CacheOwnerEnemy();
 	void LoadEnemyDamageCosmeticData();
 	void CacheDeathMaterialInstances();
 	void BindTimelineFunctions();

@@ -50,6 +50,7 @@ void UNetherCrownEnemyBasicAttackComponent::GetLifetimeReplicatedProps(TArray<cl
 	DOREPLIFETIME(ThisClass, bEnableHitTrace);
 	DOREPLIFETIME(ThisClass, EnemyBasicAttackState);
 	DOREPLIFETIME(ThisClass, LastEndLocation);
+	DOREPLIFETIME(ThisClass, HitIgnoreCharacters);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::SetupBasicAttackTimer()
@@ -83,6 +84,7 @@ void UNetherCrownEnemyBasicAttackComponent::EnableHitTrace()
 		return;
 	}
 
+	Multicast_InitHitTraceState(GetWeaponTraceSocketLocation());
 	bEnableHitTrace = true;
 }
 
@@ -119,6 +121,11 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 	FCollisionQueryParams Params{};
 	Params.AddIgnoredActor(CachedOwnerEnemy);
 
+	for (const ANetherCrownCharacter* HitCharacter : HitIgnoreCharacters)
+	{
+		Params.AddIgnoredActor(HitCharacter);
+	}
+
 	//@NOTE : bHit는 block일때만 true가 됨, overlap일때는 false
 	bool bHit = GetWorld()->SweepMultiByChannel(
 		HitResults,
@@ -149,6 +156,7 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 		if (ANetherCrownCharacter* HitCharacter = Cast<ANetherCrownCharacter>(Hit.GetActor()))
 		{
 			HitInfoMap.Add(HitCharacter, Hit.ImpactPoint);
+			HitIgnoreCharacters.AddUnique(HitCharacter);
 		}
 	}
 
@@ -260,6 +268,12 @@ void UNetherCrownEnemyBasicAttackComponent::StartEnemyAttack(const FNetherCrownE
 			Multicast_PlayBasicAttackMontage();
 		}
 	}
+}
+
+void UNetherCrownEnemyBasicAttackComponent::Multicast_InitHitTraceState_Implementation(const FVector& InLastEndLocation)
+{
+	HitIgnoreCharacters.Empty();
+	LastEndLocation = InLastEndLocation;
 }
 
 void UNetherCrownEnemyBasicAttackComponent::Multicast_PlayBasicAttackMontage_Implementation()

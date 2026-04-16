@@ -26,6 +26,7 @@ public:
 	void ClearPlayerShield();
 
 	void ModifyMP(float MPDelta);
+	void ModifyHp(float HpDelta);
 
 	//Delegate
 	FOnChacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }

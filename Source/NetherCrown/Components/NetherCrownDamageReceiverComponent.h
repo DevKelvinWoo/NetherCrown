@@ -7,6 +7,8 @@
 #include "NetherCrownDamageReceiverComponent.generated.h"
 
 
+class ANetherCrownCharacter;
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownDamageReceiverComponent : public UActorComponent
 {
@@ -22,5 +24,15 @@ protected:
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
+	void CacheOwnerCharacter();
 
+	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
+	void ApplyFinalDamage(float FinalDamage);
+
+	int32 GetArmorStat(const bool bIsPhysicalDamage) const;
+
+	bool IsDead() const;
+
+	UPROPERTY(Transient)
+	TObjectPtr<ANetherCrownCharacter> CachedOwnerCharacter{};
 };

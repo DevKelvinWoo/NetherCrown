@@ -19,7 +19,7 @@ public:
 
 	const FNetherCrownEnemyStat& GetEnemyStatData() const { return EnemyStatData; }
 
-	void SetEnemyHp(int32 InHp);
+	void ModifyEnemyHp(float HpDelta);
 
 protected:
 	virtual void BeginPlay() override;

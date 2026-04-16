@@ -29,8 +29,7 @@ void UNetherCrownEnemyDamageReceiverComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CachedOwnerEnemy = Cast<ANetherCrownEnemy>(GetOwner());
-
+	CacheOwnerEnemy();
 	LoadEnemyDamageCosmeticData();
 	CacheDeathMaterialInstances();
 	BindTimelineFunctions();
@@ -102,11 +101,7 @@ void UNetherCrownEnemyDamageReceiverComponent::ApplyFinalDamage(float FinalDamag
 		return;
 	}
 
-	const FNetherCrownEnemyStat& EnemyStatData{ EnemyStatComponent->GetEnemyStatData() };
-	const int32 CurrentHP = EnemyStatData.EnemyHP;
-	const int32 NewHP = FMath::Max(0, CurrentHP - FinalDamage);
-
-	EnemyStatComponent->SetEnemyHp(NewHP);
+	EnemyStatComponent->ModifyEnemyHp(-FinalDamage);
 }
 
 bool UNetherCrownEnemyDamageReceiverComponent::IsDead() const
@@ -209,6 +204,11 @@ int32 UNetherCrownEnemyDamageReceiverComponent::GetArmorStat(const bool bIsPhysi
 	const FNetherCrownEnemyStat& EnemyStat{ EnemyStatComponent->GetEnemyStatData() };
 
 	return bIsPhysicalDamage ? EnemyStat.PhysicalArmor : EnemyStat.MagicArmor;
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::CacheOwnerEnemy()
+{
+	CachedOwnerEnemy = Cast<ANetherCrownEnemy>(GetOwner());
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::LoadEnemyDamageCosmeticData()
