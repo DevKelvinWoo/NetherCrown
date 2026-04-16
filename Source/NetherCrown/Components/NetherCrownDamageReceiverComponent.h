@@ -7,6 +7,7 @@
 #include "NetherCrownDamageReceiverComponent.generated.h"
 
 
+class UNetherCrownCharacterDamageReceiveDataAsset;
 class ANetherCrownCharacter;
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -25,6 +26,10 @@ protected:
 
 private:
 	void CacheOwnerCharacter();
+	void CacheDamageReceiveDataAsset();
+
+	UFUNCTION(Client, Unreliable)
+	void Client_PlayHitCameraShake();
 
 	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
 	void ApplyFinalDamage(float FinalDamage);
@@ -35,4 +40,10 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedOwnerCharacter{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UNetherCrownCharacterDamageReceiveDataAsset> CachedDamageReceiveDataAsset{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiverData")
+	TSoftObjectPtr<UNetherCrownCharacterDamageReceiveDataAsset> DamageReceiveDataAssetSoft{};
 };

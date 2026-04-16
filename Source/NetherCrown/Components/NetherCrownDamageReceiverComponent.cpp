@@ -6,7 +6,9 @@
 #include "NetherCrownPlayerStatComponent.h"
 #include "Engine/DamageEvents.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
+#include "NetherCrown/Data/NetherCrownCharacterDamageReceiveDataAsset.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 
 UNetherCrownDamageReceiverComponent::UNetherCrownDamageReceiverComponent()
@@ -18,9 +20,15 @@ UNetherCrownDamageReceiverComponent::UNetherCrownDamageReceiverComponent()
 
 float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser)
 {
-	const float FinalDamage{ CalculateFinalDamage(DamageAmount, DamageEvent, DamageCauser) };
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
+	{
+		return 0.f;
+	}
 
+	const float FinalDamage{ CalculateFinalDamage(DamageAmount, DamageEvent, DamageCauser) };
 	ApplyFinalDamage(FinalDamage);
+
+	Client_PlayHitCameraShake();
 
 	if (IsDead())
 	{
@@ -43,6 +51,7 @@ void UNetherCrownDamageReceiverComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CacheOwnerCharacter();
+	CacheDamageReceiveDataAsset();
 }
 
 void UNetherCrownDamageReceiverComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
@@ -53,6 +62,42 @@ void UNetherCrownDamageReceiverComponent::TickComponent(float DeltaTime, ELevelT
 void UNetherCrownDamageReceiverComponent::CacheOwnerCharacter()
 {
 	CachedOwnerCharacter = Cast<ANetherCrownCharacter>(GetOwner());
+}
+
+void UNetherCrownDamageReceiverComponent::CacheDamageReceiveDataAsset()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!DamageReceiveDataAssetSoft.IsNull())
+	{
+		CachedDamageReceiveDataAsset = DamageReceiveDataAssetSoft.LoadSynchronous();
+	}
+}
+
+void UNetherCrownDamageReceiverComponent::Client_PlayHitCameraShake_Implementation()
+{
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)))
+	{
+		return;
+	}
+
+	const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(CachedOwnerCharacter->GetController()) };
+	if (!ensureAlways(IsValid(PlayerController)))
+	{
+		return;
+	}
+
+	APlayerCameraManager* CameraManager{ PlayerController->PlayerCameraManager };
+	if (!ensureAlways(IsValid(CameraManager)))
+	{
+		return;
+	}
+
+	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
+	CameraManager->StartCameraShake(DamageReceiveData.HitCameraShakeClass, 1.0f);
 }
 
 float UNetherCrownDamageReceiverComponent::CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const
