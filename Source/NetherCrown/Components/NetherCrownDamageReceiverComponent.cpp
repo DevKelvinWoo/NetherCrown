@@ -3,6 +3,7 @@
 
 #include "NetherCrownDamageReceiverComponent.h"
 
+#include "NetherCrownCrowdControlComponent.h"
 #include "NetherCrownPlayerStatComponent.h"
 #include "Engine/DamageEvents.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
@@ -143,6 +144,17 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitReactAnimation_Implem
 	}
 
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)))
+	{
+		return;
+	}
+
+	const UNetherCrownCrowdControlComponent* OwnerCharacterCCComponent{ CachedOwnerCharacter->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(OwnerCharacterCCComponent)))
+	{
+		return;
+	}
+
+	if (OwnerCharacterCCComponent->GetCrowdControlType() != ENetherCrownCrowdControlType::NONE)
 	{
 		return;
 	}

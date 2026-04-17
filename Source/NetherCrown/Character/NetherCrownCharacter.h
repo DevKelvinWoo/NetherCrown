@@ -82,6 +82,8 @@ public:
 	UNetherCrownSkillComponent* GetSkillComponent() const { return NetherCrownSkillComponent; }
 	UNetherCrownControlPPComponent* GetControlPPComponent() const { return NetherCrownControlPPComponent; }
 	UNetherCrownControlGhostTrailComponent* GetControlGhostTrailComponent() const { return NetherCrownControlGhostTrailComponent; }
+	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return NetherCrownCrowdControlComponent; }
+
 	FOnRepPlayerState& GetOnRepPlayerState() { return OnRepPlayerState; }
 
 protected:
