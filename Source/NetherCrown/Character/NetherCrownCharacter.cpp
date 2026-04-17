@@ -438,13 +438,13 @@ void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(AN
 		return;
 	}
 
-	//@TODO : 데미지 적용 로직 구현 필요
-	UGameplayStatics::ApplyDamage(this, 10.f, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
-
 	float KnockBackDistance{ 0.f };
 	float KnockBackDuration{ 0.f };
 	if (!EnemyBasicAttackComponent->TryGetKnockBackData(KnockBackDistance, KnockBackDuration))
 	{
+		//@TODO : 데미지 적용 로직 구현 필요
+		UGameplayStatics::ApplyDamage(this, 10.f, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
+
 		return;
 	}
 
@@ -456,6 +456,9 @@ void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(AN
 	const FVector KnockBackDirection{ (GetActorLocation() - HitCauserEnemy->GetActorLocation()).GetSafeNormal2D() };
 	NetherCrownCrowdControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::KNOCK_BACK, KnockBackDuration);
 	NetherCrownCrowdControlComponent->KnockBack(KnockBackDirection * KnockBackDistance);
+
+	//@TODO : 데미지 적용 로직 구현 필요
+	UGameplayStatics::ApplyDamage(this, 10.f, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
 }
 
 UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const
