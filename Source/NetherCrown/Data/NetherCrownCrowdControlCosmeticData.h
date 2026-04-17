@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "Engine/DataAsset.h"
-#include "NetherCrown/Components/NetherCrownCrowdControlTypes.h"
 #include "NetherCrownCrowdControlCosmeticData.generated.h"
 
 class UAnimMontage;
@@ -32,9 +31,6 @@ struct FNetherCrownCrowdControlCosmeticData
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "CCMontageMap")
-	TMap<ENetherCrownCrowdControlType, TSoftObjectPtr<UAnimMontage>> CrowdControlMontageMap{};
-
 	UPROPERTY(EditDefaultsOnly, Category = "Frozen")
 	FNetherCrownFrozenCosmeticData FrozenCosmeticData{};
 };

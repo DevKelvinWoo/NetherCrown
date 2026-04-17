@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "NetherCrownCrowdControlTypes.h"
 #include "Components/ActorComponent.h"
 #include "Components/TimelineComponent.h"
 #include "NetherCrown/Data/NetherCrownCrowdControlCosmeticData.h"
@@ -37,14 +38,13 @@ private:
 	void LoadCrowdControlCosmeticData();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
+	void Multicast_SetCrowdControlState(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ClearCrowdControl_Cosmetics(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	void ClearCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType);
 
-	void PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType);
 	void RefreshCrowdControlType();
 	void RefreshMovementAndAnimationSettings() const;
 	void SetCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType, const bool bActive);
@@ -75,9 +75,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "CrowdControlCosmeticDataAsset")
 	TSoftObjectPtr<UNetherCrownCrowdControlCosmeticDataAsset> CrowdControlCosmeticDataAssetSoft{};
-
-	UPROPERTY(Transient)
-	TMap<ENetherCrownCrowdControlType, TObjectPtr<UAnimMontage>> CachedCrowdControlAnimMap{};
 
 	UPROPERTY(Replicated)
 	ENetherCrownCrowdControlType CrowdControlType{ ENetherCrownCrowdControlType::NONE };

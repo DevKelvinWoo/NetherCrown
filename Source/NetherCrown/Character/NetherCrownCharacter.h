@@ -74,6 +74,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsEquippedWeapon() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	ENetherCrownCrowdControlType GetCrowdControlType() const;
+
 	UFUNCTION(Server, Reliable)
 	void Server_ReportHitBasicAttackByEnemy(ANetherCrownEnemy* HitCauserEnemy);
 

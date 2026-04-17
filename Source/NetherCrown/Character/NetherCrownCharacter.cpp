@@ -415,6 +415,16 @@ bool ANetherCrownCharacter::IsEquippedWeapon() const
 	return NetherCrownEquipComponent->GetEquippedWeapon() ? true : false;
 }
 
+ENetherCrownCrowdControlType ANetherCrownCharacter::GetCrowdControlType() const
+{
+	if (!ensureAlways(IsValid(NetherCrownCrowdControlComponent)))
+	{
+		return ENetherCrownCrowdControlType::NONE;
+	}
+
+	return NetherCrownCrowdControlComponent->GetCrowdControlType();
+}
+
 void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(ANetherCrownEnemy* HitCauserEnemy)
 {
 	if (!ensureAlways(IsValid(HitCauserEnemy)))

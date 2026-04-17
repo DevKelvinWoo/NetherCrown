@@ -59,24 +59,13 @@ void UNetherCrownCrowdControlComponent::LoadCrowdControlCosmeticData()
 
 	CrowdControlCosmeticData = CrowdControlCosmeticDataAsset->GetCrowdControlCosmeticData();
 
-	CachedCrowdControlAnimMap.Empty();
-	for (const TPair<ENetherCrownCrowdControlType, TSoftObjectPtr<UAnimMontage>>& Pair : CrowdControlCosmeticData.CrowdControlMontageMap)
-	{
-		if (Pair.Value.IsNull())
-		{
-			continue;
-		}
-
-		CachedCrowdControlAnimMap.Add(Pair.Key, Pair.Value.LoadSynchronous());
-	}
-
 	if (!CrowdControlCosmeticData.FrozenCosmeticData.OverlayEndCurveFloatSoft.IsNull())
 	{
 		CachedFrozenTargetOverlayMaterialEndCurveFloat = CrowdControlCosmeticData.FrozenCosmeticData.OverlayEndCurveFloatSoft.LoadSynchronous();
 	}
 }
 
-void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
+void UNetherCrownCrowdControlComponent::Multicast_SetCrowdControlState_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
 	if (!ensureAlways(IsValid(CachedOwner)))
 	{
@@ -86,13 +75,6 @@ void UNetherCrownCrowdControlComponent::Multicast_PlayCrowdControlAnim_Implement
 	SetCrowdControlActive(InCrowdControlType, true);
 	RefreshCrowdControlType();
 	RefreshMovementAndAnimationSettings();
-
-	if (CrowdControlType != InCrowdControlType || CachedOwner->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	PlayCrowdControlAnim(InCrowdControlType);
 }
 
 void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime)
@@ -118,7 +100,7 @@ void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrow
 	CrowdControlTimerDelegate.BindUObject(this, &ThisClass::ClearCrowdControl, InCrowdControlType);
 	World->GetTimerManager().SetTimer(*CrowdControlTimerHandle, CrowdControlTimerDelegate, DurationTime, false);
 
-	Multicast_PlayCrowdControlAnim(InCrowdControlType);
+	Multicast_SetCrowdControlState(InCrowdControlType);
 }
 
 void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector) const
@@ -410,32 +392,6 @@ void UNetherCrownCrowdControlComponent::ClearCrowdControl(const ENetherCrownCrow
 	RefreshCrowdControlType();
 
 	Multicast_ClearCrowdControl_Cosmetics(InCrowdControlType);
-}
-
-void UNetherCrownCrowdControlComponent::PlayCrowdControlAnim(const ENetherCrownCrowdControlType InCrowdControlType)
-{
-	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
-	if (InCrowdControlType == ENetherCrownCrowdControlType::NONE)
-	{
-		return;
-	}
-
-	if (CachedCrowdControlAnimMap.IsEmpty())
-	{
-		return;
-	}
-
-	TObjectPtr<UAnimMontage>* CrowdControlAnimMontage{ CachedCrowdControlAnimMap.Find(InCrowdControlType) };
-	if (!CrowdControlAnimMontage || !ensureAlways(IsValid(*CrowdControlAnimMontage)))
-	{
-		return;
-	}
-
-	CachedOwner->PlayAnimMontage(*CrowdControlAnimMontage);
 }
 
 void UNetherCrownCrowdControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
