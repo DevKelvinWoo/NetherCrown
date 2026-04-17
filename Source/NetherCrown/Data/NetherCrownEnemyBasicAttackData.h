@@ -8,6 +8,13 @@
 
 class UAnimMontage;
 
+UENUM()
+enum class ENetherCrownEnemyBasicAttackType : uint8
+{
+	BasicAttack,
+	DashAttack,
+};
+
 USTRUCT()
 struct FNetherCrownEnemyBasicAttackData
 {
@@ -31,6 +38,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TraceData")
 	float TraceRadius{ 10.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackType")
+	ENetherCrownEnemyBasicAttackType BasicAttackType{ ENetherCrownEnemyBasicAttackType::BasicAttack };
 };
 
 UCLASS()

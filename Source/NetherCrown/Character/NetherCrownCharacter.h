@@ -75,7 +75,7 @@ public:
 	bool IsEquippedWeapon() const;
 
 	UFUNCTION(Server, Reliable)
-	void Server_ReportHitByEnemy(ANetherCrownEnemy* HitCauserEnemy);
+	void Server_ReportHitBasicAttackByEnemy(ANetherCrownEnemy* HitCauserEnemy);
 
 	UNetherCrownBasicAttackComponent* GetBasicAttackComponent() const { return NetherCrownBasicAttackComponent; }
 	UNetherCrownEquipComponent* GetEquipComponent() const { return NetherCrownEquipComponent; }

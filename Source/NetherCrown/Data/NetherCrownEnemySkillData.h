@@ -55,6 +55,12 @@ public:
 	float DashOffset{ 100.f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
+	float DashKnockBackDistance{ 1000.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
+	float DashKnockBackDuration{ 2.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> DashFollowUpBasicAttackDataAssetSoft{};
 };
 

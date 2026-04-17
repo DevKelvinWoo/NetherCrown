@@ -12,6 +12,7 @@ class UAnimMontage;
 
 class ANetherCrownEnemyWeapon;
 class ANetherCrownEnemy;
+class ANetherCrownCharacter;
 
 UENUM()
 enum class ENetherCrownEnemyBasicAttackState : uint8
@@ -32,6 +33,8 @@ public:
 	void RequestEnemyAttackByDA(const UNetherCrownEnemyBasicAttackDataAsset* InEnemyBasicAttackDataAsset);
 
 	void SetHandledEnemyWeapon(ANetherCrownEnemyWeapon* InWeapon);
+
+	bool TryGetKnockBackData(float& OutKnockBackDistance, float& OutKnockBackDuration) const;
 
 protected:
 	virtual void BeginPlay() override;

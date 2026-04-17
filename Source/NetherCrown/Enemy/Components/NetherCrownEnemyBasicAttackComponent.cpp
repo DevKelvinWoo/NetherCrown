@@ -5,9 +5,12 @@
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Data/NetherCrownEnemySkillData.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownEnemyWeapon.h"
 
 UNetherCrownEnemyBasicAttackComponent::UNetherCrownEnemyBasicAttackComponent()
@@ -19,6 +22,29 @@ UNetherCrownEnemyBasicAttackComponent::UNetherCrownEnemyBasicAttackComponent()
 void UNetherCrownEnemyBasicAttackComponent::SetHandledEnemyWeapon(ANetherCrownEnemyWeapon* InWeapon)
 {
 	HandledEnemyWeaponWeak = MakeWeakObjectPtr(InWeapon);
+}
+
+bool UNetherCrownEnemyBasicAttackComponent::TryGetKnockBackData(float& OutKnockBackDistance, float& OutKnockBackDuration) const
+{
+	OutKnockBackDistance = 0.f;
+	OutKnockBackDuration = 0.f;
+
+	if (ActiveEnemyBasicAttackData.BasicAttackType != ENetherCrownEnemyBasicAttackType::DashAttack)
+	{
+		return false;
+	}
+
+	const UNetherCrownEnemyDashAttackDataAsset* EnemyDashAttackDataAsset{ Cast<UNetherCrownEnemyDashAttackDataAsset>(FNetherCrownUtilManager::GetEnemySkillDataAssetByGameplayTag(NetherCrownTags::Enemy_Skill_DashAttack)) };
+	if (!ensureAlways(IsValid(EnemyDashAttackDataAsset)))
+	{
+		return false;
+	}
+
+	const FNetherCrownEnemyDashAttackData& EnemyDashAttackData{ EnemyDashAttackDataAsset->GetEnemyDashAttackData() };
+	OutKnockBackDistance = EnemyDashAttackData.DashKnockBackDistance;
+	OutKnockBackDuration = EnemyDashAttackData.DashKnockBackDuration;
+
+	return true;
 }
 
 void UNetherCrownEnemyBasicAttackComponent::BeginPlay()
@@ -165,7 +191,7 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 		ANetherCrownCharacter* HitCharacter{ HitInfo.Key };
 		if (ensureAlways(IsValid(HitCharacter)))
 		{
-			HitCharacter->Server_ReportHitByEnemy(CachedOwnerEnemy);
+			HitCharacter->Server_ReportHitBasicAttackByEnemy(CachedOwnerEnemy);
 		}
 	}
 }

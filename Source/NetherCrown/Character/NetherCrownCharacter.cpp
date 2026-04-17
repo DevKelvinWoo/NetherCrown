@@ -20,6 +20,7 @@
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Enemy/Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -414,14 +415,37 @@ bool ANetherCrownCharacter::IsEquippedWeapon() const
 	return NetherCrownEquipComponent->GetEquippedWeapon() ? true : false;
 }
 
-void ANetherCrownCharacter::Server_ReportHitByEnemy_Implementation(ANetherCrownEnemy* HitCauserEnemy)
+void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(ANetherCrownEnemy* HitCauserEnemy)
 {
 	if (!ensureAlways(IsValid(HitCauserEnemy)))
 	{
 		return;
 	}
 
+	const UNetherCrownEnemyBasicAttackComponent* EnemyBasicAttackComponent{ HitCauserEnemy->GetEnemyBasicAttackComponent() };
+	if (!ensureAlways(IsValid(EnemyBasicAttackComponent)))
+	{
+		return;
+	}
+
+	//@TODO : 데미지 적용 로직 구현 필요
 	UGameplayStatics::ApplyDamage(this, 10.f, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
+
+	float KnockBackDistance{ 0.f };
+	float KnockBackDuration{ 0.f };
+	if (!EnemyBasicAttackComponent->TryGetKnockBackData(KnockBackDistance, KnockBackDuration))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(NetherCrownCrowdControlComponent)))
+	{
+		return;
+	}
+
+	const FVector KnockBackDirection{ (GetActorLocation() - HitCauserEnemy->GetActorLocation()).GetSafeNormal2D() };
+	NetherCrownCrowdControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::KNOCK_BACK, KnockBackDuration);
+	NetherCrownCrowdControlComponent->KnockBack(KnockBackDirection * KnockBackDistance);
 }
 
 UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const
