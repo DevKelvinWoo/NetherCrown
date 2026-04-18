@@ -16,10 +16,13 @@ struct FNetherCrownDamageReceiveTagData
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveTagData")
-	FGameplayTag HitImpactTag{};
+	FGameplayTag HitImpactEffectTag{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveTagData")
 	FGameplayTag HitGruntSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveTagData")
+	FGameplayTag HitImpactSoundTag{};
 };
 
 USTRUCT()

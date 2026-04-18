@@ -133,7 +133,7 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactEffect_Implemen
 	}
 
 	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
-	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitImpactTag, CachedOwnerCharacter->GetActorTransform());
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitImpactEffectTag, CachedOwnerCharacter->GetActorTransform());
 }
 
 void UNetherCrownDamageReceiverComponent::Multicast_PlayHitReactAnimation_Implementation()
@@ -211,6 +211,7 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactSound_Implement
 
 	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitGruntSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitImpactSoundTag);
 }
 
 float UNetherCrownDamageReceiverComponent::CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const
