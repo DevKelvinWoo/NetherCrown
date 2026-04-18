@@ -78,7 +78,7 @@ public:
 	ENetherCrownCrowdControlType GetCrowdControlType() const;
 
 	UFUNCTION(Server, Reliable)
-	void Server_ReportHitBasicAttackByEnemy(ANetherCrownEnemy* HitCauserEnemy);
+	void Server_ReportHitBasicAttackByEnemy(ANetherCrownEnemy* HitCauserEnemy, const int32 EnemyAttackDamage);
 
 	UNetherCrownBasicAttackComponent* GetBasicAttackComponent() const { return NetherCrownBasicAttackComponent; }
 	UNetherCrownEquipComponent* GetEquipComponent() const { return NetherCrownEquipComponent; }

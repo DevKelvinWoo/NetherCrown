@@ -43,6 +43,8 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	int32 GetEnemyAttackDamage() const;
+
 	void StartEnemyAttack(const FNetherCrownEnemyBasicAttackData& InEnemyBasicAttackData, UAnimMontage* InAttackMontage, const bool bNeedAttackAnimMontage = true);
 	void SetupBasicAttackTimer();
 

@@ -5,6 +5,7 @@
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
 #include "NetherCrown/Data/NetherCrownEnemySkillData.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -77,6 +78,22 @@ void UNetherCrownEnemyBasicAttackComponent::GetLifetimeReplicatedProps(TArray<cl
 	DOREPLIFETIME(ThisClass, EnemyBasicAttackState);
 	DOREPLIFETIME(ThisClass, LastEndLocation);
 	DOREPLIFETIME(ThisClass, HitIgnoreCharacters);
+}
+
+int32 UNetherCrownEnemyBasicAttackComponent::GetEnemyAttackDamage() const
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)))
+	{
+		return 0;
+	}
+
+	const UNetherCrownEnemyStatComponent* EnemyStatComponent{ CachedOwnerEnemy->GetEnemyStatComponent() };
+	if (!ensureAlways(IsValid(EnemyStatComponent)))
+	{
+		return 0;
+	}
+
+	return EnemyStatComponent->GetEnemyStatData().AttackDamage;
 }
 
 void UNetherCrownEnemyBasicAttackComponent::SetupBasicAttackTimer()
@@ -191,7 +208,7 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 		ANetherCrownCharacter* HitCharacter{ HitInfo.Key };
 		if (ensureAlways(IsValid(HitCharacter)))
 		{
-			HitCharacter->Server_ReportHitBasicAttackByEnemy(CachedOwnerEnemy);
+			HitCharacter->Server_ReportHitBasicAttackByEnemy(CachedOwnerEnemy, GetEnemyAttackDamage());
 		}
 	}
 }

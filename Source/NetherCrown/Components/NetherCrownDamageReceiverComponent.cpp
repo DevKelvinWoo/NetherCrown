@@ -42,10 +42,6 @@ float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmou
 	{
 		Multicast_PlayHitImpactSound();
 		Multicast_PlayHitReactAnimation();
-
-		// const bool bIsCriticalDamage{ DamageEvent.DamageTypeClass == UNetherCrownCriticalPhysicalDamageType::StaticClass() };
-		// Multicast_PlayTakeDamageAnimation(bIsCriticalDamage);
-		// Multicast_PlayTakeDamageSound();
 	}
 
 	return FinalDamage;
