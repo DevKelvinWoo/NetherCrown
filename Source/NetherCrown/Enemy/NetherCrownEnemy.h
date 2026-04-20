@@ -39,6 +39,8 @@ public:
 	void SetCurrentTargetCharacter(ANetherCrownCharacter* InTargetCharacter);
 	const ANetherCrownCharacter* GetCurrentTargetCharacter() const { return CurrentTargetCharacterWeak.Get(); }
 
+	void SetCharacterMaxSpeed(const bool bIsRunChase);
+
 	void SetIsDead(const bool InbIsDead);
 	bool IsDead() { return bIsDead; }
 

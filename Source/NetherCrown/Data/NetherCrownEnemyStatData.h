@@ -29,6 +29,12 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	int32 AttackRange{ 200 };
+
+	UPROPERTY(EditAnywhere)
+	float DefaultSpeed{ 300.f };
+
+	UPROPERTY(EditAnywhere)
+	float RunChaseSpeed{ 600.f };
 };
 
 UCLASS()

@@ -4,25 +4,17 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
-#include "NetherCrownEnemySelectChaseTypeTask.generated.h"
-
-UENUM(BlueprintType)
-enum class ENetherCrownEnemyChaseType : uint8
-{
-	None,
-	DashChase,
-	RunChase
-};
+#include "NetherCrownEnemyRunningChaseTask.generated.h"
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownEnemySelectChaseTypeTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownEnemyRunningChaseTask : public UBTTaskNode
 {
 	GENERATED_BODY()
 
 public:
-	UNetherCrownEnemySelectChaseTypeTask();
+	UNetherCrownEnemyRunningChaseTask();
 
-protected:
+public:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
@@ -30,11 +22,5 @@ private:
 	FBlackboardKeySelector ChaseTypeBlackboardKey{};
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector NeedDashAttackBlackboardKey{};
-
-	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector NeedRunChaseBlackboardKey{};
-
-	UPROPERTY(EditAnywhere, Category = "Data")
-	float DashChaseProbability{ 0.5f };
 };

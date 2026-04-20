@@ -58,6 +58,25 @@ void ANetherCrownEnemy::SetCurrentTargetCharacter(ANetherCrownCharacter* InTarge
 	CurrentTargetCharacterWeak = MakeWeakObjectPtr(InTargetCharacter);
 }
 
+void ANetherCrownEnemy::SetCharacterMaxSpeed(const bool bIsRunChase)
+{
+	UCharacterMovementComponent* CharacterMovementComponent{ GetCharacterMovement() };
+	if (!ensureAlways(IsValid(CharacterMovementComponent)))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(EnemyStatComponent)))
+	{
+		return;
+	}
+
+	const FNetherCrownEnemyStat& EnemyStat{ EnemyStatComponent->GetEnemyStatData() };
+	const float Speed{ bIsRunChase ? EnemyStat.RunChaseSpeed : EnemyStat.DefaultSpeed };
+
+	CharacterMovementComponent->MaxWalkSpeed = Speed;
+}
+
 void ANetherCrownEnemy::SetIsDead(const bool InbIsDead)
 {
 	if (HasAuthority())

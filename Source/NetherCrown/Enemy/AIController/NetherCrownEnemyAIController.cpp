@@ -100,6 +100,7 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 		BlackboardComponentCached->ClearValue(EnemyAITuningData.ChaseTypeBlackboardKeyName);
 		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKeyName);
 
+		OwnerEnemy->SetCharacterMaxSpeed(false);
 		OwnerEnemy->SetCurrentTargetCharacter(nullptr);
 	}
 }
