@@ -3,6 +3,7 @@
 #include "NetherCrownEnemy.h"
 
 #include "NiagaraComponent.h"
+#include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
@@ -83,6 +84,7 @@ void ANetherCrownEnemy::SetIsDead(const bool InbIsDead)
 	{
 		bIsDead = InbIsDead;
 
+		Multicast_SetAllMontageDisable();
 		Multicast_SetHitBoxCollisionEnabled(false);
 		Multicast_SetCapsuleCollisionResponse(ECC_Pawn, ECR_Ignore);
 		Multicast_DeActiveStatusNiagaraSystem();
@@ -183,6 +185,28 @@ void ANetherCrownEnemy::SetEnemyMovementComponentValue()
 	CharacterMovementComponent->bOrientRotationToMovement = true;
 
 	bUseControllerRotationYaw = false;
+}
+
+void ANetherCrownEnemy::Multicast_SetAllMontageDisable_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	const USkeletalMeshComponent* SkeletalMeshComponent{ GetMesh() };
+	if (!ensureAlways(IsValid(SkeletalMeshComponent)))
+	{
+		return;
+	}
+
+	UNetherCrownEnemyAnimInstance* EnemyAnimInstance{ Cast<UNetherCrownEnemyAnimInstance>(SkeletalMeshComponent->GetAnimInstance()) };
+	if (!ensureAlways(IsValid(EnemyAnimInstance)))
+	{
+		return;
+	}
+
+	EnemyAnimInstance->StopAllMontages(true);
 }
 
 void ANetherCrownEnemy::Multicast_DeActiveStatusNiagaraSystem_Implementation()

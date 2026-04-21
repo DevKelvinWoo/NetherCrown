@@ -65,6 +65,9 @@ private:
 	void Multicast_SetHitBoxCollisionEnabled(const bool bEnable);
 
 	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetAllMontageDisable();
+
+	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCapsuleCollisionResponse(const ECollisionChannel Channel, const ECollisionResponse Response);
 
 	UFUNCTION(NetMulticast, UnReliable)

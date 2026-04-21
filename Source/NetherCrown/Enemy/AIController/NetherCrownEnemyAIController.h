@@ -21,6 +21,8 @@ class NETHERCROWN_API ANetherCrownEnemyAIController : public AAIController
 public:
 	ANetherCrownEnemyAIController();
 
+	void HandleEnemyDead();
+
 	float GetPatrolRadius() const { return EnemyAITuningData.PatrolRadius; }
 
 protected:

@@ -18,6 +18,29 @@ ANetherCrownEnemyAIController::ANetherCrownEnemyAIController()
 	SightConfig = CreateDefaultSubobject<UAISenseConfig_Sight>(TEXT("SightConfig"));
 }
 
+void ANetherCrownEnemyAIController::HandleEnemyDead()
+{
+	UBehaviorTreeComponent* BTComponent{ Cast<UBehaviorTreeComponent>(BrainComponent) };
+	if (!ensureAlways(IsValid(BTComponent)))
+	{
+		return;
+	}
+
+	if (ensureAlways(IsValid(BlackboardComponentCached)))
+	{
+		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKeyName);
+		BlackboardComponentCached->ClearValue(EnemyAITuningData.NeedFoundReactionBlackboardKeyName);
+		BlackboardComponentCached->ClearValue(EnemyAITuningData.ChaseTypeBlackboardKeyName);
+	}
+
+	if (ensureAlways(IsValid(EnemyPerceptionComponent)))
+	{
+		EnemyPerceptionComponent->SetActive(false);
+	}
+
+	BTComponent->StopTree(EBTStopMode::Safe);
+}
+
 void ANetherCrownEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();

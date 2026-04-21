@@ -15,6 +15,7 @@
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -128,6 +129,13 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead()
 		return;
 	}
 
+	ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(CachedOwnerEnemy->GetController()) };
+	if (!ensureAlways(IsValid(EnemyAIController)))
+	{
+		return;
+	}
+
+	EnemyAIController->HandleEnemyDead();
 	CachedOwnerEnemy->SetIsDead(true);
 
 	Multicast_PlayDeathSound();
