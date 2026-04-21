@@ -15,11 +15,14 @@ void UNetherCrownPlayerStatusWidgetViewModel::InitViewModel(ANetherCrownCharacte
 		return;
 	}
 
+	UnbindModelDelegates();
+
 	ModelCharacterWeak = MakeWeakObjectPtr(InModelCharacter);
 
 	UNetherCrownSkillComponent* SkillComponent{ InModelCharacter->GetSkillComponent() };
 	if (ensureAlways(IsValid(SkillComponent)))
 	{
+		BoundSkillComponentWeak = MakeWeakObjectPtr(SkillComponent);
 		SkillComponent->GetOnSkillCoolDownModified().AddUObject(this, &ThisClass::HandleOnSkillCoolDownModified);
 	}
 
@@ -35,11 +38,21 @@ void UNetherCrownPlayerStatusWidgetViewModel::InitViewModel(ANetherCrownCharacte
 		return;
 	}
 
+	BoundPlayerStatComponentWeak = MakeWeakObjectPtr(OwnerCharacterStatComponent);
+	OwnerCharacterStatComponent->GetOnCharacterHPModified().AddUObject(this, &ThisClass::HandleOnCharacterHPModified);
 	OwnerCharacterStatComponent->GetOnCharacterMPModified().AddUObject(this, &ThisClass::HandleOnCharacterMPModified);
 
 	const FNetherCrownPlayerStat& PlayerStatData{ OwnerCharacterStatComponent->GetPlayerStatData() };
+	const float RemainHPRatio{ PlayerStatData.CharacterMaxHP > 0 ? (PlayerStatData.CharacterHP) / (PlayerStatData.CharacterMaxHP) : 0.0f };
 	const float RemainMPRatio{ PlayerStatData.CharacterMaxMP > 0 ? (PlayerStatData.CharacterMP) / (PlayerStatData.CharacterMaxMP) : 0.0f };
+	HandleOnCharacterHPModified(RemainHPRatio);
 	HandleOnCharacterMPModified(RemainMPRatio);
+}
+
+void UNetherCrownPlayerStatusWidgetViewModel::ResetViewModel()
+{
+	UnbindModelDelegates();
+	ModelCharacterWeak.Reset();
 }
 
 UNetherCrownSkillObject* UNetherCrownPlayerStatusWidgetViewModel::GetSkillObject(const ENetherCrownSkillKeyEnum SkillKeyEnum) const
@@ -57,6 +70,31 @@ UNetherCrownSkillObject* UNetherCrownPlayerStatusWidgetViewModel::GetSkillObject
 	}
 
 	return SkillComponent->GetSkillObject(SkillKeyEnum);
+}
+
+void UNetherCrownPlayerStatusWidgetViewModel::UnbindModelDelegates()
+{
+	if (UNetherCrownPlayerStatComponent* BoundPlayerStatComponent{ BoundPlayerStatComponentWeak.Get() })
+	{
+		BoundPlayerStatComponent->GetOnCharacterHPModified().RemoveAll(this);
+		BoundPlayerStatComponent->GetOnCharacterMPModified().RemoveAll(this);
+	}
+
+	if (UNetherCrownSkillComponent* BoundSkillComponent{ BoundSkillComponentWeak.Get() })
+	{
+		BoundSkillComponent->GetOnSkillCoolDownModified().RemoveAll(this);
+	}
+
+	BoundPlayerStatComponentWeak.Reset();
+	BoundSkillComponentWeak.Reset();
+}
+
+void UNetherCrownPlayerStatusWidgetViewModel::HandleOnCharacterHPModified(const float RemainHPRatio)
+{
+	if (OnCharacterHPModified.IsBound())
+	{
+		OnCharacterHPModified.Broadcast(RemainHPRatio);
+	}
 }
 
 void UNetherCrownPlayerStatusWidgetViewModel::HandleOnCharacterMPModified(const float RemainMPRatio)

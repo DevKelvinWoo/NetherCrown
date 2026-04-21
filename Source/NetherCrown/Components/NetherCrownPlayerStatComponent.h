@@ -14,6 +14,7 @@ class NETHERCROWN_API UNetherCrownPlayerStatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnChacterHPModified, const float);
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnChacterMPModified, const float);
 
 public:
@@ -29,6 +30,7 @@ public:
 	void ModifyHp(float HpDelta);
 
 	//Delegate
+	FOnChacterHPModified& GetOnCharacterHPModified() { return OnCharacterHPModified; }
 	FOnChacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }
 
 protected:
@@ -53,5 +55,6 @@ private:
 	TObjectPtr<ANetherCrownCharacter> CachedOwnerCharacter{};
 
 	//Delegate
+	FOnChacterHPModified OnCharacterHPModified;
 	FOnChacterMPModified OnCharacterMPModified;
 };

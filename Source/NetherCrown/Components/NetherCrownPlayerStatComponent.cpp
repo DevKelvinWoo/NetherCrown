@@ -59,6 +59,11 @@ void UNetherCrownPlayerStatComponent::LoadPlayerStatData()
 
 void UNetherCrownPlayerStatComponent::OnRep_PlayerStatData(const FNetherCrownPlayerStat& OldPlayerStatData)
 {
+	if (PlayerStatData.CharacterHP != OldPlayerStatData.CharacterHP)
+	{
+		OnCharacterHPModified.Broadcast(PlayerStatData.CharacterHP / PlayerStatData.CharacterMaxHP);
+	}
+
 	if (PlayerStatData.CharacterMP != OldPlayerStatData.CharacterMP)
 	{
 		OnCharacterMPModified.Broadcast(PlayerStatData.CharacterMP / PlayerStatData.CharacterMaxMP);
@@ -113,4 +118,6 @@ void UNetherCrownPlayerStatComponent::ModifyHp(float HpDelta)
 	}
 
 	PlayerStatData.CharacterHP += HpDelta;
+
+	OnCharacterHPModified.Broadcast(PlayerStatData.CharacterHP / PlayerStatData.CharacterMaxHP);
 }

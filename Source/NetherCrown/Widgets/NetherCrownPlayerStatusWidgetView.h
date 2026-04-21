@@ -36,6 +36,7 @@ protected:
 	TObjectPtr<UNetherCrownSkillIconComponent> NativeShiftSkillIcon{};
 
 private:
+	void ApplyHealthSlider(const float RemainHPRatio);
 	void ApplyMPSlider(const float RemainMPRatio);
 	void ApplySkillCoolDownSlider(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
