@@ -16,16 +16,13 @@ enum class ENetherCrownEnemyBasicAttackType : uint8
 };
 
 USTRUCT()
-struct FNetherCrownEnemyBasicAttackData
+struct FNetherCrownEnemyBasicAttackComboData
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
-	TSoftObjectPtr<UAnimMontage> BasicAttackMontageSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "TraceData")
-	FName WeaponTraceSocketName{};
+	UPROPERTY(EditDefaultsOnly, Category = "ComboData")
+	FName ComboMontageSectionName{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TraceData")
 	float EnableHitTraceTime{ 0.f };
@@ -35,6 +32,22 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TraceData")
 	float EndAttackTime{ 0.f };
+};
+
+USTRUCT()
+struct FNetherCrownEnemyBasicAttackData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "AnimMontage")
+	TSoftObjectPtr<UAnimMontage> BasicAttackMontageSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "ComboData")
+	TMap<int32, FNetherCrownEnemyBasicAttackComboData> EnemyComboDataMap{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TraceData")
+	FName WeaponTraceSocketName{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TraceData")
 	float TraceRadius{ 10.f };

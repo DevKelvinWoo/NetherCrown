@@ -96,7 +96,7 @@ int32 UNetherCrownEnemyBasicAttackComponent::GetEnemyAttackDamage() const
 	return EnemyStatComponent->GetEnemyStatData().AttackDamage;
 }
 
-void UNetherCrownEnemyBasicAttackComponent::SetupBasicAttackTimer()
+void UNetherCrownEnemyBasicAttackComponent::SetupBasicAttackTimer(const FNetherCrownEnemyBasicAttackComboData& EnemyBasicAttackComboData)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
@@ -115,9 +115,9 @@ void UNetherCrownEnemyBasicAttackComponent::SetupBasicAttackTimer()
 	TimerManager.ClearTimer(DisableHitTraceTimerHandle);
 	TimerManager.ClearTimer(AttackEndTimerHandle);
 
-	TimerManager.SetTimer(EnableHitTraceTimerHandle, this, &ThisClass::EnableHitTrace, ActiveEnemyBasicAttackData.EnableHitTraceTime, false);
-	TimerManager.SetTimer(DisableHitTraceTimerHandle, this, &ThisClass::DisableHitTrace, ActiveEnemyBasicAttackData.DisableHitTraceTime, false);
-	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::EndAttack, ActiveEnemyBasicAttackData.EndAttackTime, false);
+	TimerManager.SetTimer(EnableHitTraceTimerHandle, this, &ThisClass::EnableHitTrace, EnemyBasicAttackComboData.EnableHitTraceTime, false);
+	TimerManager.SetTimer(DisableHitTraceTimerHandle, this, &ThisClass::DisableHitTrace, EnemyBasicAttackComboData.DisableHitTraceTime, false);
+	TimerManager.SetTimer(AttackEndTimerHandle, this, &ThisClass::EndAttack, EnemyBasicAttackComboData.EndAttackTime, false);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::EnableHitTrace()
@@ -304,11 +304,18 @@ void UNetherCrownEnemyBasicAttackComponent::StartEnemyAttack(const FNetherCrownE
 
 		EnemyBasicAttackState = ENetherCrownEnemyBasicAttackState::Attacking;
 
-		SetupBasicAttackTimer();
+		const TMap<int32, FNetherCrownEnemyBasicAttackComboData>& EnemyComboDataMap{ ActiveEnemyBasicAttackData.EnemyComboDataMap };
+		if (EnemyComboDataMap.IsEmpty())
+		{
+			return;
+		}
+
+		const int32 ComboDataIndex{ EnemyComboDataMap.Num() == 1 ? 0 : FMath::RandRange(0, EnemyComboDataMap.Num() - 1) };
+		SetupBasicAttackTimer(EnemyComboDataMap[ComboDataIndex]);
 
 		if (bNeedAttackAnimMontage)
 		{
-			Multicast_PlayBasicAttackMontage();
+			Multicast_PlayBasicAttackMontage(EnemyComboDataMap[ComboDataIndex].ComboMontageSectionName);
 		}
 	}
 }
@@ -319,7 +326,7 @@ void UNetherCrownEnemyBasicAttackComponent::Multicast_InitHitTraceState_Implemen
 	LastEndLocation = InLastEndLocation;
 }
 
-void UNetherCrownEnemyBasicAttackComponent::Multicast_PlayBasicAttackMontage_Implementation()
+void UNetherCrownEnemyBasicAttackComponent::Multicast_PlayBasicAttackMontage_Implementation(const FName& ComboMontageSectionName)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
@@ -344,4 +351,5 @@ void UNetherCrownEnemyBasicAttackComponent::Multicast_PlayBasicAttackMontage_Imp
 	}
 
 	EnemyAnimInstance->Montage_Play(CachedActiveAttackMontage);
+	EnemyAnimInstance->Montage_JumpToSection(ComboMontageSectionName, CachedActiveAttackMontage);
 }

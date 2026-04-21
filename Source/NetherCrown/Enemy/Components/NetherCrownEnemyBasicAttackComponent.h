@@ -46,7 +46,7 @@ private:
 	int32 GetEnemyAttackDamage() const;
 
 	void StartEnemyAttack(const FNetherCrownEnemyBasicAttackData& InEnemyBasicAttackData, UAnimMontage* InAttackMontage, const bool bNeedAttackAnimMontage = true);
-	void SetupBasicAttackTimer();
+	void SetupBasicAttackTimer(const FNetherCrownEnemyBasicAttackComboData& EnemyBasicAttackComboData);
 
 	void EnableHitTrace();
 	void DisableHitTrace();
@@ -58,7 +58,7 @@ private:
 	void Multicast_InitHitTraceState(const FVector& InLastEndLocation);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_PlayBasicAttackMontage();
+	void Multicast_PlayBasicAttackMontage(const FName& ComboMontageSectionName);
 
 	void LoadEnemyBasicAttackData();
 	void CacheBasicAttackAnimMontage();
