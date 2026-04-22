@@ -90,6 +90,7 @@ public:
 	UNetherCrownControlGhostTrailComponent* GetControlGhostTrailComponent() const { return NetherCrownControlGhostTrailComponent; }
 	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return NetherCrownCrowdControlComponent; }
 	UNetherCrownActionControlComponent* GetActionControlComponent() const { return NetherCrownActionControlComponent; }
+	UNetherCrownDamageReceiverComponent* GetDamageReceiverComponent() const { return NetherCrownDamageReceiverComponent; }
 
 	FOnRepPlayerState& GetOnRepPlayerState() { return OnRepPlayerState; }
 

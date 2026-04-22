@@ -10,6 +10,13 @@
 class UNetherCrownCharacterDamageReceiveDataAsset;
 class ANetherCrownCharacter;
 
+UENUM()
+enum class ENetherCrownHitReactState : uint8
+{
+	None,
+	HitReact
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownDamageReceiverComponent : public UActorComponent
 {
@@ -20,14 +27,20 @@ public:
 
 	float HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);
 
+	bool IsHitReacting() const { return HitReactState == ENetherCrownHitReactState::HitReact; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	void CacheOwnerCharacter();
 	void CacheDamageReceiveDataAsset();
 	void CacheHitReactAnimMontage();
+
+	void SetHitReactStateAndTimer();
 
 	UFUNCTION(Client, Unreliable)
 	void Client_PlayHitCameraShake();
@@ -59,4 +72,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiverData")
 	TSoftObjectPtr<UNetherCrownCharacterDamageReceiveDataAsset> DamageReceiveDataAssetSoft{};
+
+	UPROPERTY(Replicated)
+	ENetherCrownHitReactState HitReactState{ ENetherCrownHitReactState::None };
+
+	FTimerHandle HitReactTimerHandle;
 };

@@ -7,6 +7,7 @@
 #include "NetherCrownActionControlComponent.generated.h"
 
 
+class UNetherCrownDamageReceiverComponent;
 class UNetherCrownEquipComponent;
 class ANetherCrownCharacter;
 class UNetherCrownSkillComponent;
@@ -22,6 +23,7 @@ public:
 
 	bool CanMove() const;
 	bool CanAttack() const;
+	bool CanPlayHitReactionAnimation() const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -32,6 +34,7 @@ private:
 	TWeakObjectPtr<UNetherCrownEquipComponent> EquipComponentWeak{};
 	TWeakObjectPtr<UNetherCrownBasicAttackComponent> BasicAttackComponentWeak{};
 	TWeakObjectPtr<UNetherCrownSkillComponent> SkillComponentWeak{};
+	TWeakObjectPtr<UNetherCrownDamageReceiverComponent> DamageReceiverComponentWeak{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedOwnerCharacter{};

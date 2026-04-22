@@ -3,9 +3,11 @@
 
 #include "NetherCrownDamageReceiverComponent.h"
 
+#include "NetherCrownActionControlComponent.h"
 #include "NetherCrownCrowdControlComponent.h"
 #include "NetherCrownPlayerStatComponent.h"
 #include "Engine/DamageEvents.h"
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
@@ -27,6 +29,8 @@ float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmou
 	{
 		return 0.f;
 	}
+
+	SetHitReactStateAndTimer();
 
 	const float FinalDamage{ CalculateFinalDamage(DamageAmount, DamageEvent, DamageCauser) };
 	ApplyFinalDamage(FinalDamage);
@@ -61,6 +65,13 @@ void UNetherCrownDamageReceiverComponent::TickComponent(float DeltaTime, ELevelT
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+void UNetherCrownDamageReceiverComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, HitReactState);
+}
+
 void UNetherCrownDamageReceiverComponent::CacheOwnerCharacter()
 {
 	CachedOwnerCharacter = Cast<ANetherCrownCharacter>(GetOwner());
@@ -68,11 +79,6 @@ void UNetherCrownDamageReceiverComponent::CacheOwnerCharacter()
 
 void UNetherCrownDamageReceiverComponent::CacheDamageReceiveDataAsset()
 {
-	if (GetNetMode() == NM_DedicatedServer)
-	{
-		return;
-	}
-
 	if (!DamageReceiveDataAssetSoft.IsNull())
 	{
 		CachedDamageReceiveDataAsset = DamageReceiveDataAssetSoft.LoadSynchronous();
@@ -96,6 +102,45 @@ void UNetherCrownDamageReceiverComponent::CacheHitReactAnimMontage()
 	{
 		CachedHitReactAnimMontage = DamageReceiveData.HitReactAnimMontageSoft.LoadSynchronous();
 	}
+}
+
+void UNetherCrownDamageReceiverComponent::SetHitReactStateAndTimer()
+{
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	HitReactState = ENetherCrownHitReactState::HitReact;
+
+	FTimerDelegate HitReactTimerDelegate{};
+	HitReactTimerDelegate.BindLambda([WeakThis = MakeWeakObjectPtr(this)]()
+	{
+		UNetherCrownDamageReceiverComponent* ThisPtr{ WeakThis.Get() };
+		if (!ensureAlways(IsValid(ThisPtr)))
+		{
+			return;
+		}
+
+		ThisPtr->HitReactState = ENetherCrownHitReactState::None;
+	});
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(HitReactTimerHandle);
+
+	if (!ensureAlways(IsValid(CachedDamageReceiveDataAsset)))
+	{
+		return;
+	}
+
+	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
+	TimerManager.SetTimer(HitReactTimerHandle, HitReactTimerDelegate, DamageReceiveData.HitReactDuration, false);
 }
 
 void UNetherCrownDamageReceiverComponent::Client_PlayHitCameraShake_Implementation()
@@ -140,6 +185,12 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitReactAnimation_Implem
 	}
 
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)))
+	{
+		return;
+	}
+
+	const UNetherCrownActionControlComponent* ActionControlComponent{ CachedOwnerCharacter->GetActionControlComponent() };
+	if (!ensureAlways(IsValid(ActionControlComponent)) || !ActionControlComponent->CanPlayHitReactionAnimation())
 	{
 		return;
 	}

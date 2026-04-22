@@ -5,6 +5,7 @@
 #include "NetherCrownEquipComponent.h"
 #include "NetherCrownSkillComponent.h"
 #include "NetherCrownBasicAttackComponent.h"
+#include "NetherCrownDamageReceiverComponent.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 
@@ -18,12 +19,14 @@ bool UNetherCrownActionControlComponent::CanMove() const
 	const UNetherCrownEquipComponent* EquipComponent{ EquipComponentWeak.Get() };
 	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ BasicAttackComponentWeak.Get() };
 	const UNetherCrownSkillComponent* SkillComponent{ SkillComponentWeak.Get() };
-	if (!ensureAlways(IsValid(EquipComponent)) || !ensureAlways(IsValid(BasicAttackComponent)) || !ensureAlways(IsValid(SkillComponent)))
+	const UNetherCrownDamageReceiverComponent* DamageReceiverComponent{ DamageReceiverComponentWeak.Get() };
+	if (!ensureAlways(IsValid(EquipComponent)) || !ensureAlways(IsValid(BasicAttackComponent)) || !ensureAlways(IsValid(SkillComponent))
+		|| !ensureAlways(IsValid(DamageReceiverComponent)))
 	{
 		return false;
 	}
 
-	if (EquipComponent->IsEquipping() || BasicAttackComponent->IsAttacking() || SkillComponent->IsUsingSkill())
+	if (EquipComponent->IsEquipping() || BasicAttackComponent->IsAttacking() || SkillComponent->IsUsingSkill() || DamageReceiverComponent->IsHitReacting())
 	{
 		return false;
 	}
@@ -40,6 +43,23 @@ bool UNetherCrownActionControlComponent::CanAttack() const
 	}
 
 	if (SkillComponent->IsUsingSkill() || CachedOwnerCharacter->IsJumping())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool UNetherCrownActionControlComponent::CanPlayHitReactionAnimation() const
+{
+	const UNetherCrownSkillComponent* SkillComponent{ SkillComponentWeak.Get() };
+	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ BasicAttackComponentWeak.Get() };
+	if (!ensureAlways(IsValid(BasicAttackComponent)) || !ensureAlways(IsValid(SkillComponent)))
+	{
+		return false;
+	}
+
+	if (BasicAttackComponent->IsAttacking() || SkillComponent->IsUsingSkill())
 	{
 		return false;
 	}
@@ -66,4 +86,5 @@ void UNetherCrownActionControlComponent::CacheInitData()
 	BasicAttackComponentWeak = MakeWeakObjectPtr(CachedOwnerCharacter->GetBasicAttackComponent());
 	SkillComponentWeak = MakeWeakObjectPtr(CachedOwnerCharacter->GetSkillComponent());
 	EquipComponentWeak = MakeWeakObjectPtr(CachedOwnerCharacter->GetEquipComponent());
+	DamageReceiverComponentWeak = MakeWeakObjectPtr(CachedOwnerCharacter->GetDamageReceiverComponent());
 }

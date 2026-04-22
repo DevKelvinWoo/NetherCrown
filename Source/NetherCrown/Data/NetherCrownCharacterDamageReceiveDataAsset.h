@@ -42,6 +42,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveData")
 	TMap<int32, FName> HitReactSectionNameMap{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageReceiveData")
+	float HitReactDuration{ 1.f };
 };
 
 UCLASS()
