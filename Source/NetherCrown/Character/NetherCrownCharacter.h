@@ -9,6 +9,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownCharacter.generated.h"
 
+class UNetherCrownActionControlComponent;
 class ANetherCrownEnemy;
 class UNetherCrownDamageReceiverComponent;
 class UNiagaraComponent;
@@ -121,8 +122,6 @@ private:
 	UFUNCTION()
 	void OnRep_IsHardLanding();
 
-	void SetCharacterMovementControl(const bool bEnableMovement);
-
 	UPROPERTY(Replicated)
 	bool bPressedMoveKey{ false };
 
@@ -164,6 +163,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownDamageReceiverComponent> NetherCrownDamageReceiverComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownActionControlComponent> NetherCrownActionControlComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownCharacterTagData CharacterTagData{};

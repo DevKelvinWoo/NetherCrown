@@ -31,8 +31,6 @@ class NETHERCROWN_API UNetherCrownBasicAttackComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStopOrStartBasicAttackAnim, const bool);
-
 public:
 	UNetherCrownBasicAttackComponent();
 
@@ -40,12 +38,7 @@ public:
 
 	void SetCanAttack(const bool InbCanAttack);
 
-	bool IsAttacking() const
-	{
-		return BasicAttackState == ENetherCrownBasicAttackState::Attacking;
-	}
-
-	FOnStopOrStartBasicAttackAnim& GetOnStopOrStartBasicAttack() { return OnStopOrStartBasicAttackAnim; }
+	bool IsAttacking() const;
 
 	void ApplyHitCosmeticAndDamageToHitEnemy(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation);
 
@@ -149,8 +142,6 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
-
-	FOnStopOrStartBasicAttackAnim OnStopOrStartBasicAttackAnim;
 
 	FTimerHandle ComboWindowOpenTimerHandle;
 	FTimerHandle ComboWindowCloseTimerHandle;

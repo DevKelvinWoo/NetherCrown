@@ -10,6 +10,7 @@
 #include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/NetherCrown.h"
+#include "NetherCrown/Components/NetherCrownActionControlComponent.h"
 
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownControlGhostTrailComponent.h"
@@ -35,6 +36,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownSkillComponent = CreateDefaultSubobject<UNetherCrownSkillComponent>(TEXT("SkillComponent"));
 	NetherCrownCrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
 	NetherCrownDamageReceiverComponent = CreateDefaultSubobject<UNetherCrownDamageReceiverComponent>(TEXT("DamageReceiverComponent"));
+	NetherCrownActionControlComponent = CreateDefaultSubobject<UNetherCrownActionControlComponent>(TEXT("ActionControlComponent"));
 
 	SetCharacterDefaultMovementSettings();
 
@@ -128,21 +130,6 @@ void ANetherCrownCharacter::BeginPlay()
 	Super::BeginPlay();
 
 	DestroyVisualOnlyComponentsOnDS();
-
-	if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
-	{
-		NetherCrownBasicAttackComponent->GetOnStopOrStartBasicAttack().AddUObject(this, &ThisClass::SetCharacterMovementControl);
-	}
-
-	if (ensureAlways(IsValid(NetherCrownEquipComponent)))
-	{
-		NetherCrownEquipComponent->GetOnEquipEndOrStart().AddUObject(this, &ThisClass::SetCharacterMovementControl);
-	}
-
-	if (ensureAlways(IsValid(NetherCrownSkillComponent)))
-	{
-		NetherCrownSkillComponent->GetOnStopOrStartSkill().AddUObject(this, &ThisClass::SetCharacterMovementControl);
-	}
 
 	if (ensureAlways(IsValid(NetherCrownControlPPComponent)) && ensureAlways(IsValid(NetherCrownPostProcessComponent)))
 	{
@@ -243,6 +230,16 @@ void ANetherCrownCharacter::DestroyVisualOnlyComponentsOnDS()
 
 void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 {
+	if (!ensureAlways(IsValid(NetherCrownActionControlComponent)))
+	{
+		return;
+	}
+
+	if (!NetherCrownActionControlComponent->CanMove())
+	{
+		return;
+	}
+
 	if (!ensureAlways(IsValid(Controller)))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("Controller is invalid in %hs"), __FUNCTION__);
@@ -554,17 +551,6 @@ void ANetherCrownCharacter::DisableMovementAndSetResetTimerWhenHardLanding()
 		GetWorldTimerManager().ClearTimer(TimerHandle_ResetHardLanding);
 		GetWorldTimerManager().SetTimer(TimerHandle_ResetHardLanding, this, &ANetherCrownCharacter::ResetHardLandingState, ResetDelay, false);
 	}
-}
-
-void ANetherCrownCharacter::SetCharacterMovementControl(const bool bEnableMovement)
-{
-	UCharacterMovementComponent* MovementComponent{ GetCharacterMovement() };
-	if (!ensureAlways(IsValid(MovementComponent)))
-	{
-		return;
-	}
-
-	bEnableMovement ? MovementComponent->SetMovementMode(MOVE_Walking) : MovementComponent->DisableMovement();
 }
 
 void ANetherCrownCharacter::OnRep_IsHardLanding()

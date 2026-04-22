@@ -14,10 +14,18 @@ class ANetherCrownWeapon;
 class ANetherCrownCharacter;
 
 UENUM()
-enum class EStowWeaponPosition : uint8
+enum class ENetherCrownStowWeaponPosition : uint8
 {
 	Left,
 	Right
+};
+
+UENUM()
+enum class ENetherCrownEquipState : uint8
+{
+	Unequipped,
+	Equipping,
+	Equipped,
 };
 
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
@@ -26,10 +34,11 @@ class NETHERCROWN_API UNetherCrownEquipComponent : public UActorComponent
 	GENERATED_BODY()
 
 	DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipWeapon, const bool);
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnEquipEndOrStart, const bool)
 
 public:
 	UNetherCrownEquipComponent();
+
+	bool IsEquipping() const { return EquipState == ENetherCrownEquipState::Equipping; }
 
 	void SetCanEquip(const bool bInCanEquip) { bCanEquip = bInCanEquip; }
 	void SetEquipableWeapon(ANetherCrownWeapon* InEquipableWeapon);
@@ -37,13 +46,10 @@ public:
 	void EquipOrStowWeapon();
 	void ChangeWeapon();
 
-	void NotifyEquipEndOrStart(const bool bEquipEnd) const;
-
 	ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 	const UNetherCrownWeaponData* GetEquippedWeaponData() const;
 
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
-	FOnEquipEndOrStart& GetOnEquipEndOrStart() { return OnEquipEndOrStart; }
 
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -62,8 +68,8 @@ private:
 	void AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const;
 
 	void SetupEquipStateTimer();
-	void HandleEquipStart() const;
-	void HandleEquipEnd() const;
+	void HandleEquipStart();
+	void HandleEquipEnd();
 
 	void EquipOrStowWeaponInternal();
 	void ChangeWeaponInternal();
@@ -92,11 +98,13 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
-	TArray<TPair<EStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
+	TArray<TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>> StowWeaponContainer{};
 
 	FTimerHandle EquipStartTimerHandle{};
 	FTimerHandle EquipEndTimerHandle{};
 
+	UPROPERTY(Replicated)
+	ENetherCrownEquipState EquipState{ ENetherCrownEquipState::Unequipped };
+
 	FOnEquipWeapon OnEquipWeapon;
-	FOnEquipEndOrStart OnEquipEndOrStart;
 };

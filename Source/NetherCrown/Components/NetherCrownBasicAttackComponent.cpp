@@ -165,8 +165,6 @@ void UNetherCrownBasicAttackComponent::StartAttackBasic()
 		return;
 	}
 
-	OnStopOrStartBasicAttackAnim.Broadcast(false);
-
 	if (BasicAttackData.ComboDataMap.IsEmpty())
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("ComboDataMap is Empty in %hs"), __FUNCTION__);
@@ -818,6 +816,11 @@ void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
 	BasicAttackState = InbCanAttack ? ENetherCrownBasicAttackState::CanAttack : ENetherCrownBasicAttackState::CannotAttack;
 }
 
+bool UNetherCrownBasicAttackComponent::IsAttacking() const
+{
+	return BasicAttackState == ENetherCrownBasicAttackState::Attacking || BasicAttackState == ENetherCrownBasicAttackState::CanQueueNextCombo;
+}
+
 void UNetherCrownBasicAttackComponent::SetupBasicAttackTimers(const int32 ComboCount)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
@@ -870,8 +873,6 @@ void UNetherCrownBasicAttackComponent::ServerHandleComboWindowClose()
 		World->GetTimerManager().ClearTimer(AttackEndTimerHandle);
 	}
 
-	OnStopOrStartBasicAttackAnim.Broadcast(false);
-
 	CalculateNextComboCount();
 
 	if (BasicAttackData.ComboDataMap.IsEmpty())
@@ -918,8 +919,6 @@ void UNetherCrownBasicAttackComponent::ServerHandleAttackEnd()
 	BasicAttackState = ENetherCrownBasicAttackState::CanAttack;
 
 	SetEquippedWeaponTraceEnable(false);
-
-	OnStopOrStartBasicAttackAnim.Broadcast(true);
 }
 
 void UNetherCrownBasicAttackComponent::ServerHandleHitTraceEnable()

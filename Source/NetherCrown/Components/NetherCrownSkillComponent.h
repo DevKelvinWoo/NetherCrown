@@ -10,12 +10,18 @@
 class ANetherCrownCharacter;
 enum class ENetherCrownSkillKeyEnum : uint8;
 
+UENUM()
+enum class ENetherCrownSkillState : uint8
+{
+	UsingSkill,
+	NotUsingSkill
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownSkillComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnStopOrStartSkill, const bool);
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSkillCoolDownModified, const float, const ENetherCrownSkillKeyEnum);
 	DECLARE_MULTICAST_DELEGATE(FOnSkillObjectLoaded);
 
@@ -25,13 +31,15 @@ public:
 	void ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 	UNetherCrownSkillObject* GetSkillObject(const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
 
-	FOnStopOrStartSkill& GetOnStopOrStartSkill() { return OnStopOrStartSkill; }
 	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }
 	FOnSkillObjectLoaded& GetOnSkillObjectLoaded() { return OnSkillObjectLoaded; }
 
 	bool CanActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
 
 	ENetherCrownSkillKeyEnum GetActiveSkillKeyEnum() const { return ActiveSkillKeyEnum; }
+
+	bool IsUsingSkill() const { return SkillState == ENetherCrownSkillState::UsingSkill; }
+	void SetSkillState(const ENetherCrownSkillState InSkillState) { SkillState = InSkillState; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -73,7 +81,9 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
 
-	FOnStopOrStartSkill OnStopOrStartSkill;
+	UPROPERTY(Replicated)
+	ENetherCrownSkillState SkillState{ ENetherCrownSkillState::NotUsingSkill };
+
 	FOnSkillCoolDownModified OnSkillCoolDownModified;
 	FOnSkillObjectLoaded OnSkillObjectLoaded;
 };

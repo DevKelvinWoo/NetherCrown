@@ -132,6 +132,7 @@ void UNetherCrownSkillComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 
 	DOREPLIFETIME(ThisClass, ReplicatedSkillObjects);
 	DOREPLIFETIME(ThisClass, ActiveSkillKeyEnum);
+	DOREPLIFETIME(ThisClass, SkillState);
 }
 
 void UNetherCrownSkillComponent::ConstructSkillObjects()

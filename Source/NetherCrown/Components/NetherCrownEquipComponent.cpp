@@ -24,6 +24,7 @@ void UNetherCrownEquipComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, EquippedWeapon);
+	DOREPLIFETIME(ThisClass, EquipState);
 }
 
 void UNetherCrownEquipComponent::BeginPlay()
@@ -46,14 +47,6 @@ void UNetherCrownEquipComponent::EquipOrStowWeapon()
 void UNetherCrownEquipComponent::ChangeWeapon()
 {
 	Server_ChangeWeapon();
-}
-
-void UNetherCrownEquipComponent::NotifyEquipEndOrStart(const bool bEquipEnd) const
-{
-	if (ensureAlways(IsValid(CachedCharacter)) && CachedCharacter->HasAuthority())
-	{
-		OnEquipEndOrStart.Broadcast(bEquipEnd);
-	}
 }
 
 void UNetherCrownEquipComponent::SetupEquipStateTimer()
@@ -84,24 +77,24 @@ void UNetherCrownEquipComponent::SetupEquipStateTimer()
 	}
 }
 
-void UNetherCrownEquipComponent::HandleEquipStart() const
+void UNetherCrownEquipComponent::HandleEquipStart()
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	NotifyEquipEndOrStart(false);
+	EquipState = ENetherCrownEquipState::Equipping;
 }
 
-void UNetherCrownEquipComponent::HandleEquipEnd() const
+void UNetherCrownEquipComponent::HandleEquipEnd()
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{
 		return;
 	}
 
-	NotifyEquipEndOrStart(true);
+	EquipState = ENetherCrownEquipState::Equipped;
 }
 
 const UNetherCrownWeaponData* UNetherCrownEquipComponent::GetEquippedWeaponData() const
@@ -229,18 +222,18 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
 	check(CharacterDefaultSettings);
 
-	TPair<EStowWeaponPosition, ANetherCrownWeapon*> ChangeTargetWeaponPair{ StowWeaponContainer[0] };
+	const TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>& ChangeTargetWeaponPair{ StowWeaponContainer[0] };
 	StowWeaponContainer.RemoveAt(0);
 
 	const FName& WeaponSocketName{ CharacterDefaultSettings->GetEquipWeaponSocketName() };
 	AttachWeaponToCharacterMesh(ChangeTargetWeaponPair.Value, WeaponSocketName);
 
-	const EStowWeaponPosition ChangeTargetWeaponPosition{ ChangeTargetWeaponPair.Key };
+	const ENetherCrownStowWeaponPosition ChangeTargetWeaponPosition{ ChangeTargetWeaponPair.Key };
 	FName StowSocketName{};
-	ChangeTargetWeaponPosition == EStowWeaponPosition::Left ? StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName() : StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
+	ChangeTargetWeaponPosition == ENetherCrownStowWeaponPosition::Left ? StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName() : StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
 	AttachWeaponToCharacterMesh(EquippedWeapon, StowSocketName);
 
-	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquippedWeapon });
+	StowWeaponContainer.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquippedWeapon });
 
 	EquippedWeapon = ChangeTargetWeaponPair.Value;
 
@@ -254,21 +247,21 @@ void UNetherCrownEquipComponent::StowCurrentWeapon()
 	check(CharacterDefaultSettings);
 
 	FName StowWeaponSocketName{};
-	EStowWeaponPosition StowWeaponPosition{};
+	ENetherCrownStowWeaponPosition StowWeaponPosition{};
 	if (StowWeaponContainer.IsEmpty())
 	{
-		StowWeaponPosition = EStowWeaponPosition::Left;
+		StowWeaponPosition = ENetherCrownStowWeaponPosition::Left;
 		StowWeaponSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName();
 	}
 	else
 	{
-		StowWeaponPosition = EStowWeaponPosition::Right;
+		StowWeaponPosition = ENetherCrownStowWeaponPosition::Right;
 		StowWeaponSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
 	}
 
 	AttachWeaponToCharacterMesh(EquippedWeapon, StowWeaponSocketName);
 
-	StowWeaponContainer.Add(TPair<EStowWeaponPosition, ANetherCrownWeapon*>{ StowWeaponPosition, EquippedWeapon });
+	StowWeaponContainer.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ StowWeaponPosition, EquippedWeapon });
 }
 
 void UNetherCrownEquipComponent::CacheInitData()

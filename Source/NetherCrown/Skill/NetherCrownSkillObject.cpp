@@ -400,7 +400,7 @@ void UNetherCrownSkillObject::StartSkillState()
 		return;
 	}
 
-	SkillComponent->GetOnStopOrStartSkill().Broadcast(false);
+	SkillComponent->SetSkillState(ENetherCrownSkillState::UsingSkill);
 }
 
 void UNetherCrownSkillObject::EndSkillState()
@@ -425,7 +425,7 @@ void UNetherCrownSkillObject::EndSkillState()
 		return;
 	}
 
-	SkillComponent->GetOnStopOrStartSkill().Broadcast(true);
+	SkillComponent->SetSkillState(ENetherCrownSkillState::NotUsingSkill);
 }
 
 void UNetherCrownSkillObject::MakeSkillAnimationSlowly()
