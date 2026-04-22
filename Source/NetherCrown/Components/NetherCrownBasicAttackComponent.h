@@ -36,8 +36,6 @@ public:
 
 	void RequestBasicAttack();
 
-	void SetCanAttack(const bool InbCanAttack);
-
 	bool IsAttacking() const;
 
 	void ApplyHitCosmeticAndDamageToHitEnemy(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation);

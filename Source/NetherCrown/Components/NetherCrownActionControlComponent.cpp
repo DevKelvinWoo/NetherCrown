@@ -31,6 +31,22 @@ bool UNetherCrownActionControlComponent::CanMove() const
 	return true;
 }
 
+bool UNetherCrownActionControlComponent::CanAttack() const
+{
+	const UNetherCrownSkillComponent* SkillComponent{ SkillComponentWeak.Get() };
+	if (!ensureAlways(IsValid(SkillComponent)) || !ensureAlways(IsValid(CachedOwnerCharacter)))
+	{
+		return false;
+	}
+
+	if (SkillComponent->IsUsingSkill() || CachedOwnerCharacter->IsJumping())
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void UNetherCrownActionControlComponent::BeginPlay()
 {
 	Super::BeginPlay();

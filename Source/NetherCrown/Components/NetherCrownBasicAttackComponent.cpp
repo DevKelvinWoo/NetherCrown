@@ -2,6 +2,7 @@
 
 #include "NetherCrownBasicAttackComponent.h"
 
+#include "NetherCrownActionControlComponent.h"
 #include "NetherCrownControlPPComponent.h"
 #include "NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/NetherCrown.h"
@@ -134,6 +135,22 @@ UNetherCrownCharacterAnimInstance* UNetherCrownBasicAttackComponent::GetOwnerCha
 
 void UNetherCrownBasicAttackComponent::RequestBasicAttack()
 {
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		return;
+	}
+
+	const UNetherCrownActionControlComponent* ActionControlComponent{ CachedCharacter->GetActionControlComponent() };
+	if (!ensureAlways(IsValid(ActionControlComponent)))
+	{
+		return;
+	}
+
+	if (!ActionControlComponent->CanAttack())
+	{
+		return;
+	}
+
 	AutoTargetEnemy();
 
 	Server_RequestBasicAttack();
@@ -804,16 +821,6 @@ void UNetherCrownBasicAttackComponent::CalculateNextComboCount()
 	{
 		HandleCurrentComboCountReplicated();
 	}
-}
-
-void UNetherCrownBasicAttackComponent::SetCanAttack(const bool InbCanAttack)
-{
-	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
-	{
-		return;
-	}
-
-	BasicAttackState = InbCanAttack ? ENetherCrownBasicAttackState::CanAttack : ENetherCrownBasicAttackState::CannotAttack;
 }
 
 bool UNetherCrownBasicAttackComponent::IsAttacking() const

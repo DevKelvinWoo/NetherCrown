@@ -75,6 +75,8 @@ public:
 	UFUNCTION(BlueprintCallable)
 	bool IsEquippedWeapon() const;
 
+	bool IsJumping() const { return bIsJumping; }
+
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	ENetherCrownCrowdControlType GetCrowdControlType() const;
 
@@ -87,6 +89,7 @@ public:
 	UNetherCrownControlPPComponent* GetControlPPComponent() const { return NetherCrownControlPPComponent; }
 	UNetherCrownControlGhostTrailComponent* GetControlGhostTrailComponent() const { return NetherCrownControlGhostTrailComponent; }
 	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return NetherCrownCrowdControlComponent; }
+	UNetherCrownActionControlComponent* GetActionControlComponent() const { return NetherCrownActionControlComponent; }
 
 	FOnRepPlayerState& GetOnRepPlayerState() { return OnRepPlayerState; }
 
@@ -169,6 +172,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownCharacterTagData CharacterTagData{};
+
+	UPROPERTY(Replicated)
+	bool bIsJumping{ false };
 
 	FTimerHandle TimerHandle_ResetHardLanding;
 	FOnRepPlayerState OnRepPlayerState;

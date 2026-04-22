@@ -21,6 +21,7 @@ public:
 	UNetherCrownActionControlComponent();
 
 	bool CanMove() const;
+	bool CanAttack() const;
 
 protected:
 	virtual void BeginPlay() override;

@@ -149,6 +149,7 @@ void ANetherCrownCharacter::GetLifetimeReplicatedProps(TArray<class FLifetimePro
 	DOREPLIFETIME(ThisClass, bPressedMoveKey);
 	DOREPLIFETIME(ThisClass, bIsHardLanding);
 	DOREPLIFETIME(ThisClass, JumpStartLocation);
+	DOREPLIFETIME(ThisClass, bIsJumping);
 }
 
 void ANetherCrownCharacter::Landed(const FHitResult& Hit)
@@ -157,10 +158,7 @@ void ANetherCrownCharacter::Landed(const FHitResult& Hit)
 
 	if (HasAuthority())
 	{
-		if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
-		{
-			NetherCrownBasicAttackComponent->SetCanAttack(true);
-		}
+		bIsJumping = false;
 
 		SetIsHardLanding();
 		DisableMovementAndSetResetTimerWhenHardLanding();
@@ -178,11 +176,7 @@ void ANetherCrownCharacter::OnJumped_Implementation()
 
 	if (HasAuthority())
 	{
-		if (ensureAlways(IsValid(NetherCrownBasicAttackComponent)))
-		{
-			NetherCrownBasicAttackComponent->SetCanAttack(false);
-		}
-
+		bIsJumping = true;
 		bIsHardLanding = false;
 		JumpStartLocation = GetActorLocation();
 	}

@@ -386,14 +386,6 @@ void UNetherCrownSkillObject::StartSkillState()
 		return;
 	}
 
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ SkillOwnerCharacter->GetBasicAttackComponent() };
-	if (!ensureAlways(IsValid(BasicAttackComponent)))
-	{
-		return;
-	}
-
-	BasicAttackComponent->SetCanAttack(false);
-
 	UNetherCrownSkillComponent* SkillComponent{ SkillOwnerCharacter->GetSkillComponent() };
 	if (!ensureAlways(IsValid(SkillComponent)))
 	{
@@ -410,14 +402,6 @@ void UNetherCrownSkillObject::EndSkillState()
 	{
 		return;
 	}
-
-	UNetherCrownBasicAttackComponent* BasicAttackComponent{ SkillOwnerCharacter->GetBasicAttackComponent() };
-	if (!ensureAlways(IsValid(BasicAttackComponent)))
-	{
-		return;
-	}
-
-	BasicAttackComponent->SetCanAttack(true);
 
 	UNetherCrownSkillComponent* SkillComponent{ SkillOwnerCharacter->GetSkillComponent() };
 	if (!ensureAlways(IsValid(SkillComponent)))
