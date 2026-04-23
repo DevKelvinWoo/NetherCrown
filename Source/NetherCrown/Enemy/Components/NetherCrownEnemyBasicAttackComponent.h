@@ -36,6 +36,8 @@ public:
 
 	bool TryGetKnockBackData(float& OutKnockBackDistance, float& OutKnockBackDuration) const;
 
+	bool IsAttacking() const { return EnemyBasicAttackState == ENetherCrownEnemyBasicAttackState::Attacking; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

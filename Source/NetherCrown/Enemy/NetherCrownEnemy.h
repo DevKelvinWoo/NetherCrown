@@ -7,6 +7,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
 
+class UNetherCrownEnemyActionControlComponent;
 class ANetherCrownCharacter;
 class UNetherCrownEnemySkillComponent;
 class UNetherCrownEnemyBTCosmeticComponent;
@@ -33,6 +34,8 @@ public:
 	UNetherCrownEnemyBTCosmeticComponent* GetEnemyBTCosmeticComponent() const { return EnemyBTCosmeticComponent; }
 	UNetherCrownEnemySkillComponent* GetEnemySkillComponent() const { return EnemySkillComponent; }
 	UNetherCrownEnemyBasicAttackComponent* GetEnemyBasicAttackComponent() const { return BasicAttackComponent; }
+	UNetherCrownEnemyDamageReceiverComponent* GetEnemyDamageReceiverComponent() const { return EnemyDamageReceiverComponent; }
+	UNetherCrownEnemyActionControlComponent* GetEnemyActionControlComponent() const { return EnemyActionControlComponent; }
 
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
@@ -99,6 +102,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownEnemySkillComponent> EnemySkillComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownEnemyActionControlComponent> EnemyActionControlComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyWeaponClass")
 	TSubclassOf<ANetherCrownEnemyWeapon> EnemyWeaponClass{};

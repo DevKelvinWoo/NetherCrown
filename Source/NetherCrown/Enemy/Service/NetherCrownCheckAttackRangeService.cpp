@@ -13,7 +13,7 @@ UNetherCrownCheckAttackRangeService::UNetherCrownCheckAttackRangeService()
 	NodeName = TEXT("Check Attack Range");
 
 	TargetActorBlackboardKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, TargetActorBlackboardKey), AActor::StaticClass());
-	InAttackRangeBlackboardKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, InAttackRangeBlackboardKey));
+	AttackRangeBlackboardKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, AttackRangeBlackboardKey));
 
 	Interval = 0.1f;
 	RandomDeviation = 0.0f;
@@ -44,7 +44,7 @@ void UNetherCrownCheckAttackRangeService::TickNode(UBehaviorTreeComponent& Owner
 	AActor* TargetActor{ Cast<AActor>(BlackboardComponent->GetValueAsObject(TargetActorBlackboardKey.SelectedKeyName)) };
 	if (!IsValid(TargetActor))
 	{
-		BlackboardComponent->SetValueAsBool(InAttackRangeBlackboardKey.SelectedKeyName, false);
+		BlackboardComponent->SetValueAsBool(AttackRangeBlackboardKey.SelectedKeyName, false);
 		return;
 	}
 
@@ -57,5 +57,5 @@ void UNetherCrownCheckAttackRangeService::TickNode(UBehaviorTreeComponent& Owner
 
 	const int32 EnemyAttackRange{ EnemyStatComponent->GetEnemyStatData().AttackRange };
 	const bool bInAttackRange{ DistanceSquared <= FMath::Square(EnemyAttackRange) };
-	BlackboardComponent->SetValueAsBool(InAttackRangeBlackboardKey.SelectedKeyName, bInAttackRange);
+	BlackboardComponent->SetValueAsBool(AttackRangeBlackboardKey.SelectedKeyName, bInAttackRange);
 }

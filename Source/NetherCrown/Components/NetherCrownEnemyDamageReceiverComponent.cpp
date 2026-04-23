@@ -10,6 +10,7 @@
 #include "NetherCrownCrowdControlTypes.h"
 #include "NetherCrownEnemyStatComponent.h"
 #include "NetherCrownEquipComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/DamageTypes/UNetherCrownCriticalPhysicalDamageType.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
@@ -46,6 +47,13 @@ void UNetherCrownEnemyDamageReceiverComponent::TickComponent(float DeltaTime, en
 	}
 }
 
+void UNetherCrownEnemyDamageReceiverComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, EnemyHitReactState);
+}
+
 float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
@@ -53,8 +61,9 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 		return 0.f;
 	}
 
-	const float FinalDamage{ CalculateFinalDamage(DamageAmount, DamageEvent, DamageCauser) };
+	SetHitReactStateAndTimer();
 
+	const float FinalDamage{ CalculateFinalDamage(DamageAmount, DamageEvent, DamageCauser) };
 	ApplyFinalDamage(FinalDamage);
 
 	if (IsDead())
@@ -103,6 +112,38 @@ void UNetherCrownEnemyDamageReceiverComponent::ApplyFinalDamage(float FinalDamag
 	}
 
 	EnemyStatComponent->ModifyEnemyHp(-FinalDamage);
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::SetHitReactStateAndTimer()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	EnemyHitReactState = ENetherCrownEnemyHitReactState::HitReact;
+
+	FTimerDelegate HitReactTimerDelegate{};
+	HitReactTimerDelegate.BindLambda([WeakThis = MakeWeakObjectPtr(this)]()
+	{
+		UNetherCrownEnemyDamageReceiverComponent* ThisPtr{ WeakThis.Get() };
+		if (!ensureAlways(IsValid(ThisPtr)))
+		{
+			return;
+		}
+
+		ThisPtr->EnemyHitReactState = ENetherCrownEnemyHitReactState::None;
+	});
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(HitReactTimerHandle);
+	TimerManager.SetTimer(HitReactTimerHandle, HitReactTimerDelegate, EnemyDamageCosmeticData.HitReactionDuration, false);
 }
 
 bool UNetherCrownEnemyDamageReceiverComponent::IsDead() const

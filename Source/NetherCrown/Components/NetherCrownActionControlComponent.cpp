@@ -77,7 +77,6 @@ void UNetherCrownActionControlComponent::BeginPlay()
 void UNetherCrownActionControlComponent::CacheInitData()
 {
 	CachedOwnerCharacter = Cast<ANetherCrownCharacter>(GetOwner());
-
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)))
 	{
 		return;

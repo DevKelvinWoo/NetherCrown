@@ -3,15 +3,16 @@
 #include "NetherCrownEnemy.h"
 
 #include "NiagaraComponent.h"
-#include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Net/UnrealNetwork.h"
 
 #include "Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "Components/NetherCrownEnemySkillComponent.h"
+#include "AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "Components/NetherCrownEnemyActionControlComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyBTCosmeticComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyDamageReceiverComponent.h"
@@ -42,6 +43,8 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 	EnemyBTCosmeticComponent = CreateDefaultSubobject<UNetherCrownEnemyBTCosmeticComponent>(TEXT("EnemyBTCosmeticComponent"));
 
 	EnemySkillComponent = CreateDefaultSubobject<UNetherCrownEnemySkillComponent>(TEXT("EnemySkillComponent"));
+
+	EnemyActionControlComponent = CreateDefaultSubobject<UNetherCrownEnemyActionControlComponent>(TEXT("EnemyActionControlComponent"));
 
 	bNetLoadOnClient = true;
 	bReplicates = true;

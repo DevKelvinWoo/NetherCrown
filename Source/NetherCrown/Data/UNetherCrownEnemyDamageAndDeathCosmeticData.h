@@ -80,6 +80,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownEnemyDamageTagData EnemyDamageTagData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Settings")
+	float HitReactionDuration{ 1.f };
 };
 
 UCLASS()

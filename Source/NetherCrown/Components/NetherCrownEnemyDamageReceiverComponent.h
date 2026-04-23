@@ -13,6 +13,13 @@ class ANetherCrownEnemy;
 class UNetherCrownDamageType;
 class UMaterialInstanceDynamic;
 
+UENUM()
+enum class ENetherCrownEnemyHitReactState : uint8
+{
+	None,
+	HitReact
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownEnemyDamageReceiverComponent : public UActorComponent
 {
@@ -23,14 +30,20 @@ public:
 
 	float HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser);
 
+	bool IsHitReacting() const { return EnemyHitReactState == ENetherCrownEnemyHitReactState::HitReact; }
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
 
 	void ApplyFinalDamage(float FinalDamage);
+
+	void SetHitReactStateAndTimer();
 
 	bool IsDead() const;
 	void HandleEnemyDead();
@@ -86,7 +99,11 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDamageAndDeathCosmeticDataAsset")
 	TSoftObjectPtr<UNetherCrownEnemyDamageAndDeathCosmeticDataAsset> EnemyDamageAndDeathCosmeticDataAssetSoft{};
 
+	UPROPERTY(Replicated)
+	ENetherCrownEnemyHitReactState EnemyHitReactState{ ENetherCrownEnemyHitReactState::None };
+
 	FTimerHandle HandleDestroyTimerHandle{};
+	FTimerHandle HitReactTimerHandle{};
 
 	FTimeline DeathMaterialParamTimeline{};
 };

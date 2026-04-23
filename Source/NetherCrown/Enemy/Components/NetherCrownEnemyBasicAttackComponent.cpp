@@ -2,6 +2,7 @@
 
 #include "NetherCrownEnemyBasicAttackComponent.h"
 
+#include "NetherCrownEnemyActionControlComponent.h"
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
@@ -268,12 +269,34 @@ void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttack()
 		return;
 	}
 
+	const UNetherCrownEnemyActionControlComponent* EnemyActionControlComponent{ CachedOwnerEnemy->GetEnemyActionControlComponent() };
+	if (!ensureAlways(IsValid(EnemyActionControlComponent)))
+	{
+		return;
+	}
+
+	if (!EnemyActionControlComponent->CanAttack())
+	{
+		return;
+	}
+
 	StartEnemyAttack(EnemyBasicAttackData, CachedBasicAttackMontage);
 }
 
 void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttackByDA(const UNetherCrownEnemyBasicAttackDataAsset* InEnemyBasicAttackDataAsset)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	const UNetherCrownEnemyActionControlComponent* EnemyActionControlComponent{ CachedOwnerEnemy->GetEnemyActionControlComponent() };
+	if (!ensureAlways(IsValid(EnemyActionControlComponent)))
+	{
+		return;
+	}
+
+	if (!EnemyActionControlComponent->CanAttack())
 	{
 		return;
 	}

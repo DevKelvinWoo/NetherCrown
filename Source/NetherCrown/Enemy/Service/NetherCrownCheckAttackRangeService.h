@@ -24,5 +24,5 @@ private:
 	FBlackboardKeySelector TargetActorBlackboardKey{};
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
-	FBlackboardKeySelector InAttackRangeBlackboardKey{};
+	FBlackboardKeySelector AttackRangeBlackboardKey{};
 };
