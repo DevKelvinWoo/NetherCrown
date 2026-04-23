@@ -65,6 +65,33 @@ void UNetherCrownCrowdControlComponent::LoadCrowdControlCosmeticData()
 	}
 }
 
+void UNetherCrownCrowdControlComponent::Multicast_SetAllMontageDisable_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedOwner)))
+	{
+		return;
+	}
+
+	const USkeletalMeshComponent* OwnerSkeletalMeshComponent{ CachedOwner->GetMesh() };
+	if (!ensureAlways(IsValid(OwnerSkeletalMeshComponent)))
+	{
+		return;
+	}
+
+	UAnimInstance* OwnerAnimInstance{ OwnerSkeletalMeshComponent->GetAnimInstance() };
+	if (!ensureAlways(IsValid(OwnerAnimInstance)))
+	{
+		return;
+	}
+
+	OwnerAnimInstance->StopAllMontages(true);
+}
+
 void UNetherCrownCrowdControlComponent::Multicast_SetCrowdControlState_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
 	if (!ensureAlways(IsValid(CachedOwner)))
@@ -83,6 +110,8 @@ void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrow
 	{
 		return;
 	}
+
+	Multicast_SetAllMontageDisable();
 
 	SetCrowdControlActive(InCrowdControlType, true);
 	RefreshCrowdControlType();

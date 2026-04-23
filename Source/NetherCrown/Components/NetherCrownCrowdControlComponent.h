@@ -39,6 +39,9 @@ private:
 	void LoadCrowdControlCosmeticData();
 
 	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetAllMontageDisable();
+
+	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCrowdControlState(const ENetherCrownCrowdControlType InCrowdControlType);
 
 	UFUNCTION(NetMulticast, Reliable)

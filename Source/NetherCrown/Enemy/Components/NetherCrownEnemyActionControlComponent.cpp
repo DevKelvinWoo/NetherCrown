@@ -3,6 +3,7 @@
 #include "NetherCrownEnemyActionControlComponent.h"
 
 #include "NetherCrownEnemyBasicAttackComponent.h"
+#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyDamageReceiverComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 
@@ -14,12 +15,13 @@ UNetherCrownEnemyActionControlComponent::UNetherCrownEnemyActionControlComponent
 bool UNetherCrownEnemyActionControlComponent::CanAttack() const
 {
 	const UNetherCrownEnemyDamageReceiverComponent* EnemyDamageReceiverComponent{ EnemyDamageReceiverComponentWeak.Get() };
-	if (!ensureAlways(IsValid(EnemyDamageReceiverComponent)))
+	const UNetherCrownCrowdControlComponent* EnemyCrowdControlComponent{ EnemyCrowdControlComponentWeak.Get() };
+	if (!ensureAlways(IsValid(EnemyDamageReceiverComponent)) || !ensureAlways(IsValid(EnemyCrowdControlComponent)))
 	{
 		return false;
 	}
 
-	if (EnemyDamageReceiverComponent->IsHitReacting())
+	if (EnemyDamageReceiverComponent->IsHitReacting() || EnemyCrowdControlComponent->IsCrowdControlActive())
 	{
 		return false;
 	}
@@ -31,12 +33,14 @@ bool UNetherCrownEnemyActionControlComponent::CanChase() const
 {
 	const UNetherCrownEnemyDamageReceiverComponent* EnemyDamageReceiverComponent{ EnemyDamageReceiverComponentWeak.Get() };
 	const UNetherCrownEnemyBasicAttackComponent* EnemyBasicAttackComponent{ EnemyBasicAttackComponentWeak.Get() };
-	if (!ensureAlways(IsValid(EnemyDamageReceiverComponent)) || !ensureAlways(IsValid(EnemyBasicAttackComponent)))
+	const UNetherCrownCrowdControlComponent* EnemyCrowdControlComponent{ EnemyCrowdControlComponentWeak.Get() };
+	if (!ensureAlways(IsValid(EnemyDamageReceiverComponent)) || !ensureAlways(IsValid(EnemyBasicAttackComponent))
+		|| !ensureAlways(IsValid(EnemyCrowdControlComponent)))
 	{
 		return false;
 	}
 
-	if (EnemyDamageReceiverComponent->IsHitReacting() || EnemyBasicAttackComponent->IsAttacking())
+	if (EnemyDamageReceiverComponent->IsHitReacting() || EnemyBasicAttackComponent->IsAttacking() || EnemyCrowdControlComponent->IsCrowdControlActive())
 	{
 		return false;
 	}
@@ -61,4 +65,5 @@ void UNetherCrownEnemyActionControlComponent::CacheInitData()
 
 	EnemyBasicAttackComponentWeak = CachedOwnerEnemy->GetEnemyBasicAttackComponent();
 	EnemyDamageReceiverComponentWeak = CachedOwnerEnemy->GetEnemyDamageReceiverComponent();
+	EnemyCrowdControlComponentWeak = CachedOwnerEnemy->GetCrowdControlComponent();
 }

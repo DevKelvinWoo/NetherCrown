@@ -446,7 +446,7 @@ void UNetherCrownBasicAttackComponent::ApplyLastComboAttackKnockBack(const ANeth
 		return;
 	}
 
-	CCControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::KNOCK_BACK, 1.f);
+	CCControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::KNOCK_BACK, 1.5f);
 
 	const FVector KnockBackDirection{ HitEnemy->GetActorForwardVector() * -1.f };
 	CCControlComponent->KnockBack(KnockBackDirection * BasicAttackData.LastComboAttackKnockBackVelocity);
