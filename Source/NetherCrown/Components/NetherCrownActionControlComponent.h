@@ -7,6 +7,7 @@
 #include "NetherCrownActionControlComponent.generated.h"
 
 
+class UNetherCrownCrowdControlComponent;
 class UNetherCrownDamageReceiverComponent;
 class UNetherCrownEquipComponent;
 class ANetherCrownCharacter;
@@ -35,6 +36,7 @@ private:
 	TWeakObjectPtr<UNetherCrownBasicAttackComponent> BasicAttackComponentWeak{};
 	TWeakObjectPtr<UNetherCrownSkillComponent> SkillComponentWeak{};
 	TWeakObjectPtr<UNetherCrownDamageReceiverComponent> DamageReceiverComponentWeak{};
+	TWeakObjectPtr<UNetherCrownCrowdControlComponent> CrowdControlComponentWeak{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedOwnerCharacter{};

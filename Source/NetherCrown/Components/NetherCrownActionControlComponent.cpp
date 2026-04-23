@@ -5,6 +5,7 @@
 #include "NetherCrownEquipComponent.h"
 #include "NetherCrownSkillComponent.h"
 #include "NetherCrownBasicAttackComponent.h"
+#include "NetherCrownCrowdControlComponent.h"
 #include "NetherCrownDamageReceiverComponent.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
@@ -20,13 +21,15 @@ bool UNetherCrownActionControlComponent::CanMove() const
 	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ BasicAttackComponentWeak.Get() };
 	const UNetherCrownSkillComponent* SkillComponent{ SkillComponentWeak.Get() };
 	const UNetherCrownDamageReceiverComponent* DamageReceiverComponent{ DamageReceiverComponentWeak.Get() };
+	const UNetherCrownCrowdControlComponent* CrowdControlComponent{ CrowdControlComponentWeak.Get() };
 	if (!ensureAlways(IsValid(EquipComponent)) || !ensureAlways(IsValid(BasicAttackComponent)) || !ensureAlways(IsValid(SkillComponent))
-		|| !ensureAlways(IsValid(DamageReceiverComponent)))
+		|| !ensureAlways(IsValid(DamageReceiverComponent)) || !ensureAlways(IsValid(CrowdControlComponent)))
 	{
 		return false;
 	}
 
-	if (EquipComponent->IsEquipping() || BasicAttackComponent->IsAttacking() || SkillComponent->IsUsingSkill() || DamageReceiverComponent->IsHitReacting())
+	if (EquipComponent->IsEquipping() || BasicAttackComponent->IsAttacking() || SkillComponent->IsUsingSkill()
+		|| DamageReceiverComponent->IsHitReacting() || CrowdControlComponent->IsCrowdControlActive())
 	{
 		return false;
 	}
@@ -37,12 +40,13 @@ bool UNetherCrownActionControlComponent::CanMove() const
 bool UNetherCrownActionControlComponent::CanAttack() const
 {
 	const UNetherCrownSkillComponent* SkillComponent{ SkillComponentWeak.Get() };
-	if (!ensureAlways(IsValid(SkillComponent)) || !ensureAlways(IsValid(CachedOwnerCharacter)))
+	const UNetherCrownCrowdControlComponent* CrowdControlComponent{ CrowdControlComponentWeak.Get() };
+	if (!ensureAlways(IsValid(SkillComponent)) || !ensureAlways(IsValid(CachedOwnerCharacter)) || !ensureAlways(IsValid(CrowdControlComponent)))
 	{
 		return false;
 	}
 
-	if (SkillComponent->IsUsingSkill() || CachedOwnerCharacter->IsJumping())
+	if (SkillComponent->IsUsingSkill() || CachedOwnerCharacter->IsJumping() || CrowdControlComponent->IsCrowdControlActive())
 	{
 		return false;
 	}
@@ -54,12 +58,13 @@ bool UNetherCrownActionControlComponent::CanPlayHitReactionAnimation() const
 {
 	const UNetherCrownSkillComponent* SkillComponent{ SkillComponentWeak.Get() };
 	const UNetherCrownBasicAttackComponent* BasicAttackComponent{ BasicAttackComponentWeak.Get() };
-	if (!ensureAlways(IsValid(BasicAttackComponent)) || !ensureAlways(IsValid(SkillComponent)))
+	const UNetherCrownCrowdControlComponent* CrowdControlComponent{ CrowdControlComponentWeak.Get() };
+	if (!ensureAlways(IsValid(BasicAttackComponent)) || !ensureAlways(IsValid(SkillComponent)) || !ensureAlways(IsValid(CrowdControlComponent)))
 	{
 		return false;
 	}
 
-	if (BasicAttackComponent->IsAttacking() || SkillComponent->IsUsingSkill())
+	if (BasicAttackComponent->IsAttacking() || SkillComponent->IsUsingSkill() || CrowdControlComponent->IsCrowdControlActive())
 	{
 		return false;
 	}
@@ -86,4 +91,5 @@ void UNetherCrownActionControlComponent::CacheInitData()
 	SkillComponentWeak = MakeWeakObjectPtr(CachedOwnerCharacter->GetSkillComponent());
 	EquipComponentWeak = MakeWeakObjectPtr(CachedOwnerCharacter->GetEquipComponent());
 	DamageReceiverComponentWeak = MakeWeakObjectPtr(CachedOwnerCharacter->GetDamageReceiverComponent());
+	CrowdControlComponentWeak = MakeWeakObjectPtr(CachedOwnerCharacter->GetCrowdControlComponent());
 }

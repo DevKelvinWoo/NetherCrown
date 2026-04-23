@@ -188,6 +188,11 @@ bool UNetherCrownCrowdControlComponent::IsCrowdControlActive(const ENetherCrownC
 	return (ActiveCrowdControlFlags & BitMask) != 0;
 }
 
+bool UNetherCrownCrowdControlComponent::IsCrowdControlActive() const
+{
+	return CrowdControlType != ENetherCrownCrowdControlType::NONE;
+}
+
 void UNetherCrownCrowdControlComponent::Multicast_ClearCrowdControl_Cosmetics_Implementation(const ENetherCrownCrowdControlType InCrowdControlType)
 {
 	if (!ensureAlways(IsValid(CachedOwner)))

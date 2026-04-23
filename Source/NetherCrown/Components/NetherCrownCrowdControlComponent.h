@@ -20,6 +20,7 @@ public:
 	UNetherCrownCrowdControlComponent();
 
 	ENetherCrownCrowdControlType GetCrowdControlType() const { return CrowdControlType; }
+	bool IsCrowdControlActive() const;
 	bool IsCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType) const;
 	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime);
 
