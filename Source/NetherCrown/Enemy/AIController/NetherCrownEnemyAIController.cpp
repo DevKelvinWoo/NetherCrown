@@ -45,8 +45,6 @@ void ANetherCrownEnemyAIController::BeginPlay()
 {
 	Super::BeginPlay();
 
-	SetSightConfigAndPerceptionComponentValue();
-
 	if (ensureAlways(IsValid(EnemyPerceptionComponent)))
 	{
 		EnemyPerceptionComponent->OnTargetPerceptionUpdated.AddDynamic(this, &ThisClass::HandleTargetPerceptionUpdated);
@@ -63,6 +61,7 @@ void ANetherCrownEnemyAIController::OnPossess(APawn* InPawn)
 	}
 
 	LoadEnemyAITuningData();
+	SetSightConfigAndPerceptionComponentValue();
 
 	if (!ensureAlways(IsValid(EnemyAITuningData.BehaviorTreeAsset)))
 	{
@@ -95,9 +94,6 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 	ANetherCrownCharacter* TargetCharacter{ Cast<ANetherCrownCharacter>(Actor) };
 	if (!IsValid(TargetCharacter))
 	{
-		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKeyName);
-		BlackboardComponentCached->ClearValue(EnemyAITuningData.NeedFoundReactionBlackboardKeyName);
-
 		return;
 	}
 
@@ -120,6 +116,12 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 	}
 	else
 	{
+		const UObject* CurrentTargetActor{ BlackboardComponentCached->GetValueAsObject(EnemyAITuningData.TargetActorBlackboardKeyName) };
+		if (CurrentTargetActor != TargetCharacter)
+		{
+			return;
+		}
+
 		BlackboardComponentCached->ClearValue(EnemyAITuningData.ChaseTypeBlackboardKeyName);
 		BlackboardComponentCached->ClearValue(EnemyAITuningData.TargetActorBlackboardKeyName);
 
