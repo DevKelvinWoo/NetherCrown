@@ -17,6 +17,16 @@ class UNiagaraSystem;
 class ANetherCrownShield;
 
 USTRUCT()
+struct FNetherCrownDodgeSkillData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditAnywhere, Category = "SkillData")
+	float DodgeDistance{ 500.f };
+};
+
+USTRUCT()
 struct FNetherCrownShieldMasteryData
 {
 	GENERATED_BODY()
@@ -172,6 +182,19 @@ public:
 private:
 	UPROPERTY(EditAnywhere, Category = "SkillData")
 	FNetherCrownSkillData SkillData{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownDodgeSkillDataAsset : public UNetherCrownSkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownDodgeSkillData& GetDodgeSkillData() const { return DodgeSkillData; }
+
+private:
+	UPROPERTY(EditAnywhere, Category = "DodgeSkillData")
+	FNetherCrownDodgeSkillData DodgeSkillData{};
 };
 
 UCLASS()

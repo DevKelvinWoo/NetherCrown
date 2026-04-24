@@ -61,6 +61,7 @@ public:
 	void ActiveESkill(const FInputActionValue& Value) const;
 	void ActiveRSkill(const FInputActionValue& Value) const;
 	void ActiveShiftSkill(const FInputActionValue& Value) const;
+	void ActiveCSkill(const FInputActionValue& Value) const;
 
 	void SetMainSpringArmZOffset(const float InSpringArmZOffset);
 	void SetMainSpringArmLength(const float InSpringArmLength);
@@ -92,6 +93,8 @@ public:
 	UNetherCrownActionControlComponent* GetActionControlComponent() const { return NetherCrownActionControlComponent; }
 	UNetherCrownDamageReceiverComponent* GetDamageReceiverComponent() const { return NetherCrownDamageReceiverComponent; }
 
+	FVector GetLastMoveDirection() const { return CachedLastMoveDirection; }
+
 	FOnRepPlayerState& GetOnRepPlayerState() { return OnRepPlayerState; }
 
 protected:
@@ -112,7 +115,7 @@ private:
 	void DestroyVisualOnlyComponentsOnDS();
 
 	UFUNCTION(Server, Reliable)
-	void Server_SetPressedMoveKey(const bool InbPressedMoveKey);
+	void Server_SetPressedMoveKey(const bool InbPressedMoveKey, const FVector& InLastMoveDirection);
 
 	void SetUseControllerSettings();
 	void SetMainSpringArmComponentSettings();
@@ -176,6 +179,9 @@ private:
 
 	UPROPERTY(Replicated)
 	bool bIsJumping{ false };
+
+	UPROPERTY()
+	FVector CachedLastMoveDirection{};
 
 	FTimerHandle TimerHandle_ResetHardLanding;
 	FOnRepPlayerState OnRepPlayerState;

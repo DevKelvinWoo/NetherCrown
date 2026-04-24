@@ -21,7 +21,8 @@ enum class ENetherCrownSkillKeyEnum : uint8
 	QSkill,
 	ESkill,
 	RSkill,
-	ShiftSkill
+	ShiftSkill,
+	CSkill
 };
 
 USTRUCT()

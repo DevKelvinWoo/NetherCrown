@@ -48,6 +48,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_ShieldMastery, "Skill.ShieldMastery", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_FrozenTempest, "Skill.FrozenTempest", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_DashAttack, "Skill.DashAttack", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Skill_DodgeSkill, "Skill.DodgeSkill", "");
 #pragma endregion
 
 #pragma region UI

@@ -84,7 +84,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	check(EnhancedInputLocalPlayerSubSystem);
 
 	if (!ensure(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction && EquipAction && ChangeWeaponAction
-					&& QSkillAction && ESkillAction && RSkillAction && ShiftSkillAction))
+					&& QSkillAction && ESkillAction && RSkillAction && ShiftSkillAction && CSkillAction))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("Can't add Mapping Context and InputActions in %hs"), __FUNCTION__);
 
@@ -105,6 +105,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	EnhancedPlayerInputComponent->BindAction(ESkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveESkill);
 	EnhancedPlayerInputComponent->BindAction(RSkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveRSkill);
 	EnhancedPlayerInputComponent->BindAction(ShiftSkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveShiftSkill);
+	EnhancedPlayerInputComponent->BindAction(CSkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveCSkill);
 }
 
 void ANetherCrownPlayerController::HandleInputMoveCharacter(const FInputActionValue& InActionValue)
@@ -160,4 +161,9 @@ void ANetherCrownPlayerController::HandleInputActiveRSkill(const FInputActionVal
 void ANetherCrownPlayerController::HandleInputActiveShiftSkill(const FInputActionValue& InActionValue)
 {
 	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveShiftSkill, InActionValue);
+}
+
+void ANetherCrownPlayerController::HandleInputActiveCSkill(const FInputActionValue& InActionValue)
+{
+	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveCSkill, InActionValue);
 }

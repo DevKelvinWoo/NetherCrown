@@ -240,11 +240,6 @@ void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 		return;
 	}
 
-	if (!bPressedMoveKey)
-	{
-		Server_SetPressedMoveKey(true);
-	}
-
 	//@NOTE : CMC의 클라이언트 예측 로직으로 input lag을 방지한다, 또한 FInputActionValue는 NetSerialize용으로 설계되지 않음 (이는 LookAt, Jump에도 해당함)
 	if (Value.IsNonZero())
 	{
@@ -255,15 +250,25 @@ void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 
 		const FVector& ForwardDirection{ FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X) };
 		const FVector& RightDirection{ FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y) };
+		const FVector MoveDirection{ (ForwardDirection * MovementVector.Y + RightDirection * MovementVector.X).GetSafeNormal2D() };
+
+		Server_SetPressedMoveKey(true, MoveDirection);
 
 		AddMovementInput(ForwardDirection, MovementVector.Y);
 		AddMovementInput(RightDirection, MovementVector.X);
 	}
 }
 
-void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool InbPressedMoveKey)
+void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool InbPressedMoveKey, const FVector& InLastMoveDirection)
 {
 	bPressedMoveKey = InbPressedMoveKey;
+
+	if (InLastMoveDirection.IsNearlyZero())
+	{
+		return;
+	}
+
+	CachedLastMoveDirection = InLastMoveDirection.GetSafeNormal2D();
 }
 
 void ANetherCrownCharacter::LookAtCharacter(const FInputActionValue& Value)
@@ -290,7 +295,7 @@ void ANetherCrownCharacter::HandleOnMoveActionCompleted()
 {
 	if (bPressedMoveKey)
 	{
-		Server_SetPressedMoveKey(false);
+		Server_SetPressedMoveKey(false, FVector::ZeroVector);
 	}
 }
 
@@ -364,6 +369,11 @@ void ANetherCrownCharacter::ActiveRSkill(const FInputActionValue& Value) const
 void ANetherCrownCharacter::ActiveShiftSkill(const FInputActionValue& Value) const
 {
 	ExecuteSkillByKey(Value, ENetherCrownSkillKeyEnum::ShiftSkill);
+}
+
+void ANetherCrownCharacter::ActiveCSkill(const FInputActionValue& Value) const
+{
+	ExecuteSkillByKey(Value, ENetherCrownSkillKeyEnum::CSkill);
 }
 
 void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffset)
