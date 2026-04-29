@@ -48,6 +48,7 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 
 	bNetLoadOnClient = true;
 	bReplicates = true;
+	SetReplicatingMovement(true);
 
 	SetEnemyMovementComponentValue();
 }
