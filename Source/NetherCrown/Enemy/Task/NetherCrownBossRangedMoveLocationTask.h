@@ -55,4 +55,7 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "RangedBoss")
 	float LocationSearchRadius{ 350.0f };
+
+	UPROPERTY(EditAnywhere, Category = "RangedBoss")
+	float MinLocationOffset{ 150.f };
 };

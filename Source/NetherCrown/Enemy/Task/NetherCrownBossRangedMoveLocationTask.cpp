@@ -56,7 +56,16 @@ EBTNodeResult::Type UNetherCrownBossRangedMoveLocationTask::ExecuteTask(UBehavio
 	const FVector DesiredLocation{ TargetLocation + DesiredDirection * PreferredAttackDistance };
 
 	FNavLocation MoveLocation{};
-	const bool bFoundLocation{ NavigationSystem->GetRandomReachablePointInRadius(DesiredLocation, LocationSearchRadius, MoveLocation) };
+	bool bFoundLocation{ false };
+	for (int index = 0; index < 5; ++index)
+	{
+		bFoundLocation = NavigationSystem->GetRandomReachablePointInRadius(DesiredLocation, LocationSearchRadius, MoveLocation);
+		if (MoveLocation.Location.Length() >= MinLocationOffset)
+		{
+			break;
+		}
+	}
+
 	if (!bFoundLocation)
 	{
 		return EBTNodeResult::Failed;
