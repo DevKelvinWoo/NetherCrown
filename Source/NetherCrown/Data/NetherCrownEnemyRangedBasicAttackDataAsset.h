@@ -10,6 +10,22 @@ class UNetherCrownEnemyProjectileDataAsset;
 class ANetherCrownEnemyMagicProjectile;
 
 USTRUCT()
+struct FNetherCrownEnemyRangedBasicAttackComboData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "ComboData")
+	FName ComboMontageSectionName{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "ComboData")
+	float ComboEndTime{ 0.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyRangedBasicAttackData")
+	FName FireSocketName{};
+};
+
+USTRUCT()
 struct FNetherCrownEnemyRangedBasicAttackCosmeticData
 {
 	GENERATED_BODY()
@@ -29,7 +45,10 @@ public:
 	TSoftObjectPtr<UNetherCrownEnemyProjectileDataAsset> EnemyProjectileDataAssetSoft{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyRangedBasicAttackData")
-	FName FireSocketName{};
+	FNetherCrownEnemyRangedBasicAttackCosmeticData EnemyRangedBasicAttackCosmeticData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyRangedBasicAttackData")
+	TMap<int32, FNetherCrownEnemyRangedBasicAttackComboData> EnemyRangedBasicAttackComboDataMap{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyRangedBasicAttackData")
 	float Damage{};

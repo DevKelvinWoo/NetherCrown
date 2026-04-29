@@ -2,9 +2,12 @@
 
 #include "NetherCrownEnemyRangedBasicAttackComponent.h"
 
+#include "Net/UnrealNetwork.h"
+#include "NetherCrown/NetherCrown.h"
 #include "NetherCrown/Data/NetherCrownEnemyProjectileDataAsset.h"
 #include "NetherCrown/Data/NetherCrownEnemyRangedBasicAttackDataAsset.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "NetherCrown/Projectile/NetherCrownEnemyMagicProjectile.h"
 
 UNetherCrownEnemyRangedBasicAttackComponent::UNetherCrownEnemyRangedBasicAttackComponent()
@@ -21,7 +24,23 @@ void UNetherCrownEnemyRangedBasicAttackComponent::RequestEnemyRangedAttack()
 		return;
 	}
 
-	SpawnRangedBasicAttackProjectile();
+	if (!ensureAlways(IsValid(CachedEnemyRangedBasicAttackDataAsset)))
+	{
+		return;
+	}
+
+	CurrentComboIndex = 0;
+
+	const TMap<int32, FNetherCrownEnemyRangedBasicAttackComboData>& EnemyRangedBasicAttackComboDataMap{ CachedEnemyRangedBasicAttackDataAsset->GetEnemyRangedBasicAttackData().EnemyRangedBasicAttackComboDataMap };
+	const int32 ComboDataMapCount{ EnemyRangedBasicAttackComboDataMap.Num() };
+	if (ComboDataMapCount == 0)
+	{
+		return;
+	}
+
+	MaxComboCount = FMath::RandRange(1, ComboDataMapCount);
+
+	StartRangedBasicAttack();
 }
 
 void UNetherCrownEnemyRangedBasicAttackComponent::BeginPlay()
@@ -36,6 +55,15 @@ void UNetherCrownEnemyRangedBasicAttackComponent::TickComponent(float DeltaTime,
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
+void UNetherCrownEnemyRangedBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, CurrentComboIndex);
+	DOREPLIFETIME(ThisClass, MaxComboCount);
+	DOREPLIFETIME(ThisClass, EnemyRangedBasicAttackState);
+}
+
 void UNetherCrownEnemyRangedBasicAttackComponent::CacheEnemyRangedBasicAttackData()
 {
 	if (EnemyRangedBasicAttackDataAssetSoft.IsNull())
@@ -45,13 +73,21 @@ void UNetherCrownEnemyRangedBasicAttackComponent::CacheEnemyRangedBasicAttackDat
 
 	CachedEnemyRangedBasicAttackDataAsset = EnemyRangedBasicAttackDataAssetSoft.LoadSynchronous();
 
-	TSoftObjectPtr<UNetherCrownEnemyProjectileDataAsset> EnemyProjectileDataAssetSoft = CachedEnemyRangedBasicAttackDataAsset->GetEnemyRangedBasicAttackData().EnemyProjectileDataAssetSoft;
-	if (EnemyProjectileDataAssetSoft.IsNull())
+	const FNetherCrownEnemyRangedBasicAttackData& EnemyRangedBasicAttackData{ CachedEnemyRangedBasicAttackDataAsset->GetEnemyRangedBasicAttackData() };
+	if (EnemyRangedBasicAttackData.EnemyProjectileDataAssetSoft.IsNull())
 	{
 		return;
 	}
 
-	CachedProjectileData = EnemyProjectileDataAssetSoft.LoadSynchronous();
+	CachedProjectileData = EnemyRangedBasicAttackData.EnemyProjectileDataAssetSoft.LoadSynchronous();
+
+	const FNetherCrownEnemyRangedBasicAttackCosmeticData& EnemyRangedBasicAttackCosmeticData{ EnemyRangedBasicAttackData.EnemyRangedBasicAttackCosmeticData };
+	if (EnemyRangedBasicAttackCosmeticData.FireAnimMontageSoft.IsNull())
+	{
+		return;
+	}
+
+	CachedBasicAttackMontage = EnemyRangedBasicAttackCosmeticData.FireAnimMontageSoft.LoadSynchronous();
 }
 
 void UNetherCrownEnemyRangedBasicAttackComponent::CacheInitData()
@@ -61,7 +97,7 @@ void UNetherCrownEnemyRangedBasicAttackComponent::CacheInitData()
 	CacheEnemyRangedBasicAttackData();
 }
 
-void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjectile()
+void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjectile(const FName& StartFireSocketName)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
@@ -90,7 +126,7 @@ void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjecti
 		return;
 	}
 
-	const FVector SpawnLocation{ GetProjectileSpawnLocation() };
+	const FVector SpawnLocation{ GetProjectileSpawnLocation(StartFireSocketName) };
 	const FRotator SpawnRotation{ CachedOwnerEnemy->GetActorForwardVector().Rotation() };
 	ANetherCrownEnemyMagicProjectile* EnemyMagicProjectile{ World->SpawnActor<ANetherCrownEnemyMagicProjectile>(
 		EnemyProjectileData.EnemyMagicProjectileClass,
@@ -107,7 +143,7 @@ void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjecti
 	EnemyMagicProjectile->InitProjectile(CachedOwnerEnemy->GetActorForwardVector(), EnemyProjectileData.ProjectileSpeed);
 }
 
-FVector UNetherCrownEnemyRangedBasicAttackComponent::GetProjectileSpawnLocation() const
+FVector UNetherCrownEnemyRangedBasicAttackComponent::GetProjectileSpawnLocation(const FName& StartFireSocketName) const
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
@@ -125,6 +161,127 @@ FVector UNetherCrownEnemyRangedBasicAttackComponent::GetProjectileSpawnLocation(
 		return FVector::ZeroVector;
 	}
 
-	const FNetherCrownEnemyRangedBasicAttackData& RangedBasicAttackData{ CachedEnemyRangedBasicAttackDataAsset->GetEnemyRangedBasicAttackData() };
-	return EnemySkeletalMeshComponent->GetSocketLocation(RangedBasicAttackData.FireSocketName);
+	return EnemySkeletalMeshComponent->GetSocketLocation(StartFireSocketName);
+}
+
+void UNetherCrownEnemyRangedBasicAttackComponent::StartRangedBasicAttack()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedEnemyRangedBasicAttackDataAsset)))
+	{
+		return;
+	}
+
+	EnemyRangedBasicAttackState = ENetherCrownEnemyRangedBasicAttackState::Attacking;
+
+	PlayAttackMontageAndSpawnProjectile();
+
+	++CurrentComboIndex;
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(ComboAttackTimerHandle);
+
+	const TMap<int32, FNetherCrownEnemyRangedBasicAttackComboData>& EnemyRangedBasicAttackComboDataMap{ CachedEnemyRangedBasicAttackDataAsset->GetEnemyRangedBasicAttackData().EnemyRangedBasicAttackComboDataMap };
+	const FNetherCrownEnemyRangedBasicAttackComboData* FoundComboDataPtr{ EnemyRangedBasicAttackComboDataMap.Find(CurrentComboIndex - 1) };
+	if (!FoundComboDataPtr)
+	{
+		return;
+	}
+
+	if (MaxComboCount == 1)
+	{
+		TimerManager.SetTimer(ComboAttackEndTimerHandle, this, &ThisClass::EndRangedBasicAttack, FoundComboDataPtr->ComboEndTime, false);
+		return;
+	}
+
+	if (CurrentComboIndex < MaxComboCount)
+	{
+		TimerManager.SetTimer(ComboAttackTimerHandle, this, &ThisClass::StartRangedBasicAttack, FoundComboDataPtr->ComboEndTime, false);
+	}
+	else
+	{
+		TimerManager.SetTimer(ComboAttackEndTimerHandle, this, &ThisClass::EndRangedBasicAttack, FoundComboDataPtr->ComboEndTime, false);
+	}
+}
+
+void UNetherCrownEnemyRangedBasicAttackComponent::PlayAttackMontageAndSpawnProjectile()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedEnemyRangedBasicAttackDataAsset)))
+	{
+		return;
+	}
+
+	const TMap<int32, FNetherCrownEnemyRangedBasicAttackComboData>& EnemyRangedBasicAttackComboDataMap{ CachedEnemyRangedBasicAttackDataAsset->GetEnemyRangedBasicAttackData().EnemyRangedBasicAttackComboDataMap };
+	const FNetherCrownEnemyRangedBasicAttackComboData* RangedBasicAttackComboDataPtr{ EnemyRangedBasicAttackComboDataMap.Find(CurrentComboIndex) };
+	if (!RangedBasicAttackComboDataPtr)
+	{
+		return;
+	}
+
+	Multicast_PlayRangedBasicAttackAnim(RangedBasicAttackComboDataPtr->ComboMontageSectionName);
+	SpawnRangedBasicAttackProjectile(RangedBasicAttackComboDataPtr->FireSocketName);
+}
+
+void UNetherCrownEnemyRangedBasicAttackComponent::EndRangedBasicAttack()
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(ComboAttackEndTimerHandle);
+
+	EnemyRangedBasicAttackState = ENetherCrownEnemyRangedBasicAttackState::NotAttacking;
+
+	OnEnemyRangedBasicAttackFinished.Broadcast();
+}
+
+void UNetherCrownEnemyRangedBasicAttackComponent::Multicast_PlayRangedBasicAttackAnim_Implementation(const FName& ComboSectionName)
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedBasicAttackMontage)) || !ensureAlways(IsValid(CachedOwnerEnemy)))
+	{
+		return;
+	}
+
+	const USkeletalMeshComponent* EnemySkeletalMeshComponent{ CachedOwnerEnemy->GetMesh() };
+	if (!ensureAlways(IsValid(EnemySkeletalMeshComponent)))
+	{
+		return;
+	}
+
+	UNetherCrownEnemyAnimInstance* EnemyAnimInstance{ Cast<UNetherCrownEnemyAnimInstance>(EnemySkeletalMeshComponent->GetAnimInstance()) };
+	if (!ensureAlways(IsValid(EnemyAnimInstance)))
+	{
+		return;
+	}
+
+	EnemyAnimInstance->Montage_Play(CachedBasicAttackMontage);
+	EnemyAnimInstance->Montage_JumpToSection(ComboSectionName, CachedBasicAttackMontage);
 }
