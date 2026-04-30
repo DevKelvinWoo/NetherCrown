@@ -11,6 +11,8 @@ class UNiagaraComponent;
 class UProjectileMovementComponent;
 class USphereComponent;
 
+class ANetherCrownCharacter;
+
 USTRUCT()
 struct FNetherCrownEnemyMagicProjectileInitData
 {
@@ -21,7 +23,7 @@ public:
 	FVector Direction{};
 
 	UPROPERTY()
-	float ProjectileSpeed{ 0.f };
+	float ProjectileSpeed{};
 
 	UPROPERTY()
 	FGameplayTag DestroyNiagaraEffectTag{};
@@ -35,10 +37,14 @@ class NETHERCROWN_API ANetherCrownEnemyMagicProjectile : public AActor
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnMagicProjectileHit, ANetherCrownCharacter*, ANetherCrownEnemyMagicProjectile*);
+
 public:
 	ANetherCrownEnemyMagicProjectile();
 
 	void InitProjectile(const FNetherCrownEnemyMagicProjectileInitData& InitData);
+
+	FOnMagicProjectileHit& GetOnMagicProjectileHit() { return OnMagicProjectileHit; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -69,4 +75,6 @@ private:
 
 	UPROPERTY(Replicated)
 	FGameplayTag DestroySoundTag{};
+
+	FOnMagicProjectileHit OnMagicProjectileHit;
 };

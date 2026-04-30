@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "NetherCrownEnemyRangedBasicAttackComponent.generated.h"
 
+class ANetherCrownEnemyMagicProjectile;
+class ANetherCrownCharacter;
 class UNetherCrownEnemyRangedBasicAttackDataAsset;
 class UNetherCrownEnemyProjectileDataAsset;
 class ANetherCrownEnemy;
@@ -51,6 +53,10 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayRangedBasicAttackAnim(const FName& ComboSectionName);
+
+	int32 GetEnemyMagicAttackDamage() const;
+
+	void HandleOnMagicProjectileHit(ANetherCrownCharacter* HitCharacter, ANetherCrownEnemyMagicProjectile* DamageCauserProjectile);
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownEnemyRangedBasicAttackDataAsset> CachedEnemyRangedBasicAttackDataAsset{};

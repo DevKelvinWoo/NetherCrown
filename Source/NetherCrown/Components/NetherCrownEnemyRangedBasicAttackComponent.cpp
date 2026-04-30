@@ -2,8 +2,12 @@
 
 #include "NetherCrownEnemyRangedBasicAttackComponent.h"
 
+#include "NetherCrownEnemyStatComponent.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/NetherCrown.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/DamageTypes/NetherCrownMagicDamageType.h"
 #include "NetherCrown/Data/NetherCrownEnemyProjectileDataAsset.h"
 #include "NetherCrown/Data/NetherCrownEnemyRangedBasicAttackDataAsset.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -140,6 +144,8 @@ void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjecti
 		return;
 	}
 
+	EnemyMagicProjectile->GetOnMagicProjectileHit().AddUObject(this, &ThisClass::HandleOnMagicProjectileHit);
+
 	const FNetherCrownEnemyProjectileTagData& EnemyProjectileTagData{ EnemyProjectileData.EnemyProjectileTagData };
 
 	FNetherCrownEnemyMagicProjectileInitData InitData{};
@@ -264,6 +270,32 @@ void UNetherCrownEnemyRangedBasicAttackComponent::EndRangedBasicAttack()
 	EnemyRangedBasicAttackState = ENetherCrownEnemyRangedBasicAttackState::NotAttacking;
 
 	OnEnemyRangedBasicAttackFinished.Broadcast();
+}
+
+int32 UNetherCrownEnemyRangedBasicAttackComponent::GetEnemyMagicAttackDamage() const
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)))
+	{
+		return 0;
+	}
+
+	const UNetherCrownEnemyStatComponent* EnemyStatComponent{ CachedOwnerEnemy->GetEnemyStatComponent() };
+	if (!ensureAlways(IsValid(EnemyStatComponent)))
+	{
+		return 0;
+	}
+
+	return EnemyStatComponent->GetEnemyStatData().MagicPower;
+}
+
+void UNetherCrownEnemyRangedBasicAttackComponent::HandleOnMagicProjectileHit(ANetherCrownCharacter* HitCharacter, ANetherCrownEnemyMagicProjectile* DamageCauserProjectile)
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	UGameplayStatics::ApplyDamage(HitCharacter, GetEnemyMagicAttackDamage(), CachedOwnerEnemy->GetController(), DamageCauserProjectile, UNetherCrownMagicDamageType::StaticClass());
 }
 
 void UNetherCrownEnemyRangedBasicAttackComponent::Multicast_PlayRangedBasicAttackAnim_Implementation(const FName& ComboSectionName)

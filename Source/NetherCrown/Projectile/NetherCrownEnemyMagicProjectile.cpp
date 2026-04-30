@@ -75,10 +75,13 @@ void ANetherCrownEnemyMagicProjectile::HandleOnHitSphereBeginOverlap(UPrimitiveC
 		return;
 	}
 
-	if (!(OtherActor->IsA<ANetherCrownCharacter>()))
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(OtherActor) };
+	if (!IsValid(OwnerCharacter))
 	{
 		return;
 	}
+
+	OnMagicProjectileHit.Broadcast(OwnerCharacter, this);
 
 	const FTransform& DestroyNiagaraSystemTransform{ FTransform(FRotator(), SweepResult.Location, FVector::OneVector) };
 	Multicast_SpawnDestroyProjectileEffect(DestroyNiagaraSystemTransform);

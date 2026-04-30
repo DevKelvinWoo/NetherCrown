@@ -49,9 +49,6 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyRangedBasicAttackData")
 	TMap<int32, FNetherCrownEnemyRangedBasicAttackComboData> EnemyRangedBasicAttackComboDataMap{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyRangedBasicAttackData")
-	float Damage{};
 };
 
 UCLASS()
