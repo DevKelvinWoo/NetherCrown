@@ -29,8 +29,8 @@ protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
-	ENetherCrownBossRangedMoveType ResolveMoveType(const FVector& OwnerLocation, const FVector& TargetLocation) const;
-	FVector GetDesiredDirectionFromTarget(const FVector& OwnerLocation, const FVector& TargetLocation, const ENetherCrownBossRangedMoveType ResolvedMoveType) const;
+	ENetherCrownBossRangedMoveType ResolveMoveType(const FVector& OwnerLocation, const FVector& TargetLocation, const float MinAttackDistance, const float MaxAttackDistance) const;
+	FVector GetDesiredDirectionFromTarget(const FVector& OwnerLocation, const FVector& TargetLocation, const ENetherCrownBossRangedMoveType ResolvedMoveType, const float OrbitAngleDegrees) const;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector TargetActorBlackboardKey{};
@@ -40,22 +40,4 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "RangedBoss")
 	ENetherCrownBossRangedMoveType MoveType{ ENetherCrownBossRangedMoveType::Auto };
-
-	UPROPERTY(EditAnywhere, Category = "RangedBoss")
-	float MinAttackDistance{ 650.0f };
-
-	UPROPERTY(EditAnywhere, Category = "RangedBoss")
-	float PreferredAttackDistance{ 1000.0f };
-
-	UPROPERTY(EditAnywhere, Category = "RangedBoss")
-	float MaxAttackDistance{ 1350.0f };
-
-	UPROPERTY(EditAnywhere, Category = "RangedBoss")
-	float OrbitAngleDegrees{ 70.0f };
-
-	UPROPERTY(EditAnywhere, Category = "RangedBoss")
-	float LocationSearchRadius{ 350.0f };
-
-	UPROPERTY(EditAnywhere, Category = "RangedBoss")
-	float MinLocationOffset{ 150.f };
 };

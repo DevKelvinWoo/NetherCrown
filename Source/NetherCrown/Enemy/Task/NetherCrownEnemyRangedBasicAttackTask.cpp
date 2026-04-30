@@ -3,6 +3,7 @@
 
 #include "NetherCrownEnemyRangedBasicAttackTask.h"
 
+#include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyRangedBasicAttackComponent.h"
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
@@ -10,6 +11,8 @@
 UNetherCrownEnemyRangedBasicAttackTask::UNetherCrownEnemyRangedBasicAttackTask()
 {
 	NodeName = TEXT("EnemyRangedBasicAttackTask");
+
+	ShouldRepositionBlackboardKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, ShouldRepositionBlackboardKey));
 }
 
 EBTNodeResult::Type UNetherCrownEnemyRangedBasicAttackTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -50,6 +53,12 @@ void UNetherCrownEnemyRangedBasicAttackTask::HandleRangedBasicAttackFinished()
 	{
 		CachedOwnerCompWeak.Reset();
 		return;
+	}
+
+	UBlackboardComponent* BlackboardComponent{ CachedOwnerComp->GetBlackboardComponent() };
+	if (ensureAlways(IsValid(BlackboardComponent)))
+	{
+		BlackboardComponent->SetValueAsBool(ShouldRepositionBlackboardKey.SelectedKeyName, true);
 	}
 
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);

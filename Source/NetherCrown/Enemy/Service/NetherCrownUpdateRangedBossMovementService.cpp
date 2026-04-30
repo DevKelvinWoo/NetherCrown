@@ -3,6 +3,7 @@
 #include "NetherCrownUpdateRangedBossMovementService.h"
 
 #include "BehaviorTree/BlackboardComponent.h"
+#include "NetherCrown/Data/NetherCrownEnemyAITuningData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 
@@ -50,8 +51,9 @@ void UNetherCrownUpdateRangedBossMovementService::TickNode(UBehaviorTreeComponen
 	}
 
 	const double TargetDistance{ FVector::Dist2D(OwnerEnemy->GetActorLocation(), TargetActor->GetActorLocation()) };
-	const bool bNeedEscape{ TargetDistance <= MinAttackDistance };
-	const bool bNeedApproach{ TargetDistance >= MaxAttackDistance };
+	const FNetherCrownBossRangedCombatData& BossRangedCombatData{ EnemyAIController->GetBossRangedCombatData() };
+	const bool bNeedEscape{ TargetDistance <= BossRangedCombatData.MinAttackDistance };
+	const bool bNeedApproach{ TargetDistance >= BossRangedCombatData.MaxAttackDistance };
 	const bool bNeedOrbit{ !bNeedEscape && !bNeedApproach };
 
 	BlackboardComponent->SetValueAsFloat(TargetDistanceBlackboardKey.SelectedKeyName, TargetDistance);

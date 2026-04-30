@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "BehaviorTree/BTTaskNode.h"
+#include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "NetherCrownEnemyRangedBasicAttackTask.generated.h"
 
 UCLASS()
@@ -19,6 +20,9 @@ protected:
 
 private:
 	void HandleRangedBasicAttackFinished();
+
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector ShouldRepositionBlackboardKey{};
 
 	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerCompWeak{};
 };

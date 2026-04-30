@@ -4,6 +4,7 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
+#include "NetherCrown/Data/NetherCrownEnemyAITuningData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 
@@ -51,16 +52,17 @@ EBTNodeResult::Type UNetherCrownBossRangedMoveLocationTask::ExecuteTask(UBehavio
 
 	const FVector OwnerLocation{ OwnerEnemy->GetActorLocation() };
 	const FVector TargetLocation{ TargetActor->GetActorLocation() };
-	const ENetherCrownBossRangedMoveType ResolvedMoveType{ ResolveMoveType(OwnerLocation, TargetLocation) };
-	const FVector DesiredDirection{ GetDesiredDirectionFromTarget(OwnerLocation, TargetLocation, ResolvedMoveType) };
-	const FVector DesiredLocation{ TargetLocation + DesiredDirection * PreferredAttackDistance };
+	const FNetherCrownBossRangedCombatData& BossRangedCombatData{ EnemyAIController->GetBossRangedCombatData() };
+	const ENetherCrownBossRangedMoveType ResolvedMoveType{ ResolveMoveType(OwnerLocation, TargetLocation, BossRangedCombatData.MinAttackDistance, BossRangedCombatData.MaxAttackDistance) };
+	const FVector DesiredDirection{ GetDesiredDirectionFromTarget(OwnerLocation, TargetLocation, ResolvedMoveType, BossRangedCombatData.OrbitAngleDegrees) };
+	const FVector DesiredLocation{ TargetLocation + DesiredDirection * BossRangedCombatData.PreferredAttackDistance };
 
 	FNavLocation MoveLocation{};
 	bool bFoundLocation{ false };
 	for (int index = 0; index < 5; ++index)
 	{
-		bFoundLocation = NavigationSystem->GetRandomReachablePointInRadius(DesiredLocation, LocationSearchRadius, MoveLocation);
-		if (MoveLocation.Location.Length() >= MinLocationOffset)
+		bFoundLocation = NavigationSystem->GetRandomReachablePointInRadius(DesiredLocation, BossRangedCombatData.LocationSearchRadius, MoveLocation);
+		if (MoveLocation.Location.Length() >= BossRangedCombatData.MinLocationOffset)
 		{
 			break;
 		}
@@ -76,7 +78,7 @@ EBTNodeResult::Type UNetherCrownBossRangedMoveLocationTask::ExecuteTask(UBehavio
 	return EBTNodeResult::Succeeded;
 }
 
-ENetherCrownBossRangedMoveType UNetherCrownBossRangedMoveLocationTask::ResolveMoveType(const FVector& OwnerLocation, const FVector& TargetLocation) const
+ENetherCrownBossRangedMoveType UNetherCrownBossRangedMoveLocationTask::ResolveMoveType(const FVector& OwnerLocation, const FVector& TargetLocation, const float MinAttackDistance, const float MaxAttackDistance) const
 {
 	if (MoveType != ENetherCrownBossRangedMoveType::Auto)
 	{
@@ -97,7 +99,7 @@ ENetherCrownBossRangedMoveType UNetherCrownBossRangedMoveLocationTask::ResolveMo
 	return ENetherCrownBossRangedMoveType::Orbit;
 }
 
-FVector UNetherCrownBossRangedMoveLocationTask::GetDesiredDirectionFromTarget(const FVector& OwnerLocation, const FVector& TargetLocation, const ENetherCrownBossRangedMoveType ResolvedMoveType) const
+FVector UNetherCrownBossRangedMoveLocationTask::GetDesiredDirectionFromTarget(const FVector& OwnerLocation, const FVector& TargetLocation, const ENetherCrownBossRangedMoveType ResolvedMoveType, const float OrbitAngleDegrees) const
 {
 	const FVector TargetToOwnerDirection{ (OwnerLocation - TargetLocation).GetSafeNormal2D() };
 	if (TargetToOwnerDirection.IsNearlyZero())

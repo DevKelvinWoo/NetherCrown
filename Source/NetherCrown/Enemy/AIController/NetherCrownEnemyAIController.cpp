@@ -144,6 +144,7 @@ void ANetherCrownEnemyAIController::LoadEnemyAITuningData()
 	}
 
 	EnemyAITuningData = EnemyAITuningDataAsset->GetEnemyAITuningData();
+	BossRangedCombatData = EnemyAITuningDataAsset->GetBossRangedCombatData();
 }
 
 void ANetherCrownEnemyAIController::SetSightConfigAndPerceptionComponentValue()

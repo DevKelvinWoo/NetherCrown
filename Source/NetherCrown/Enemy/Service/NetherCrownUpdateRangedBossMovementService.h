@@ -39,10 +39,4 @@ private:
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector NeedOrbitBlackboardKey{};
-
-	UPROPERTY(EditAnywhere, Category = "RangedBoss")
-	float MinAttackDistance{ 650.0f };
-
-	UPROPERTY(EditAnywhere, Category = "RangedBoss")
-	float MaxAttackDistance{ 1350.0f };
 };

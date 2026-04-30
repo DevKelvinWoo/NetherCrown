@@ -52,6 +52,31 @@ public:
 	float PatrolRadius{ 1000.0f };
 };
 
+USTRUCT()
+struct FNetherCrownBossRangedCombatData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "RangedBoss")
+	float MinAttackDistance{ 650.0f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "RangedBoss")
+	float PreferredAttackDistance{ 1000.0f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "RangedBoss")
+	float MaxAttackDistance{ 1350.0f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "RangedBoss")
+	float OrbitAngleDegrees{ 70.0f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "RangedBoss")
+	float LocationSearchRadius{ 350.0f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "RangedBoss")
+	float MinLocationOffset{ 150.0f };
+};
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownEnemyAITuningDataAsset : public UDataAsset
 {
@@ -59,8 +84,12 @@ class NETHERCROWN_API UNetherCrownEnemyAITuningDataAsset : public UDataAsset
 
 public:
 	const FNetherCrownEnemyAITuningData& GetEnemyAITuningData() const { return EnemyAITuningData; }
+	const FNetherCrownBossRangedCombatData& GetBossRangedCombatData() const { return BossRangedCombatData; }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyAITuningData")
 	FNetherCrownEnemyAITuningData EnemyAITuningData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "BossRangedCombatData")
+	FNetherCrownBossRangedCombatData BossRangedCombatData{};
 };

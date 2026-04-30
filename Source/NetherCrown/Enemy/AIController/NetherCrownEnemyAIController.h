@@ -24,6 +24,7 @@ public:
 	void HandleEnemyDead();
 
 	float GetPatrolRadius() const { return EnemyAITuningData.PatrolRadius; }
+	const FNetherCrownBossRangedCombatData& GetBossRangedCombatData() const { return BossRangedCombatData; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -38,6 +39,9 @@ private:
 
 	UPROPERTY(Transient)
 	FNetherCrownEnemyAITuningData EnemyAITuningData{};
+
+	UPROPERTY(Transient)
+	FNetherCrownBossRangedCombatData BossRangedCombatData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyAITuningDataAsset")
 	TSoftObjectPtr<UNetherCrownEnemyAITuningDataAsset> EnemyAITuningDataAssetSoft{};
