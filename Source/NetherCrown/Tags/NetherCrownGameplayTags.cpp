@@ -21,6 +21,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_FrozenEnemy_HurtImpact, "Sound.FrozenEnemy.HurtImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_FrozenEnemy_Death, "Sound.FrozenEnemy.Death", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Shield_On, "Sound.Shield.On", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Projectile_BossEnemy1_ProjectileDestroy, "Sound.Projectile.BossEnemy1.ProjectileDestroy", "");
 #pragma endregion
 
 #pragma region Effect
@@ -33,6 +34,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_FrozenDeath_Impact, "Effect.FrozenDeath.Impact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_FrozenDeath_Impact_BackGround, "Effect.FrozenDeath.Impact.BackGround", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_HitImpact, "Effect.Knight.HitImpact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_Projectile_HitImpact, "Effect.Boss1.Projectile.HitImpact", "");
 #pragma endregion
 
 #pragma region Weapon

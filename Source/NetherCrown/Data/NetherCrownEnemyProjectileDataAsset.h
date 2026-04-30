@@ -3,10 +3,24 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "NetherCrownEnemyProjectileDataAsset.generated.h"
 
 class ANetherCrownEnemyMagicProjectile;
+
+USTRUCT()
+struct FNetherCrownEnemyProjectileTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag ProjectileDestroyNiagaraEffectTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag ProjectileDestroySoundTag{};
+};
 
 USTRUCT()
 struct FNetherCrownEnemyProjectileData
@@ -16,6 +30,9 @@ struct FNetherCrownEnemyProjectileData
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyRangedBasicAttackData")
 	TSubclassOf<ANetherCrownEnemyMagicProjectile> EnemyMagicProjectileClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FNetherCrownEnemyProjectileTagData EnemyProjectileTagData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "ProjectileData")
 	float ProjectileSpeed{ 1800.f };

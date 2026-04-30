@@ -53,14 +53,17 @@ void ANetherCrownWeapon::BeginPlay()
 	Super::BeginPlay();
 
 	WeaponData = FNetherCrownUtilManager::GetWeaponDataByGameplayTag(WeaponTag);
-	check(WeaponData);
 
-	check(WeaponEquipSphereComponent);
-	WeaponEquipSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereBeginOverlap);
-	WeaponEquipSphereComponent->OnComponentEndOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereEndOverlap);
+	if (ensureAlways(IsValid(WeaponEquipSphereComponent)))
+	{
+		WeaponEquipSphereComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereBeginOverlap);
+		WeaponEquipSphereComponent->OnComponentEndOverlap.AddDynamic(this, &ThisClass::HandleOnEquipSphereEndOverlap);
+	}
 
-	check(WeaponTraceComponent);
-	WeaponTraceComponent->GetOnHitEnemy().AddUObject(this, &ThisClass::HandleOnHitEnemy);
+	if (ensureAlways(IsValid(WeaponTraceComponent)))
+	{
+		WeaponTraceComponent->GetOnHitEnemy().AddUObject(this, &ThisClass::HandleOnHitEnemy);
+	}
 
 	CacheWeaponSkillAuraMap();
 	CacheWeaponLastComboAttackAura();

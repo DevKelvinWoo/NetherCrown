@@ -140,7 +140,15 @@ void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjecti
 		return;
 	}
 
-	EnemyMagicProjectile->InitProjectile(CachedOwnerEnemy->GetActorForwardVector(), EnemyProjectileData.ProjectileSpeed);
+	const FNetherCrownEnemyProjectileTagData& EnemyProjectileTagData{ EnemyProjectileData.EnemyProjectileTagData };
+
+	FNetherCrownEnemyMagicProjectileInitData InitData{};
+	InitData.Direction = CachedOwnerEnemy->GetActorForwardVector();
+	InitData.ProjectileSpeed = EnemyProjectileData.ProjectileSpeed;
+	InitData.DestroyNiagaraEffectTag = EnemyProjectileTagData.ProjectileDestroyNiagaraEffectTag;
+	InitData.DestroySoundTag = EnemyProjectileTagData.ProjectileDestroySoundTag;
+
+	EnemyMagicProjectile->InitProjectile(InitData);
 }
 
 FVector UNetherCrownEnemyRangedBasicAttackComponent::GetProjectileSpawnLocation(const FName& StartFireSocketName) const
