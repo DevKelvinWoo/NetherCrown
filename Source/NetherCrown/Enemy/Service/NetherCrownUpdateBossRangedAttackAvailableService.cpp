@@ -49,7 +49,7 @@ void UNetherCrownUpdateBossRangedAttackAvailableService::TickNode(UBehaviorTreeC
 
 	const double TargetDistance{ FVector::Dist2D(OwnerEnemy->GetActorLocation(), TargetActor->GetActorLocation()) };
 	const FNetherCrownBossRangedCombatData& BossRangedCombatData{ EnemyAIController->GetBossRangedCombatData() };
-	const bool bIsTargetInRangedAttackRange{ TargetDistance >= BossRangedCombatData.MinAttackDistance && TargetDistance <= BossRangedCombatData.MaxAttackDistance };
+	const bool bIsTargetInRangedAttackRange{ TargetDistance <= BossRangedCombatData.MaxAttackDistance };
 
 	SetIsTargetInRangedAttackRange(BlackboardComponent, bIsTargetInRangedAttackRange);
 }
