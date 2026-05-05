@@ -29,6 +29,88 @@ void UNetherCrownEnemyVoidPiercer::ExecuteEnemySkillGameplay()
 	JumpAndFlyToUseSkill();
 }
 
+void UNetherCrownEnemyVoidPiercer::StartVoidPiercerTraceTimer()
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	{
+		FinishEnemySkill();
+		return;
+	}
+
+	AttackVoidPiercerToCharacter();
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		FinishEnemySkill();
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(TraceTimerHandle);
+	TimerManager.SetTimer(TraceTimerHandle, this, &ThisClass::AttackVoidPiercerToCharacter, CachedVoidPiercerData.DamageInterval, true);
+}
+
+void UNetherCrownEnemyVoidPiercer::AttackVoidPiercerToCharacter()
+{
+	ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	{
+		FinishEnemySkill();
+		return;
+	}
+
+	if (!bCanActiveTrace)
+	{
+		FinishEnemySkill();
+		return;
+	}
+
+	USkeletalMeshComponent* SkillOwnerEnemySkeletalMeshComponent{ SkillOwnerEnemy->GetMesh() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemySkeletalMeshComponent)))
+	{
+		return;
+	}
+
+	const FVector LeftHandSocketLocation{ SkillOwnerEnemySkeletalMeshComponent->GetSocketLocation(TEXT("hand_l")) };
+	const FVector RightHandSocketLocation{ SkillOwnerEnemySkeletalMeshComponent->GetSocketLocation(TEXT("hand_r")) };
+
+	const FVector StartLocation{ (LeftHandSocketLocation + RightHandSocketLocation) / 2.f };
+	const FVector Direction{ SkillOwnerEnemy->GetActorForwardVector() };
+	const FVector EndLocation{ StartLocation + Direction * CachedVoidPiercerData.LaserRange };
+
+	TArray<AActor*> ActorsToIgnore{};
+	ActorsToIgnore.Add(SkillOwnerEnemy);
+
+	TArray<FHitResult> OutHits{};
+	UKismetSystemLibrary::SphereTraceMulti(
+		  GetWorld(),
+		  StartLocation,
+		  EndLocation,
+		  CachedVoidPiercerData.LaserRadius,
+		  UEngineTypes::ConvertToTraceType(ECC_Visibility),
+		  false,
+		  ActorsToIgnore,
+		  EDrawDebugTrace::ForDuration,
+		  OutHits,
+		  true
+	);
+
+	for (const FHitResult& Hit : OutHits)
+	{
+		ANetherCrownCharacter* HitCharacter{ Cast<ANetherCrownCharacter>(Hit.GetActor()) };
+		if (!IsValid(HitCharacter))
+		{
+			continue;
+		}
+
+		ApplyEnemyMagicSkillDamage(HitCharacter);
+	}
+
+	UKismetSystemLibrary::DrawDebugSphere(this, EndLocation, CachedVoidPiercerData.LaserRadius, 10, FColor::Red, false, 2.0f);
+}
+
 void UNetherCrownEnemyVoidPiercer::CacheVoidPiercerData()
 {
 	const UNetherCrownEnemySkillDataAsset* EnemySkillDataAsset{ FNetherCrownUtilManager::GetEnemySkillDataAssetByGameplayTag(NetherCrownTags::Enemy_Skill_VoidPiercer) };
@@ -122,6 +204,9 @@ void UNetherCrownEnemyVoidPiercer::HandleVoidPiercerJumpFinished()
 
 	SkillOwnerEnemyMovementComponent->SetMovementMode(MOVE_Flying);
 
+	bCanActiveTrace = true;
+	StartVoidPiercerTraceTimer();
+
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
@@ -151,6 +236,8 @@ void UNetherCrownEnemyVoidPiercer::HandleVoidPiercerFlyFinished()
 		FinishEnemySkill();
 		return;
 	}
+
+	bCanActiveTrace = false;
 
 	const FRotator& SkillOwnerEnemyRotation{ SkillOwnerEnemy->GetActorRotation() };
 	SkillOwnerEnemy->SetActorRotation(FRotator(0.f, SkillOwnerEnemyRotation.Yaw, SkillOwnerEnemyRotation.Roll));

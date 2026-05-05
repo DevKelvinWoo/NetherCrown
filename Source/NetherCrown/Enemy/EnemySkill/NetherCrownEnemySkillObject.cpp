@@ -3,8 +3,12 @@
 
 #include "NetherCrownEnemySkillObject.h"
 
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
+#include "NetherCrown/DamageTypes/NetherCrownMagicDamageType.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
@@ -168,4 +172,42 @@ void UNetherCrownEnemySkillObject::FinishEnemySkill()
 	}
 
 	OnEnemySkillFinished.Broadcast();
+}
+
+int32 UNetherCrownEnemySkillObject::CalculateEnemyMagicSkillDamage() const
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	{
+		return 0;
+	}
+
+	const UNetherCrownEnemyStatComponent* EnemyStatComponent{ SkillOwnerEnemy->GetEnemyStatComponent() };
+	if (!ensureAlways(IsValid(EnemyStatComponent)))
+	{
+		return 0;
+	}
+
+	return EnemyStatComponent->GetEnemyStatData().MagicPower + EnemySkillData.EnemySkillDamage;
+}
+
+void UNetherCrownEnemySkillObject::ApplyEnemyMagicSkillDamage(ANetherCrownCharacter* TargetCharacter) const
+{
+	ApplyEnemySkillDamage(TargetCharacter, CalculateEnemyMagicSkillDamage(), UNetherCrownMagicDamageType::StaticClass());
+}
+
+void UNetherCrownEnemySkillObject::ApplyEnemySkillDamage(ANetherCrownCharacter* TargetCharacter, const int32 DamageAmount, const TSubclassOf<UDamageType> DamageTypeClass) const
+{
+	ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(TargetCharacter)))
+	{
+		return;
+	}
+
+	UGameplayStatics::ApplyDamage(TargetCharacter, DamageAmount, SkillOwnerEnemy->GetInstigatorController(), SkillOwnerEnemy, DamageTypeClass);
 }

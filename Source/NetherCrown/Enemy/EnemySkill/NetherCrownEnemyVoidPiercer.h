@@ -17,6 +17,9 @@ protected:
 	virtual void ExecuteEnemySkillGameplay() override;
 
 private:
+	void StartVoidPiercerTraceTimer();
+	void AttackVoidPiercerToCharacter();
+
 	void CacheVoidPiercerData();
 
 	void JumpAndFlyToUseSkill();
@@ -30,4 +33,7 @@ private:
 
 	FTimerHandle FlyTimerHandle{};
 	FTimerHandle LandTimerHandle{};
+	FTimerHandle TraceTimerHandle{};
+
+	bool bCanActiveTrace{ false };
 };

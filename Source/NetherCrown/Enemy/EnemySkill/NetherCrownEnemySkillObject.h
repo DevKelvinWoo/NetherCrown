@@ -9,8 +9,10 @@
 #include "NetherCrownEnemySkillObject.generated.h"
 
 class UAnimMontage;
+class UDamageType;
 
 class ANetherCrownEnemy;
+class ANetherCrownCharacter;
 
 UCLASS()
 class NETHERCROWN_API UNetherCrownEnemySkillObject : public UObject
@@ -53,8 +55,12 @@ protected:
 
 	void FinishEnemySkill();
 
+	int32 CalculateEnemyMagicSkillDamage() const;
+	void ApplyEnemyMagicSkillDamage(ANetherCrownCharacter* TargetCharacter) const;
+
 private:
 	void CacheSkillData();
+	void ApplyEnemySkillDamage(ANetherCrownCharacter* TargetCharacter, int32 DamageAmount, TSubclassOf<UDamageType> DamageTypeClass) const;
 
 	void StartSkillCoolDownTimer();
 	void StopSkillCoolDownTimer();

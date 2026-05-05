@@ -20,6 +20,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillAnim")
 	TSoftObjectPtr<UAnimMontage> EnemySkillAnimMontageSoft{};
 
+	UPROPERTY(EditDefaultsOnly, Category = "Damage")
+	int32 EnemySkillDamage{ 10 };
+
 	UPROPERTY(EditDefaultsOnly, Category = "Duration")
 	float EnemySkillDuration{ 1.5f };
 
@@ -71,6 +74,15 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
 	float FlyingDuration{ 4.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	float DamageInterval{ 0.5f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	float LaserRadius{ 30.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	float LaserRange{ 1200.f };
 };
 
 USTRUCT()
