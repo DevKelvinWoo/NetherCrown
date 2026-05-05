@@ -16,22 +16,32 @@ struct FNetherCrownEnemySkillData
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillAnim")
-	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
+	TSoftObjectPtr<UAnimMontage> EnemySkillAnimMontageSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Duration")
+	float EnemySkillDuration{ 1.5f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillCoolDown")
+	float EnemySkillCoolDown{ 3.f };
 };
 
 UCLASS()
 class NETHERCROWN_API UNetherCrownEnemySkillObject : public UObject
 {
 	GENERATED_BODY()
+	DECLARE_MULTICAST_DELEGATE(FOnEnemySkillFinished);
 
 public:
 	void SetSkillOwnerEnemy(ANetherCrownEnemy* SkillOwnerEnemy);
 
 	const FGameplayTag& GetEnemySkillTag() const { return EnemySkillTag; }
+	FOnEnemySkillFinished& GetOnEnemySkillFinished() { return OnEnemySkillFinished; }
 
 	virtual void InitEnemySkillObject();
 	virtual void PlayEnemySkillCosmetics();
 	virtual void ExecuteEnemySkillGameplay();
+
+	bool IsEnemySkillCoolDown() const { return bIsCoolDown; }
 
 protected:
 	//@NOTE : To Replicate UObject
@@ -54,6 +64,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, Replicated, Category = "SkillTag")
 	FGameplayTag EnemySkillTag{};
 
+	void FinishEnemySkill();
+
 private:
 	void CacheSkillData();
+
+	void StartSkillCoolDownTimer();
+	void StopSkillCoolDownTimer();
+	void StartEnemySkillDurationTimer();
+
+	UPROPERTY(Replicated)
+	bool bIsCoolDown{ false };
+
+	FTimerHandle SkillCoolDownTimerHandle{};
+	FTimerHandle TimerHandle_EnemySkillFinished{};
+	FOnEnemySkillFinished OnEnemySkillFinished;
 };

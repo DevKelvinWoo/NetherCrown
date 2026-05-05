@@ -4,6 +4,7 @@
 #include "NetherCrownEnemySkillObject.h"
 
 #include "Net/UnrealNetwork.h"
+#include "TimerManager.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
@@ -17,9 +18,9 @@ void UNetherCrownEnemySkillObject::InitEnemySkillObject()
 {
 	CacheSkillData();
 
-	if (!EnemySkillData.SkillAnimMontageSoft.IsNull())
+	if (!EnemySkillData.EnemySkillAnimMontageSoft.IsNull())
 	{
-		CachedEnemySkillAnimMontage = EnemySkillData.SkillAnimMontageSoft.LoadSynchronous();
+		CachedEnemySkillAnimMontage = EnemySkillData.EnemySkillAnimMontageSoft.LoadSynchronous();
 	}
 }
 
@@ -49,6 +50,8 @@ void UNetherCrownEnemySkillObject::PlayEnemySkillCosmetics()
 
 void UNetherCrownEnemySkillObject::ExecuteEnemySkillGameplay()
 {
+	StartSkillCoolDownTimer();
+	StartEnemySkillDurationTimer();
 }
 
 void UNetherCrownEnemySkillObject::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -57,6 +60,7 @@ void UNetherCrownEnemySkillObject::GetLifetimeReplicatedProps(TArray<class FLife
 
 	DOREPLIFETIME(ThisClass, EnemySkillTag);
 	DOREPLIFETIME(ThisClass, SkillOwnerEnemyWeak);
+	DOREPLIFETIME(ThisClass, bIsCoolDown);
 }
 
 int32 UNetherCrownEnemySkillObject::GetFunctionCallspace(UFunction* Function, FFrame* Stack)
@@ -98,4 +102,70 @@ void UNetherCrownEnemySkillObject::CacheSkillData()
 	}
 
 	EnemySkillData = EnemySkillDataAsset->GetEnemySkillData();
+}
+
+void UNetherCrownEnemySkillObject::StartSkillCoolDownTimer()
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	bIsCoolDown = true;
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, EnemySkillData.EnemySkillCoolDown, false);
+}
+
+void UNetherCrownEnemySkillObject::StopSkillCoolDownTimer()
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	bIsCoolDown = false;
+}
+
+void UNetherCrownEnemySkillObject::StartEnemySkillDurationTimer()
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(TimerHandle_EnemySkillFinished);
+	TimerManager.SetTimer(TimerHandle_EnemySkillFinished, this, &ThisClass::FinishEnemySkill, EnemySkillData.EnemySkillDuration, false);
+}
+
+void UNetherCrownEnemySkillObject::FinishEnemySkill()
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!IsValid(SkillOwnerEnemy) || !SkillOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	if (const UWorld* World{ GetWorld() })
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle_EnemySkillFinished);
+	}
+
+	OnEnemySkillFinished.Broadcast();
 }

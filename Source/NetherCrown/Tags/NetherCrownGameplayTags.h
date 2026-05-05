@@ -67,6 +67,7 @@ namespace NetherCrownTags
 
 #pragma region EnemySkill
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_DashAttack);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_VoidPiercer);
 #pragma endregion
 
 }

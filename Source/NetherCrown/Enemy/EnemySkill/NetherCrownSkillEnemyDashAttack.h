@@ -14,11 +14,9 @@ UCLASS(Blueprintable)
 class NETHERCROWN_API UNetherCrownSkillEnemyDashAttack : public UNetherCrownEnemySkillObject
 {
 	GENERATED_BODY()
-	DECLARE_MULTICAST_DELEGATE(FOnEnemyDashAttackFinished);
 
 public:
 	void EnemyDashAttack();
-	FOnEnemyDashAttackFinished& GetOnEnemyDashAttackFinished() { return OnEnemyDashAttackFinished; }
 
 protected:
 	virtual void InitEnemySkillObject() override;
@@ -33,11 +31,7 @@ private:
 	void DetectTargetAndAttack();
 
 	void CacheEnemyDashAttackData();
-	void BroadcastDashAttackFinished();
 
 	UPROPERTY(Transient)
 	FNetherCrownEnemyDashAttackData CachedEnemyDashAttackData{};
-
-	FTimerHandle TimerHandle_DashAttackFinished{};
-	FOnEnemyDashAttackFinished OnEnemyDashAttackFinished;
 };

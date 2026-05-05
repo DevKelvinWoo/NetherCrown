@@ -55,7 +55,7 @@ EBTNodeResult::Type UNetherCrownEnemyDashAttackTask::ExecuteTask(UBehaviorTreeCo
 
 	CachedOwnerCompWeak = MakeWeakObjectPtr(&OwnerComp);
 	CachedDashAttackSkillWeak = MakeWeakObjectPtr(DashAttackSkill);
-	DashAttackFinishedDelegateHandle = DashAttackSkill->GetOnEnemyDashAttackFinished().AddUObject(this, &ThisClass::HandleDashAttackFinished);
+	DashAttackFinishedDelegateHandle = DashAttackSkill->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleDashAttackFinished);
 
 	EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_DashAttack);
 
@@ -98,7 +98,7 @@ void UNetherCrownEnemyDashAttackTask::ResetTaskState()
 	UNetherCrownSkillEnemyDashAttack* DashAttackSkill{ CachedDashAttackSkillWeak.Get() };
 	if (IsValid(DashAttackSkill) && DashAttackFinishedDelegateHandle.IsValid())
 	{
-		DashAttackSkill->GetOnEnemyDashAttackFinished().Remove(DashAttackFinishedDelegateHandle);
+		DashAttackSkill->GetOnEnemySkillFinished().Remove(DashAttackFinishedDelegateHandle);
 	}
 
 	DashAttackFinishedDelegateHandle.Reset();

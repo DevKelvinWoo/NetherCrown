@@ -66,6 +66,7 @@ namespace NetherCrownTags
 
 #pragma region EnemySkill
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_DashAttack, "Enemy.Skill.DashAttack", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_VoidPiercer, "Enemy.Skill.VoidPiercer", "");
 #pragma endregion
 
 }

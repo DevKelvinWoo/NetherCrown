@@ -40,6 +40,16 @@ private:
 };
 
 USTRUCT()
+struct FNetherCrownEnemyVoidPiercerData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	float FlyingDuration{ 1.f };
+};
+
+USTRUCT()
 struct FNetherCrownEnemyDashAttackData
 {
 	GENERATED_BODY()
@@ -47,9 +57,6 @@ struct FNetherCrownEnemyDashAttackData
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	float DashDuration{ 0.3f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
-	float DashAttackDuration{ 1.5f };
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	float DashOffset{ 100.f };
@@ -62,6 +69,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> DashFollowUpBasicAttackDataAssetSoft{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownEnemyVoidPiercerDataAsset : public UNetherCrownEnemySkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownEnemyVoidPiercerData& GetEnemyVoidPiecerData() const { return EnemyVoidPiercerData; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	FNetherCrownEnemyVoidPiercerData EnemyVoidPiercerData{};
 };
 
 UCLASS()
