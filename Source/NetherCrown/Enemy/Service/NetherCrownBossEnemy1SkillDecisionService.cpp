@@ -1,0 +1,76 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+
+#include "NetherCrownBossEnemy1SkillDecisionService.h"
+
+#include "BehaviorTree/BlackboardComponent.h"
+#include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
+#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
+#include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
+#include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemyVoidPiercer.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+
+UNetherCrownBossEnemy1SkillDecisionService::UNetherCrownBossEnemy1SkillDecisionService()
+{
+	NodeName = TEXT("Skill CoolDown Check");
+
+	SelectedSkillKeyNameBlackboardKey.AddNameFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, SelectedSkillKeyNameBlackboardKey));
+}
+
+void UNetherCrownBossEnemy1SkillDecisionService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+{
+	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
+
+	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
+	if (!ensureAlways(IsValid(EnemyAIController)))
+	{
+		return;
+	}
+
+	const ANetherCrownBossEnemy* OwnerBossEnemy{ Cast<ANetherCrownBossEnemy>(EnemyAIController->GetPawn()) };
+	if (!ensureAlways(IsValid(OwnerBossEnemy)))
+	{
+		return;
+	}
+
+	BossEnemySkillComponentWeak = MakeWeakObjectPtr(OwnerBossEnemy->GetEnemySkillComponent());
+
+	SelectedSkillGameplayTag = FGameplayTag();
+
+	if (CanUseVoidPiercerSkill())
+	{
+		SelectedSkillGameplayTag = NetherCrownTags::Enemy_Skill_VoidPiercer;
+	}
+
+	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
+	if (!ensureAlways(IsValid(BlackboardComponent)))
+	{
+		return;
+	}
+
+	BlackboardComponent->SetValueAsName(SelectedSkillKeyNameBlackboardKey.SelectedKeyName, SelectedSkillGameplayTag.GetTagName());
+}
+
+bool UNetherCrownBossEnemy1SkillDecisionService::IsEnemySkillCoolDown(const FGameplayTag& InSkillTag) const
+{
+	const UNetherCrownEnemySkillComponent* BossEnemySkillComponent{ BossEnemySkillComponentWeak.Get() };
+	if (!ensureAlways(IsValid(BossEnemySkillComponent)))
+	{
+		return false;
+	}
+
+	const UNetherCrownEnemySkillObject* FoundEnemySkill{ BossEnemySkillComponent->GetEnemySkillObject(InSkillTag) };
+	if (!ensureAlways(IsValid(FoundEnemySkill)))
+	{
+		return false;
+	}
+
+	return FoundEnemySkill->IsEnemySkillCoolDown();
+}
+
+bool UNetherCrownBossEnemy1SkillDecisionService::CanUseVoidPiercerSkill() const
+{
+	const bool IsVoidPiercerSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_VoidPiercer) };
+
+	return !IsVoidPiercerSkillCoolDown;
+}

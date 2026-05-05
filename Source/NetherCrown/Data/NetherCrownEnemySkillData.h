@@ -64,7 +64,13 @@ struct FNetherCrownEnemyVoidPiercerData
 
 public:
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
-	float FlyingDuration{ 1.f };
+	float JumpToSkyDuration{ 0.5f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	float JumpToSkyOffset{ 500.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	float FlyingDuration{ 4.f };
 };
 
 USTRUCT()
@@ -95,10 +101,10 @@ class NETHERCROWN_API UNetherCrownEnemyVoidPiercerDataAsset : public UNetherCrow
 	GENERATED_BODY()
 
 public:
-	const FNetherCrownEnemyVoidPiercerData& GetEnemyVoidPiecerData() const { return EnemyVoidPiercerData; }
+	const FNetherCrownEnemyVoidPiercerData& GetEnemyVoidPiercerData() const { return EnemyVoidPiercerData; }
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiercerData")
 	FNetherCrownEnemyVoidPiercerData EnemyVoidPiercerData{};
 };
 

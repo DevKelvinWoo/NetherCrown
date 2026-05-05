@@ -11,6 +11,7 @@ UNetherCrownFaceTargetService::UNetherCrownFaceTargetService()
 	NodeName = TEXT("Face Target");
 
 	TargetActorBlackboardKey.AddObjectFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, TargetActorBlackboardKey), AActor::StaticClass());
+	BlockFaceTargetBlackboardKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, BlockFaceTargetBlackboardKey));
 
 	Interval = 0.05f;
 	RandomDeviation = 0.0f;
@@ -26,14 +27,19 @@ void UNetherCrownFaceTargetService::TickNode(UBehaviorTreeComponent& OwnerComp, 
 		return;
 	}
 
-	ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
+	if (!ensureAlways(IsValid(BlackboardComponent)))
 	{
 		return;
 	}
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	if (BlackboardComponent->GetValueAsBool(BlockFaceTargetBlackboardKey.SelectedKeyName))
+	{
+		return;
+	}
+
+	ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
+	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
 	{
 		return;
 	}

@@ -10,4 +10,24 @@ UCLASS(Blueprintable)
 class NETHERCROWN_API UNetherCrownEnemyVoidPiercer : public UNetherCrownEnemySkillObject
 {
 	GENERATED_BODY()
+
+protected:
+	virtual void InitEnemySkillObject() override;
+	virtual void PlayEnemySkillCosmetics() override;
+	virtual void ExecuteEnemySkillGameplay() override;
+
+private:
+	void CacheVoidPiercerData();
+
+	void JumpAndFlyToUseSkill();
+	void RotateToTargetActor();
+
+	void HandleVoidPiercerJumpFinished();
+	void HandleVoidPiercerFlyFinished();
+
+	UPROPERTY(Transient)
+	FNetherCrownEnemyVoidPiercerData CachedVoidPiercerData{};
+
+	FTimerHandle FlyTimerHandle{};
+	FTimerHandle LandTimerHandle{};
 };

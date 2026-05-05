@@ -20,5 +20,8 @@ protected:
 private:
 	void HandleVoidPiercerFinished();
 
+	UPROPERTY(EditAnywhere, Category = "Blackboard")
+	FBlackboardKeySelector BlockFaceTargetBlackboardKey{};
+
 	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerCompWeak{};
 };

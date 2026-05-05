@@ -3,6 +3,7 @@
 
 #include "NetherCrownBossVoidPiercerTask.h"
 
+#include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
@@ -12,6 +13,8 @@
 UNetherCrownBossVoidPiercerTask::UNetherCrownBossVoidPiercerTask()
 {
 	NodeName = TEXT("BossVoidPiercer");
+
+	BlockFaceTargetBlackboardKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, BlockFaceTargetBlackboardKey));
 }
 
 EBTNodeResult::Type UNetherCrownBossVoidPiercerTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -44,6 +47,14 @@ EBTNodeResult::Type UNetherCrownBossVoidPiercerTask::ExecuteTask(UBehaviorTreeCo
 		return EBTNodeResult::Failed;
 	}
 
+	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
+	if (!ensureAlways(IsValid(BlackboardComponent)))
+	{
+		return EBTNodeResult::Failed;
+	}
+
+	BlackboardComponent->SetValueAsBool(BlockFaceTargetBlackboardKey.SelectedKeyName, true);
+
 	VoidPiercerSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleVoidPiercerFinished);
 
 	EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_VoidPiercer);
@@ -59,6 +70,15 @@ void UNetherCrownBossVoidPiercerTask::HandleVoidPiercerFinished()
 		CachedOwnerCompWeak.Reset();
 		return;
 	}
+
+	UBlackboardComponent* BlackboardComponent{ CachedOwnerComp->GetBlackboardComponent() };
+	if (!ensureAlways(IsValid(BlackboardComponent)))
+	{
+		CachedOwnerCompWeak.Reset();
+		return;
+	}
+
+	BlackboardComponent->SetValueAsBool(BlockFaceTargetBlackboardKey.SelectedKeyName, false);
 
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
 }
