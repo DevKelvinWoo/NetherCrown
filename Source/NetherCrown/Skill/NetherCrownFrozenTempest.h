@@ -4,7 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/TimelineComponent.h"
-#include "NetherCrown/Data/NetherCrownSkillData.h"
+#include "NetherCrownSkillObject.h"
 #include "NetherCrownFrozenTempest.generated.h"
 
 class UCurveVector;

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "UObject/Object.h"
+#include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrownSkillObject.generated.h"
 
 class UAnimMontage;
@@ -13,97 +14,6 @@ class ANetherCrownCharacter;
 class ANetherCrownEnemy;
 enum class ENetherCrownCrowdControlType : uint8;
 enum class ENetherCrownPPType : uint8;
-
-UENUM()
-enum class ENetherCrownSkillKeyEnum : uint8
-{
-	None,
-	QSkill,
-	ESkill,
-	RSkill,
-	ShiftSkill,
-	CSkill
-};
-
-USTRUCT()
-struct FNetherCrownSkillTagData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly)
-	FGameplayTag SkillHitImpactEffectTag{};
-};
-
-USTRUCT()
-struct FNetherCrownSkillData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly)
-	FString SkillName{};
-
-	UPROPERTY(EditDefaultsOnly)
-	FString SkillDescription{};
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UTexture2D> SkillIconTextureSoft{};
-
-	UPROPERTY(EditDefaultsOnly)
-	int32 SkillDamage{ 100 };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillCooldown{ 5.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillMPCost{ 20.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	ENetherCrownSkillKeyEnum SkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
-
-	UPROPERTY(EditDefaultsOnly)
-	TSoftObjectPtr<UAnimMontage> SkillAnimMontageSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "TagData")
-	FNetherCrownSkillTagData SkillTagData{};
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillHitTime{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillStartTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillEndTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float CharacterMovementFlyTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float CharacterMovementWalkTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillAuraActiveTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillAuraDeactivateTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillMontageBeginSlowPlayRate{ 0.5f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillMontageBeginSlowTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillMontageEndSlowPlayRate{ 1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillMontageEndSlowTimeOffset{ -1.f };
-
-	UPROPERTY(EditDefaultsOnly)
-	float SkillCoolDownDecreaseOffset{ 0.1f };
-};
 
 UCLASS(Abstract)
 class NETHERCROWN_API UNetherCrownSkillObject : public UObject

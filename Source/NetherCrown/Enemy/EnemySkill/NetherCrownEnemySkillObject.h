@@ -5,25 +5,12 @@
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
 #include "UObject/Object.h"
+#include "NetherCrown/Data/NetherCrownEnemySkillData.h"
 #include "NetherCrownEnemySkillObject.generated.h"
 
+class UAnimMontage;
+
 class ANetherCrownEnemy;
-
-USTRUCT()
-struct FNetherCrownEnemySkillData
-{
-	GENERATED_BODY()
-
-public:
-	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillAnim")
-	TSoftObjectPtr<UAnimMontage> EnemySkillAnimMontageSoft{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Duration")
-	float EnemySkillDuration{ 1.5f };
-
-	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillCoolDown")
-	float EnemySkillCoolDown{ 3.f };
-};
 
 UCLASS()
 class NETHERCROWN_API UNetherCrownEnemySkillObject : public UObject

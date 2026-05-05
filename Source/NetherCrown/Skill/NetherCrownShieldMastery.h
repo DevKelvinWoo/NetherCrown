@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NetherCrown/Data/NetherCrownSkillData.h"
+#include "NetherCrownSkillObject.h"
 #include "NetherCrownShieldMastery.generated.h"
 
 class UNiagaraComponent;
