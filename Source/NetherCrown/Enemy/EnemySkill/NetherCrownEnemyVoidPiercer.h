@@ -28,6 +28,9 @@ private:
 	void HandleVoidPiercerJumpFinished();
 	void HandleVoidPiercerFlyFinished();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayVoidPiercerHitImpactEffect(const FVector& HitLocation);
+
 	UPROPERTY(Transient)
 	FNetherCrownEnemyVoidPiercerData CachedVoidPiercerData{};
 

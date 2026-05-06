@@ -35,6 +35,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_FrozenDeath_Impact_BackGround, "Effect.FrozenDeath.Impact.BackGround", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_HitImpact, "Effect.Knight.HitImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_Projectile_HitImpact, "Effect.Boss1.Projectile.HitImpact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_VoidPiercer_HitImpact, "Effect.Boss1.VoidPiercer.HitImpact", "");
 #pragma endregion
 
 #pragma region Weapon

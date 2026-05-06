@@ -63,7 +63,6 @@ void UNetherCrownEnemyVoidPiercer::AttackVoidPiercerToCharacter()
 
 	if (!bCanActiveTrace)
 	{
-		FinishEnemySkill();
 		return;
 	}
 
@@ -99,7 +98,13 @@ void UNetherCrownEnemyVoidPiercer::AttackVoidPiercerToCharacter()
 
 	for (const FHitResult& Hit : OutHits)
 	{
-		ANetherCrownCharacter* HitCharacter{ Cast<ANetherCrownCharacter>(Hit.GetActor()) };
+		AActor* HitActor{ Hit.GetActor() };
+		if (IsValid(HitActor))
+		{
+			Multicast_PlayVoidPiercerHitImpactEffect(Hit.ImpactPoint);
+		}
+
+		ANetherCrownCharacter* HitCharacter{ Cast<ANetherCrownCharacter>(HitActor) };
 		if (!IsValid(HitCharacter))
 		{
 			continue;
@@ -242,4 +247,17 @@ void UNetherCrownEnemyVoidPiercer::HandleVoidPiercerFlyFinished()
 	const FRotator& SkillOwnerEnemyRotation{ SkillOwnerEnemy->GetActorRotation() };
 	SkillOwnerEnemy->SetActorRotation(FRotator(0.f, SkillOwnerEnemyRotation.Yaw, SkillOwnerEnemyRotation.Roll));
 	SkillOwnerEnemyMovementComponent->SetMovementMode(MOVE_Walking);
+}
+
+void UNetherCrownEnemyVoidPiercer::Multicast_PlayVoidPiercerHitImpactEffect_Implementation(const FVector& HitLocation)
+{
+	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || SkillOwnerEnemy->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	const FGameplayTag& VoidPiercerHitImpactEffectTag{ CachedVoidPiercerData.VoidPiercerTagData.HitImpactEffectTag };
+	const FTransform& HitImpactTransform{ FTransform(FRotator::ZeroRotator, HitLocation, FVector::OneVector) };
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, VoidPiercerHitImpactEffectTag, HitImpactTransform);
 }

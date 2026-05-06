@@ -8,6 +8,7 @@
 #include "GameplayTagContainer.h"
 #include "NetherCrownEnemySkillData.generated.h"
 
+class UNiagaraSystem;
 class UAnimMontage;
 class UNetherCrownEnemyBasicAttackDataAsset;
 
@@ -61,28 +62,41 @@ private:
 };
 
 USTRUCT()
+struct FNetherCrownEnemyVoidPiercerTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag HitImpactEffectTag{};
+};
+
+USTRUCT()
 struct FNetherCrownEnemyVoidPiercerData
 {
 	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiercerData")
 	float JumpToSkyDuration{ 0.5f };
 
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiercerData")
 	float JumpToSkyOffset{ 500.f };
 
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiercerData")
 	float FlyingDuration{ 4.f };
 
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiercerData")
 	float DamageInterval{ 0.5f };
 
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiercerData")
 	float LaserRadius{ 30.f };
 
-	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiecerData")
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiercerData")
 	float LaserRange{ 1200.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyVoidPiercerData")
+	FNetherCrownEnemyVoidPiercerTagData VoidPiercerTagData{};
 };
 
 USTRUCT()
