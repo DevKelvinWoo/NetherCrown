@@ -8,6 +8,7 @@
 #include "GameplayTagContainer.h"
 #include "NetherCrownEnemySkillData.generated.h"
 
+class ANetherCrownEnemyCrownPrisonWall;
 class UNiagaraSystem;
 class UAnimMontage;
 class UNetherCrownEnemyBasicAttackDataAsset;
@@ -59,6 +60,21 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillData")
 	TSoftObjectPtr<UNetherCrownEnemySkillDataAsset> EnemySkillDataAssetSoft{};
+};
+
+USTRUCT()
+struct FNetherCrownEnemyCrownPrisonData
+{
+	GENERATED_BODY()
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	TSubclassOf<ANetherCrownEnemyCrownPrisonWall> CrownPrisonWallClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	float WallHiddenZOffset{ -300.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	float WallRiseDuration{ 1.5f };
 };
 
 USTRUCT()
@@ -119,6 +135,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> DashFollowUpBasicAttackDataAssetSoft{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownEnemyCrownPrisonDataAsset : public UNetherCrownEnemySkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownEnemyCrownPrisonData& GetEnemyCrownPrisonData() const { return EnemyCrownPrisonData; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyCrownPrisonData")
+	FNetherCrownEnemyCrownPrisonData EnemyCrownPrisonData{};
 };
 
 UCLASS()

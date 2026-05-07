@@ -36,6 +36,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_HitImpact, "Effect.Knight.HitImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_Projectile_HitImpact, "Effect.Boss1.Projectile.HitImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_VoidPiercer_HitImpact, "Effect.Boss1.VoidPiercer.HitImpact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_CrownPrison_RaiseImpact, "Effect.Boss1.CrownPrison.RaiseImpact", "");
 #pragma endregion
 
 #pragma region Weapon
@@ -68,6 +69,7 @@ namespace NetherCrownTags
 #pragma region EnemySkill
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_DashAttack, "Enemy.Skill.DashAttack", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_VoidPiercer, "Enemy.Skill.VoidPiercer", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_CrownPrison, "Enemy.Skill.CrownPrison", "");
 #pragma endregion
 
 }

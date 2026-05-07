@@ -37,6 +37,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Knight_HitImpact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_Projectile_HitImpact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_VoidPiercer_HitImpact);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_CrownPrison_RaiseImpact);
 #pragma endregion
 
 #pragma region Weapon
@@ -69,6 +70,7 @@ namespace NetherCrownTags
 #pragma region EnemySkill
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_DashAttack);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_VoidPiercer);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_CrownPrison);
 #pragma endregion
 
 }
