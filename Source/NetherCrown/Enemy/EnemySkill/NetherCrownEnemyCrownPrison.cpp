@@ -80,7 +80,13 @@ void UNetherCrownEnemyCrownPrison::SpawnCrownPrisonWall()
 		return;
 	}
 
-	CrownPrisonWall->StartRiseWall(CachedCrownEnemyCrownPrisonData.WallHiddenZOffset, CachedCrownEnemyCrownPrisonData.WallRiseDuration);
+	FNetherCrownCrownPrisonInitData CrownPrisonInitData{};
+	CrownPrisonInitData.ExplosionRadius = CachedCrownEnemyCrownPrisonData.ExplosionRadius;
+	CrownPrisonInitData.ExplosionTimeOffset = CachedCrownEnemyCrownPrisonData.ExplosionTimeOffset;
+
+	CrownPrisonWall->GetOnCrownPrisonExplosionHit().AddUObject(this, &ThisClass::HandleOnCrownPrisonExplosionHit);
+	CrownPrisonWall->InitCrownPrisonWall(CrownPrisonInitData);
+	CrownPrisonWall->StartRiseUpOrDownWall(CachedCrownEnemyCrownPrisonData.WallHiddenZOffset, CachedCrownEnemyCrownPrisonData.WallRiseDuration, true);
 }
 
 FVector UNetherCrownEnemyCrownPrison::GetCrownPrisonWallSpawnLocation() const
@@ -107,4 +113,15 @@ FVector UNetherCrownEnemyCrownPrison::GetCrownPrisonWallSpawnLocation() const
 
 	GroundLocation.Z += CachedCrownEnemyCrownPrisonData.WallHiddenZOffset;
 	return GroundLocation;
+}
+
+void UNetherCrownEnemyCrownPrison::HandleOnCrownPrisonExplosionHit(ANetherCrownCharacter* HitCharacter)
+{
+	const ANetherCrownEnemy* OwnerEnemy{ SkillOwnerEnemyWeak.Get() };
+	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	ApplyEnemyMagicSkillDamage(HitCharacter);
 }

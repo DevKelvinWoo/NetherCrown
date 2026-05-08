@@ -24,6 +24,8 @@ private:
 	void SpawnCrownPrisonWall();
 	FVector GetCrownPrisonWallSpawnLocation() const;
 
+	void HandleOnCrownPrisonExplosionHit(ANetherCrownCharacter* HitCharacter);
+
 	UPROPERTY(Transient)
 	FNetherCrownEnemyCrownPrisonData CachedCrownEnemyCrownPrisonData{};
 };

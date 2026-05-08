@@ -7,17 +7,38 @@
 #include "NetherCrownEnemyCrownPrisonWall.generated.h"
 
 class UNiagaraComponent;
+class UCameraShakeBase;
 class UStaticMeshComponent;
+
+class ANetherCrownCharacter;
+
+USTRUCT()
+struct FNetherCrownCrownPrisonInitData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	float ExplosionRadius{ 700.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	float ExplosionTimeOffset{ 3.f };
+};
 
 UCLASS()
 class NETHERCROWN_API ANetherCrownEnemyCrownPrisonWall : public AActor
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCrownPrisonExplosionHit, ANetherCrownCharacter*);
+
 public:
 	ANetherCrownEnemyCrownPrisonWall();
 
-	void StartRiseWall(const float InWallHiddenZOffset, const float InWallRiseDuration);
+	void InitCrownPrisonWall(const FNetherCrownCrownPrisonInitData& InCrownPrisonInitData);
+	void StartRiseUpOrDownWall(const float InWallHiddenZOffset, const float InWallRiseDuration, const bool bRiseUp);
+
+	FOnCrownPrisonExplosionHit& GetOnCrownPrisonExplosionHit() { return OnCrownPrisonExplosionHit; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -29,11 +50,25 @@ private:
 	void SetWallCollisionEnabled(const ECollisionEnabled::Type CollisionEnabled) const;
 	void HandleRiseWallFinished();
 
+	void StartExplosionTimer();
+	void ExplosionPrisonWallMagic();
+
+	void StartRiseDownWallTimer();
+	void RiseDownWall();
+
+	void StartDestroyTimer();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ActiveMagicRangeNiagaraEffect();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ActiveWallRaiseUpDownNiagaraEffect(const bool bRaiseUp);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ActiveExplosionNiagaraEffect();
+
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_PlayRiseWallCameraShake();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UStaticMeshComponent> WallStaticMeshComponent1{};
@@ -59,8 +94,22 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNiagaraComponent> ExplosionNiagaraComponent{};
 
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
+	TSubclassOf<UCameraShakeBase> RiseWallCameraShakeClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
+	float RiseWallCameraShakeInnerRadius{ 0.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
+	float RiseWallCameraShakeOuterRadius{ 1200.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "CameraShake")
+	float RiseWallCameraShakeFalloff{ 1.f };
+
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UStaticMeshComponent>> WallStaticMeshComponents{};
+
+	FNetherCrownCrownPrisonInitData CrownPrisonInitData{};
 
 	FVector HiddenLocation{};
 	FVector RaisedLocation{};
@@ -72,4 +121,14 @@ private:
 	float WallHiddenZOffset{};
 
 	bool bIsRising{ false };
+	bool bIsRiseUp{ true };
+
+	UPROPERTY(Replicated)
+	FVector WorldCameraShakeLocation{};
+
+	FTimerHandle ExplosionTimer{};
+	FTimerHandle RiseDownWallTimer{};
+	FTimerHandle DestroyTimer{};
+
+	FOnCrownPrisonExplosionHit OnCrownPrisonExplosionHit;
 };

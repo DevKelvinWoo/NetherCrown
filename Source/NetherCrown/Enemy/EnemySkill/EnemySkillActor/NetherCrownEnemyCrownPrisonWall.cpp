@@ -4,9 +4,11 @@
 
 #include "NiagaraComponent.h"
 #include "Components/StaticMeshComponent.h"
-#include "Kismet/KismetSystemLibrary.h"
+#include "Kismet/GameplayStatics.h"
 #include "Net/UnrealNetwork.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+#include "NetherCrown/Util/NetherCrownCollisionChannels.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 ANetherCrownEnemyCrownPrisonWall::ANetherCrownEnemyCrownPrisonWall()
@@ -52,6 +54,16 @@ ANetherCrownEnemyCrownPrisonWall::ANetherCrownEnemyCrownPrisonWall()
 	SetReplicatingMovement(true);
 }
 
+void ANetherCrownEnemyCrownPrisonWall::InitCrownPrisonWall(const FNetherCrownCrownPrisonInitData& InCrownPrisonInitData)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	CrownPrisonInitData = InCrownPrisonInitData;
+}
+
 void ANetherCrownEnemyCrownPrisonWall::BeginPlay()
 {
 	Super::BeginPlay();
@@ -85,9 +97,10 @@ void ANetherCrownEnemyCrownPrisonWall::GetLifetimeReplicatedProps(TArray<class F
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, WallHiddenZOffset);
+	DOREPLIFETIME(ThisClass, WorldCameraShakeLocation);
 }
 
-void ANetherCrownEnemyCrownPrisonWall::StartRiseWall(const float InWallHiddenZOffset, const float InWallRiseDuration)
+void ANetherCrownEnemyCrownPrisonWall::StartRiseUpOrDownWall(const float InWallHiddenZOffset, const float InWallRiseDuration, const bool bRiseUp)
 {
 	if (!HasAuthority())
 	{
@@ -96,16 +109,20 @@ void ANetherCrownEnemyCrownPrisonWall::StartRiseWall(const float InWallHiddenZOf
 
 	WallHiddenZOffset = InWallHiddenZOffset;
 	HiddenLocation = GetActorLocation();
-	RaisedLocation = HiddenLocation - FVector{ 0.f, 0.f, InWallHiddenZOffset };
+	RaisedLocation = bRiseUp ? HiddenLocation - FVector{ 0.f, 0.f, InWallHiddenZOffset } : HiddenLocation + FVector{ 0.f, 0.f, InWallHiddenZOffset };
+	WorldCameraShakeLocation = bRiseUp ? RaisedLocation : HiddenLocation;
 	WallRiseDuration = FMath::Max(InWallRiseDuration, KINDA_SMALL_NUMBER);
 	WallRiseElapsedTime = 0.f;
 	bIsRising = true;
+
+	bIsRiseUp = bRiseUp;
 
 	SetActorLocation(HiddenLocation);
 	SetWallCollisionEnabled(ECollisionEnabled::NoCollision);
 	SetActorTickEnabled(true);
 
-	Multicast_ActiveWallRaiseUpDownNiagaraEffect(true);
+	Multicast_ActiveWallRaiseUpDownNiagaraEffect(bRiseUp);
+	Multicast_PlayRiseWallCameraShake();
 }
 
 void ANetherCrownEnemyCrownPrisonWall::SetWallCollisionEnabled(const ECollisionEnabled::Type CollisionEnabled) const
@@ -133,12 +150,142 @@ void ANetherCrownEnemyCrownPrisonWall::HandleRiseWallFinished()
 		return;
 	}
 
+	if (!bIsRiseUp)
+	{
+		StartDestroyTimer();
+		return;
+	}
+
 	bIsRising = false;
 	SetActorLocation(RaisedLocation);
 	SetWallCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	SetActorTickEnabled(false);
 
+	WorldCameraShakeLocation = GetActorLocation();
+
 	Multicast_ActiveMagicRangeNiagaraEffect();
+	StartExplosionTimer();
+}
+
+void ANetherCrownEnemyCrownPrisonWall::StartExplosionTimer()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(ExplosionTimer);
+	TimerManager.SetTimer(ExplosionTimer, this, &ThisClass::ExplosionPrisonWallMagic, CrownPrisonInitData.ExplosionTimeOffset, false);
+}
+
+void ANetherCrownEnemyCrownPrisonWall::ExplosionPrisonWallMagic()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	StartRiseDownWallTimer();
+	Multicast_ActiveExplosionNiagaraEffect();
+
+	TArray<AActor*> OverlappedActors{};
+	const FVector DetectSpherePos{ GetActorLocation() };
+	const TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes{ UEngineTypes::ConvertToObjectType(ECC_Player) };
+
+	UKismetSystemLibrary::SphereOverlapActors(this, DetectSpherePos, CrownPrisonInitData.ExplosionRadius, ObjectTypes, ANetherCrownCharacter::StaticClass(),
+		TArray<AActor*>(), OverlappedActors);
+
+	if (OverlappedActors.IsEmpty())
+	{
+		return;
+	}
+
+	for (AActor* OverlappedActor : OverlappedActors)
+	{
+		if (ANetherCrownCharacter* OverlappedCharacter = Cast<ANetherCrownCharacter>(OverlappedActor))
+		{
+			OnCrownPrisonExplosionHit.Broadcast(OverlappedCharacter);
+		}
+	}
+}
+
+void ANetherCrownEnemyCrownPrisonWall::StartRiseDownWallTimer()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(RiseDownWallTimer);
+	TimerManager.SetTimer(RiseDownWallTimer, this, &ThisClass::RiseDownWall, 1.5f, false);
+}
+
+void ANetherCrownEnemyCrownPrisonWall::RiseDownWall()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	StartRiseUpOrDownWall(WallHiddenZOffset, WallRiseDuration, false);
+}
+
+void ANetherCrownEnemyCrownPrisonWall::StartDestroyTimer()
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FTimerDelegate TimerDelegate{};
+	TimerDelegate.BindLambda([WeakThis = MakeWeakObjectPtr(this)]()
+	{
+		ANetherCrownEnemyCrownPrisonWall* ThisPtr{ WeakThis.Get() };
+		if (!ensureAlways(IsValid(ThisPtr)))
+		{
+			return;
+		}
+
+		ThisPtr->Destroy();
+	});
+
+	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(DestroyTimer);
+	TimerManager.SetTimer(DestroyTimer, TimerDelegate, 1.5f, false);
+}
+
+void ANetherCrownEnemyCrownPrisonWall::Multicast_ActiveExplosionNiagaraEffect_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(ExplosionNiagaraComponent)))
+	{
+		return;
+	}
+
+	ExplosionNiagaraComponent->Activate();
 }
 
 void ANetherCrownEnemyCrownPrisonWall::Multicast_ActiveWallRaiseUpDownNiagaraEffect_Implementation(const bool bRaiseUp)
@@ -175,4 +322,27 @@ void ANetherCrownEnemyCrownPrisonWall::Multicast_ActiveMagicRangeNiagaraEffect_I
 	}
 
 	MagicRangeNiagaraComponent->Activate();
+}
+
+void ANetherCrownEnemyCrownPrisonWall::Multicast_PlayRiseWallCameraShake_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!IsValid(RiseWallCameraShakeClass))
+	{
+		return;
+	}
+
+	UGameplayStatics::PlayWorldCameraShake(
+		this,
+		RiseWallCameraShakeClass,
+		WorldCameraShakeLocation,
+		RiseWallCameraShakeInnerRadius,
+		RiseWallCameraShakeOuterRadius,
+		RiseWallCameraShakeFalloff,
+		false
+	);
 }

@@ -112,8 +112,6 @@ void UNetherCrownEnemyVoidPiercer::AttackVoidPiercerToCharacter()
 
 		ApplyEnemyMagicSkillDamage(HitCharacter);
 	}
-
-	UKismetSystemLibrary::DrawDebugSphere(this, EndLocation, CachedVoidPiercerData.LaserRadius, 10, FColor::Red, false, 2.0f);
 }
 
 void UNetherCrownEnemyVoidPiercer::CacheVoidPiercerData()

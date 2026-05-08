@@ -75,6 +75,12 @@ struct FNetherCrownEnemyCrownPrisonData
 
 	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
 	float WallRiseDuration{ 1.5f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	float ExplosionRadius{ 700.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	float ExplosionTimeOffset{ 3.f };
 };
 
 USTRUCT()
