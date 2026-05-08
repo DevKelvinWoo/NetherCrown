@@ -23,6 +23,7 @@ class UNetherCrownControlGhostTrailComponent;
 class UNetherCrownBasicAttackComponent;
 class UNetherCrownEquipComponent;
 class UNetherCrownSkillComponent;
+class UNetherCrownStatusEffectControlComponent;
 
 enum class ENetherCrownSkillKeyEnum : uint8;
 
@@ -97,6 +98,8 @@ public:
 
 	FOnRepPlayerState& GetOnRepPlayerState() { return OnRepPlayerState; }
 
+	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
+
 protected:
 	virtual void BeginPlay() override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
@@ -104,8 +107,6 @@ protected:
 	virtual void Landed(const FHitResult& Hit) override;
 	virtual void OnJumped_Implementation() override;
 	virtual void OnMovementModeChanged(EMovementMode PrevMovementMode, uint8 PreviousCustomMode = 0) override;
-
-	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 	virtual void OnRep_PlayerState() override;
 
@@ -173,6 +174,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownActionControlComponent> NetherCrownActionControlComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownStatusEffectControlComponent> StatusEffectControlComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNiagaraComponent> StatusNiagaraComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownCharacterTagData CharacterTagData{};

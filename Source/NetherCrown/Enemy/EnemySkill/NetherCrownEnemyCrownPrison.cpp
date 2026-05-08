@@ -4,6 +4,7 @@
 
 #include "Components/CapsuleComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
 #include "NetherCrown/Enemy/EnemySkill/EnemySkillActor/NetherCrownEnemyCrownPrisonWall.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
@@ -123,5 +124,19 @@ void UNetherCrownEnemyCrownPrison::HandleOnCrownPrisonExplosionHit(ANetherCrownC
 		return;
 	}
 
+	if (!IsValid(HitCharacter))
+	{
+		return;
+	}
+
 	ApplyEnemyMagicSkillDamage(HitCharacter);
+
+	UNetherCrownCrowdControlComponent* CCComponent{ HitCharacter->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCComponent)))
+	{
+		return;
+	}
+
+	CCComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::STUN, CachedCrownEnemyCrownPrisonData.CrownPrisonStunDuration);
+	CCComponent->Stun();
 }

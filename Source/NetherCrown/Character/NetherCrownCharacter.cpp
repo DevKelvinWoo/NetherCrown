@@ -19,6 +19,7 @@
 #include "NetherCrown/Components/NetherCrownDamageReceiverComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
+#include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemyBasicAttackComponent.h"
@@ -37,6 +38,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownCrowdControlComponent = CreateDefaultSubobject<UNetherCrownCrowdControlComponent>(TEXT("CrowdControlComponent"));
 	NetherCrownDamageReceiverComponent = CreateDefaultSubobject<UNetherCrownDamageReceiverComponent>(TEXT("DamageReceiverComponent"));
 	NetherCrownActionControlComponent = CreateDefaultSubobject<UNetherCrownActionControlComponent>(TEXT("ActionControlComponent"));
+	StatusEffectControlComponent = CreateDefaultSubobject<UNetherCrownStatusEffectControlComponent>(TEXT("StatusEffectControlComponent"));
 
 	SetCharacterDefaultMovementSettings();
 
@@ -58,6 +60,9 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 
 		NetherCrownPostProcessComponent = CreateDefaultSubobject<UPostProcessComponent>(TEXT("PostProcessComponent"));
 		NetherCrownControlPPComponent = CreateDefaultSubobject<UNetherCrownControlPPComponent>(TEXT("ControlPPComponent"));
+
+		StatusNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("StatusNiagaraComponent"));
+		StatusNiagaraComponent->SetupAttachment(RootComponent);
 	}
 }
 
@@ -139,6 +144,11 @@ void ANetherCrownCharacter::BeginPlay()
 	if (ensureAlways(IsValid(NetherCrownControlGhostTrailComponent)) && ensureAlways(IsValid(NetherCrownGhostTrailNiagaraComponent)))
 	{
 		NetherCrownControlGhostTrailComponent->SetHandledGhostTrailNiagaraComponent(NetherCrownGhostTrailNiagaraComponent);
+	}
+
+	if (GetNetMode() != NM_DedicatedServer && ensureAlways(IsValid(StatusNiagaraComponent)))
+	{
+		StatusEffectControlComponent->SetHandledStatusNiagaraComponent(StatusNiagaraComponent);
 	}
 }
 
@@ -462,10 +472,7 @@ void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(AN
 
 UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const
 {
-	//@TODO : Need to implements Status Effect Control Component in NetherCrownCharacter class (now only for enemy class)
-	unimplemented();
-
-	return nullptr;
+	return StatusEffectControlComponent;
 }
 
 void ANetherCrownCharacter::OnRep_PlayerState()
