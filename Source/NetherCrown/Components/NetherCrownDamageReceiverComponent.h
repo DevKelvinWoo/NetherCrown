@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "GameplayTagContainer.h"
 #include "NetherCrownDamageReceiverComponent.generated.h"
 
 
@@ -46,16 +47,18 @@ private:
 	void Client_PlayHitCameraShake();
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayHitImpactEffect();
+	void Multicast_PlayHitImpactEffect(const FGameplayTag& HitImpactEffectTag);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitReactAnimation();
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayHitImpactSound();
+	void Multicast_PlayHitImpactSound(const FGameplayTag& HitImpactSoundTag);
 
 	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
 	void ApplyFinalDamage(float FinalDamage);
+	FGameplayTag ResolveHitImpactEffectTag(FDamageEvent const& DamageEvent) const;
+	FGameplayTag ResolveHitImpactSoundTag(FDamageEvent const& DamageEvent) const;
 
 	int32 GetArmorStat(const bool bIsPhysicalDamage) const;
 

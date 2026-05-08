@@ -8,6 +8,7 @@
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/DamageTypes/NetherCrownMagicDamageType.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/Data/NetherCrownEnemyProjectileDataAsset.h"
 #include "NetherCrown/Data/NetherCrownEnemyRangedBasicAttackDataAsset.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -295,7 +296,24 @@ void UNetherCrownEnemyRangedBasicAttackComponent::HandleOnMagicProjectileHit(ANe
 		return;
 	}
 
-	UGameplayStatics::ApplyDamage(HitCharacter, GetEnemyMagicAttackDamage(), CachedOwnerEnemy->GetController(), DamageCauserProjectile, UNetherCrownMagicDamageType::StaticClass());
+	FGameplayTag HitImpactEffectTag{};
+	FGameplayTag HitImpactSoundTag{};
+	if (IsValid(CachedProjectileData))
+	{
+		const FNetherCrownEnemyProjectileTagData& EnemyProjectileTagData{ CachedProjectileData->GetEnemyProjectileData().EnemyProjectileTagData };
+		HitImpactEffectTag = EnemyProjectileTagData.ProjectileHitImpactEffectTag;
+		HitImpactSoundTag = EnemyProjectileTagData.ProjectileHitImpactSoundTag;
+	}
+
+	FNetherCrownDamageEvent::ApplyDamage(
+		HitCharacter,
+		GetEnemyMagicAttackDamage(),
+		CachedOwnerEnemy->GetController(),
+		DamageCauserProjectile,
+		UNetherCrownMagicDamageType::StaticClass(),
+		HitImpactSoundTag,
+		HitImpactEffectTag
+	);
 }
 
 void UNetherCrownEnemyRangedBasicAttackComponent::Multicast_PlayRangedBasicAttackAnim_Implementation(const FName& ComboSectionName)

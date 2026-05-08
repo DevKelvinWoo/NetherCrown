@@ -13,6 +13,7 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/DamageTypes/UNetherCrownCriticalPhysicalDamageType.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -74,7 +75,7 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 	{
 		const bool bIsCriticalDamage{ DamageEvent.DamageTypeClass == UNetherCrownCriticalPhysicalDamageType::StaticClass() };
 		Multicast_PlayTakeDamageAnimation(bIsCriticalDamage);
-		Multicast_PlayTakeDamageSound();
+		Multicast_PlayTakeDamageSound(ResolveHurtImpactSoundTag(DamageEvent));
 	}
 
 	return FinalDamage;
@@ -253,6 +254,25 @@ int32 UNetherCrownEnemyDamageReceiverComponent::GetArmorStat(const bool bIsPhysi
 	const FNetherCrownEnemyStat& EnemyStat{ EnemyStatComponent->GetEnemyStatData() };
 
 	return bIsPhysicalDamage ? EnemyStat.PhysicalArmor : EnemyStat.MagicArmor;
+}
+
+FGameplayTag UNetherCrownEnemyDamageReceiverComponent::ResolveHurtImpactSoundTag(FDamageEvent const& DamageEvent) const
+{
+	const FNetherCrownDamageEvent& NetherCrownDamageEvent{ static_cast<const FNetherCrownDamageEvent&>(DamageEvent) };
+	if (NetherCrownDamageEvent.HitImpactSoundTag.IsValid())
+	{
+		return NetherCrownDamageEvent.HitImpactSoundTag;
+	}
+
+	const UNetherCrownCrowdControlComponent* CCComponent{ CachedOwnerEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCComponent)))
+	{
+		return FGameplayTag{};
+	}
+
+	const bool bIsFrozen{ CCComponent->GetCrowdControlType() == ENetherCrownCrowdControlType::FROZEN };
+	const FNetherCrownEnemyDamageTagData& EnemyDamageTagData{ EnemyDamageCosmeticData.EnemyDamageTagData };
+	return bIsFrozen ? EnemyDamageTagData.FrozenEnemyHurtImpactSoundTag : EnemyDamageTagData.EnemyHurtImpactSoundTag;
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::CacheOwnerEnemy()
@@ -476,7 +496,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation
 	}
 }
 
-void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageSound_Implementation()
+void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageSound_Implementation(const FGameplayTag& HurtImpactSoundTag)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
 	{
@@ -491,7 +511,6 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageSound_Imp
 
 	const bool bIsFrozen{ CCComponent->GetCrowdControlType() == ENetherCrownCrowdControlType::FROZEN };
 	const FNetherCrownEnemyDamageTagData& EnemyDamageTagData{ EnemyDamageCosmeticData.EnemyDamageTagData };
-	const FGameplayTag HurtImpactSoundTag{ bIsFrozen ? EnemyDamageTagData.FrozenEnemyHurtImpactSoundTag : EnemyDamageTagData.EnemyHurtImpactSoundTag };
 
 	if (!bIsFrozen)
 	{

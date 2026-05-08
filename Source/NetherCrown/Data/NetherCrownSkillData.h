@@ -37,6 +37,9 @@ struct FNetherCrownSkillTagData
 public:
 	UPROPERTY(EditDefaultsOnly)
 	FGameplayTag SkillHitImpactEffectTag{};
+
+	UPROPERTY(EditDefaultsOnly)
+	FGameplayTag SkillHitImpactSoundTag{};
 };
 
 USTRUCT()

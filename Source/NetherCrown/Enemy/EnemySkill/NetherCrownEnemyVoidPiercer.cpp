@@ -180,7 +180,7 @@ void UNetherCrownEnemyVoidPiercer::RotateToTargetActor()
 	}
 
 	const ANetherCrownCharacter* TargetCharacter{ SkillOwnerEnemy->GetCurrentTargetCharacter() };
-	if (!ensureAlways(IsValid(TargetCharacter)))
+	if (!IsValid(TargetCharacter))
 	{
 		return;
 	}

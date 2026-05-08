@@ -21,6 +21,7 @@
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
@@ -453,7 +454,7 @@ void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(AN
 	float KnockBackDuration{ 0.f };
 	if (!EnemyBasicAttackComponent->TryGetKnockBackData(KnockBackDistance, KnockBackDuration))
 	{
-		UGameplayStatics::ApplyDamage(this, EnemyAttackDamage, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
+		FNetherCrownDamageEvent::ApplyDamage(this, EnemyAttackDamage, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
 
 		return;
 	}
@@ -467,7 +468,7 @@ void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(AN
 	NetherCrownCrowdControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::KNOCK_BACK, KnockBackDuration);
 	NetherCrownCrowdControlComponent->KnockBack(KnockBackDirection * KnockBackDistance);
 
-	UGameplayStatics::ApplyDamage(this, EnemyAttackDamage, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
+	FNetherCrownDamageEvent::ApplyDamage(this, EnemyAttackDamage, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
 }
 
 UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const

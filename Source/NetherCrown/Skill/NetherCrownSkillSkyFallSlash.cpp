@@ -10,6 +10,7 @@
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownCollisionChannels.h"
@@ -209,7 +210,15 @@ void UNetherCrownSkillSkyFallSlash::DetectAndHitSkyFallSlashSkill()
 				CrowdControlComponent->KnockBack(DetectedEnemy->GetActorForwardVector() * -SkyFallSlashData.SkillKnockBackDistance);
 			}
 
-			UGameplayStatics::ApplyDamage(DetectedEnemy, CalculateSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
+			FNetherCrownDamageEvent::ApplyDamage(
+				DetectedEnemy,
+				CalculateSkillDamage(),
+				SkillOwnerCharacter->GetController(),
+				SkillOwnerCharacter,
+				UNetherCrownPhysicalDamageType::StaticClass(),
+				SkillData.SkillTagData.SkillHitImpactSoundTag,
+				SkillData.SkillTagData.SkillHitImpactEffectTag
+			);
 
 			//@NOTE : Skill Hit Sound is played by TakeDamage function, So only Spawn VFX
 			Multicast_SpawnSkillImpactEffect(DetectedEnemy);

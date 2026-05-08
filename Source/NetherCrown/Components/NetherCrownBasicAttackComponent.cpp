@@ -17,6 +17,7 @@
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/DamageTypes/UNetherCrownCriticalPhysicalDamageType.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
@@ -683,7 +684,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) con
 	}
 
 	TSubclassOf<UDamageType> DamageTypeClass{ IsLastComboAttack() ? UNetherCrownCriticalPhysicalDamageType::StaticClass() : UNetherCrownPhysicalDamageType::StaticClass() };
-	UGameplayStatics::ApplyDamage(HitEnemy, CalculateBasicAttackDamage(), CachedCharacter->GetInstigatorController(), CachedCharacter, DamageTypeClass);
+	FNetherCrownDamageEvent::ApplyDamage(HitEnemy, CalculateBasicAttackDamage(), CachedCharacter->GetInstigatorController(), CachedCharacter, DamageTypeClass);
 }
 
 void UNetherCrownBasicAttackComponent::HandleOnEquipWeapon(const bool bEquipWeapon)

@@ -107,6 +107,8 @@ void ANetherCrownEnemyCrownPrisonWall::StartRiseUpOrDownWall(const float InWallH
 		return;
 	}
 
+	Multicast_PlayCrownPrisonSoundByTag(NetherCrownTags::Sound_BossEnemy1_CrownPrisonStatueRise);
+
 	WallHiddenZOffset = InWallHiddenZOffset;
 	HiddenLocation = GetActorLocation();
 	RaisedLocation = bRiseUp ? HiddenLocation - FVector{ 0.f, 0.f, InWallHiddenZOffset } : HiddenLocation + FVector{ 0.f, 0.f, InWallHiddenZOffset };
@@ -164,6 +166,7 @@ void ANetherCrownEnemyCrownPrisonWall::HandleRiseWallFinished()
 	WorldCameraShakeLocation = GetActorLocation();
 
 	Multicast_ActiveMagicRangeNiagaraEffect();
+	Multicast_PlayCrownPrisonSoundByTag(NetherCrownTags::Sound_BossEnemy1_CrownPrisonRanged);
 	StartExplosionTimer();
 }
 
@@ -193,7 +196,9 @@ void ANetherCrownEnemyCrownPrisonWall::ExplosionPrisonWallMagic()
 	}
 
 	StartRiseDownWallTimer();
+
 	Multicast_ActiveExplosionNiagaraEffect();
+	Multicast_PlayCrownPrisonSoundByTag(NetherCrownTags::Sound_BossEnemy1_CrownPrisonExplosion);
 
 	TArray<AActor*> OverlappedActors{};
 	const FVector DetectSpherePos{ GetActorLocation() };
@@ -271,6 +276,16 @@ void ANetherCrownEnemyCrownPrisonWall::StartDestroyTimer()
 	FTimerManager& TimerManager{ World->GetTimerManager() };
 	TimerManager.ClearTimer(DestroyTimer);
 	TimerManager.SetTimer(DestroyTimer, TimerDelegate, 1.5f, false);
+}
+
+void ANetherCrownEnemyCrownPrisonWall::Multicast_PlayCrownPrisonSoundByTag_Implementation(const FGameplayTag& SoundTag)
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, SoundTag);
 }
 
 void ANetherCrownEnemyCrownPrisonWall::Multicast_ActiveExplosionNiagaraEffect_Implementation()

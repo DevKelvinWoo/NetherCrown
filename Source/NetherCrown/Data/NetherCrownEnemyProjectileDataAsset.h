@@ -20,6 +20,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FGameplayTag ProjectileDestroySoundTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag ProjectileHitImpactEffectTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag ProjectileHitImpactSoundTag{};
 };
 
 USTRUCT()

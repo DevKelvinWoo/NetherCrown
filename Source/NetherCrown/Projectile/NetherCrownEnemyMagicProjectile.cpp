@@ -84,8 +84,8 @@ void ANetherCrownEnemyMagicProjectile::HandleOnHitSphereBeginOverlap(UPrimitiveC
 	OnMagicProjectileHit.Broadcast(OwnerCharacter, this);
 
 	const FTransform& DestroyNiagaraSystemTransform{ FTransform(FRotator(), SweepResult.Location, FVector::OneVector) };
-	Multicast_SpawnDestroyProjectileEffect(DestroyNiagaraSystemTransform);
-	Multicast_PlayDestroyProjectileSound();
+	//Multicast_SpawnDestroyProjectileEffect(DestroyNiagaraSystemTransform);
+	//Multicast_PlayDestroyProjectileSound();
 
 	Destroy();
 }

@@ -22,6 +22,10 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_FrozenEnemy_Death, "Sound.FrozenEnemy.Death", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Shield_On, "Sound.Shield.On", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Projectile_BossEnemy1_ProjectileDestroy, "Sound.Projectile.BossEnemy1.ProjectileDestroy", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonExplosion, "Sound.BossEnemy1.CrownPrisonExplosion", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonRanged, "Sound.BossEnemy1.CrownPrisonRanged", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonStatueRise, "Sound.BossEnemy1.CrownPrisonStatueRise", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonHit, "Sound.BossEnemy1.CrownPrisonHit", "");
 #pragma endregion
 
 #pragma region Effect
@@ -37,6 +41,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_Projectile_HitImpact, "Effect.Boss1.Projectile.HitImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_VoidPiercer_HitImpact, "Effect.Boss1.VoidPiercer.HitImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_CrownPrison_RaiseImpact, "Effect.Boss1.CrownPrison.RaiseImpact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_CrownPrison_HitImpact, "Effect.Boss1.CrownPrison.HitImpact", "");
 #pragma endregion
 
 #pragma region Weapon

@@ -21,6 +21,7 @@
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -550,7 +551,15 @@ void UNetherCrownSkillDashAttack::ApplyDashAttackDamageAndCrowdControl(ANetherCr
 	CrowdControlComponent->Stun();
 
 	ApplyCrowdControlToTarget(TargetEnemy, ENetherCrownCrowdControlType::STUN, DashAttackData.StunDuration);
-	UGameplayStatics::ApplyDamage(TargetEnemy, CalculateSkillDamage(), SkillOwnerCharacter->GetController(), SkillOwnerCharacter, UNetherCrownPhysicalDamageType::StaticClass());
+	FNetherCrownDamageEvent::ApplyDamage(
+		TargetEnemy,
+		CalculateSkillDamage(),
+		SkillOwnerCharacter->GetController(),
+		SkillOwnerCharacter,
+		UNetherCrownPhysicalDamageType::StaticClass(),
+		SkillData.SkillTagData.SkillHitImpactSoundTag,
+		SkillData.SkillTagData.SkillHitImpactEffectTag
+	);
 
 	Multicast_SpawnSkillImpactEffect(TargetEnemy);
 	Client_ActiveSkillHitCameraShake();

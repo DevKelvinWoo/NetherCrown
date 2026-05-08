@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "Components/TimelineComponent.h"
+#include "GameplayTagContainer.h"
 #include "NetherCrown/Data/UNetherCrownEnemyDamageAndDeathCosmeticData.h"
 #include "NetherCrownEnemyDamageReceiverComponent.generated.h"
 
@@ -51,6 +52,7 @@ private:
 
 	int32 GetWeaponPenetration(const bool bIsPhysicalDamage, const AActor* DamageCauser) const;
 	int32 GetArmorStat(const bool bIsPhysicalDamage) const;
+	FGameplayTag ResolveHurtImpactSoundTag(FDamageEvent const& DamageEvent) const;
 
 	void CacheOwnerEnemy();
 	void LoadEnemyDamageCosmeticData();
@@ -58,7 +60,7 @@ private:
 	void BindTimelineFunctions();
 
 	UFUNCTION(NetMulticast, Unreliable)
-	void Multicast_PlayTakeDamageSound();
+	void Multicast_PlayTakeDamageSound(const FGameplayTag& HurtImpactSoundTag);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayDeathSound();

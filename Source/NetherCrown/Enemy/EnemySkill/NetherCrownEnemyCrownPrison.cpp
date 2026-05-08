@@ -84,6 +84,7 @@ void UNetherCrownEnemyCrownPrison::SpawnCrownPrisonWall()
 	FNetherCrownCrownPrisonInitData CrownPrisonInitData{};
 	CrownPrisonInitData.ExplosionRadius = CachedCrownEnemyCrownPrisonData.ExplosionRadius;
 	CrownPrisonInitData.ExplosionTimeOffset = CachedCrownEnemyCrownPrisonData.ExplosionTimeOffset;
+	CrownPrisonInitData.CrownPrisonTagData = CachedCrownEnemyCrownPrisonData.CrownPrisonTagData;
 
 	CrownPrisonWall->GetOnCrownPrisonExplosionHit().AddUObject(this, &ThisClass::HandleOnCrownPrisonExplosionHit);
 	CrownPrisonWall->InitCrownPrisonWall(CrownPrisonInitData);

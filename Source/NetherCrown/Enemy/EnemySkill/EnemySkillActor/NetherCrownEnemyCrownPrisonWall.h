@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+#include "NetherCrown/Data/NetherCrownEnemySkillData.h"
 #include "NetherCrownEnemyCrownPrisonWall.generated.h"
 
 class UNiagaraComponent;
@@ -23,6 +24,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
 	float ExplosionTimeOffset{ 3.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	FNetherCrownEnemyCrownPrisonTagData CrownPrisonTagData{};
 };
 
 UCLASS()
@@ -66,6 +70,9 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ActiveExplosionNiagaraEffect();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayCrownPrisonSoundByTag(const FGameplayTag& SoundTag);
 
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayRiseWallCameraShake();

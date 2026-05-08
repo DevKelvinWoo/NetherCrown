@@ -23,6 +23,11 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_FrozenEnemy_Death);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Shield_On);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Projectile_BossEnemy1_ProjectileDestroy);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_VoidPiercerHitImpact);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_CrownPrisonExplosion);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_CrownPrisonRanged);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_CrownPrisonStatueRise);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_CrownPrisonHit);
 #pragma endregion
 
 #pragma region Effect
@@ -38,6 +43,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_Projectile_HitImpact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_VoidPiercer_HitImpact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_CrownPrison_RaiseImpact);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_CrownPrison_HitImpact);
 #pragma endregion
 
 #pragma region Weapon

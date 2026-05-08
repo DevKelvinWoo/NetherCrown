@@ -39,7 +39,7 @@ EBTNodeResult::Type UNetherCrownBossRangedMoveLocationTask::ExecuteTask(UBehavio
 	}
 
 	const AActor* TargetActor{ Cast<AActor>(BlackboardComponent->GetValueAsObject(TargetActorBlackboardKey.SelectedKeyName)) };
-	if (!ensureAlways(IsValid(TargetActor)))
+	if (!IsValid(TargetActor))
 	{
 		return EBTNodeResult::Failed;
 	}

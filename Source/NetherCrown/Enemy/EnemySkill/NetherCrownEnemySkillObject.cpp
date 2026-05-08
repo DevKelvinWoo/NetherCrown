@@ -8,6 +8,7 @@
 #include "TimerManager.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/DamageTypes/NetherCrownMagicDamageType.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
@@ -209,5 +210,13 @@ void UNetherCrownEnemySkillObject::ApplyEnemySkillDamage(ANetherCrownCharacter* 
 		return;
 	}
 
-	UGameplayStatics::ApplyDamage(TargetCharacter, DamageAmount, SkillOwnerEnemy->GetInstigatorController(), SkillOwnerEnemy, DamageTypeClass);
+	FNetherCrownDamageEvent::ApplyDamage(
+		TargetCharacter,
+		DamageAmount,
+		SkillOwnerEnemy->GetInstigatorController(),
+		SkillOwnerEnemy,
+		DamageTypeClass,
+		EnemySkillData.EnemySkillTagData.HitImpactSoundTag,
+		EnemySkillData.EnemySkillTagData.HitImpactEffectTag
+	);
 }

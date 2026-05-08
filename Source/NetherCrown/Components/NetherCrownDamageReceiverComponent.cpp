@@ -12,6 +12,7 @@
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownKnightAnimInstance.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/Data/NetherCrownCharacterDamageReceiveDataAsset.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
@@ -35,7 +36,7 @@ float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmou
 	const float FinalDamage{ CalculateFinalDamage(DamageAmount, DamageEvent, DamageCauser) };
 	ApplyFinalDamage(FinalDamage);
 
-	Multicast_PlayHitImpactEffect();
+	Multicast_PlayHitImpactEffect(ResolveHitImpactEffectTag(DamageEvent));
 	Client_PlayHitCameraShake();
 
 	if (IsDead())
@@ -44,7 +45,7 @@ float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmou
 	}
 	else
 	{
-		Multicast_PlayHitImpactSound();
+		Multicast_PlayHitImpactSound(ResolveHitImpactSoundTag(DamageEvent));
 		Multicast_PlayHitReactAnimation();
 	}
 
@@ -166,15 +167,14 @@ void UNetherCrownDamageReceiverComponent::Client_PlayHitCameraShake_Implementati
 	CameraManager->StartCameraShake(DamageReceiveData.HitCameraShakeClass, 1.0f);
 }
 
-void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactEffect_Implementation()
+void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactEffect_Implementation(const FGameplayTag& HitImpactEffectTag)
 {
 	if (GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
 
-	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
-	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitImpactEffectTag, CachedOwnerCharacter->GetActorTransform());
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(CachedOwnerCharacter->GetWorld(), HitImpactEffectTag, CachedOwnerCharacter->GetActorTransform());
 }
 
 void UNetherCrownDamageReceiverComponent::Multicast_PlayHitReactAnimation_Implementation()
@@ -239,7 +239,7 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitReactAnimation_Implem
 	}
 }
 
-void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactSound_Implementation()
+void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactSound_Implementation(const FGameplayTag& HitImpactSoundTag)
 {
 	if (GetNetMode() == NM_DedicatedServer)
 	{
@@ -258,7 +258,7 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactSound_Implement
 
 	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitGruntSoundTag);
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerCharacter->GetWorld(), DamageReceiveData.DamageReceiveTagData.HitImpactSoundTag);
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerCharacter->GetWorld(), HitImpactSoundTag);
 }
 
 float UNetherCrownDamageReceiverComponent::CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const
@@ -297,6 +297,30 @@ void UNetherCrownDamageReceiverComponent::ApplyFinalDamage(float FinalDamage)
 	}
 
 	PlayerStatComponent->ModifyHp(-FinalDamage);
+}
+
+FGameplayTag UNetherCrownDamageReceiverComponent::ResolveHitImpactEffectTag(FDamageEvent const& DamageEvent) const
+{
+	const FNetherCrownDamageEvent& NetherCrownDamageEvent{ static_cast<const FNetherCrownDamageEvent&>(DamageEvent) };
+	if (NetherCrownDamageEvent.HitImpactEffectTag.IsValid())
+	{
+		return NetherCrownDamageEvent.HitImpactEffectTag;
+	}
+
+	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
+	return DamageReceiveData.DamageReceiveTagData.HitImpactEffectTag;
+}
+
+FGameplayTag UNetherCrownDamageReceiverComponent::ResolveHitImpactSoundTag(FDamageEvent const& DamageEvent) const
+{
+	const FNetherCrownDamageEvent& NetherCrownDamageEvent{ static_cast<const FNetherCrownDamageEvent&>(DamageEvent) };
+	if (NetherCrownDamageEvent.HitImpactSoundTag.IsValid())
+	{
+		return NetherCrownDamageEvent.HitImpactSoundTag;
+	}
+
+	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
+	return DamageReceiveData.DamageReceiveTagData.HitImpactSoundTag;
 }
 
 int32 UNetherCrownDamageReceiverComponent::GetArmorStat(const bool bIsPhysicalDamage) const

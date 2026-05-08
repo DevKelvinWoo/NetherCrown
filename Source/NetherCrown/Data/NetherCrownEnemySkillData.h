@@ -14,6 +14,19 @@ class UAnimMontage;
 class UNetherCrownEnemyBasicAttackDataAsset;
 
 USTRUCT()
+struct FNetherCrownEnemySkillTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag HitImpactEffectTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag HitImpactSoundTag{};
+};
+
+USTRUCT()
 struct FNetherCrownEnemySkillData
 {
 	GENERATED_BODY()
@@ -30,6 +43,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillCoolDown")
 	float EnemySkillCoolDown{ 3.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FNetherCrownEnemySkillTagData EnemySkillTagData{};
 };
 
 UCLASS()
@@ -63,12 +79,31 @@ private:
 };
 
 USTRUCT()
+struct FNetherCrownEnemyCrownPrisonTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag CrownPrisonStatueRiseSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag CrownPrisonRangedSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag CrownPrisonExplosionSoundTag{};
+};
+
+USTRUCT()
 struct FNetherCrownEnemyCrownPrisonData
 {
 	GENERATED_BODY()
 
 	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
 	TSubclassOf<ANetherCrownEnemyCrownPrisonWall> CrownPrisonWallClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
+	FNetherCrownEnemyCrownPrisonTagData CrownPrisonTagData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "CrownPrisonData")
 	float WallHiddenZOffset{ -300.f };
