@@ -5,6 +5,7 @@
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
+#include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemySkillObject.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 
 UNetherCrownBossCrownPrisonTask::UNetherCrownBossCrownPrisonTask()
@@ -34,7 +35,28 @@ EBTNodeResult::Type UNetherCrownBossCrownPrisonTask::ExecuteTask(UBehaviorTreeCo
 		return EBTNodeResult::Failed;
 	}
 
+	CachedOwnerCompWeak = MakeWeakObjectPtr(&OwnerComp);
+
+	UNetherCrownEnemySkillObject* CrownPrisonSkillObject{ EnemySkillComponent->GetEnemySkillObject(NetherCrownTags::Enemy_Skill_CrownPrison) };
+	if (!ensureAlways(IsValid(CrownPrisonSkillObject)))
+	{
+		return EBTNodeResult::Failed;
+	}
+	CrownPrisonSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnCrownPrisonSkillFinished);
+
 	EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_CrownPrison);
 
-	return EBTNodeResult::Succeeded;
+	return EBTNodeResult::InProgress;
+}
+
+void UNetherCrownBossCrownPrisonTask::HandleOnCrownPrisonSkillFinished()
+{
+	UBehaviorTreeComponent* CachedOwnerComp{ CachedOwnerCompWeak.Get() };
+	if (!ensureAlways(IsValid(CachedOwnerComp)))
+	{
+		CachedOwnerCompWeak.Reset();
+		return;
+	}
+
+	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
 }

@@ -21,12 +21,14 @@ protected:
 
 private:
 	bool IsEnemySkillCoolDown(const FGameplayTag& InSkillTag) const;
+
 	bool CanUseVoidPiercerSkill() const;
+	bool CanUseCrownPrisonSkill() const;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector SelectedSkillKeyNameBlackboardKey{};
 
-	UPROPERTY(EditAnywhere, Category = "GameplayTag")
+	TArray<FGameplayTag> AvailableSkillGameplayTags{};
 	FGameplayTag SelectedSkillGameplayTag{};
 
 	TWeakObjectPtr<UNetherCrownEnemySkillComponent> BossEnemySkillComponentWeak{};

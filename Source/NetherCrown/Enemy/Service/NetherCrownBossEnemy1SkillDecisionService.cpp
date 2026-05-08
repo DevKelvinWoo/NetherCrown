@@ -12,7 +12,7 @@
 
 UNetherCrownBossEnemy1SkillDecisionService::UNetherCrownBossEnemy1SkillDecisionService()
 {
-	NodeName = TEXT("Skill CoolDown Check");
+	NodeName = TEXT("Skill Decision");
 
 	SelectedSkillKeyNameBlackboardKey.AddNameFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, SelectedSkillKeyNameBlackboardKey));
 }
@@ -33,20 +33,35 @@ void UNetherCrownBossEnemy1SkillDecisionService::TickNode(UBehaviorTreeComponent
 		return;
 	}
 
-	BossEnemySkillComponentWeak = MakeWeakObjectPtr(OwnerBossEnemy->GetEnemySkillComponent());
-
-	SelectedSkillGameplayTag = FGameplayTag();
-
-	if (CanUseVoidPiercerSkill())
-	{
-		SelectedSkillGameplayTag = NetherCrownTags::Enemy_Skill_VoidPiercer;
-	}
-
 	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
 	if (!ensureAlways(IsValid(BlackboardComponent)))
 	{
 		return;
 	}
+	BlackboardComponent->SetValueAsName(SelectedSkillKeyNameBlackboardKey.SelectedKeyName, TEXT(""));
+
+	BossEnemySkillComponentWeak = MakeWeakObjectPtr(OwnerBossEnemy->GetEnemySkillComponent());
+
+	AvailableSkillGameplayTags.Empty();
+	SelectedSkillGameplayTag = FGameplayTag();
+
+	if (CanUseVoidPiercerSkill())
+	{
+		AvailableSkillGameplayTags.Add(NetherCrownTags::Enemy_Skill_VoidPiercer);
+	}
+
+	if (CanUseCrownPrisonSkill())
+	{
+		AvailableSkillGameplayTags.Add(NetherCrownTags::Enemy_Skill_CrownPrison);
+	}
+
+	const int32 AvailableSkillCount{ AvailableSkillGameplayTags.Num() };
+	if (AvailableSkillCount == 0)
+	{
+		return;
+	}
+
+	SelectedSkillGameplayTag = AvailableSkillGameplayTags[FMath::RandRange(0, AvailableSkillCount - 1)];
 
 	BlackboardComponent->SetValueAsName(SelectedSkillKeyNameBlackboardKey.SelectedKeyName, SelectedSkillGameplayTag.GetTagName());
 }
@@ -73,4 +88,11 @@ bool UNetherCrownBossEnemy1SkillDecisionService::CanUseVoidPiercerSkill() const
 	const bool IsVoidPiercerSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_VoidPiercer) };
 
 	return !IsVoidPiercerSkillCoolDown;
+}
+
+bool UNetherCrownBossEnemy1SkillDecisionService::CanUseCrownPrisonSkill() const
+{
+	const bool IsCrownPrisonSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_CrownPrison) };
+
+	return !IsCrownPrisonSkillCoolDown;
 }
