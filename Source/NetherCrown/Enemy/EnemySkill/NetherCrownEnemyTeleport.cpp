@@ -4,6 +4,7 @@
 #include "NetherCrownEnemyTeleport.h"
 
 #include "NavigationSystem.h"
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
@@ -32,6 +33,13 @@ void UNetherCrownEnemyTeleport::ExecuteEnemySkillGameplay()
 	TeleportToEscape();
 }
 
+void UNetherCrownEnemyTeleport::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, TeleportStartVector)
+}
+
 void UNetherCrownEnemyTeleport::PlayTeleportSound() const
 {
 	const ANetherCrownEnemy* OwnerEnemy{ SkillOwnerEnemyWeak.Get() };
@@ -51,7 +59,7 @@ void UNetherCrownEnemyTeleport::SpawnTeleportEffect() const
 		return;
 	}
 
-	const FTransform& TeleportEffectTransform{ FTransform(FRotator::ZeroRotator, OwnerEnemy->GetActorLocation(), FVector::OneVector) };
+	const FTransform& TeleportEffectTransform{ FTransform(FRotator::ZeroRotator, TeleportStartVector, FVector::OneVector) };
 	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, CachedTeleportData.TeleportTagData.TeleportEffectTag, TeleportEffectTransform);
 }
 
@@ -86,6 +94,9 @@ void UNetherCrownEnemyTeleport::TeleportToEscape()
 	{
 		return;
 	}
+
+	TeleportStartVector = FVector::ZeroVector;
+	TeleportStartVector = OwnerEnemy->GetActorLocation();
 
 	const FVector& TeleportTargetLocation{ CurrentTargetCharacter->GetActorLocation() };
 

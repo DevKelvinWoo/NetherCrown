@@ -16,6 +16,8 @@ protected:
 	virtual void PlayEnemySkillCosmetics() override;
 	virtual void ExecuteEnemySkillGameplay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
 	void PlayTeleportSound() const;
 	void SpawnTeleportEffect() const;
@@ -23,6 +25,9 @@ private:
 	void CacheEnemyTeleportData();
 
 	void TeleportToEscape();
+
+	UPROPERTY(Transient, Replicated)
+	FVector TeleportStartVector{};
 
 	UPROPERTY(Transient)
 	FNetherCrownEnemyTeleportData CachedTeleportData{};

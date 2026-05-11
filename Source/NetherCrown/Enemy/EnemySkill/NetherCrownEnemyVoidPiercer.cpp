@@ -91,7 +91,7 @@ void UNetherCrownEnemyVoidPiercer::AttackVoidPiercerToCharacter()
 		  UEngineTypes::ConvertToTraceType(ECC_Visibility),
 		  false,
 		  ActorsToIgnore,
-		  EDrawDebugTrace::ForDuration,
+		  EDrawDebugTrace::None,
 		  OutHits,
 		  true
 	);
