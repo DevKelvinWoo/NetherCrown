@@ -79,6 +79,35 @@ private:
 };
 
 USTRUCT()
+struct FNetherCrownEnemyTeleportTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag TeleportSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag TeleportEffectTag{};
+};
+
+USTRUCT()
+struct FNetherCrownEnemyTeleportData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TeleportData")
+	FNetherCrownEnemyTeleportTagData TeleportTagData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TeleportData")
+	float TeleportDistance{ 500.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "TeleportData")
+	float TeleportRandomRadius{ 30.f };
+};
+
+USTRUCT()
 struct FNetherCrownEnemyCrownPrisonTagData
 {
 	GENERATED_BODY()
@@ -179,6 +208,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> DashFollowUpBasicAttackDataAssetSoft{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownEnemyTeleportDataAsset : public UNetherCrownEnemySkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownEnemyTeleportData& GetEnemyTeleportData() const { return EnemyTeleportData; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyTeleportData")
+	FNetherCrownEnemyTeleportData EnemyTeleportData{};
 };
 
 UCLASS()

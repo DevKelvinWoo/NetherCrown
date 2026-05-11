@@ -28,6 +28,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_CrownPrisonRanged);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_CrownPrisonStatueRise);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_CrownPrisonHit);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_Teleport);
 #pragma endregion
 
 #pragma region Effect
@@ -44,6 +45,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_VoidPiercer_HitImpact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_CrownPrison_RaiseImpact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_CrownPrison_HitImpact);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_Teleport_Impact);
 #pragma endregion
 
 #pragma region Weapon
@@ -77,6 +79,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_DashAttack);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_VoidPiercer);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_CrownPrison);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_Teleport);
 #pragma endregion
 
 }

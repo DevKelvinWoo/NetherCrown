@@ -21,6 +21,8 @@ public:
 	void ActivateEnemySkill(const FGameplayTag& SkillTag);
 	UNetherCrownEnemySkillObject* GetEnemySkillObject(const FGameplayTag& SkillTag) const;
 
+	bool IsEnemySkillCoolDown(const FGameplayTag& SkillTag) const;
+
 protected:
 	virtual void BeginPlay() override;
 

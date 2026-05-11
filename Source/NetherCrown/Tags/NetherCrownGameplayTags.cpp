@@ -26,6 +26,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonRanged, "Sound.BossEnemy1.CrownPrisonRanged", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonStatueRise, "Sound.BossEnemy1.CrownPrisonStatueRise", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonHit, "Sound.BossEnemy1.CrownPrisonHit", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_Teleport, "Sound.BossEnemy1.Teleport", "");
 #pragma endregion
 
 #pragma region Effect
@@ -42,6 +43,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_VoidPiercer_HitImpact, "Effect.Boss1.VoidPiercer.HitImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_CrownPrison_RaiseImpact, "Effect.Boss1.CrownPrison.RaiseImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_CrownPrison_HitImpact, "Effect.Boss1.CrownPrison.HitImpact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_Teleport_Impact, "Effect.Boss1.Teleport.Impact", "");
 #pragma endregion
 
 #pragma region Weapon
@@ -75,6 +77,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_DashAttack, "Enemy.Skill.DashAttack", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_VoidPiercer, "Enemy.Skill.VoidPiercer", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_CrownPrison, "Enemy.Skill.CrownPrison", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_Teleport, "Enemy.Skill.Teleport", "");
 #pragma endregion
 
 }

@@ -55,6 +55,22 @@ UNetherCrownEnemySkillObject* UNetherCrownEnemySkillComponent::GetEnemySkillObje
 	return FoundEnemySkillObjectPtr ? *FoundEnemySkillObjectPtr : nullptr;
 }
 
+bool UNetherCrownEnemySkillComponent::IsEnemySkillCoolDown(const FGameplayTag& SkillTag) const
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return true;
+	}
+
+	const UNetherCrownEnemySkillObject* FoundEnemySkill{ GetEnemySkillObject(SkillTag) };
+	if (!ensureAlways(IsValid(FoundEnemySkill)))
+	{
+		return true;
+	}
+
+	return FoundEnemySkill->IsEnemySkillCoolDown();
+}
+
 void UNetherCrownEnemySkillComponent::BeginPlay()
 {
 	Super::BeginPlay();

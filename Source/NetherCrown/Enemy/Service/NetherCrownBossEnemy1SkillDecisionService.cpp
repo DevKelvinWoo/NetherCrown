@@ -7,7 +7,6 @@
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
-#include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemyVoidPiercer.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 
 UNetherCrownBossEnemy1SkillDecisionService::UNetherCrownBossEnemy1SkillDecisionService()
@@ -74,13 +73,7 @@ bool UNetherCrownBossEnemy1SkillDecisionService::IsEnemySkillCoolDown(const FGam
 		return false;
 	}
 
-	const UNetherCrownEnemySkillObject* FoundEnemySkill{ BossEnemySkillComponent->GetEnemySkillObject(InSkillTag) };
-	if (!ensureAlways(IsValid(FoundEnemySkill)))
-	{
-		return false;
-	}
-
-	return FoundEnemySkill->IsEnemySkillCoolDown();
+	return BossEnemySkillComponent->IsEnemySkillCoolDown(InSkillTag);
 }
 
 bool UNetherCrownBossEnemy1SkillDecisionService::CanUseVoidPiercerSkill() const

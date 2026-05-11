@@ -41,6 +41,16 @@ ANetherCrownEnemyCrownPrisonWall::ANetherCrownEnemyCrownPrisonWall()
 	WallStaticMeshComponent6->SetupAttachment(RootComponent);
 	WallStaticMeshComponents.Add(WallStaticMeshComponent6);
 
+	for (UStaticMeshComponent* WallStaticMeshComponent : WallStaticMeshComponents)
+	{
+		if (!IsValid(WallStaticMeshComponent))
+		{
+			continue;
+		}
+
+		WallStaticMeshComponent->SetCanEverAffectNavigation(true);
+	}
+
 	MagicRangeNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("MagicRangeNiagaraComponent"));
 	MagicRangeNiagaraComponent->SetupAttachment(RootComponent);
 	MagicRangeNiagaraComponent->bAutoActivate = false;
