@@ -48,6 +48,11 @@ void UNetherCrownBossEnemy1EscapeSkillDecisionService::TickNode(UBehaviorTreeCom
 		AvailableEscapeSkillGameplayTags.Add(NetherCrownTags::Enemy_Skill_Teleport);
 	}
 
+	if (CanUseShockwaveRepulseSkill())
+	{
+		AvailableEscapeSkillGameplayTags.Add(NetherCrownTags::Enemy_Skill_ShockwaveRepulse);
+	}
+
 	const int32 AvailableEscapeSkillCount{ AvailableEscapeSkillGameplayTags.Num() };
 	if (AvailableEscapeSkillCount == 0)
 	{
@@ -75,4 +80,11 @@ bool UNetherCrownBossEnemy1EscapeSkillDecisionService::CanUseTeleportSkill() con
 	const bool IsTeleportSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_Teleport) };
 
 	return !IsTeleportSkillCoolDown;
+}
+
+bool UNetherCrownBossEnemy1EscapeSkillDecisionService::CanUseShockwaveRepulseSkill() const
+{
+	const bool IsShockwaveRepulseSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_ShockwaveRepulse) };
+
+	return !IsShockwaveRepulseSkillCoolDown;
 }

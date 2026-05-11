@@ -78,6 +78,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_VoidPiercer, "Enemy.Skill.VoidPiercer", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_CrownPrison, "Enemy.Skill.CrownPrison", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_Teleport, "Enemy.Skill.Teleport", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_ShockwaveRepulse, "Enemy.Skill.ShockwaveRepulse", "");
 #pragma endregion
 
 }

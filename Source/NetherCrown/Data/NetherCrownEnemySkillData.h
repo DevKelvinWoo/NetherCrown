@@ -79,6 +79,22 @@ private:
 };
 
 USTRUCT()
+struct FNetherCrownEnemyShockwaveRepulseData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "ShockwaveRepulseData")
+	float ShockwaveRepulseDuration{ 2.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "ShockwaveRepulseData")
+	float ShockwaveRepulseKnockbackTimeOffset{ 0.45f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "ShockwaveRepulseData")
+	float ShockwaveRepulseKnockbackDistance{ 1200.f };
+};
+
+USTRUCT()
 struct FNetherCrownEnemyTeleportTagData
 {
 	GENERATED_BODY()
@@ -208,6 +224,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> DashFollowUpBasicAttackDataAssetSoft{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownEnemyShockwaveRepulseDataAsset : public UNetherCrownEnemySkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownEnemyShockwaveRepulseData& GetEnemyShockwaveRepulseData() const { return EnemyShockwaveRepulseData; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyTeleportData")
+	FNetherCrownEnemyShockwaveRepulseData EnemyShockwaveRepulseData{};
 };
 
 UCLASS()

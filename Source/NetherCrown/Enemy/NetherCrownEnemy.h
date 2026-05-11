@@ -40,7 +40,7 @@ public:
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
 	void SetCurrentTargetCharacter(ANetherCrownCharacter* InTargetCharacter);
-	const ANetherCrownCharacter* GetCurrentTargetCharacter() const { return CurrentTargetCharacterWeak.Get(); }
+	ANetherCrownCharacter* GetCurrentTargetCharacter() const { return CurrentTargetCharacterWeak.Get(); }
 
 	void SetCharacterMaxSpeed(const bool bIsRunChase);
 

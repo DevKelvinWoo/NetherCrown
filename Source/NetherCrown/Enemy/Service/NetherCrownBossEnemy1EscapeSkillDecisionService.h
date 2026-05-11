@@ -23,6 +23,7 @@ private:
 	bool IsEnemySkillCoolDown(const FGameplayTag& InSkillTag) const;
 
 	bool CanUseTeleportSkill() const;
+	bool CanUseShockwaveRepulseSkill() const;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector SelectedEscapeSkillKeyNameBlackboardKey{};
