@@ -45,6 +45,7 @@ private:
 	void ApplyFinalDamage(float FinalDamage);
 
 	void SetHitReactStateAndTimer();
+	void ClearHitReactState();
 
 	bool IsDead() const;
 	void HandleEnemyDead();

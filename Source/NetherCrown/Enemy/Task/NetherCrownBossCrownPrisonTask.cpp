@@ -44,7 +44,12 @@ EBTNodeResult::Type UNetherCrownBossCrownPrisonTask::ExecuteTask(UBehaviorTreeCo
 	}
 	CrownPrisonSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnCrownPrisonSkillFinished);
 
-	EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_CrownPrison);
+	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_CrownPrison))
+	{
+		CrownPrisonSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+		CachedOwnerCompWeak.Reset();
+		return EBTNodeResult::Failed;
+	}
 
 	return EBTNodeResult::InProgress;
 }

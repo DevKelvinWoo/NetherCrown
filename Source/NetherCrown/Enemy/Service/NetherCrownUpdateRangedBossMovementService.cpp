@@ -6,6 +6,7 @@
 #include "NetherCrown/Data/NetherCrownEnemyAITuningData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
+#include "NetherCrown/Enemy/Components/NetherCrownEnemyActionControlComponent.h"
 
 UNetherCrownUpdateRangedBossMovementService::UNetherCrownUpdateRangedBossMovementService()
 {
@@ -40,6 +41,13 @@ void UNetherCrownUpdateRangedBossMovementService::TickNode(UBehaviorTreeComponen
 	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
 	if (!ensureAlways(IsValid(BlackboardComponent)))
 	{
+		return;
+	}
+
+	const UNetherCrownEnemyActionControlComponent* EnemyActionControlComponent{ OwnerEnemy->GetEnemyActionControlComponent() };
+	if (!ensureAlways(IsValid(EnemyActionControlComponent)) || !EnemyActionControlComponent->CanChase())
+	{
+		ClearMovementState(BlackboardComponent);
 		return;
 	}
 

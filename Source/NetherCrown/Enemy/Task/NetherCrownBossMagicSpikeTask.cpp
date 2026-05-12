@@ -44,7 +44,12 @@ EBTNodeResult::Type UNetherCrownBossMagicSpikeTask::ExecuteTask(UBehaviorTreeCom
 	}
 	MagicSpikeSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnMagicSpikeSkillFinished);
 
-	EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_MagicSpike);
+	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_MagicSpike))
+	{
+		MagicSpikeSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+		CachedOwnerCompWeak.Reset();
+		return EBTNodeResult::Failed;
+	}
 
 	return EBTNodeResult::InProgress;
 }

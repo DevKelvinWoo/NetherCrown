@@ -40,6 +40,10 @@ void UNetherCrownBossEnemy1SkillDecisionService::TickNode(UBehaviorTreeComponent
 	BlackboardComponent->SetValueAsName(SelectedSkillKeyNameBlackboardKey.SelectedKeyName, TEXT(""));
 
 	BossEnemySkillComponentWeak = MakeWeakObjectPtr(OwnerBossEnemy->GetEnemySkillComponent());
+	if (!BossEnemySkillComponentWeak.IsValid() || !BossEnemySkillComponentWeak->CanActivateEnemySkill())
+	{
+		return;
+	}
 
 	AvailableSkillGameplayTags.Empty();
 	SelectedSkillGameplayTag = FGameplayTag();

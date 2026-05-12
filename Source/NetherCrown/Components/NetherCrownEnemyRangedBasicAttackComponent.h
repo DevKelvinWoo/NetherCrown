@@ -29,7 +29,7 @@ class NETHERCROWN_API UNetherCrownEnemyRangedBasicAttackComponent : public UActo
 public:
 	UNetherCrownEnemyRangedBasicAttackComponent();
 
-	void RequestEnemyRangedAttack();
+	bool RequestEnemyRangedAttack();
 
 	FOnEnemyRangedBasicAttackFinished& GetOnEnemyRangedBasicAttackFinished() { return OnEnemyRangedBasicAttackFinished; }
 
@@ -42,6 +42,7 @@ protected:
 private:
 	void CacheEnemyRangedBasicAttackData();
 	void CacheInitData();
+	bool CanUseRangedBasicAttack() const;
 
 	void SpawnRangedBasicAttackProjectile(const FName& StartFireSocketName);
 	FVector GetProjectileSpawnLocation(const FName& StartFireSocketName) const;

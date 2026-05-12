@@ -45,7 +45,12 @@ EBTNodeResult::Type UNetherCrownEnemyTeleportTask::ExecuteTask(UBehaviorTreeComp
 	}
 	TeleportSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnTeleportSkillFinished);
 
-	EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_Teleport);
+	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_Teleport))
+	{
+		TeleportSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+		CachedOwnerCompWeak.Reset();
+		return EBTNodeResult::Failed;
+	}
 
 	return EBTNodeResult::InProgress;
 }

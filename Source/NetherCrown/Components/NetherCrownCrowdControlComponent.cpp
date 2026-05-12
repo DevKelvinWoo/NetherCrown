@@ -2,6 +2,7 @@
 
 #include "NetherCrownCrowdControlComponent.h"
 
+#include "AIController.h"
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrownStatusEffectControlComponent.h"
 #include "Animation/AnimMontage.h"
@@ -115,6 +116,7 @@ void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrow
 
 	SetCrowdControlActive(InCrowdControlType, true);
 	RefreshCrowdControlType();
+	StopOwnerMovementForCrowdControl();
 
 	const UWorld* World{ GetWorld() };
 	check(World);
@@ -145,6 +147,8 @@ void UNetherCrownCrowdControlComponent::KnockBack(const FVector& KnockBackVector
 		return;
 	}
 
+	StopOwnerMovementForCrowdControl();
+	MovementComponent->StopMovementImmediately();
 	MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
 	CachedOwner->LaunchCharacter(KnockBackVector, true, true);
 }
@@ -270,6 +274,8 @@ void UNetherCrownCrowdControlComponent::RefreshMovementAndAnimationSettings() co
 		const bool bHasBlockingMovementCrowdControl{ IsCrowdControlActive(ENetherCrownCrowdControlType::FROZEN) || IsCrowdControlActive(ENetherCrownCrowdControlType::STUN) };
 		if (bHasBlockingMovementCrowdControl && !IsCrowdControlActive(ENetherCrownCrowdControlType::KNOCK_BACK))
 		{
+			StopOwnerMovementForCrowdControl();
+			MovementComponent->StopMovementImmediately();
 			MovementComponent->DisableMovement();
 		}
 		else
@@ -290,6 +296,20 @@ void UNetherCrownCrowdControlComponent::RefreshMovementAndAnimationSettings() co
 	}
 
 	SkeletalMeshComponent->bPauseAnims = IsCrowdControlActive(ENetherCrownCrowdControlType::FROZEN);
+}
+
+void UNetherCrownCrowdControlComponent::StopOwnerMovementForCrowdControl() const
+{
+	if (!ensureAlways(IsValid(CachedOwner)) || !CachedOwner->HasAuthority())
+	{
+		return;
+	}
+
+	AAIController* AIController{ Cast<AAIController>(CachedOwner->GetController()) };
+	if (IsValid(AIController))
+	{
+		AIController->StopMovement();
+	}
 }
 
 void UNetherCrownCrowdControlComponent::SetCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType, const bool bActive)

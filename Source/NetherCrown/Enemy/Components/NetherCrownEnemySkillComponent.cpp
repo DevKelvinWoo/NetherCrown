@@ -6,6 +6,7 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/NetherCrown.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
+#include "NetherCrown/Enemy/Components/NetherCrownEnemyActionControlComponent.h"
 #include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemySkillObject.h"
 
 UNetherCrownEnemySkillComponent::UNetherCrownEnemySkillComponent()
@@ -15,33 +16,40 @@ UNetherCrownEnemySkillComponent::UNetherCrownEnemySkillComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-void UNetherCrownEnemySkillComponent::ActivateEnemySkill(const FGameplayTag& SkillTag)
+bool UNetherCrownEnemySkillComponent::ActivateEnemySkill(const FGameplayTag& SkillTag)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
-		return;
+		return false;
+	}
+
+	if (!CanActivateEnemySkill())
+	{
+		return false;
 	}
 
 	if (!SkillTag.IsValid() || EnemySkillObjectMap.IsEmpty())
 	{
-		return;
+		return false;
 	}
 
 	UNetherCrownEnemySkillObject** FoundEnemySkillObjectPtr{ EnemySkillObjectMap.Find(SkillTag) };
-	if (!IsValid(*FoundEnemySkillObjectPtr))
+	if (!FoundEnemySkillObjectPtr || !IsValid(*FoundEnemySkillObjectPtr))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("FoundSkillObjectPtr is Invalid in %hs"), __FUNCTION__);
-		return;
+		return false;
 	}
 
 	UNetherCrownEnemySkillObject* FoundEnemySkillObject{ *FoundEnemySkillObjectPtr };
 	if (!ensureAlways(IsValid(FoundEnemySkillObject)))
 	{
-		return;
+		return false;
 	}
 
 	FoundEnemySkillObject->ExecuteEnemySkillGameplay();
 	Multicast_PlayEnemySkillCosmetics(FoundEnemySkillObject);
+
+	return true;
 }
 
 UNetherCrownEnemySkillObject* UNetherCrownEnemySkillComponent::GetEnemySkillObject(const FGameplayTag& SkillTag) const
@@ -53,6 +61,22 @@ UNetherCrownEnemySkillObject* UNetherCrownEnemySkillComponent::GetEnemySkillObje
 
 	UNetherCrownEnemySkillObject* const* FoundEnemySkillObjectPtr{ EnemySkillObjectMap.Find(SkillTag) };
 	return FoundEnemySkillObjectPtr ? *FoundEnemySkillObjectPtr : nullptr;
+}
+
+bool UNetherCrownEnemySkillComponent::CanActivateEnemySkill() const
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return false;
+	}
+
+	const UNetherCrownEnemyActionControlComponent* EnemyActionControlComponent{ CachedOwnerEnemy->GetEnemyActionControlComponent() };
+	if (!ensureAlways(IsValid(EnemyActionControlComponent)))
+	{
+		return false;
+	}
+
+	return EnemyActionControlComponent->CanUseSkill();
 }
 
 bool UNetherCrownEnemySkillComponent::IsEnemySkillCoolDown(const FGameplayTag& SkillTag) const

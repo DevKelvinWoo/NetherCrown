@@ -21,6 +21,8 @@ public:
 
 	bool CanAttack() const;
 	bool CanChase() const;
+	bool CanFaceTarget() const;
+	bool CanUseSkill() const;
 
 protected:
 	virtual void BeginPlay() override;

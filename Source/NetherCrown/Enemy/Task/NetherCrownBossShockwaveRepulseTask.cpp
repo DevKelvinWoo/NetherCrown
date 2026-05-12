@@ -44,7 +44,12 @@ EBTNodeResult::Type UNetherCrownBossShockwaveRepulseTask::ExecuteTask(UBehaviorT
 	}
 	ShockwaveRepulseSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnShockwaveRepulseSkillFinished);
 
-	OwnerBossEnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_ShockwaveRepulse);
+	if (!OwnerBossEnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_ShockwaveRepulse))
+	{
+		ShockwaveRepulseSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+		CachedOwnerCompWeak.Reset();
+		return EBTNodeResult::Failed;
+	}
 
 	return EBTNodeResult::InProgress;
 }

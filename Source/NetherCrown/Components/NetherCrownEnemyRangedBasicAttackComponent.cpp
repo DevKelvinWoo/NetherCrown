@@ -13,6 +13,7 @@
 #include "NetherCrown/Data/NetherCrownEnemyRangedBasicAttackDataAsset.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
+#include "NetherCrown/Enemy/Components/NetherCrownEnemyActionControlComponent.h"
 #include "NetherCrown/Projectile/NetherCrownEnemyMagicProjectile.h"
 
 UNetherCrownEnemyRangedBasicAttackComponent::UNetherCrownEnemyRangedBasicAttackComponent()
@@ -22,16 +23,21 @@ UNetherCrownEnemyRangedBasicAttackComponent::UNetherCrownEnemyRangedBasicAttackC
 	SetIsReplicatedByDefault(true);
 }
 
-void UNetherCrownEnemyRangedBasicAttackComponent::RequestEnemyRangedAttack()
+bool UNetherCrownEnemyRangedBasicAttackComponent::RequestEnemyRangedAttack()
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
-		return;
+		return false;
+	}
+
+	if (!CanUseRangedBasicAttack())
+	{
+		return false;
 	}
 
 	if (!ensureAlways(IsValid(CachedEnemyRangedBasicAttackDataAsset)))
 	{
-		return;
+		return false;
 	}
 
 	CurrentComboIndex = 0;
@@ -40,12 +46,14 @@ void UNetherCrownEnemyRangedBasicAttackComponent::RequestEnemyRangedAttack()
 	const int32 ComboDataMapCount{ EnemyRangedBasicAttackComboDataMap.Num() };
 	if (ComboDataMapCount == 0)
 	{
-		return;
+		return false;
 	}
 
 	MaxComboCount = FMath::RandRange(1, ComboDataMapCount);
 
 	StartRangedBasicAttack();
+
+	return EnemyRangedBasicAttackState == ENetherCrownEnemyRangedBasicAttackState::Attacking;
 }
 
 void UNetherCrownEnemyRangedBasicAttackComponent::BeginPlay()
@@ -100,6 +108,22 @@ void UNetherCrownEnemyRangedBasicAttackComponent::CacheInitData()
 	CachedOwnerEnemy = Cast<ANetherCrownEnemy>(GetOwner());
 
 	CacheEnemyRangedBasicAttackData();
+}
+
+bool UNetherCrownEnemyRangedBasicAttackComponent::CanUseRangedBasicAttack() const
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return false;
+	}
+
+	const UNetherCrownEnemyActionControlComponent* EnemyActionControlComponent{ CachedOwnerEnemy->GetEnemyActionControlComponent() };
+	if (!ensureAlways(IsValid(EnemyActionControlComponent)))
+	{
+		return false;
+	}
+
+	return EnemyActionControlComponent->CanAttack();
 }
 
 void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjectile(const FName& StartFireSocketName)
@@ -186,6 +210,12 @@ void UNetherCrownEnemyRangedBasicAttackComponent::StartRangedBasicAttack()
 		return;
 	}
 
+	if (!CanUseRangedBasicAttack())
+	{
+		EndRangedBasicAttack();
+		return;
+	}
+
 	if (!ensureAlways(IsValid(CachedEnemyRangedBasicAttackDataAsset)))
 	{
 		return;
@@ -266,6 +296,7 @@ void UNetherCrownEnemyRangedBasicAttackComponent::EndRangedBasicAttack()
 	}
 
 	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(ComboAttackTimerHandle);
 	TimerManager.ClearTimer(ComboAttackEndTimerHandle);
 
 	EnemyRangedBasicAttackState = ENetherCrownEnemyRangedBasicAttackState::NotAttacking;

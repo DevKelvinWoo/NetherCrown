@@ -57,7 +57,13 @@ EBTNodeResult::Type UNetherCrownBossVoidPiercerTask::ExecuteTask(UBehaviorTreeCo
 
 	VoidPiercerSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleVoidPiercerFinished);
 
-	EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_VoidPiercer);
+	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_VoidPiercer))
+	{
+		VoidPiercerSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+		BlackboardComponent->SetValueAsBool(BlockFaceTargetBlackboardKey.SelectedKeyName, false);
+		CachedOwnerCompWeak.Reset();
+		return EBTNodeResult::Failed;
+	}
 
 	return EBTNodeResult::InProgress;
 }

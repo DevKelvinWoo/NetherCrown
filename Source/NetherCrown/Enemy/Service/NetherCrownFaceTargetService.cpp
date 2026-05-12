@@ -5,6 +5,7 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
+#include "NetherCrown/Enemy/Components/NetherCrownEnemyActionControlComponent.h"
 
 UNetherCrownFaceTargetService::UNetherCrownFaceTargetService()
 {
@@ -40,6 +41,12 @@ void UNetherCrownFaceTargetService::TickNode(UBehaviorTreeComponent& OwnerComp, 
 
 	ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
 	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	const UNetherCrownEnemyActionControlComponent* EnemyActionControlComponent{ OwnerEnemy->GetEnemyActionControlComponent() };
+	if (!ensureAlways(IsValid(EnemyActionControlComponent)) || !EnemyActionControlComponent->CanFaceTarget())
 	{
 		return;
 	}

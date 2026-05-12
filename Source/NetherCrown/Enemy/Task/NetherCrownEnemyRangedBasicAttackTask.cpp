@@ -41,7 +41,12 @@ EBTNodeResult::Type UNetherCrownEnemyRangedBasicAttackTask::ExecuteTask(UBehavio
 
 	CachedOwnerCompWeak = MakeWeakObjectPtr(&OwnerComp);
 
-	EnemyRangedBasicAttackComponent->RequestEnemyRangedAttack();
+	if (!EnemyRangedBasicAttackComponent->RequestEnemyRangedAttack())
+	{
+		EnemyRangedBasicAttackComponent->GetOnEnemyRangedBasicAttackFinished().RemoveAll(this);
+		CachedOwnerCompWeak.Reset();
+		return EBTNodeResult::Failed;
+	}
 
 	return EBTNodeResult::InProgress;
 }

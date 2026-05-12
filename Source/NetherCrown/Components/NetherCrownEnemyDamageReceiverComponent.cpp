@@ -122,29 +122,47 @@ void UNetherCrownEnemyDamageReceiverComponent::SetHitReactStateAndTimer()
 		return;
 	}
 
-	EnemyHitReactState = ENetherCrownEnemyHitReactState::HitReact;
-
-	FTimerDelegate HitReactTimerDelegate{};
-	HitReactTimerDelegate.BindLambda([WeakThis = MakeWeakObjectPtr(this)]()
+	const UNetherCrownCrowdControlComponent* CCComponent{ CachedOwnerEnemy->GetCrowdControlComponent() };
+	if (!ensureAlways(IsValid(CCComponent)))
 	{
-		UNetherCrownEnemyDamageReceiverComponent* ThisPtr{ WeakThis.Get() };
-		if (!ensureAlways(IsValid(ThisPtr)))
-		{
-			return;
-		}
+		ClearHitReactState();
+		return;
+	}
 
-		ThisPtr->EnemyHitReactState = ENetherCrownEnemyHitReactState::None;
-	});
+	if (CCComponent->IsCrowdControlActive())
+	{
+		ClearHitReactState();
+		return;
+	}
 
 	const UWorld* World{ GetWorld() };
 	if (!ensureAlways(IsValid(World)))
 	{
+		ClearHitReactState();
 		return;
 	}
 
 	FTimerManager& TimerManager{ World->GetTimerManager() };
 	TimerManager.ClearTimer(HitReactTimerHandle);
-	TimerManager.SetTimer(HitReactTimerHandle, HitReactTimerDelegate, EnemyDamageCosmeticData.HitReactionDuration, false);
+
+	if (EnemyDamageCosmeticData.HitReactionDuration <= 0.f)
+	{
+		ClearHitReactState();
+		return;
+	}
+
+	EnemyHitReactState = ENetherCrownEnemyHitReactState::HitReact;
+	TimerManager.SetTimer(HitReactTimerHandle, this, &ThisClass::ClearHitReactState, EnemyDamageCosmeticData.HitReactionDuration, false);
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::ClearHitReactState()
+{
+	EnemyHitReactState = ENetherCrownEnemyHitReactState::None;
+
+	if (const UWorld* World{ GetWorld() })
+	{
+		World->GetTimerManager().ClearTimer(HitReactTimerHandle);
+	}
 }
 
 bool UNetherCrownEnemyDamageReceiverComponent::IsDead() const

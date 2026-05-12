@@ -48,6 +48,38 @@ bool UNetherCrownEnemyActionControlComponent::CanChase() const
 	return true;
 }
 
+bool UNetherCrownEnemyActionControlComponent::CanFaceTarget() const
+{
+	const UNetherCrownCrowdControlComponent* EnemyCrowdControlComponent{ EnemyCrowdControlComponentWeak.Get() };
+	if (!ensureAlways(IsValid(EnemyCrowdControlComponent)))
+	{
+		return false;
+	}
+
+	if (EnemyCrowdControlComponent->IsCrowdControlActive())
+	{
+		return false;
+	}
+
+	return true;
+}
+
+bool UNetherCrownEnemyActionControlComponent::CanUseSkill() const
+{
+	const UNetherCrownCrowdControlComponent* EnemyCrowdControlComponent{ EnemyCrowdControlComponentWeak.Get() };
+	if (!ensureAlways(IsValid(EnemyCrowdControlComponent)))
+	{
+		return false;
+	}
+
+	if (EnemyCrowdControlComponent->IsCrowdControlActive())
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void UNetherCrownEnemyActionControlComponent::BeginPlay()
 {
 	Super::BeginPlay();

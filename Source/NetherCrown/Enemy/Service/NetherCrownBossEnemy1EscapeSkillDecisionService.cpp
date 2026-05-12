@@ -39,6 +39,10 @@ void UNetherCrownBossEnemy1EscapeSkillDecisionService::TickNode(UBehaviorTreeCom
 	BlackboardComponent->SetValueAsName(SelectedEscapeSkillKeyNameBlackboardKey.SelectedKeyName, TEXT(""));
 
 	BossEnemySkillComponentWeak = MakeWeakObjectPtr(OwnerBossEnemy->GetEnemySkillComponent());
+	if (!BossEnemySkillComponentWeak.IsValid() || !BossEnemySkillComponentWeak->CanActivateEnemySkill())
+	{
+		return;
+	}
 
 	AvailableEscapeSkillGameplayTags.Empty();
 	SelectedEscapeSkillGameplayTag = FGameplayTag();

@@ -51,6 +51,7 @@ private:
 
 	void RefreshCrowdControlType();
 	void RefreshMovementAndAnimationSettings() const;
+	void StopOwnerMovementForCrowdControl() const;
 	void SetCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType, const bool bActive);
 	FTimerHandle* GetCrowdControlTimerHandle(const ENetherCrownCrowdControlType InCrowdControlType);
 	ENetherCrownCrowdControlType GetHighestPriorityCrowdControlType() const;

@@ -7,6 +7,7 @@
 #include "NetherCrown/Data/NetherCrownEnemyAITuningData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
+#include "NetherCrown/Enemy/Components/NetherCrownEnemyActionControlComponent.h"
 
 UNetherCrownBossRangedMoveLocationTask::UNetherCrownBossRangedMoveLocationTask()
 {
@@ -28,6 +29,12 @@ EBTNodeResult::Type UNetherCrownBossRangedMoveLocationTask::ExecuteTask(UBehavio
 
 	const ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
 	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	{
+		return EBTNodeResult::Failed;
+	}
+
+	const UNetherCrownEnemyActionControlComponent* EnemyActionControlComponent{ OwnerEnemy->GetEnemyActionControlComponent() };
+	if (!ensureAlways(IsValid(EnemyActionControlComponent)) || !EnemyActionControlComponent->CanChase())
 	{
 		return EBTNodeResult::Failed;
 	}

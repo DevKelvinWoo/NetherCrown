@@ -18,9 +18,10 @@ class NETHERCROWN_API UNetherCrownEnemySkillComponent : public UActorComponent
 public:
 	UNetherCrownEnemySkillComponent();
 
-	void ActivateEnemySkill(const FGameplayTag& SkillTag);
+	bool ActivateEnemySkill(const FGameplayTag& SkillTag);
 	UNetherCrownEnemySkillObject* GetEnemySkillObject(const FGameplayTag& SkillTag) const;
 
+	bool CanActivateEnemySkill() const;
 	bool IsEnemySkillCoolDown(const FGameplayTag& SkillTag) const;
 
 protected:

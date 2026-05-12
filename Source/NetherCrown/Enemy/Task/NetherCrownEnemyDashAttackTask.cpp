@@ -57,7 +57,11 @@ EBTNodeResult::Type UNetherCrownEnemyDashAttackTask::ExecuteTask(UBehaviorTreeCo
 	CachedDashAttackSkillWeak = MakeWeakObjectPtr(DashAttackSkill);
 	DashAttackFinishedDelegateHandle = DashAttackSkill->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleDashAttackFinished);
 
-	EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_DashAttack);
+	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_DashAttack))
+	{
+		ResetTaskState();
+		return EBTNodeResult::Failed;
+	}
 
 	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
 	if (!ensureAlways(IsValid(BlackboardComponent)))
