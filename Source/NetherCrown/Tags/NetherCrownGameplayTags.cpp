@@ -27,6 +27,8 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonStatueRise, "Sound.BossEnemy1.CrownPrisonStatueRise", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_CrownPrisonHit, "Sound.BossEnemy1.CrownPrisonHit", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_Teleport, "Sound.BossEnemy1.Teleport", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_MagicSpikeUp, "Sound.BossEnemy1.MagicSpikeUp", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_MagicSpike_Range, "Sound.BossEnemy1.MagicSpike_Range", "");
 #pragma endregion
 
 #pragma region Effect
@@ -44,6 +46,9 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_CrownPrison_RaiseImpact, "Effect.Boss1.CrownPrison.RaiseImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_CrownPrison_HitImpact, "Effect.Boss1.CrownPrison.HitImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_Teleport_Impact, "Effect.Boss1.Teleport.Impact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_MagicSpike_Range, "Effect.Boss1.MagicSpike.Range", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_MagicSpike_Impact, "Effect.Boss1.MagicSpike.Impact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_MagicSpike_Hit, "Effect.Boss1.MagicSpike.Hit", "");
 #pragma endregion
 
 #pragma region Weapon
@@ -79,6 +84,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_CrownPrison, "Enemy.Skill.CrownPrison", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_Teleport, "Enemy.Skill.Teleport", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_ShockwaveRepulse, "Enemy.Skill.ShockwaveRepulse", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_MagicSpike, "Enemy.Skill.MagicSpike", "");
 #pragma endregion
 
 }

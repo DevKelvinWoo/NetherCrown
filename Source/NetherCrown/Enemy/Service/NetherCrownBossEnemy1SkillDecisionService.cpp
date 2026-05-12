@@ -54,6 +54,11 @@ void UNetherCrownBossEnemy1SkillDecisionService::TickNode(UBehaviorTreeComponent
 		AvailableSkillGameplayTags.Add(NetherCrownTags::Enemy_Skill_CrownPrison);
 	}
 
+	if (CanUseMagicSpikeSkill())
+	{
+		AvailableSkillGameplayTags.Add(NetherCrownTags::Enemy_Skill_MagicSpike);
+	}
+
 	const int32 AvailableSkillCount{ AvailableSkillGameplayTags.Num() };
 	if (AvailableSkillCount == 0)
 	{
@@ -88,4 +93,11 @@ bool UNetherCrownBossEnemy1SkillDecisionService::CanUseCrownPrisonSkill() const
 	const bool IsCrownPrisonSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_CrownPrison) };
 
 	return !IsCrownPrisonSkillCoolDown;
+}
+
+bool UNetherCrownBossEnemy1SkillDecisionService::CanUseMagicSpikeSkill() const
+{
+	const bool IsMagicSpikeSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_MagicSpike) };
+
+	return !IsMagicSpikeSkillCoolDown;
 }

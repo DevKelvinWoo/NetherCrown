@@ -24,6 +24,7 @@ private:
 
 	bool CanUseVoidPiercerSkill() const;
 	bool CanUseCrownPrisonSkill() const;
+	bool CanUseMagicSpikeSkill() const;
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector SelectedSkillKeyNameBlackboardKey{};

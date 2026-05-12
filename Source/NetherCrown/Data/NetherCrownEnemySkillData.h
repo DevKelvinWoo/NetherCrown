@@ -79,6 +79,53 @@ private:
 };
 
 USTRUCT()
+struct FNetherCrownMagicSpikeTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag SpikeEffectTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag SpikeSoundTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag RangeEffectTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag RangeSoundTag{};
+};
+
+USTRUCT()
+struct FNetherCrownMagicSpikeData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "MagicSpikeData")
+	FNetherCrownMagicSpikeTagData MagicSpikeTagData{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "MagicSpikeData")
+	float MagicSpikeSpawnRadius{ 1000.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "MagicSpikeData")
+	float MagicSpikeRadius{ 200.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "MagicSpikeData")
+	int32 MagicSpikeMaxCount{ 5 };
+
+	UPROPERTY(EditDefaultsOnly, Category = "MagicSpikeData")
+	float MagicSpikeRangeInterval{ 0.5f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "MagicSpikeData")
+	float MagicSpikeImpactTimeOffset{ 2.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "MagicSpikeData")
+	float MagicSpikeStunDuration{ 2.f };
+};
+
+USTRUCT()
 struct FNetherCrownEnemyShockwaveRepulseData
 {
 	GENERATED_BODY()
@@ -224,6 +271,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDashAttackData")
 	TSoftObjectPtr<UNetherCrownEnemyBasicAttackDataAsset> DashFollowUpBasicAttackDataAssetSoft{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownEnemyMagicSpikeDataAsset : public UNetherCrownEnemySkillDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FNetherCrownMagicSpikeData& GetEnemyMagicSpikeData() const { return EnemyMagicSpikeData; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "EnemyTeleportData")
+	FNetherCrownMagicSpikeData EnemyMagicSpikeData{};
 };
 
 UCLASS()

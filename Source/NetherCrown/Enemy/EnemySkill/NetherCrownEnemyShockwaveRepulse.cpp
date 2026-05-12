@@ -85,6 +85,5 @@ void UNetherCrownEnemyShockwaveRepulse::ApplyShockwaveRepulse()
 	const FVector& KnockBackVector{ -CurrentTargetCharacter->GetActorForwardVector() * CachedEnemyShockwaveRepulseData.ShockwaveRepulseKnockbackDistance };
 	CharacterCCComponent->KnockBack(KnockBackVector);
 
-	FNetherCrownDamageEvent::ApplyDamage(CurrentTargetCharacter, CalculateEnemyMagicSkillDamage(), OwnerBossEnemy->GetInstigatorController(),
-		OwnerBossEnemy, UNetherCrownMagicDamageType::StaticClass());
+	ApplyEnemyMagicSkillDamage(CurrentTargetCharacter);
 }
