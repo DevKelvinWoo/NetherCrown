@@ -140,7 +140,7 @@ void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjecti
 		SpawnParams
 	) };
 
-	if (!ensureAlways(IsValid(EnemyMagicProjectile)))
+	if (!IsValid(EnemyMagicProjectile))
 	{
 		return;
 	}

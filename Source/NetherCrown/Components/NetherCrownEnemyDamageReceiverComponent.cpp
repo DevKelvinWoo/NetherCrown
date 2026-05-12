@@ -462,7 +462,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_PlayTakeDamageAnimation
 		return;
 	}
 
-	if (!ensureAlways(IsValid(CachedTakeDamageAnimMontage)) || !ensureAlways(IsValid(CachedTakeCriticalDamageAnimMontage)))
+	if (!IsValid(CachedTakeDamageAnimMontage) || !IsValid(CachedTakeCriticalDamageAnimMontage))
 	{
 		return;
 	}
