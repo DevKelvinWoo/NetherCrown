@@ -240,6 +240,14 @@ void UNetherCrownEnemyVoidPiercer::HandleVoidPiercerFlyFinished()
 		return;
 	}
 
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	World->GetTimerManager().ClearTimer(TraceTimerHandle);
+
 	bCanActiveTrace = false;
 
 	const FRotator& SkillOwnerEnemyRotation{ SkillOwnerEnemy->GetActorRotation() };

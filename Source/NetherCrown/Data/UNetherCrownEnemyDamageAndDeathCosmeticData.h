@@ -59,6 +59,9 @@ public:
 	UPROPERTY(EditdefaultsOnly, Category = "ParamName")
 	FName DestroyMaterialParamName{"DissolveAmount"};
 
+	UPROPERTY(EditDefaultsOnly, Category = "DeathData")
+	float DeathKnockBackDistance{ 500.f };
+
 	UPROPERTY(EditDefaultsOnly, Category = "CurveData")
 	TSoftObjectPtr<UCurveFloat> DestroyMaterialParamCurveFloatSoft{};
 };

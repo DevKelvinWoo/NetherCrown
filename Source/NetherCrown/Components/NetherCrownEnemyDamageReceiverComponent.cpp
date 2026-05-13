@@ -10,6 +10,7 @@
 #include "NetherCrownCrowdControlTypes.h"
 #include "NetherCrownEnemyStatComponent.h"
 #include "NetherCrownEquipComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/DamageTypes/UNetherCrownCriticalPhysicalDamageType.h"
@@ -195,10 +196,21 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead()
 		return;
 	}
 
+	EnemyAIController->StopMovement();
 	EnemyAIController->HandleEnemyDead();
 	CachedOwnerEnemy->SetIsDead(true);
 
 	Multicast_PlayDeathSound();
+
+	UCharacterMovementComponent* MovementComponent{ CachedOwnerEnemy->GetCharacterMovement() };
+	if (!ensureAlways(IsValid(MovementComponent)))
+	{
+		return;
+	}
+
+	MovementComponent->StopMovementImmediately();
+	MovementComponent->SetMovementMode(EMovementMode::MOVE_Walking);
+	CachedOwnerEnemy->LaunchCharacter(-CachedOwnerEnemy->GetActorForwardVector() * EnemyDeathCosmeticData.DeathKnockBackDistance, true, true);
 
 	const UNetherCrownCrowdControlComponent* CCComponent{ CachedOwnerEnemy->GetCrowdControlComponent() };
 	if (!ensureAlways(IsValid(CCComponent)))

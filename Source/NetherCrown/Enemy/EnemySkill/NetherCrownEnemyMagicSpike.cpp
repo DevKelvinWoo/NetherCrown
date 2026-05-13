@@ -150,7 +150,7 @@ void UNetherCrownEnemyMagicSpike::StartMagicSpikeRangeTimer()
 void UNetherCrownEnemyMagicSpike::StartMagicSpikeAttackTimer(const FVector& InMagicSpikePointVector)
 {
 	const ANetherCrownEnemy* OwnerEnemy{ SkillOwnerEnemyWeak.Get() };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	if (!IsValid(OwnerEnemy) || !OwnerEnemy->HasAuthority())
 	{
 		return;
 	}
@@ -172,7 +172,7 @@ void UNetherCrownEnemyMagicSpike::StartMagicSpikeAttackTimer(const FVector& InMa
 void UNetherCrownEnemyMagicSpike::ShowMagicSpikeRange()
 {
 	const ANetherCrownEnemy* OwnerEnemy{ SkillOwnerEnemyWeak.Get() };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	if (!IsValid(OwnerEnemy) || !OwnerEnemy->HasAuthority())
 	{
 		return;
 	}
@@ -203,7 +203,7 @@ void UNetherCrownEnemyMagicSpike::ShowMagicSpikeRange()
 void UNetherCrownEnemyMagicSpike::ShowMagicSpikeImpactAndApplyDamage(FVector InMagicSpikePointVector)
 {
 	const ANetherCrownEnemy* OwnerEnemy{ SkillOwnerEnemyWeak.Get() };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	if (!IsValid(OwnerEnemy) || !OwnerEnemy->HasAuthority())
 	{
 		return;
 	}

@@ -131,7 +131,7 @@ void UNetherCrownEnemySkillObject::StartSkillCoolDownTimer()
 void UNetherCrownEnemySkillObject::StopSkillCoolDownTimer()
 {
 	const ANetherCrownEnemy* SkillOwnerEnemy{ SkillOwnerEnemyWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerEnemy)) || !SkillOwnerEnemy->HasAuthority())
+	if (!IsValid(SkillOwnerEnemy) || !SkillOwnerEnemy->HasAuthority())
 	{
 		return;
 	}

@@ -38,7 +38,7 @@ void ANetherCrownEnemyAIController::HandleEnemyDead()
 		EnemyPerceptionComponent->SetActive(false);
 	}
 
-	BTComponent->StopTree(EBTStopMode::Safe);
+	BTComponent->StopTree(EBTStopMode::Forced);
 }
 
 void ANetherCrownEnemyAIController::BeginPlay()
