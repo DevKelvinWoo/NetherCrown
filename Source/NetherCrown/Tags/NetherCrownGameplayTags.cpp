@@ -38,8 +38,10 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_BasicAttackImpact, "Effect.Knight.BasicAttackImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_FrozenBasicAttackImpact, "Effect.Knight.FrozenBasicAttackImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_SkyFallSlash_Impact, "Effect.SkyFallSlash.Impact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_SkyFallSlash_TraceImpact, "Effect.SkyFallSlash.TraceImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_ShieldMastery, "Effect.ShieldMastery", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_DashAttack_Impact, "Effect.DashAttack.Impact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_DashAttack_ThunderImpact, "Effect.DashAttack.ThunderImpact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_FrozenDeath_Impact, "Effect.FrozenDeath.Impact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_FrozenDeath_Impact_BackGround, "Effect.FrozenDeath.Impact.BackGround", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_HitImpact, "Effect.Knight.HitImpact", "");

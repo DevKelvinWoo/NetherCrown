@@ -142,6 +142,16 @@ public:
 };
 
 USTRUCT()
+struct FNetherCrownSkyFallSlashTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag SkyFallSlashTraceImpactTag{};
+};
+
+USTRUCT()
 struct FNetherCrownSkyFallSlashData
 {
 	GENERATED_BODY()
@@ -170,6 +180,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "MaterialParam")
 	FName ArmMaterialScalarParameterName{ TEXT("SkyFallSlashAlpha") };
+
+	UPROPERTY(EditAnywhere, Category = "TagData")
+	FNetherCrownSkyFallSlashTagData SkyFallSlashTagData{};
 };
 
 USTRUCT()
@@ -207,6 +220,16 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "MaterialParam")
 	FName FrozenTempestTargetMaterialParam{ TEXT("_VfxMix") };
+};
+
+USTRUCT()
+struct FNetherCrownDashAttackTagData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY(EditDefaultsOnly, Category = "TagData")
+	FGameplayTag DashAttackThunderEffectTag{};
 };
 
 USTRUCT()
@@ -265,6 +288,9 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "CurveData")
 	TSoftObjectPtr<UCurveVector> DashAttackCameraPosEndCurveSoft{};
+
+	UPROPERTY(EditAnywhere, Category = "TagData")
+	FNetherCrownDashAttackTagData DashAttackTagData{};
 };
 
 UCLASS()

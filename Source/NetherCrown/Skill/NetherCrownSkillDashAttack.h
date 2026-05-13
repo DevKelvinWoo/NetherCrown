@@ -79,6 +79,9 @@ private:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayLastDashAttackMontage() const;
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnThunderEffect(const AActor* TargetActor);
+
 	void PlayDashAttackMontage(UAnimMontage* SkillAnimMontage) const;
 
 	void HitDashAttack();

@@ -488,6 +488,18 @@ void UNetherCrownSkillDashAttack::AttackLastDashAttack()
 	Client_StartPostProcessBlendEndTimer();
 }
 
+void UNetherCrownSkillDashAttack::Multicast_SpawnThunderEffect_Implementation(const AActor* TargetActor)
+{
+	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	const FTransform& EffectTransform{ FTransform(FRotator::ZeroRotator, TargetActor->GetActorLocation(), FVector::OneVector) };
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, NetherCrownTags::Effect_DashAttack_ThunderImpact, EffectTransform);
+}
+
 void UNetherCrownSkillDashAttack::PlayDashAttackMontage(UAnimMontage* SkillAnimMontage) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
@@ -525,6 +537,8 @@ void UNetherCrownSkillDashAttack::HitDashAttack()
 	{
 		return;
 	}
+
+	Multicast_SpawnThunderEffect(CurrentTargetEnemy);
 
 	ApplyDashAttackDamageAndCrowdControl(CurrentTargetEnemy);
 }

@@ -181,7 +181,7 @@ void UNetherCrownEnemyBasicAttackComponent::DetectHit()
 		Params
 	);
 
-#if 1
+#if 0
 	DrawDebugLine(GetWorld(), LastEndLocation, CurrentEndLocation, FColor::Red, false, 2.0f);
 	DrawDebugSphere(GetWorld(), LastEndLocation, ActiveEnemyBasicAttackData.TraceRadius, 8, FColor::Yellow, false, 2.0f);
 	DrawDebugSphere(GetWorld(), CurrentEndLocation, ActiveEnemyBasicAttackData.TraceRadius, 8, FColor::Blue, false, 2.0f);

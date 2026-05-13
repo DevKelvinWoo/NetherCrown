@@ -3,8 +3,10 @@
 
 #include "NetherCrownSkillSkyFallSlash.h"
 
+#include "Components/CapsuleComponent.h"
 #include "NetherCrown/NetherCrown.h"
 #include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetMathLibrary.h"
 #include "Kismet/KismetSystemLibrary.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Components/NetherCrownControlPPComponent.h"
@@ -193,6 +195,8 @@ void UNetherCrownSkillSkyFallSlash::DetectAndHitSkyFallSlashSkill()
 	}
 
 	const TArray<AActor*> DetectedActors{ GetSkillDetectedTargets() };
+	Multicast_SpawnSkyFallSlashTraceEffect(DetectedActors);
+
 	if (DetectedActors.IsEmpty())
 	{
 		return;
@@ -301,6 +305,46 @@ void UNetherCrownSkillSkyFallSlash::CreateArmMaterialInstanceDynamic()
 
 	ArmMaterialInstanceDynamic = SkeletalMeshComponent ? SkeletalMeshComponent->CreateDynamicMaterialInstance(ArmMaterialIndex) : nullptr;
 	ensureAlways(IsValid(ArmMaterialInstanceDynamic));
+}
+
+void UNetherCrownSkillSkyFallSlash::Multicast_SpawnSkyFallSlashTraceEffect_Implementation(const TArray<AActor*>& DetectedActors)
+{
+	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	const UCapsuleComponent* CapsuleComponent{ SkillOwnerCharacter->GetCapsuleComponent() };
+	if (!ensureAlways(IsValid(CapsuleComponent)))
+	{
+		return;
+	}
+
+	const FVector& SkillOwnerCharacterLocation{ SkillOwnerCharacter->GetActorLocation() };
+	const FVector& EffectStartLocation{ FVector(SkillOwnerCharacterLocation.X, SkillOwnerCharacterLocation.Y, SkillOwnerCharacterLocation.Z - CapsuleComponent->GetScaledCapsuleHalfHeight()) };
+
+	const FGameplayTag& EffectTag{ SkyFallSlashData.SkyFallSlashTagData.SkyFallSlashTraceImpactTag };
+	if (DetectedActors.IsEmpty())
+	{
+		const FTransform& TraceEffectTransform{ FTransform(SkillOwnerCharacter->GetActorRotation(), EffectStartLocation, FVector::OneVector) };
+		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, EffectTag, TraceEffectTransform);
+
+		return;
+	}
+
+	for (const AActor* DetectedActor : DetectedActors)
+	{
+		if (!ensureAlways(IsValid(DetectedActor)))
+		{
+			continue;
+		}
+
+		const FRotator& LookAtTargetRotation{ UKismetMathLibrary::FindLookAtRotation(SkillOwnerCharacterLocation, DetectedActor->GetActorLocation()) };
+		const FTransform& TraceEffectTransform{ FTransform(LookAtTargetRotation, EffectStartLocation, FVector::OneVector) };
+
+		FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, EffectTag, TraceEffectTransform);
+	}
 }
 
 void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue)

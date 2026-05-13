@@ -174,14 +174,6 @@ void UNetherCrownFrozenTempest::Multicast_StartFrozenTempestHitCosmetics_Impleme
 		}
 
 		CameraManager->StartCameraShake(FrozenTempestData.SkillCameraShakeBaseClass, 1.f);
-
-		UNetherCrownControlPPComponent* ControlPPComponent{ SkillOwnerCharacter->GetControlPPComponent() };
-		if (!ensureAlways(IsValid(ControlPPComponent)))
-		{
-			return;
-		}
-
-		ControlPPComponent->ApplyPostProcess(ENetherCrownPPType::Frozen, FrozenTempestData.FrozenDuration);
 	}
 }
 

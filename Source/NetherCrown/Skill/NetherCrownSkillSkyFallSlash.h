@@ -38,6 +38,9 @@ private:
 	UFUNCTION(Client, Unreliable)
 	void Client_StartCameraShake();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnSkyFallSlashTraceEffect(const TArray<AActor*>& DetectedActors);
+
 	UFUNCTION()
 	void SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue);
 
