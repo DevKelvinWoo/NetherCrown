@@ -8,6 +8,7 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemyActionControlComponent.h"
 #include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemySkillObject.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 
 UNetherCrownEnemySkillComponent::UNetherCrownEnemySkillComponent()
 {
@@ -23,7 +24,7 @@ bool UNetherCrownEnemySkillComponent::ActivateEnemySkill(const FGameplayTag& Ski
 		return false;
 	}
 
-	if (!CanActivateEnemySkill())
+	if (!CanActivateEnemySkillByElapsedTime(SkillTag))
 	{
 		return false;
 	}
@@ -47,6 +48,12 @@ bool UNetherCrownEnemySkillComponent::ActivateEnemySkill(const FGameplayTag& Ski
 	}
 
 	FoundEnemySkillObject->ExecuteEnemySkillGameplay();
+
+	if (!IsEscapeEnemySkill(SkillTag))
+	{
+		RecordGeneralEnemySkillActivated();
+	}
+
 	Multicast_PlayEnemySkillCosmetics(FoundEnemySkillObject);
 
 	return true;
@@ -79,6 +86,26 @@ bool UNetherCrownEnemySkillComponent::CanActivateEnemySkill() const
 	return EnemyActionControlComponent->CanUseSkill();
 }
 
+bool UNetherCrownEnemySkillComponent::CanActivateEnemySkillByElapsedTime(const FGameplayTag& SkillTag) const
+{
+	if (!CanActivateEnemySkill())
+	{
+		return false;
+	}
+
+	if (!SkillTag.IsValid())
+	{
+		return false;
+	}
+
+	if (IsEscapeEnemySkill(SkillTag))
+	{
+		return true;
+	}
+
+	return IsGeneralEnemySkillIntervalReady();
+}
+
 bool UNetherCrownEnemySkillComponent::IsEnemySkillCoolDown(const FGameplayTag& SkillTag) const
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
@@ -93,6 +120,34 @@ bool UNetherCrownEnemySkillComponent::IsEnemySkillCoolDown(const FGameplayTag& S
 	}
 
 	return FoundEnemySkill->IsEnemySkillCoolDown();
+}
+
+bool UNetherCrownEnemySkillComponent::IsEscapeEnemySkill(const FGameplayTag& SkillTag) const
+{
+	return SkillTag == NetherCrownTags::Enemy_Skill_Teleport
+		|| SkillTag == NetherCrownTags::Enemy_Skill_ShockwaveRepulse;
+}
+
+bool UNetherCrownEnemySkillComponent::IsGeneralEnemySkillIntervalReady() const
+{
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return false;
+	}
+
+	return World->GetTimeSeconds() - LastGeneralEnemySkillActivatedTime >= GeneralEnemySkillActivationInterval;
+}
+
+void UNetherCrownEnemySkillComponent::RecordGeneralEnemySkillActivated()
+{
+	const UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	LastGeneralEnemySkillActivatedTime = World->GetTimeSeconds();
 }
 
 void UNetherCrownEnemySkillComponent::BeginPlay()
@@ -112,7 +167,7 @@ bool UNetherCrownEnemySkillComponent::ReplicateSubobjects(UActorChannel* Channel
 	{
 		if (IsValid(SkillPair.Value))
 		{
-			//@NOTE : UObject 자체로는 Channel이 없어 Replicate가 불가능하기에 생성된 Component의 Channel을 이욯하여 replicate한다
+			//@NOTE : UObject 자체로는 Channel이 없어 Replicate가 불가능하기에 생성된 Component의 Channel을 이용하여 replicate한다
 			//SkillObject의 Property들 (Replicated) 전부 replicate해준다
 			bWroteSomething |= Channel->ReplicateSubobject(SkillPair.Value, *Bunch, *RepFlags);
 		}

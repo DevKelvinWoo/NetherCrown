@@ -88,20 +88,23 @@ bool UNetherCrownBossEnemy1SkillDecisionService::IsEnemySkillCoolDown(const FGam
 bool UNetherCrownBossEnemy1SkillDecisionService::CanUseVoidPiercerSkill() const
 {
 	const bool IsVoidPiercerSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_VoidPiercer) };
+	const bool bCanActivateVoidPiercerSkill{ BossEnemySkillComponentWeak.IsValid() && BossEnemySkillComponentWeak->CanActivateEnemySkillByElapsedTime(NetherCrownTags::Enemy_Skill_VoidPiercer) };
 
-	return !IsVoidPiercerSkillCoolDown;
+	return !IsVoidPiercerSkillCoolDown && bCanActivateVoidPiercerSkill;
 }
 
 bool UNetherCrownBossEnemy1SkillDecisionService::CanUseCrownPrisonSkill() const
 {
 	const bool IsCrownPrisonSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_CrownPrison) };
+	const bool bCanActivateCrownPrisonSkill{ BossEnemySkillComponentWeak.IsValid() && BossEnemySkillComponentWeak->CanActivateEnemySkillByElapsedTime(NetherCrownTags::Enemy_Skill_CrownPrison) };
 
-	return !IsCrownPrisonSkillCoolDown;
+	return !IsCrownPrisonSkillCoolDown && bCanActivateCrownPrisonSkill;
 }
 
 bool UNetherCrownBossEnemy1SkillDecisionService::CanUseMagicSpikeSkill() const
 {
 	const bool IsMagicSpikeSkillCoolDown{ IsEnemySkillCoolDown(NetherCrownTags::Enemy_Skill_MagicSpike) };
+	const bool bCanActivateMagicSpikeSkill{ BossEnemySkillComponentWeak.IsValid() && BossEnemySkillComponentWeak->CanActivateEnemySkillByElapsedTime(NetherCrownTags::Enemy_Skill_MagicSpike) };
 
-	return !IsMagicSpikeSkillCoolDown;
+	return !IsMagicSpikeSkillCoolDown && bCanActivateMagicSpikeSkill;
 }

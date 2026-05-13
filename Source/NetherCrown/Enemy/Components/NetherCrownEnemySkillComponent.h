@@ -22,6 +22,7 @@ public:
 	UNetherCrownEnemySkillObject* GetEnemySkillObject(const FGameplayTag& SkillTag) const;
 
 	bool CanActivateEnemySkill() const;
+	bool CanActivateEnemySkillByElapsedTime(const FGameplayTag& SkillTag) const;
 	bool IsEnemySkillCoolDown(const FGameplayTag& SkillTag) const;
 
 protected:
@@ -33,6 +34,9 @@ protected:
 private:
 	void CacheInitData();
 	void ConstructEnemySkillObjects();
+	bool IsEscapeEnemySkill(const FGameplayTag& SkillTag) const;
+	bool IsGeneralEnemySkillIntervalReady() const;
+	void RecordGeneralEnemySkillActivated();
 
 	UFUNCTION()
 	void OnRep_ReplicatedEnemySkillObjects();
@@ -48,6 +52,11 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Skill")
+	float GeneralEnemySkillActivationInterval{ 5.f };
+
+	float LastGeneralEnemySkillActivatedTime{ -BIG_NUMBER };
 
 	UPROPERTY(ReplicatedUsing=OnRep_ReplicatedEnemySkillObjects)
 	TArray<TObjectPtr<UNetherCrownEnemySkillObject>> ReplicatedEnemySkillObjects;
