@@ -93,4 +93,8 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_MagicSpike);
 #pragma endregion
 
+#pragma region Sequence
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sequence_Boss1_Begin);
+#pragma endregion
+
 }

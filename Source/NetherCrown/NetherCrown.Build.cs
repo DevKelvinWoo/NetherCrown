@@ -16,7 +16,7 @@ public class NetherCrown : ModuleRules
 		PrivateDependencyModuleNames.AddRange(new string[]
 		{
 			"Slate",
-			"SlateCore"
+			"SlateCore", "LevelSequence", "MovieScene"
 		});
 
 		// Uncomment if you are using online features

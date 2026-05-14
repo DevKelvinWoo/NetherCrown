@@ -91,4 +91,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_MagicSpike, "Enemy.Skill.MagicSpike", "");
 #pragma endregion
 
+#pragma region Sequence
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sequence_Boss1_Begin, "Sequence.Boss1.Begin", "");
+#pragma endregion
 }

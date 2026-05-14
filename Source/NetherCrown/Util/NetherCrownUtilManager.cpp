@@ -13,6 +13,7 @@
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
 #include "NetherCrown/UI/NetherCrownUITypes.h"
+#include "LevelSequence.h"
 
 bool FNetherCrownUtilManager::bCacheInitialized{ false };
 TMap<FGameplayTag, FNetherCrownSoundData> FNetherCrownUtilManager::CachedSoundDataByTag{};
@@ -21,6 +22,7 @@ TMap<FGameplayTag, FNetherCrownWeaponDataTableRow> FNetherCrownUtilManager::Cach
 TMap<FGameplayTag, FNetherCrownEffectData> FNetherCrownUtilManager::CachedEffectDataByTag{};
 TMap<FGameplayTag, FNetherCrownUIScreenDefinition> FNetherCrownUtilManager::CachedScreenDefinitionDataByTag{};
 TMap<FGameplayTag, FNetherCrownEnemySkillDataTableRow> FNetherCrownUtilManager::CachedEnemySkillDataByTag{};
+TMap<FGameplayTag, FNetherCrownLevelSequenceData> FNetherCrownUtilManager::CachedLevelSequenceByTag{};
 
 void FNetherCrownUtilManager::EnsureCacheBuilt()
 {
@@ -119,6 +121,20 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 			if (Row)
 			{
 				CachedScreenDefinitionDataByTag.Add(Row->ScreenTag, *Row);
+			}
+		}
+	}
+
+	UDataTable* LevelSequenceDT{ DefaultSettings->LevelSequenceDT.LoadSynchronous() };
+	if (IsValid(LevelSequenceDT))
+	{
+		TArray<FNetherCrownLevelSequenceData*> OutRows{};
+		LevelSequenceDT->GetAllRows<FNetherCrownLevelSequenceData>(TEXT("LevelSequenceTag"), OutRows);
+		for (FNetherCrownLevelSequenceData* Row : OutRows)
+		{
+			if (Row)
+			{
+				CachedLevelSequenceByTag.Add(Row->GetLevelSequenceTag(), *Row);
 			}
 		}
 	}
@@ -316,4 +332,25 @@ const TArray<FNetherCrownUIScreenDefinition> FNetherCrownUtilManager::GetUIScree
 	}
 
 	return ScreenDefinitionArray;
+}
+
+ULevelSequence* FNetherCrownUtilManager::GetLevelSequenceByGameplayTag(const FGameplayTag& SequenceTag)
+{
+	EnsureCacheBuilt();
+
+	if (!ensureAlways(!CachedLevelSequenceByTag.IsEmpty()))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No LevelSequenceData in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	const FNetherCrownLevelSequenceData* FoundEffectData{ CachedLevelSequenceByTag.Find(SequenceTag) };
+	if (!FoundEffectData)
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("LevelSequence Data Not Found for Tag: %s"), *SequenceTag.ToString());
+		return nullptr;
+	}
+
+	return FoundEffectData->GetLevelSequenceSoft().LoadSynchronous();
 }

@@ -7,6 +7,7 @@
 #include "GameplayTagContainer.h"
 #include "NetherCrown/Data/NetherCrownEffectData.h"
 #include "NetherCrown/Data/NetherCrownEnemySkillData.h"
+#include "NetherCrown/Data/NetherCrownLevelSequenceData.h"
 #include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrown/Data/NetherCrownSoundData.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
@@ -15,6 +16,7 @@
 class USoundCue;
 class UNiagaraSystem;
 class UNiagaraComponent;
+class ULevelSequence;
 
 class UNetherCrownSkillDataAsset;
 class UNetherCrownWeaponData;
@@ -41,6 +43,9 @@ public:
 	//UI
 	static const TArray<FNetherCrownUIScreenDefinition> GetUIScreenDefinitionData();
 
+	//Sequence
+	static ULevelSequence* GetLevelSequenceByGameplayTag(const FGameplayTag& SequenceTag);
+
 private:
 	static void EnsureCacheBuilt();
 
@@ -51,4 +56,5 @@ private:
 	static TMap<FGameplayTag, FNetherCrownWeaponDataTableRow> CachedWeaponDataByTag;
 	static TMap<FGameplayTag, FNetherCrownEffectData> CachedEffectDataByTag;
 	static TMap<FGameplayTag, FNetherCrownUIScreenDefinition> CachedScreenDefinitionDataByTag;
+	static TMap<FGameplayTag, FNetherCrownLevelSequenceData> CachedLevelSequenceByTag;
 };
