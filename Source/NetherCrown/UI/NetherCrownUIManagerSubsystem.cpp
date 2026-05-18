@@ -9,6 +9,55 @@
 #include "GameFramework/PlayerController.h"
 #include "NetherCrown/NetherCrown.h"
 
+void UNetherCrownUIManagerSubsystem::CaptureTravelPersistentScreens()
+{
+	TravelCachedActiveScreenTags.Empty();
+
+	for (const TPair<FGameplayTag, TObjectPtr<UNetherCrownUIScreenBase>>& ActiveScreenPair : ActiveScreenMap)
+	{
+		if (ActiveScreenPair.Key.IsValid() && IsValid(ActiveScreenPair.Value))
+		{
+			TravelCachedActiveScreenTags.AddUnique(ActiveScreenPair.Key);
+		}
+	}
+}
+
+void UNetherCrownUIManagerSubsystem::PrepareForLevelTravel()
+{
+	bPendingTravelRestore = true;
+	ResetRuntimeWidgets();
+}
+
+bool UNetherCrownUIManagerSubsystem::RestoreTravelPersistentScreens()
+{
+	if (!bPendingTravelRestore)
+	{
+		return true;
+	}
+
+	APlayerController* PlayerController{ GetLocalPlayer() ? GetLocalPlayer()->GetPlayerController(GetWorld()) : nullptr };
+	if (!IsValid(PlayerController) || !IsValid(PlayerController->GetPawn()))
+	{
+		return false;
+	}
+
+	if (!InitializePrimaryLayout())
+	{
+		return false;
+	}
+
+	const TArray<FGameplayTag> CachedScreenTags{ TravelCachedActiveScreenTags };
+	TravelCachedActiveScreenTags.Empty();
+	bPendingTravelRestore = false;
+
+	for (const FGameplayTag& CachedScreenTag : CachedScreenTags)
+	{
+		ShowScreenByTag(CachedScreenTag);
+	}
+
+	return true;
+}
+
 void UNetherCrownUIManagerSubsystem::SetPrimaryLayoutClass(TSubclassOf<UNetherCrownPrimaryLayout> InPrimaryLayoutClass)
 {
 	PrimaryLayoutClass = InPrimaryLayoutClass;
@@ -87,8 +136,18 @@ UNetherCrownUIScreenBase* UNetherCrownUIManagerSubsystem::ShowScreenByTag(const 
 
 	if (TObjectPtr<UNetherCrownUIScreenBase>* ActiveScreenPtr = ActiveScreenMap.Find(ScreenTag))
 	{
-		ApplyInputModeFromTopScreen();
-		return *ActiveScreenPtr;
+		if (IsValid(*ActiveScreenPtr) && (*ActiveScreenPtr)->GetParent())
+		{
+			ApplyInputModeFromTopScreen();
+			return *ActiveScreenPtr;
+		}
+
+		const FNetherCrownUIScreenDefinition* StaleScreenDefinitionPtr{ ScreenDefinitionMap.Find(ScreenTag) };
+		if (StaleScreenDefinitionPtr)
+		{
+			RemoveScreenFromLayerContainer(*ActiveScreenPtr, StaleScreenDefinitionPtr->LayerTag);
+		}
+		ActiveScreenMap.Remove(ScreenTag);
 	}
 
 	UNetherCrownPrimaryLayout* LayoutWidget{ InitializePrimaryLayout() };
@@ -197,20 +256,37 @@ void UNetherCrownUIManagerSubsystem::ClearLayer(const FGameplayTag& LayerTag)
 
 void UNetherCrownUIManagerSubsystem::Deinitialize()
 {
+	ResetRuntimeWidgets();
+	TravelCachedActiveScreenTags.Empty();
+	bPendingTravelRestore = false;
+	ScreenDefinitionMap.Empty();
+
+	Super::Deinitialize();
+}
+
+void UNetherCrownUIManagerSubsystem::PlayerControllerChanged(APlayerController* NewPlayerController)
+{
+	Super::PlayerControllerChanged(NewPlayerController);
+
+	if (IsValid(NewPlayerController) && bPendingTravelRestore)
+	{
+		RestoreTravelPersistentScreens();
+	}
+}
+
+void UNetherCrownUIManagerSubsystem::ResetRuntimeWidgets()
+{
 	GameLayerScreenStack.Empty();
 	GameMenuLayerScreenStack.Empty();
 	MenuLayerScreenStack.Empty();
 	ModalLayerScreenStack.Empty();
 	ActiveScreenMap.Empty();
-	ScreenDefinitionMap.Empty();
 
 	if (IsValid(PrimaryLayoutWidget))
 	{
 		PrimaryLayoutWidget->RemoveFromParent();
 		PrimaryLayoutWidget = nullptr;
 	}
-
-	Super::Deinitialize();
 }
 
 void UNetherCrownUIManagerSubsystem::AddScreenToLayerContainer(UNetherCrownUIScreenBase* ScreenWidget, const FGameplayTag& LayerTag)

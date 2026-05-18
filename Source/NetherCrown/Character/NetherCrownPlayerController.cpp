@@ -6,6 +6,7 @@
 #include "NetherCrownCharacter.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
+#include "NetherCrown/Core/NetherCrownLevelTravelPersistenceSubsystem.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "NetherCrown/UI/NetherCrownPrimaryLayout.h"
 #include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
@@ -26,19 +27,51 @@ void ANetherCrownPlayerController::SetupInputComponent()
 void ANetherCrownPlayerController::OnPossess(APawn* InPawn)
 {
 	Super::OnPossess(InPawn);
+
 	CachedCharacter = Cast<ANetherCrownCharacter>(InPawn);
+	OnControlledCharacterChanged.Broadcast(CachedCharacter);
+
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	if (const UGameInstance* GameInstance{ GetGameInstance() })
+	{
+		if (UNetherCrownLevelTravelPersistenceSubsystem* LevelTravelPersistenceSubsystem{ GameInstance->GetSubsystem<UNetherCrownLevelTravelPersistenceSubsystem>() })
+		{
+			LevelTravelPersistenceSubsystem->RestoreLevelTravelPersistence();
+		}
+	}
 }
 
 void ANetherCrownPlayerController::OnUnPossess()
 {
 	Super::OnUnPossess();
+
 	CachedCharacter = nullptr;
+	OnControlledCharacterChanged.Broadcast(nullptr);
 }
 
 void ANetherCrownPlayerController::AcknowledgePossession(APawn* P)
 {
 	Super::AcknowledgePossession(P);
+
 	CachedCharacter = Cast<ANetherCrownCharacter>(P);
+	OnControlledCharacterChanged.Broadcast(CachedCharacter);
+
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	if (const UGameInstance* GameInstance{ GetGameInstance() })
+	{
+		if (UNetherCrownLevelTravelPersistenceSubsystem* LevelTravelPersistenceSubsystem{ GameInstance->GetSubsystem<UNetherCrownLevelTravelPersistenceSubsystem>() })
+		{
+			LevelTravelPersistenceSubsystem->RestoreLevelTravelPersistence();
+		}
+	}
 }
 
 void ANetherCrownPlayerController::BeginPlay()
@@ -166,4 +199,26 @@ void ANetherCrownPlayerController::HandleInputActiveShiftSkill(const FInputActio
 void ANetherCrownPlayerController::HandleInputActiveCSkill(const FInputActionValue& InActionValue)
 {
 	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveCSkill, InActionValue);
+}
+
+void ANetherCrownPlayerController::Client_BeginLevelTravelPersistence_Implementation()
+{
+	if (!IsLocalController())
+	{
+		return;
+	}
+
+	UGameInstance* GameInstance{ GetGameInstance() };
+	if (!ensureAlways(IsValid(GameInstance)))
+	{
+		return;
+	}
+
+	UNetherCrownLevelTravelPersistenceSubsystem* LevelTravelPersistenceSubsystem{ GameInstance->GetSubsystem<UNetherCrownLevelTravelPersistenceSubsystem>() };
+	if (!ensureAlways(IsValid(LevelTravelPersistenceSubsystem)))
+	{
+		return;
+	}
+
+	LevelTravelPersistenceSubsystem->BeginLevelTravelPersistence();
 }

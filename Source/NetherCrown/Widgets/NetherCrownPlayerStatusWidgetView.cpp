@@ -10,8 +10,6 @@
 
 void UNetherCrownPlayerStatusWidgetView::NativeOnInitialized()
 {
-	Super::NativeOnInitialized();
-
 	PlayerStatusWidgetViewModel = NewObject<UNetherCrownPlayerStatusWidgetViewModel>(this);
 	if (!ensureAlways(IsValid(PlayerStatusWidgetViewModel)))
 	{
@@ -22,36 +20,12 @@ void UNetherCrownPlayerStatusWidgetView::NativeOnInitialized()
 	PlayerStatusWidgetViewModel->GetOnCharacterMPModified().AddUObject(this, &ThisClass::ApplyMPSlider);
 	PlayerStatusWidgetViewModel->GetOnSkillCoolDownModified().AddUObject(this, &ThisClass::ApplySkillCoolDownSlider);
 
-	ANetherCrownCharacter* OwningCharacter{ GetOwningNetherCrownCharacter() };
-	if (!ensureAlways(IsValid(OwningCharacter)))
-	{
-		return;
-	}
-
-	OwningCharacter->GetOnRepPlayerState().RemoveAll(this);
-	OwningCharacter->GetOnRepPlayerState().AddUObject(this, &ThisClass::InitViewModel);
-
-	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter->GetSkillComponent() };
-	if (ensureAlways(IsValid(SkillComponent)))
-	{
-		SkillComponent->GetOnSkillObjectLoaded().RemoveAll(this);
-		SkillComponent->GetOnSkillObjectLoaded().AddUObject(this, &ThisClass::InitViewModel);
-	}
+	Super::NativeOnInitialized();
 }
 
 void UNetherCrownPlayerStatusWidgetView::NativeDestruct()
 {
-	ANetherCrownCharacter* OwningCharacter{ GetOwningNetherCrownCharacter() };
-	if (ensureAlways(IsValid(OwningCharacter)))
-	{
-		OwningCharacter->GetOnRepPlayerState().RemoveAll(this);
-	}
-
-	UNetherCrownSkillComponent* SkillComponent{ OwningCharacter ? OwningCharacter->GetSkillComponent() : nullptr };
-	if (ensureAlways(IsValid(SkillComponent)))
-	{
-		SkillComponent->GetOnSkillObjectLoaded().RemoveAll(this);
-	}
+	UnbindCharacterDelegates();
 
 	if (ensureAlways(IsValid(PlayerStatusWidgetViewModel)))
 	{
@@ -59,6 +33,54 @@ void UNetherCrownPlayerStatusWidgetView::NativeDestruct()
 	}
 
 	Super::NativeDestruct();
+}
+
+void UNetherCrownPlayerStatusWidgetView::HandleOwningCharacterChanged(ANetherCrownCharacter* NewOwningCharacter)
+{
+	Super::HandleOwningCharacterChanged(NewOwningCharacter);
+
+	UnbindCharacterDelegates();
+
+	if (!IsValid(NewOwningCharacter))
+	{
+		return;
+	}
+
+	BoundCharacterWeak = MakeWeakObjectPtr(NewOwningCharacter);
+
+	NewOwningCharacter->GetOnRepPlayerState().RemoveAll(this);
+	NewOwningCharacter->GetOnRepPlayerState().AddUObject(this, &ThisClass::InitViewModel);
+
+	UNetherCrownSkillComponent* SkillComponent{ NewOwningCharacter->GetSkillComponent() };
+	if (ensureAlways(IsValid(SkillComponent)))
+	{
+		SkillComponent->GetOnSkillObjectLoaded().RemoveAll(this);
+		SkillComponent->GetOnSkillObjectLoaded().AddUObject(this, &ThisClass::InitViewModel);
+	}
+
+	InitViewModel();
+}
+
+void UNetherCrownPlayerStatusWidgetView::UnbindCharacterDelegates()
+{
+	ANetherCrownCharacter* BoundCharacter{ BoundCharacterWeak.Get() };
+	if (IsValid(BoundCharacter))
+	{
+		BoundCharacter->GetOnRepPlayerState().RemoveAll(this);
+
+		UNetherCrownSkillComponent* SkillComponent{ BoundCharacter->GetSkillComponent() };
+		if (IsValid(SkillComponent))
+		{
+			SkillComponent->GetOnSkillObjectLoaded().RemoveAll(this);
+		}
+
+		if (IsValid(PlayerStatusWidgetViewModel))
+		{
+			PlayerStatusWidgetViewModel->ResetViewModel();
+		}
+	}
+
+	BoundCharacterWeak.Reset();
 }
 
 void UNetherCrownPlayerStatusWidgetView::ApplyHealthSlider(const float RemainHPRatio)
@@ -114,7 +136,7 @@ void UNetherCrownPlayerStatusWidgetView::InitViewModel()
 		return;
 	}
 
-	ANetherCrownCharacter* OwningCharacter{ GetOwningNetherCrownCharacter() };
+	ANetherCrownCharacter* OwningCharacter{ BoundCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(OwningCharacter)))
 	{
 		return;

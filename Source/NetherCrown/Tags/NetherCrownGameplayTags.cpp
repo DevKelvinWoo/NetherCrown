@@ -94,4 +94,10 @@ namespace NetherCrownTags
 #pragma region Sequence
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sequence_Boss1_Begin, "Sequence.Boss1.Begin", "");
 #pragma endregion
+
+#pragma region Level
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Level_Boss1Dungeon, "Level.Boss1Dungeon", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Level_NormalMonsterDungeon, "Level.NormalMonsterDungeon", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Level_Town, "Level.Town", "");
+#pragma endregion
 }

@@ -97,4 +97,10 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sequence_Boss1_Begin);
 #pragma endregion
 
+#pragma region Level
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Level_Boss1Dungeon);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Level_NormalMonsterDungeon);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Level_Town);
+#pragma endregion
+
 }

@@ -8,6 +8,8 @@
 #include "NetherCrownUITypes.h"
 #include "NetherCrownUIManagerSubsystem.generated.h"
 
+class APlayerController;
+
 class UNetherCrownPrimaryLayout;
 class UNetherCrownUIScreenBase;
 
@@ -17,6 +19,10 @@ class NETHERCROWN_API UNetherCrownUIManagerSubsystem : public ULocalPlayerSubsys
 	GENERATED_BODY()
 
 public:
+	void CaptureTravelPersistentScreens();
+	void PrepareForLevelTravel();
+	bool RestoreTravelPersistentScreens();
+
 	UFUNCTION(BlueprintCallable)
 	void SetPrimaryLayoutClass(TSubclassOf<UNetherCrownPrimaryLayout> InPrimaryLayoutClass);
 
@@ -49,8 +55,10 @@ public:
 
 protected:
 	virtual void Deinitialize() override;
+	virtual void PlayerControllerChanged(APlayerController* NewPlayerController) override;
 
 private:
+	void ResetRuntimeWidgets();
 	void AddScreenToLayerContainer(UNetherCrownUIScreenBase* ScreenWidget, const FGameplayTag& LayerTag);
 	void RemoveScreenFromLayerContainer(UNetherCrownUIScreenBase* ScreenWidget, const FGameplayTag& LayerTag);
 	TArray<TObjectPtr<UNetherCrownUIScreenBase>>& GetLayerContainer(const FGameplayTag& LayerTag);
@@ -82,4 +90,9 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UNetherCrownUIScreenBase>> ModalLayerScreenStack{};
+
+	UPROPERTY(Transient)
+	TArray<FGameplayTag> TravelCachedActiveScreenTags{};
+
+	bool bPendingTravelRestore{ false };
 };

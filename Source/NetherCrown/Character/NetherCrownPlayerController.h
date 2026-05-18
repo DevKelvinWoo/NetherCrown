@@ -16,9 +16,15 @@ UCLASS()
 class NETHERCROWN_API ANetherCrownPlayerController : public APlayerController
 {
 	GENERATED_BODY()
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnControlledCharacterChanged, ANetherCrownCharacter*);
 
 public:
 	ANetherCrownPlayerController();
+	ANetherCrownCharacter* GetCachedCharacter() const { return CachedCharacter; }
+	FOnControlledCharacterChanged& GetOnControlledCharacterChanged() { return OnControlledCharacterChanged; }
+
+	UFUNCTION(Client, Reliable)
+	void Client_BeginLevelTravelPersistence();
 
 protected:
 	virtual void BeginPlay() override;
@@ -87,6 +93,8 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
+
+	FOnControlledCharacterChanged OnControlledCharacterChanged;
 };
 
 template<typename FuncType, typename... ArgsType>

@@ -132,7 +132,7 @@ void UNetherCrownSkillIconComponent::TryResolveHandlingSkillObject()
 	}
 
 	ANetherCrownCharacter* OwningCharacter{ Cast<ANetherCrownCharacter>(GetOwningPlayerPawn()) };
-	if (!ensureAlways(IsValid(OwningCharacter)))
+	if (!IsValid(OwningCharacter))
 	{
 		return;
 	}

@@ -37,16 +37,24 @@ public:
 	ANetherCrownCharacter* GetOwningNetherCrownCharacter() const;
 
 protected:
+	ANetherCrownCharacter* GetCachedOwningNetherCrownCharacter() const { return CachedOwningCharacterWeak.Get(); }
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void HandleScreenShown();
 
 	UFUNCTION(BlueprintImplementableEvent)
 	void HandleScreenHidden();
 
+	virtual void HandleOwningCharacterChanged(ANetherCrownCharacter* NewOwningCharacter);
+	virtual void NativeOnInitialized() override;
 	virtual void NativeConstruct() override;
 	virtual void NativeDestruct() override;
 
 private:
+	void BindOwningPlayerController();
+	void UnbindOwningPlayerController();
+	void HandleControlledCharacterChanged(ANetherCrownCharacter* NewControlledCharacter);
+
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	FGameplayTag ScreenTag{};
 
@@ -58,4 +66,7 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	bool bShowMouseCursor{ true };
+
+	UPROPERTY(Transient)
+	TWeakObjectPtr<ANetherCrownCharacter> CachedOwningCharacterWeak{};
 };

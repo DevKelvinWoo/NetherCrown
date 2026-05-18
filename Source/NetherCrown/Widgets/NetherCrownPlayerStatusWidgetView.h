@@ -9,6 +9,7 @@
 class UNetherCrownSliderComponent;
 class UNetherCrownSkillIconComponent;
 class UNetherCrownPlayerStatusWidgetViewModel;
+class ANetherCrownCharacter;
 enum class ENetherCrownSkillKeyEnum : uint8;
 
 UCLASS()
@@ -19,6 +20,7 @@ class NETHERCROWN_API UNetherCrownPlayerStatusWidgetView : public UNetherCrownUI
 protected:
 	virtual void NativeOnInitialized() override;
 	virtual void NativeDestruct() override;
+	virtual void HandleOwningCharacterChanged(ANetherCrownCharacter* NewOwningCharacter) override;
 
 	UPROPERTY(meta = (BindWidget))
 	TObjectPtr<UNetherCrownSliderComponent> NativeHealthBar{};
@@ -36,6 +38,7 @@ protected:
 	TObjectPtr<UNetherCrownSkillIconComponent> NativeShiftSkillIcon{};
 
 private:
+	void UnbindCharacterDelegates();
 	void ApplyHealthSlider(const float RemainHPRatio);
 	void ApplyMPSlider(const float RemainMPRatio);
 	void ApplySkillCoolDownSlider(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum);
@@ -44,4 +47,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownPlayerStatusWidgetViewModel> PlayerStatusWidgetViewModel{};
+
+	UPROPERTY(Transient)
+	TWeakObjectPtr<ANetherCrownCharacter> BoundCharacterWeak{};
 };
