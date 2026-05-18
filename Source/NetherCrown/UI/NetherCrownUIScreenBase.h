@@ -62,10 +62,10 @@ private:
 	FGameplayTag LayerTag{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	ENetherCrownUIInputMode InputMode{ ENetherCrownUIInputMode::GameAndUI };
+	ENetherCrownUIInputMode InputMode{ ENetherCrownUIInputMode::GameOnly };
 
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
-	bool bShowMouseCursor{ true };
+	bool bShowMouseCursor{ false };
 
 	UPROPERTY(Transient)
 	TWeakObjectPtr<ANetherCrownCharacter> CachedOwningCharacterWeak{};
