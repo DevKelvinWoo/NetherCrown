@@ -14,4 +14,11 @@ class NETHERCROWN_API ANetherCrownGameMode : public AGameMode
 
 public:
 	void TravelLevelByTag(const FGameplayTag& LevelTag);
+
+protected:
+	virtual void PostLogin(APlayerController* NewPlayer) override;
+	virtual void HandleSeamlessTravelPlayer(AController*& C) override;
+
+private:
+	void EnsurePersistentPlayerId(AController* Controller) const;
 };

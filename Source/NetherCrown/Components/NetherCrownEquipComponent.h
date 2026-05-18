@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "NetherCrown/Data/NetherCrownEquipData.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrownEquipComponent.generated.h"
 
 class UNetherCrownWeaponData;
@@ -45,6 +46,7 @@ public:
 
 	void EquipOrStowWeapon();
 	void ChangeWeapon();
+	bool RestoreWeaponFromPersistentData(const FNetherCrownWeaponPersistentData& InWeaponPersistentData);
 
 	ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 	const UNetherCrownWeaponData* GetEquippedWeaponData() const;
@@ -75,9 +77,13 @@ private:
 	void ChangeWeaponInternal();
 
 	void StowCurrentWeapon();
+	ANetherCrownWeapon* SpawnPersistentWeapon(TSubclassOf<ANetherCrownWeapon> WeaponClass, const FName& SocketName);
+	void ClearRestoredWeapons();
 
 	void CacheInitData();
 	void LoadEquipData();
+
+	void SetWeaponPersistentData();
 
 	bool bCanEquip{ false };
 
@@ -107,4 +113,6 @@ private:
 	ENetherCrownEquipState EquipState{ ENetherCrownEquipState::Unequipped };
 
 	FOnEquipWeapon OnEquipWeapon;
+
+	FNetherCrownWeaponPersistentData WeaponPersistentData{};
 };

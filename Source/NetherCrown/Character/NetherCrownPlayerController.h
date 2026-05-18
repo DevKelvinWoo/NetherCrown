@@ -22,6 +22,8 @@ public:
 	ANetherCrownPlayerController();
 	ANetherCrownCharacter* GetCachedCharacter() const { return CachedCharacter; }
 	FOnControlledCharacterChanged& GetOnControlledCharacterChanged() { return OnControlledCharacterChanged; }
+	const FGuid& GetPersistentPlayerId() const { return PersistentPlayerId; }
+	void SetPersistentPlayerId(const FGuid& InPersistentPlayerId) { PersistentPlayerId = InPersistentPlayerId; }
 
 	UFUNCTION(Client, Reliable)
 	void Client_BeginLevelTravelPersistence();
@@ -93,6 +95,8 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownCharacter> CachedCharacter{};
+
+	FGuid PersistentPlayerId{};
 
 	FOnControlledCharacterChanged OnControlledCharacterChanged;
 };

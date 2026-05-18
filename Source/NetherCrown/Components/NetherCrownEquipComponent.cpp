@@ -7,7 +7,9 @@
 #include "Net/UnrealNetwork.h"
 #include "TimerManager.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Character/AnimInstance/NetherCrownCharacterAnimInstance.h"
+#include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "NetherCrown/Weapon/NetherCrownWeapon.h"
@@ -47,6 +49,57 @@ void UNetherCrownEquipComponent::EquipOrStowWeapon()
 void UNetherCrownEquipComponent::ChangeWeapon()
 {
 	Server_ChangeWeapon();
+}
+
+bool UNetherCrownEquipComponent::RestoreWeaponFromPersistentData(const FNetherCrownWeaponPersistentData& InWeaponPersistentData)
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return false;
+	}
+
+	WeaponPersistentData = InWeaponPersistentData;
+
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSettings);
+
+	ClearRestoredWeapons();
+
+	if (WeaponPersistentData.EquippedWeaponClass)
+	{
+		EquippedWeapon = SpawnPersistentWeapon(WeaponPersistentData.EquippedWeaponClass, CharacterDefaultSettings->GetEquipWeaponSocketName());
+		if (!ensureAlways(IsValid(EquippedWeapon)))
+		{
+			return false;
+		}
+	}
+
+	if (WeaponPersistentData.LeftStowWeaponClass)
+	{
+		ANetherCrownWeapon* LeftStowWeapon{ SpawnPersistentWeapon(WeaponPersistentData.LeftStowWeaponClass, CharacterDefaultSettings->GetStowWeaponSocketLName()) };
+		if (!ensureAlways(IsValid(LeftStowWeapon)))
+		{
+			return false;
+		}
+
+		StowWeaponContainer.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ ENetherCrownStowWeaponPosition::Left, LeftStowWeapon });
+	}
+
+	if (WeaponPersistentData.RightStowWeaponClass)
+	{
+		ANetherCrownWeapon* RightStowWeapon{ SpawnPersistentWeapon(WeaponPersistentData.RightStowWeaponClass, CharacterDefaultSettings->GetStowWeaponSocketRName()) };
+		if (!ensureAlways(IsValid(RightStowWeapon)))
+		{
+			return false;
+		}
+
+		StowWeaponContainer.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ ENetherCrownStowWeaponPosition::Right, RightStowWeapon });
+	}
+
+	EquipState = IsValid(EquippedWeapon) ? ENetherCrownEquipState::Equipped : ENetherCrownEquipState::Unequipped;
+	OnEquipWeapon.Broadcast(IsValid(EquippedWeapon));
+
+	return true;
 }
 
 void UNetherCrownEquipComponent::SetupEquipStateTimer()
@@ -204,6 +257,10 @@ void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 
 	const FName& EquipWeaponSocketName{ CharacterDefaultSettings->GetEquipWeaponSocketName() };
 	AttachWeaponToCharacterMesh(EquippedWeapon, EquipWeaponSocketName);
+
+	WeaponPersistentData.EquippedWeaponClass = EquippedWeapon.GetClass();
+
+	SetWeaponPersistentData();
 }
 
 void UNetherCrownEquipComponent::ChangeWeaponInternal()
@@ -227,10 +284,21 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 
 	const FName& WeaponSocketName{ CharacterDefaultSettings->GetEquipWeaponSocketName() };
 	AttachWeaponToCharacterMesh(ChangeTargetWeaponPair.Value, WeaponSocketName);
+	WeaponPersistentData.EquippedWeaponClass = ChangeTargetWeaponPair.Value->GetClass();
 
 	const ENetherCrownStowWeaponPosition ChangeTargetWeaponPosition{ ChangeTargetWeaponPair.Key };
 	FName StowSocketName{};
-	ChangeTargetWeaponPosition == ENetherCrownStowWeaponPosition::Left ? StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName() : StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
+	if (ChangeTargetWeaponPosition == ENetherCrownStowWeaponPosition::Left)
+	{
+		StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName();
+		WeaponPersistentData.LeftStowWeaponClass = EquippedWeapon.GetClass();
+	}
+	else if (ChangeTargetWeaponPosition == ENetherCrownStowWeaponPosition::Right)
+	{
+		StowSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
+		WeaponPersistentData.RightStowWeaponClass = EquippedWeapon.GetClass();
+	}
+
 	AttachWeaponToCharacterMesh(EquippedWeapon, StowSocketName);
 
 	StowWeaponContainer.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ ChangeTargetWeaponPosition, EquippedWeapon });
@@ -239,6 +307,7 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 
 	SetupEquipStateTimer();
 	Multicast_PlayEquipAnimationAndSound();
+	SetWeaponPersistentData();
 }
 
 void UNetherCrownEquipComponent::StowCurrentWeapon()
@@ -252,16 +321,70 @@ void UNetherCrownEquipComponent::StowCurrentWeapon()
 	{
 		StowWeaponPosition = ENetherCrownStowWeaponPosition::Left;
 		StowWeaponSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName();
+
+		WeaponPersistentData.LeftStowWeaponClass = EquippedWeapon.GetClass();
 	}
 	else
 	{
 		StowWeaponPosition = ENetherCrownStowWeaponPosition::Right;
 		StowWeaponSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
+
+		WeaponPersistentData.RightStowWeaponClass = EquippedWeapon.GetClass();
 	}
 
 	AttachWeaponToCharacterMesh(EquippedWeapon, StowWeaponSocketName);
 
 	StowWeaponContainer.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ StowWeaponPosition, EquippedWeapon });
+}
+
+ANetherCrownWeapon* UNetherCrownEquipComponent::SpawnPersistentWeapon(TSubclassOf<ANetherCrownWeapon> WeaponClass, const FName& SocketName)
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority() || !WeaponClass)
+	{
+		return nullptr;
+	}
+
+	UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return nullptr;
+	}
+
+	FActorSpawnParameters SpawnParameters{};
+	SpawnParameters.Owner = CachedCharacter;
+	SpawnParameters.Instigator = CachedCharacter;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	ANetherCrownWeapon* SpawnedWeapon{ World->SpawnActor<ANetherCrownWeapon>(WeaponClass, CachedCharacter->GetActorTransform(), SpawnParameters) };
+	if (!ensureAlways(IsValid(SpawnedWeapon)))
+	{
+		return nullptr;
+	}
+
+	SpawnedWeapon->DisableEquipSphereCollision();
+	AttachWeaponToCharacterMesh(SpawnedWeapon, SocketName);
+
+	return SpawnedWeapon;
+}
+
+void UNetherCrownEquipComponent::ClearRestoredWeapons()
+{
+	if (IsValid(EquippedWeapon))
+	{
+		EquippedWeapon->Destroy();
+		EquippedWeapon = nullptr;
+	}
+
+	for (const TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>& StowWeaponPair : StowWeaponContainer)
+	{
+		if (IsValid(StowWeaponPair.Value))
+		{
+			StowWeaponPair.Value->Destroy();
+		}
+	}
+
+	StowWeaponContainer.Empty();
+	EquipableWeaponWeak.Reset();
 }
 
 void UNetherCrownEquipComponent::CacheInitData()
@@ -297,4 +420,26 @@ void UNetherCrownEquipComponent::LoadEquipData()
 	}
 
 	EquipData = EquipDataAsset->GetEquipData();
+}
+
+void UNetherCrownEquipComponent::SetWeaponPersistentData()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(CachedCharacter->GetController()) };
+	if (!ensureAlways(IsValid(PlayerController)))
+	{
+		return;
+	}
+
+	ANetherCrownPlayerState* PlayerState{ PlayerController->GetPlayerState<ANetherCrownPlayerState>() };
+	if (!ensureAlways(IsValid(PlayerState)))
+	{
+		return;
+	}
+
+	PlayerState->SetWeaponPersistentData(WeaponPersistentData);
 }

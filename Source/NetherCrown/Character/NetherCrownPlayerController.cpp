@@ -31,11 +31,6 @@ void ANetherCrownPlayerController::OnPossess(APawn* InPawn)
 	CachedCharacter = Cast<ANetherCrownCharacter>(InPawn);
 	OnControlledCharacterChanged.Broadcast(CachedCharacter);
 
-	if (!IsLocalController())
-	{
-		return;
-	}
-
 	if (const UGameInstance* GameInstance{ GetGameInstance() })
 	{
 		if (UNetherCrownLevelTravelPersistenceSubsystem* LevelTravelPersistenceSubsystem{ GameInstance->GetSubsystem<UNetherCrownLevelTravelPersistenceSubsystem>() })

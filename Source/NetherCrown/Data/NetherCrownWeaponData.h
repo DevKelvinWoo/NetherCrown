@@ -7,8 +7,25 @@
 #include "Engine/DataAsset.h"
 #include "NetherCrownWeaponData.generated.h"
 
+class ANetherCrownWeapon;
 class UNiagaraSystem;
 enum class ENetherCrownSkillKeyEnum : uint8;
+
+USTRUCT()
+struct FNetherCrownWeaponPersistentData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TSubclassOf<ANetherCrownWeapon> EquippedWeaponClass{};
+
+	UPROPERTY()
+	TSubclassOf<ANetherCrownWeapon> LeftStowWeaponClass{};
+
+	UPROPERTY()
+	TSubclassOf<ANetherCrownWeapon> RightStowWeaponClass{};
+};
 
 USTRUCT(BlueprintType)
 struct FNetherCrownWeaponTraceData

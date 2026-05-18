@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrownPlayerState.generated.h"
 
 class UNetherCrownPlayerStatComponent;
@@ -18,10 +19,23 @@ public:
 
 	UNetherCrownPlayerStatComponent* GetNetherCrownPlayerStatComponent() const { return NetherCrownPlayerStatComponent; }
 
+	const FGuid& GetPersistentPlayerId() const { return PersistentPlayerId; }
+	void SetPersistentPlayerId(const FGuid& InPersistentPlayerId);
+
+	const FNetherCrownWeaponPersistentData& GetWeaponPersistentData() const { return WeaponPersistentData; }
+	void SetWeaponPersistentData(const FNetherCrownWeaponPersistentData& InPersistentData);
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+	virtual void CopyProperties(APlayerState* PlayerState) override;
+	virtual void OverrideWith(APlayerState* PlayerState) override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Replicated)
 	TObjectPtr<UNetherCrownPlayerStatComponent> NetherCrownPlayerStatComponent{};
+
+	UPROPERTY(Replicated)
+	FGuid PersistentPlayerId{};
+
+	FNetherCrownWeaponPersistentData WeaponPersistentData{};
 };

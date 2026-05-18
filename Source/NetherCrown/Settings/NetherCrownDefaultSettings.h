@@ -9,6 +9,7 @@
 class UDataTable;
 class UCurveFloat;
 
+class UNetherCrownLoadingScreenWidgetView;
 class UNetherCrownPrimaryLayout;
 
 UCLASS(config = Game, defaultconfig, meta = (DisplayName = "NetherCrown Default Settings"))
@@ -55,4 +56,7 @@ public:
 
 	UPROPERTY(Config, EditAnywhere, Category = "UI")
 	TSubclassOf<UNetherCrownPrimaryLayout> PrimaryLayoutWidgetClass{};
+
+	UPROPERTY(Config, EditAnywhere, Category = "UI")
+	TSubclassOf<UNetherCrownLoadingScreenWidgetView> LoadingScreenWidgetClass{};
 };

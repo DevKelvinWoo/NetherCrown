@@ -7,6 +7,21 @@
 #include "NetherCrown/Core/NetherCrownLevelTravelManagerSubsystem.h"
 #include "NetherCrown/Core/NetherCrownLevelTravelPersistenceSubsystem.h"
 #include "NetherCrown/Data/NetherCrownLevelTravelDataAsset.h"
+#include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
+
+void ANetherCrownGameMode::PostLogin(APlayerController* NewPlayer)
+{
+	Super::PostLogin(NewPlayer);
+
+	EnsurePersistentPlayerId(NewPlayer);
+}
+
+void ANetherCrownGameMode::HandleSeamlessTravelPlayer(AController*& C)
+{
+	Super::HandleSeamlessTravelPlayer(C);
+
+	EnsurePersistentPlayerId(C);
+}
 
 void ANetherCrownGameMode::TravelLevelByTag(const FGameplayTag& LevelTag)
 {
@@ -71,4 +86,34 @@ void ANetherCrownGameMode::TravelLevelByTag(const FGameplayTag& LevelTag)
 
 	bUseSeamlessTravel = true;
 	World->ServerTravel(LevelPackageName);
+}
+
+void ANetherCrownGameMode::EnsurePersistentPlayerId(AController* Controller) const
+{
+	ANetherCrownPlayerController* NetherCrownPlayerController{ Cast<ANetherCrownPlayerController>(Controller) };
+	if (!IsValid(NetherCrownPlayerController))
+	{
+		return;
+	}
+
+	FGuid PersistentPlayerId{ NetherCrownPlayerController->GetPersistentPlayerId() };
+	if (!PersistentPlayerId.IsValid())
+	{
+		PersistentPlayerId = FGuid::NewGuid();
+		NetherCrownPlayerController->SetPersistentPlayerId(PersistentPlayerId);
+	}
+
+	ANetherCrownPlayerState* NetherCrownPlayerState{ NetherCrownPlayerController->GetPlayerState<ANetherCrownPlayerState>() };
+	if (!IsValid(NetherCrownPlayerState))
+	{
+		return;
+	}
+
+	if (!NetherCrownPlayerState->GetPersistentPlayerId().IsValid())
+	{
+		NetherCrownPlayerState->SetPersistentPlayerId(PersistentPlayerId);
+		return;
+	}
+
+	NetherCrownPlayerController->SetPersistentPlayerId(NetherCrownPlayerState->GetPersistentPlayerId());
 }
