@@ -1,0 +1,78 @@
+﻿// Fill out your copyright notice in the Description page of Project Settings.
+
+#pragma once
+
+#include "CoreMinimal.h"
+#include "NetherCrownInteract.h"
+#include "NetherCrownInteractActor.h"
+#include "Components/TimelineComponent.h"
+#include "GameFramework/Actor.h"
+#include "NetherCrownBossDungeonDoor.generated.h"
+
+class UBoxComponent;
+class USphereComponent;
+
+class UNetherCrownBossDungeonDoorDataAsset;
+
+UCLASS()
+class NETHERCROWN_API ANetherCrownBossDungeonDoor : public ANetherCrownInteractActor, public INetherCrownInteract
+{
+	GENERATED_BODY()
+
+public:
+	ANetherCrownBossDungeonDoor();
+
+protected:
+	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
+
+	virtual void Interact() override;
+
+private:
+	void CacheBossDungeonDoorData();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayOpenDoor();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayOpenDoorCameraShake();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_PlayOpenDoorSound();
+
+	UFUNCTION()
+	void OpenLeftDoor(float CurveFloat);
+
+	UFUNCTION()
+	void OpenRightDoor(float CurveFloat);
+
+	UFUNCTION()
+	void HandleOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UStaticMeshComponent> LeftDoorMeshComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UStaticMeshComponent> RightDoorMeshComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UBoxComponent> TestBoxComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<USphereComponent> CameraShakePointSphereComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DoorDataAsset")
+	TSoftObjectPtr<UNetherCrownBossDungeonDoorDataAsset> DoorDataAssetSoft{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UNetherCrownBossDungeonDoorDataAsset> CachedDoorDataAsset{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveFloat> CachedLeftDoorOpenCurve{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UCurveFloat> CachedRightDoorOpenCurve{};
+
+	FTimeline LeftDoorOpenTimeline{};
+	FTimeline RightDoorOpenTimeline{};
+};

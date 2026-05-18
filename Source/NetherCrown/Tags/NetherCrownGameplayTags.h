@@ -33,6 +33,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_Teleport);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_MagicSpikeUp);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossEnemy1_MagicSpike_Range);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossDungeon_DoorSlide);
 #pragma endregion
 
 #pragma region Effect

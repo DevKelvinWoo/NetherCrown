@@ -31,6 +31,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_Teleport, "Sound.BossEnemy1.Teleport", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_MagicSpikeUp, "Sound.BossEnemy1.MagicSpikeUp", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossEnemy1_MagicSpike_Range, "Sound.BossEnemy1.MagicSpike_Range", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossDungeon_DoorSlide, "Sound.BossDungeon.DoorSlide", "");
 #pragma endregion
 
 #pragma region Effect
