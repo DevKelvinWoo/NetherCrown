@@ -9,6 +9,7 @@
 
 class UWidgetComponent;
 class USphereComponent;
+class UTexture2D;
 
 class ANetherCrownCharacter;
 
@@ -31,6 +32,8 @@ protected:
 	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
 
 private:
+	void CacheInteractWidgetTexture();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
 
@@ -45,6 +48,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UWidgetComponent> InteractWidgetComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "InteractWidget")
+	TSoftObjectPtr<UTexture2D> InteractWidgetTextureSoft{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> CachedInteractWidgetTexture{};
 
 	UPROPERTY(Transient, Replicated)
 	TObjectPtr<ANetherCrownCharacter> InteractTargetCharacter{};

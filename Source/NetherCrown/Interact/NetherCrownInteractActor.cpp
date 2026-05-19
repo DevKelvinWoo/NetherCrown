@@ -7,6 +7,7 @@
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownInteractComponent.h"
+#include "NetherCrown/Widgets/NetherCrownInteractWidgetView.h"
 
 ANetherCrownInteractActor::ANetherCrownInteractActor()
 {
@@ -28,6 +29,8 @@ ANetherCrownInteractActor::ANetherCrownInteractActor()
 void ANetherCrownInteractActor::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CacheInteractWidgetTexture();
 
 	if (ensureAlways(IsValid(InteractDetectSphereComponent)))
 	{
@@ -123,7 +126,31 @@ void ANetherCrownInteractActor::SetInteractWidgetVisibility(const ANetherCrownCh
 		return;
 	}
 
+	if (bVisible)
+	{
+		UNetherCrownInteractWidgetView* InteractWidgetView{ Cast<UNetherCrownInteractWidgetView>(InteractWidgetComponent->GetWidget()) };
+		if (ensureAlways(IsValid(InteractWidgetView)))
+		{
+			InteractWidgetView->SetInteractWidgetBorderTexture(CachedInteractWidgetTexture);
+		}
+	}
+
 	InteractWidgetComponent->SetVisibility(bVisible);
+}
+
+void ANetherCrownInteractActor::CacheInteractWidgetTexture()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (InteractWidgetTextureSoft.IsNull())
+	{
+		return;
+	}
+
+	CachedInteractWidgetTexture = InteractWidgetTextureSoft.LoadSynchronous();
 }
 
 void ANetherCrownInteractActor::Multicast_SetInteractWidgetVisibility_Implementation(
