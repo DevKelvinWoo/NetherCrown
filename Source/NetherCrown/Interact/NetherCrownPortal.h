@@ -4,13 +4,12 @@
 
 #include "CoreMinimal.h"
 #include "GameplayTagContainer.h"
+#include "NetherCrownInteractActor.h"
 #include "GameFramework/Actor.h"
 #include "NetherCrownPortal.generated.h"
 
-class UBoxComponent;
-
 UCLASS(Blueprintable)
-class NETHERCROWN_API ANetherCrownPortal : public AActor
+class NETHERCROWN_API ANetherCrownPortal : public ANetherCrownInteractActor
 {
 	GENERATED_BODY()
 
@@ -20,13 +19,11 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void Interact() override;
+
 private:
-	UFUNCTION()
-	void OnTestBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void TravelByLevelTag();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Tag")
 	FGameplayTag LevelTag{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Component")
-	TObjectPtr<UBoxComponent> TestBoxComponent{};
 };

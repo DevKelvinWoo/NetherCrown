@@ -2,17 +2,11 @@
 
 #include "NetherCrownPortal.h"
 
-#include "Components/BoxComponent.h"
 #include "NetherCrown/GameMode/NetherCrownGameMode.h"
 
 ANetherCrownPortal::ANetherCrownPortal()
 {
 	PrimaryActorTick.bCanEverTick = false;
-
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
-
-	TestBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("TestBoxComponent"));
-	TestBoxComponent->SetupAttachment(RootComponent);
 
 	bReplicates = true;
 	bNetLoadOnClient = true;
@@ -21,14 +15,19 @@ ANetherCrownPortal::ANetherCrownPortal()
 void ANetherCrownPortal::BeginPlay()
 {
 	Super::BeginPlay();
+}
 
-	if (ensureAlways(IsValid(TestBoxComponent)))
+void ANetherCrownPortal::Interact()
+{
+	Super::Interact();
+
+	if (HasAuthority())
 	{
-		TestBoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::OnTestBoxBeginOverlap);
+		TravelByLevelTag();
 	}
 }
 
-void ANetherCrownPortal::OnTestBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+void ANetherCrownPortal::TravelByLevelTag()
 {
 	if (!HasAuthority())
 	{

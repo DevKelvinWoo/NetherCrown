@@ -27,7 +27,10 @@ private:
 	UPROPERTY(Transient)
 	TArray<TObjectPtr<UNetherCrownLoadingScreenWidgetView>> LoadingScreenWidgets{};
 
+	UPROPERTY(Transient)
 	TMap<FGuid, FNetherCrownWeaponPersistentData> WeaponPersistentDataMap{};
+
+	UPROPERTY(Transient)
 	TArray<FGuid> WeaponPersistentPlayerIdQueue{};
 
 	bool bHasPendingPersistence{ false };

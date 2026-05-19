@@ -46,6 +46,7 @@ public:
 
 	void EquipOrStowWeapon();
 	void ChangeWeapon();
+	FNetherCrownWeaponPersistentData MakeWeaponPersistentData() const;
 	bool RestoreWeaponFromPersistentData(const FNetherCrownWeaponPersistentData& InWeaponPersistentData);
 
 	ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
@@ -78,6 +79,7 @@ private:
 
 	void StowCurrentWeapon();
 	ANetherCrownWeapon* SpawnPersistentWeapon(TSubclassOf<ANetherCrownWeapon> WeaponClass, const FName& SocketName);
+	ANetherCrownWeapon* FindAttachedWeaponBySocket(const FName& SocketName) const;
 	void ClearRestoredWeapons();
 
 	void CacheInitData();
@@ -114,5 +116,6 @@ private:
 
 	FOnEquipWeapon OnEquipWeapon;
 
+	UPROPERTY(Transient)
 	FNetherCrownWeaponPersistentData WeaponPersistentData{};
 };

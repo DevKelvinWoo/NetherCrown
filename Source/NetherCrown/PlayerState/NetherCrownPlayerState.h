@@ -37,5 +37,6 @@ private:
 	UPROPERTY(Replicated)
 	FGuid PersistentPlayerId{};
 
+	UPROPERTY(Transient)
 	FNetherCrownWeaponPersistentData WeaponPersistentData{};
 };

@@ -128,7 +128,29 @@ void UNetherCrownLevelTravelPersistenceSubsystem::CaptureWeaponPersistentData()
 			continue;
 		}
 
-		WeaponPersistentDataMap.Add(PersistentPlayerId, PlayerState->GetWeaponPersistentData());
+		ANetherCrownCharacter* ControlledCharacter{ PlayerController->GetCachedCharacter() };
+		if (!IsValid(ControlledCharacter))
+		{
+			ControlledCharacter = Cast<ANetherCrownCharacter>(PlayerController->GetPawn());
+		}
+
+		if (!IsValid(ControlledCharacter))
+		{
+			WeaponPersistentDataMap.Add(PersistentPlayerId, PlayerState->GetWeaponPersistentData());
+			WeaponPersistentPlayerIdQueue.Add(PersistentPlayerId);
+			continue;
+		}
+
+		const UNetherCrownEquipComponent* EquipComponent{ ControlledCharacter->GetEquipComponent() };
+		if (!IsValid(EquipComponent))
+		{
+			WeaponPersistentDataMap.Add(PersistentPlayerId, PlayerState->GetWeaponPersistentData());
+			WeaponPersistentPlayerIdQueue.Add(PersistentPlayerId);
+			continue;
+		}
+
+		const FNetherCrownWeaponPersistentData WeaponPersistentData{ EquipComponent->MakeWeaponPersistentData() };
+		WeaponPersistentDataMap.Add(PersistentPlayerId, WeaponPersistentData);
 		WeaponPersistentPlayerIdQueue.Add(PersistentPlayerId);
 	}
 }

@@ -52,6 +52,7 @@ void UNetherCrownBasicAttackComponent::BeginPlay()
 	}
 
 	EquipComponent->GetOnEquipWeapon().AddUObject(this, &ThisClass::HandleOnEquipWeapon);
+	HandleOnEquipWeapon(IsValid(EquipComponent->GetEquippedWeapon()));
 }
 
 void UNetherCrownBasicAttackComponent::LoadBasicAttackData()
