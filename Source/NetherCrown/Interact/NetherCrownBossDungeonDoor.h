@@ -15,7 +15,7 @@ class USphereComponent;
 class UNetherCrownBossDungeonDoorDataAsset;
 
 UCLASS()
-class NETHERCROWN_API ANetherCrownBossDungeonDoor : public ANetherCrownInteractActor, public INetherCrownInteract
+class NETHERCROWN_API ANetherCrownBossDungeonDoor : public ANetherCrownInteractActor
 {
 	GENERATED_BODY()
 
@@ -46,17 +46,11 @@ private:
 	UFUNCTION()
 	void OpenRightDoor(float CurveFloat);
 
-	UFUNCTION()
-	void HandleOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
-
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UStaticMeshComponent> LeftDoorMeshComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UStaticMeshComponent> RightDoorMeshComponent{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Component")
-	TObjectPtr<UBoxComponent> TestBoxComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USphereComponent> CameraShakePointSphereComponent{};

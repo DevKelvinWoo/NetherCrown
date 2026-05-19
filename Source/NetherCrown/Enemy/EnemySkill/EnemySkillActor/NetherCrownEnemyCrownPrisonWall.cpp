@@ -59,7 +59,6 @@ ANetherCrownEnemyCrownPrisonWall::ANetherCrownEnemyCrownPrisonWall()
 	ExplosionNiagaraComponent->SetupAttachment(RootComponent);
 	ExplosionNiagaraComponent->bAutoActivate = false;
 
-
 	bReplicates = true;
 	SetReplicatingMovement(true);
 }

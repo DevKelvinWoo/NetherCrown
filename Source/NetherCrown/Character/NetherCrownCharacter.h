@@ -9,6 +9,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownCharacter.generated.h"
 
+class UNetherCrownInteractComponent;
 class UNetherCrownActionControlComponent;
 class ANetherCrownEnemy;
 class UNetherCrownDamageReceiverComponent;
@@ -56,6 +57,7 @@ public:
 	void RequestBasicAttack(const FInputActionValue& Value);
 	void EquipCharacter(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
+	void InteractToTarget(const FInputActionValue& Value);
 
 	void ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const;
 	void ActiveQSkill(const FInputActionValue& Value) const;
@@ -93,6 +95,7 @@ public:
 	UNetherCrownCrowdControlComponent* GetCrowdControlComponent() const { return NetherCrownCrowdControlComponent; }
 	UNetherCrownActionControlComponent* GetActionControlComponent() const { return NetherCrownActionControlComponent; }
 	UNetherCrownDamageReceiverComponent* GetDamageReceiverComponent() const { return NetherCrownDamageReceiverComponent; }
+	UNetherCrownInteractComponent* GetInteractComponent() const { return InteractComponent; }
 
 	FVector GetLastMoveDirection() const { return CachedLastMoveDirection; }
 
@@ -180,6 +183,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNiagaraComponent> StatusNiagaraComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownInteractComponent> InteractComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownCharacterTagData CharacterTagData{};

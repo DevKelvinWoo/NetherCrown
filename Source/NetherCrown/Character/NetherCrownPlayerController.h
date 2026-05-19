@@ -63,6 +63,8 @@ private:
 	void HandleInputActiveShiftSkill(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void HandleInputActiveCSkill(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void HandleInputActiveInteract(const FInputActionValue& InActionValue);
 
 	template<typename FuncType, typename... ArgsType>
 	void ExecuteCharacterAction(FuncType Func, ArgsType&&... Args);
@@ -89,6 +91,8 @@ private:
 	TObjectPtr<UInputAction> ShiftSkillAction{};
 	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
 	TObjectPtr<UInputAction> CSkillAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> InteractionAction{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "InputMappingContext")
 	TObjectPtr<UInputMappingContext> MappingContext{};

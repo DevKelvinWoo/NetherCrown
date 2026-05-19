@@ -18,6 +18,7 @@
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownDamageReceiverComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
+#include "NetherCrown/Components/NetherCrownInteractComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
@@ -40,6 +41,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownDamageReceiverComponent = CreateDefaultSubobject<UNetherCrownDamageReceiverComponent>(TEXT("DamageReceiverComponent"));
 	NetherCrownActionControlComponent = CreateDefaultSubobject<UNetherCrownActionControlComponent>(TEXT("ActionControlComponent"));
 	StatusEffectControlComponent = CreateDefaultSubobject<UNetherCrownStatusEffectControlComponent>(TEXT("StatusEffectControlComponent"));
+	InteractComponent = CreateDefaultSubobject<UNetherCrownInteractComponent>(TEXT("InteractComponent"));
 
 	SetCharacterDefaultMovementSettings();
 
@@ -346,6 +348,19 @@ void ANetherCrownCharacter::ChangeWeapon(const FInputActionValue& Value)
 	if (ensureAlways(IsValid(NetherCrownEquipComponent)))
 	{
 		NetherCrownEquipComponent->ChangeWeapon();
+	}
+}
+
+void ANetherCrownCharacter::InteractToTarget(const FInputActionValue& Value)
+{
+	if (!Value.Get<bool>())
+	{
+		return;
+	}
+
+	if (ensureAlways(IsValid(InteractComponent)))
+	{
+		InteractComponent->InteractToTarget();
 	}
 }
 

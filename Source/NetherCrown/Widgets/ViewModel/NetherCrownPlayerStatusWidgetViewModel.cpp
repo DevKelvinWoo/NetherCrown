@@ -20,20 +20,20 @@ void UNetherCrownPlayerStatusWidgetViewModel::InitViewModel(ANetherCrownCharacte
 	ModelCharacterWeak = MakeWeakObjectPtr(InModelCharacter);
 
 	UNetherCrownSkillComponent* SkillComponent{ InModelCharacter->GetSkillComponent() };
-	if (ensureAlways(IsValid(SkillComponent)))
+	if ((IsValid(SkillComponent)))
 	{
 		BoundSkillComponentWeak = MakeWeakObjectPtr(SkillComponent);
 		SkillComponent->GetOnSkillCoolDownModified().AddUObject(this, &ThisClass::HandleOnSkillCoolDownModified);
 	}
 
 	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(InModelCharacter->GetPlayerState()) };
-	if (!ensureAlways(IsValid(OwnerPlayerState)))
+	if (!(IsValid(OwnerPlayerState)))
 	{
 		return;
 	}
 
 	UNetherCrownPlayerStatComponent* OwnerCharacterStatComponent{ OwnerPlayerState->GetNetherCrownPlayerStatComponent() };
-	if (!ensureAlways(IsValid(OwnerCharacterStatComponent)))
+	if (!(IsValid(OwnerCharacterStatComponent)))
 	{
 		return;
 	}

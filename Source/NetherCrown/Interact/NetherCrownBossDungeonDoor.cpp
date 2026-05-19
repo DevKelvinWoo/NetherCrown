@@ -12,16 +12,11 @@ ANetherCrownBossDungeonDoor::ANetherCrownBossDungeonDoor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
-
 	LeftDoorMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftDoorMeshComponent"));
 	LeftDoorMeshComponent->SetupAttachment(RootComponent);
 
 	RightDoorMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("RightDoorMeshComponent"));
 	RightDoorMeshComponent->SetupAttachment(RootComponent);
-
-	TestBoxComponent = CreateDefaultSubobject<UBoxComponent>(TEXT("TestBoxComponent"));
-	TestBoxComponent->SetupAttachment(RootComponent);
 
 	CameraShakePointSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("CameraShakePointSphere"));
 	CameraShakePointSphereComponent->SetupAttachment(RootComponent);
@@ -43,11 +38,6 @@ void ANetherCrownBossDungeonDoor::BeginPlay()
 	FOnTimelineFloat RightDoorTimelineFloat{};
 	RightDoorTimelineFloat.BindUFunction(this, FName("OpenRightDoor"));
 	RightDoorOpenTimeline.AddInterpFloat(CachedRightDoorOpenCurve, RightDoorTimelineFloat);
-
-	if (TestBoxComponent)
-	{
-		TestBoxComponent->OnComponentBeginOverlap.AddDynamic(this, &ThisClass::HandleOnOverlapBegin);
-	}
 }
 
 void ANetherCrownBossDungeonDoor::Tick(float DeltaTime)
@@ -67,6 +57,8 @@ void ANetherCrownBossDungeonDoor::Tick(float DeltaTime)
 
 void ANetherCrownBossDungeonDoor::Interact()
 {
+	Super::Interact();
+
 	if (HasAuthority())
 	{
 		Multicast_PlayOpenDoorSound();
@@ -148,15 +140,4 @@ void ANetherCrownBossDungeonDoor::OpenLeftDoor(float CurveFloat)
 void ANetherCrownBossDungeonDoor::OpenRightDoor(float CurveFloat)
 {
 	RightDoorMeshComponent->SetRelativeLocation(FVector(0.f, CurveFloat, 0.f));
-}
-
-void ANetherCrownBossDungeonDoor::HandleOnOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	Interact();
 }
