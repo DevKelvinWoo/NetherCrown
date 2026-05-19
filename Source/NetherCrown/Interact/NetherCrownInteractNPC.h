@@ -4,38 +4,35 @@
 
 #include "CoreMinimal.h"
 #include "NetherCrownInteract.h"
-#include "GameFramework/Actor.h"
-#include "NetherCrownInteractActor.generated.h"
+#include "GameFramework/Character.h"
+#include "NetherCrownInteractNPC.generated.h"
 
-class UWidgetComponent;
 class USphereComponent;
-class UTexture2D;
+class UWidgetComponent;
 
 class ANetherCrownCharacter;
 
 UCLASS()
-class NETHERCROWN_API ANetherCrownInteractActor : public AActor, public INetherCrownInteract
+class NETHERCROWN_API ANetherCrownInteractNPC : public ACharacter, public INetherCrownInteract
 {
 	GENERATED_BODY()
 
 public:
-	ANetherCrownInteractActor();
+	ANetherCrownInteractNPC();
 
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
-
 	virtual void Interact() override;
 
-	void SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
-	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	void CacheInteractWidgetTexture();
+	void SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
+	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
+	void Multicast_ShowNPCDialogueWidget();
 
 	UFUNCTION()
 	void HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
@@ -48,12 +45,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UWidgetComponent> InteractWidgetComponent{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "InteractWidget")
-	TSoftObjectPtr<UTexture2D> InteractWidgetTextureSoft{};
-
-	UPROPERTY(Transient)
-	TObjectPtr<UTexture2D> CachedInteractWidgetTexture{};
 
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> InteractTargetCharacterWeak{};

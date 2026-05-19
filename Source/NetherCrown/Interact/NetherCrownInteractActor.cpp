@@ -43,11 +43,12 @@ void ANetherCrownInteractActor::GetLifetimeReplicatedProps(TArray<class FLifetim
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ThisClass, InteractTargetCharacter);
+	DOREPLIFETIME(ThisClass, InteractTargetCharacterWeak);
 }
 
 void ANetherCrownInteractActor::Interact()
 {
+	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
 	if (!IsValid(InteractTargetCharacter) || !HasAuthority())
 	{
 		return;
@@ -60,7 +61,8 @@ void ANetherCrownInteractActor::HandleOnDetectSphereOverlapBegin(UPrimitiveCompo
                                                                  AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                                                  const FHitResult& SweepResult)
 {
-	InteractTargetCharacter = Cast<ANetherCrownCharacter>(OtherActor);
+	InteractTargetCharacterWeak = MakeWeakObjectPtr(Cast<ANetherCrownCharacter>(OtherActor));
+	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
 	if (!IsValid(InteractTargetCharacter))
 	{
 		return;
@@ -80,7 +82,8 @@ void ANetherCrownInteractActor::HandleOnDetectSphereOverlapBegin(UPrimitiveCompo
 void ANetherCrownInteractActor::HandleOnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	InteractTargetCharacter = Cast<ANetherCrownCharacter>(OtherActor);
+	InteractTargetCharacterWeak = MakeWeakObjectPtr(Cast<ANetherCrownCharacter>(OtherActor));
+	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
 	if (!IsValid(InteractTargetCharacter))
 	{
 		return;
