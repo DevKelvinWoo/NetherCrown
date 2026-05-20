@@ -22,11 +22,4 @@ protected:
 	virtual void Interact() override;
 
 private:
-	void CacheWeaponSellNPCData();
-
-	UPROPERTY(EditDefaultsOnly, Category = "Data")
-	TSoftObjectPtr<UNetherCrownWeaponSellNPCDataAsset> WeaponSellNPCDataAssetSoft{};
-
-	UPROPERTY(Transient)
-	TObjectPtr<UNetherCrownWeaponSellNPCDataAsset> CachedWeaponSellNPCDataAsset{};
 };

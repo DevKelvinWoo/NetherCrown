@@ -3,6 +3,8 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
+#include "NetherCrownQuestData.h"
 #include "Engine/DataAsset.h"
 #include "NetherCrownNPCData.generated.h"
 
@@ -10,27 +12,19 @@ UCLASS()
 class NETHERCROWN_API UNetherCrownNPCDataAsset : public UDataAsset
 {
 	GENERATED_BODY()
-};
-
-USTRUCT()
-struct FNetherCrownWeaponSellNPCData
-{
-	GENERATED_BODY()
 
 public:
-	UPROPERTY(EditDefaultsOnly, Category = "DialogueData")
-	TMap<int32, FText> WeaponSellNPCDialogueData{};
-};
-
-UCLASS()
-class NETHERCROWN_API UNetherCrownWeaponSellNPCDataAsset : public UDataAsset
-{
-	GENERATED_BODY()
-
-public:
-	const FNetherCrownWeaponSellNPCData& GetWeaponSellNPCData() { return WeaponSellNPCData; }
 
 private:
-	UPROPERTY(EditDefaultsOnly, Category = "Data")
-	FNetherCrownWeaponSellNPCData WeaponSellNPCData{};
+	UPROPERTY(EditDefaultsOnly, Category = "Tag")
+	FGameplayTag NPCTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Setting")
+	bool bIsQuestNPC{ false };
+
+	UPROPERTY(EditDefaultsOnly, Category = "QuestData")
+	TArray<TObjectPtr<UNetherCrownQuestData>> QuestDataArray{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
+	TArray<FText> NonQuestNPCDialogues{};
 };

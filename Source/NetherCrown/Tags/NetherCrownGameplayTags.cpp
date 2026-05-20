@@ -102,4 +102,12 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Level_NormalMonsterDungeon, "Level.NormalMonsterDungeon", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Level_Town, "Level.Town", "");
 #pragma endregion
+
+#pragma region Quest
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Quest_WeaponSell, "Quest.WeaponSell", "");
+#pragma endregion
+
+#pragma region NPC
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(NPC_WeaponSell, "NPC.WeaponSell", "");
+#pragma endregion
 }

@@ -10,6 +10,7 @@
 #include "NetherCrown/Components/NetherCrownInteractComponent.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
+#include "NetherCrown/Data/NetherCrownNPCData.h"
 
 ANetherCrownInteractNPC::ANetherCrownInteractNPC()
 {
@@ -29,6 +30,8 @@ ANetherCrownInteractNPC::ANetherCrownInteractNPC()
 void ANetherCrownInteractNPC::BeginPlay()
 {
 	Super::BeginPlay();
+
+	CacheNPCDataAsset();
 
 	if (ensureAlways(IsValid(InteractDetectSphereComponent)))
 	{
@@ -85,6 +88,16 @@ void ANetherCrownInteractNPC::SetInteractWidgetVisibility(const ANetherCrownChar
 	}
 
 	InteractWidgetComponent->SetVisibility(bVisible);
+}
+
+void ANetherCrownInteractNPC::CacheNPCDataAsset()
+{
+	if (NPCDataAssetSoft.IsNull())
+	{
+		return;
+	}
+
+	CachedNPCDataAsset = NPCDataAssetSoft.LoadSynchronous();
 }
 
 void ANetherCrownInteractNPC::Multicast_ShowNPCDialogueWidget_Implementation()

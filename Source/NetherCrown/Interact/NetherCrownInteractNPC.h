@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "NetherCrownInteractNPC.generated.h"
 
+class UNetherCrownNPCDataAsset;
 class USphereComponent;
 class UWidgetComponent;
 
@@ -31,6 +32,8 @@ private:
 	void SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
 	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
 
+	void CacheNPCDataAsset();
+
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ShowNPCDialogueWidget();
 
@@ -45,6 +48,12 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UWidgetComponent> InteractWidgetComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Data")
+	TSoftObjectPtr<UNetherCrownNPCDataAsset> NPCDataAssetSoft{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UNetherCrownNPCDataAsset> CachedNPCDataAsset{};
 
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> InteractTargetCharacterWeak{};

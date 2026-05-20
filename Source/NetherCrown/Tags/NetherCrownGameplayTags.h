@@ -105,4 +105,12 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Level_Town);
 #pragma endregion
 
+#pragma region Quest
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Quest_WeaponSell);
+#pragma endregion
+
+#pragma region NPC
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(NPC_WeaponSell);
+#pragma endregion
+
 }
