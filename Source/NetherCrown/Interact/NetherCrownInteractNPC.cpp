@@ -11,6 +11,7 @@
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
 #include "NetherCrown/Data/NetherCrownNPCData.h"
+#include "NetherCrown/Widgets/NetherCrownNPCDialogueWidgetView.h"
 
 ANetherCrownInteractNPC::ANetherCrownInteractNPC()
 {
@@ -55,6 +56,7 @@ void ANetherCrownInteractNPC::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, InteractTargetCharacterWeak);
+	DOREPLIFETIME(ThisClass, CurrentQuestIndex);
 }
 
 void ANetherCrownInteractNPC::SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid)
@@ -126,7 +128,24 @@ void ANetherCrownInteractNPC::Multicast_ShowNPCDialogueWidget_Implementation()
 		return;
 	}
 
-	UIManagerSubsystem->ShowScreenByTag(NetherCrownTags::UI_Screen_NPCDialogue);
+	UNetherCrownNPCDialogueWidgetView* NPCDialogueWidget{ Cast<UNetherCrownNPCDialogueWidgetView>(UIManagerSubsystem->ShowScreenByTag(NetherCrownTags::UI_Screen_NPCDialogue)) };
+	if (!ensureAlways(IsValid(NPCDialogueWidget)))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedNPCDataAsset)))
+	{
+		return;
+	}
+
+	const TArray<UNetherCrownQuestData*> QuestData{ CachedNPCDataAsset->GetQuestDataArray() };
+	if (!(QuestData.IsValidIndex(CurrentQuestIndex)))
+	{
+		return;
+	}
+
+	NPCDialogueWidget->SetDialogueText(QuestData[CurrentQuestIndex]->GetQuestDialogues(), 0);
 }
 
 void ANetherCrownInteractNPC::HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent,

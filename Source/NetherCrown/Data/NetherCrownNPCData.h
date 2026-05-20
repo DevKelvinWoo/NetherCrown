@@ -14,6 +14,7 @@ class NETHERCROWN_API UNetherCrownNPCDataAsset : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	const TArray<TObjectPtr<UNetherCrownQuestData>>& GetQuestDataArray() const { return QuestDataArray; }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Tag")

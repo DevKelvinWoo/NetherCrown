@@ -55,6 +55,9 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownNPCDataAsset> CachedNPCDataAsset{};
 
+	UPROPERTY(Transient, Replicated)
+	int32 CurrentQuestIndex{};
+
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> InteractTargetCharacterWeak{};
 };

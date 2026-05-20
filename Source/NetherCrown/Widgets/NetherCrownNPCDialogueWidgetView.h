@@ -15,6 +15,7 @@ class NETHERCROWN_API UNetherCrownNPCDialogueWidgetView : public UNetherCrownUIS
 	GENERATED_BODY()
 
 public:
+	void SetDialogueText(const TArray<FText>& InDialogue, const int32 DialogueIndex);
 
 protected:
 	virtual void NativeConstruct() override;
@@ -26,4 +27,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> DialogueText{};
+
+	UPROPERTY(Transient)
+	TArray<FText> DialogueArray{};
+
+	int32 CurrentDialogueIndex{};
 };

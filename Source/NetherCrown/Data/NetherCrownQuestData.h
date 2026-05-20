@@ -16,6 +16,7 @@ class NETHERCROWN_API UNetherCrownQuestData : public UDataAsset
 	GENERATED_BODY()
 
 public:
+	const TArray<FText>& GetQuestDialogues() const { return QuestDialogues; }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Tag")

@@ -3,6 +3,23 @@
 
 #include "NetherCrownNPCDialogueWidgetView.h"
 
+#include "Components/TextBlock.h"
+
+void UNetherCrownNPCDialogueWidgetView::SetDialogueText(const TArray<FText>& InDialogue, const int32 DialogueIndex)
+{
+	if (!ensureAlways(IsValid(DialogueText)))
+	{
+		return;
+	}
+
+	DialogueArray = InDialogue;
+
+	if (DialogueArray.IsValidIndex(DialogueIndex))
+	{
+		DialogueText->SetText(DialogueArray[DialogueIndex]);
+	}
+}
+
 void UNetherCrownNPCDialogueWidgetView::NativeConstruct()
 {
 	Super::NativeConstruct();
@@ -15,12 +32,13 @@ FReply UNetherCrownNPCDialogueWidgetView::NativeOnKeyDown(const FGeometry& MyGeo
 {
 	Super::NativeOnKeyDown(MyGeometry, InKeyEvent);
 
-	if (InKeyEvent.GetKey() != EKeys::LeftAlt)
+	if (InKeyEvent.GetKey() != EKeys::Y)
 	{
 		return FReply::Unhandled();
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("Alt key pressed"));
+	++CurrentDialogueIndex;
+	SetDialogueText(DialogueArray, CurrentDialogueIndex);
 
 	return FReply::Handled();
 }
