@@ -3,7 +3,19 @@
 
 #include "NetherCrownNPCDialogueWidgetView.h"
 
+#include "InputCoreTypes.h"
 #include "Components/TextBlock.h"
+#include "ViewModel/NetherCrownNPCDialogueWidgetViewModel.h"
+
+void UNetherCrownNPCDialogueWidgetView::InitViewModel(ANetherCrownCharacter* InModelCharacter, const FGameplayTag& InQuestTag)
+{
+	if (!ensureAlways(IsValid(NPCDialogueWidgetViewModel)))
+	{
+		return;
+	}
+
+	NPCDialogueWidgetViewModel->InitViewModel(InModelCharacter, InQuestTag);
+}
 
 void UNetherCrownNPCDialogueWidgetView::SetDialogueText(const TArray<FText>& InDialogue, const int32 DialogueIndex)
 {
@@ -16,8 +28,20 @@ void UNetherCrownNPCDialogueWidgetView::SetDialogueText(const TArray<FText>& InD
 
 	if (DialogueArray.IsValidIndex(DialogueIndex))
 	{
+		CurrentDialogueIndex = DialogueIndex;
 		DialogueText->SetText(DialogueArray[DialogueIndex]);
 	}
+}
+
+void UNetherCrownNPCDialogueWidgetView::NativeOnInitialized()
+{
+	NPCDialogueWidgetViewModel = NewObject<UNetherCrownNPCDialogueWidgetViewModel>(this);
+	if (!ensureAlways(IsValid(NPCDialogueWidgetViewModel)))
+	{
+		return;
+	}
+
+	Super::NativeOnInitialized();
 }
 
 void UNetherCrownNPCDialogueWidgetView::NativeConstruct()
@@ -26,6 +50,16 @@ void UNetherCrownNPCDialogueWidgetView::NativeConstruct()
 
 	SetIsFocusable(true);
 	SetKeyboardFocus();
+}
+
+void UNetherCrownNPCDialogueWidgetView::NativeDestruct()
+{
+	if (ensureAlways(IsValid(NPCDialogueWidgetViewModel)))
+	{
+		NPCDialogueWidgetViewModel->ResetViewModel();
+	}
+
+	Super::NativeDestruct();
 }
 
 FReply UNetherCrownNPCDialogueWidgetView::NativeOnKeyDown(const FGeometry& MyGeometry, const FKeyEvent& InKeyEvent)
@@ -37,8 +71,20 @@ FReply UNetherCrownNPCDialogueWidgetView::NativeOnKeyDown(const FGeometry& MyGeo
 		return FReply::Unhandled();
 	}
 
-	++CurrentDialogueIndex;
-	SetDialogueText(DialogueArray, CurrentDialogueIndex);
+	const int32 NextDialogueIndex{ CurrentDialogueIndex + 1 };
+	if (DialogueArray.IsValidIndex(NextDialogueIndex))
+	{
+		SetDialogueText(DialogueArray, NextDialogueIndex);
+		return FReply::Handled();
+	}
+
+	if (!ensureAlways(IsValid(NPCDialogueWidgetViewModel)))
+	{
+		return FReply::Handled();
+	}
+
+	HideScreen();
+	NPCDialogueWidgetViewModel->RequestAcceptQuestState();
 
 	return FReply::Handled();
 }

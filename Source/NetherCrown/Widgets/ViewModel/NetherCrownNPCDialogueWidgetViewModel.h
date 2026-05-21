@@ -3,8 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "MVVMViewModelBase.h"
 #include "NetherCrownNPCDialogueWidgetViewModel.generated.h"
+
+class ANetherCrownCharacter;
 
 UCLASS()
 class NETHERCROWN_API UNetherCrownNPCDialogueWidgetViewModel : public UMVVMViewModelBase
@@ -12,7 +15,15 @@ class NETHERCROWN_API UNetherCrownNPCDialogueWidgetViewModel : public UMVVMViewM
 	GENERATED_BODY()
 
 public:
+	void InitViewModel(ANetherCrownCharacter* InModelCharacter, const FGameplayTag& InQuestTag);
+	void ResetViewModel();
+
+	void RequestAcceptQuestState();
 
 private:
+	UPROPERTY(Transient)
+	TWeakObjectPtr<ANetherCrownCharacter> ModelCharacterWeak{};
 
+	UPROPERTY(Transient)
+	FGameplayTag QuestTag{};
 };

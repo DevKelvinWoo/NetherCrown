@@ -7,6 +7,7 @@
 #include "GameFramework/Character.h"
 #include "NetherCrownInteractNPC.generated.h"
 
+enum class ENetherCrownQuestState : uint8;
 class UNetherCrownNPCDataAsset;
 class USphereComponent;
 class UWidgetComponent;
@@ -34,8 +35,11 @@ private:
 
 	void CacheNPCDataAsset();
 
+	const ENetherCrownQuestState GetTargetPlayerQuestState() const;
+	TArray<FText> GetQuestDialogueText(const ENetherCrownQuestState InQuestState) const;
+
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_ShowNPCDialogueWidget();
+	void Multicast_ShowNPCDialogueWidget(const ENetherCrownQuestState QuestState);
 
 	UFUNCTION()
 	void HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

@@ -19,6 +19,7 @@
 #include "NetherCrown/Components/NetherCrownDamageReceiverComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownInteractComponent.h"
+#include "NetherCrown/Components/NetherCrownQuestComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
@@ -42,6 +43,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	NetherCrownActionControlComponent = CreateDefaultSubobject<UNetherCrownActionControlComponent>(TEXT("ActionControlComponent"));
 	StatusEffectControlComponent = CreateDefaultSubobject<UNetherCrownStatusEffectControlComponent>(TEXT("StatusEffectControlComponent"));
 	InteractComponent = CreateDefaultSubobject<UNetherCrownInteractComponent>(TEXT("InteractComponent"));
+	QuestComponent = CreateDefaultSubobject<UNetherCrownQuestComponent>(TEXT("QuestComponent"));
 
 	SetCharacterDefaultMovementSettings();
 

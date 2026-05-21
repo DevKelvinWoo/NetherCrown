@@ -2,6 +2,7 @@
 
 #include "NetherCrownUIScreenBase.h"
 
+#include "NetherCrownUIManagerSubsystem.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
@@ -45,6 +46,29 @@ ANetherCrownCharacter* UNetherCrownUIScreenBase::GetOwningNetherCrownCharacter()
 	}
 
 	return Cast<ANetherCrownCharacter>(GetOwningPlayerPawn());
+}
+
+void UNetherCrownUIScreenBase::HideScreen()
+{
+	ANetherCrownPlayerController* OwningPlayerController{ GetOwningNetherCrownPlayerController() };
+	if (!ensureAlways(IsValid(OwningPlayerController)))
+	{
+		return;
+	}
+
+	const ULocalPlayer* LocalPlayer{ OwningPlayerController->GetLocalPlayer() };
+	if (!ensureAlways(IsValid(LocalPlayer)))
+	{
+		return;
+	}
+
+	UNetherCrownUIManagerSubsystem* UIManagerSubsystem{ LocalPlayer->GetSubsystem<UNetherCrownUIManagerSubsystem>() };
+	if (!ensureAlways(IsValid(UIManagerSubsystem)))
+	{
+		return;
+	}
+
+	UIManagerSubsystem->HideScreenByTag(ScreenTag);
 }
 
 void UNetherCrownUIScreenBase::BindOwningPlayerController()

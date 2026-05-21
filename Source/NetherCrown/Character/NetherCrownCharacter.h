@@ -25,6 +25,7 @@ class UNetherCrownBasicAttackComponent;
 class UNetherCrownEquipComponent;
 class UNetherCrownSkillComponent;
 class UNetherCrownStatusEffectControlComponent;
+class UNetherCrownQuestComponent;
 
 enum class ENetherCrownSkillKeyEnum : uint8;
 
@@ -96,6 +97,7 @@ public:
 	UNetherCrownActionControlComponent* GetActionControlComponent() const { return NetherCrownActionControlComponent; }
 	UNetherCrownDamageReceiverComponent* GetDamageReceiverComponent() const { return NetherCrownDamageReceiverComponent; }
 	UNetherCrownInteractComponent* GetInteractComponent() const { return InteractComponent; }
+	UNetherCrownQuestComponent* GetQuestComponent() const { return QuestComponent; }
 
 	FVector GetLastMoveDirection() const { return CachedLastMoveDirection; }
 
@@ -186,6 +188,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownInteractComponent> InteractComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownQuestComponent> QuestComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownCharacterTagData CharacterTagData{};

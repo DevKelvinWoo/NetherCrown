@@ -39,6 +39,8 @@ public:
 protected:
 	ANetherCrownCharacter* GetCachedOwningNetherCrownCharacter() const { return CachedOwningCharacterWeak.Get(); }
 
+	void HideScreen();
+
 	UFUNCTION(BlueprintImplementableEvent)
 	void HandleScreenShown();
 
