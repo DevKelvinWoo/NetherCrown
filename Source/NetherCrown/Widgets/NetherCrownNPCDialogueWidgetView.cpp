@@ -7,14 +7,14 @@
 #include "Components/TextBlock.h"
 #include "ViewModel/NetherCrownNPCDialogueWidgetViewModel.h"
 
-void UNetherCrownNPCDialogueWidgetView::InitViewModel(ANetherCrownCharacter* InModelCharacter, const FGameplayTag& InQuestTag)
+void UNetherCrownNPCDialogueWidgetView::InitViewModel(ANetherCrownCharacter* InModelCharacter)
 {
 	if (!ensureAlways(IsValid(NPCDialogueWidgetViewModel)))
 	{
 		return;
 	}
 
-	NPCDialogueWidgetViewModel->InitViewModel(InModelCharacter, InQuestTag);
+	NPCDialogueWidgetViewModel->InitViewModel(InModelCharacter);
 }
 
 void UNetherCrownNPCDialogueWidgetView::SetDialogueText(const TArray<FText>& InDialogue, const int32 DialogueIndex)
@@ -83,15 +83,7 @@ FReply UNetherCrownNPCDialogueWidgetView::NativeOnKeyDown(const FGeometry& MyGeo
 		return FReply::Handled();
 	}
 
-	if (NPCDialogueWidgetViewModel->IsQuestDone())
-	{
-		NPCDialogueWidgetViewModel->RewardToInteractCharacter();
-	}
-	else
-	{
-		NPCDialogueWidgetViewModel->RequestAcceptQuestStateInProgress();
-	}
-
+	NPCDialogueWidgetViewModel->FinishInteract();
 	HideScreen();
 
 	return FReply::Handled();

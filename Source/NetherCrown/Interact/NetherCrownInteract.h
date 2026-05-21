@@ -6,6 +6,8 @@
 #include "UObject/Interface.h"
 #include "NetherCrownInteract.generated.h"
 
+class ANetherCrownCharacter;
+
 UINTERFACE()
 class UNetherCrownInteract : public UInterface
 {
@@ -18,4 +20,6 @@ class NETHERCROWN_API INetherCrownInteract
 
 public:
 	virtual void Interact() = 0;
+	virtual bool IsNeedCameraMoving() { return false; }
+	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) {}
 };

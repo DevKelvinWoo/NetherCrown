@@ -3,7 +3,6 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameplayTagContainer.h"
 #include "NetherCrown/UI/NetherCrownUIScreenBase.h"
 #include "NetherCrownNPCDialogueWidgetView.generated.h"
 
@@ -19,7 +18,7 @@ class NETHERCROWN_API UNetherCrownNPCDialogueWidgetView : public UNetherCrownUIS
 
 public:
 	void SetDialogueText(const TArray<FText>& InDialogue, const int32 DialogueIndex);
-	void InitViewModel(ANetherCrownCharacter* InModelCharacter, const FGameplayTag& InQuestTag);
+	void InitViewModel(ANetherCrownCharacter* InModelCharacter);
 
 protected:
 	virtual void NativeOnInitialized() override;

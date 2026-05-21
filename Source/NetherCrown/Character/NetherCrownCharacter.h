@@ -71,6 +71,8 @@ public:
 	void SetMainSpringArmLength(const float InSpringArmLength);
 	float GetMainSpringArmLength() const;
 
+	void SetMeshVisibility(const bool bIsHidden);
+
 	UFUNCTION(BlueprintCallable)
 	bool IsPressedMoveKey() const { return bPressedMoveKey;}
 

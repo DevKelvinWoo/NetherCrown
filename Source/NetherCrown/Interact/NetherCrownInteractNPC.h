@@ -22,10 +22,15 @@ class NETHERCROWN_API ANetherCrownInteractNPC : public ACharacter, public INethe
 public:
 	ANetherCrownInteractNPC();
 
+	FVector GetInteractCameraPos() const;
+	FRotator GetInteractCameraRot() const;
+
 protected:
 	virtual void BeginPlay() override;
 
+	virtual bool IsNeedCameraMoving() override { return true; };
 	virtual void Interact() override;
+	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -52,6 +57,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UWidgetComponent> InteractWidgetComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<USphereComponent> InteractCameraPosSphereComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Data")
 	TSoftObjectPtr<UNetherCrownNPCDataAsset> NPCDataAssetSoft{};

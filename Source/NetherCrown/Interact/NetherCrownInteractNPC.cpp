@@ -12,6 +12,7 @@
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
 #include "NetherCrown/Data/NetherCrownNPCData.h"
+#include "NetherCrown/Data/NetherCrownQuestData.h"
 #include "NetherCrown/Widgets/NetherCrownNPCDialogueWidgetView.h"
 
 ANetherCrownInteractNPC::ANetherCrownInteractNPC()
@@ -25,8 +26,31 @@ ANetherCrownInteractNPC::ANetherCrownInteractNPC()
 	InteractWidgetComponent->SetupAttachment(RootComponent);
 	InteractWidgetComponent->SetVisibility(false);
 
+	InteractCameraPosSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("InteractCameraPosSphereComponent"));
+	InteractCameraPosSphereComponent->SetupAttachment(RootComponent);
+
 	bNetLoadOnClient = true;
 	bReplicates = true;
+}
+
+FVector ANetherCrownInteractNPC::GetInteractCameraPos() const
+{
+	if (!ensureAlways(IsValid(InteractCameraPosSphereComponent)))
+	{
+		return FVector::ZeroVector;
+	}
+
+	return InteractCameraPosSphereComponent->GetComponentLocation();
+}
+
+FRotator ANetherCrownInteractNPC::GetInteractCameraRot() const
+{
+	if (!ensureAlways(IsValid(InteractCameraPosSphereComponent)))
+	{
+		return FRotator::ZeroRotator;
+	}
+
+	return InteractCameraPosSphereComponent->GetComponentRotation();
 }
 
 void ANetherCrownInteractNPC::BeginPlay()
@@ -50,6 +74,47 @@ void ANetherCrownInteractNPC::Interact()
 	}
 
 	Multicast_ShowNPCDialogueWidget(GetTargetPlayerQuestState());
+}
+
+void ANetherCrownInteractNPC::FinishInteract(ANetherCrownCharacter* InteractCharacter)
+{
+	if (!ensureAlways(IsValid(InteractCharacter)) || !InteractCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedNPCDataAsset)))
+	{
+		return;
+	}
+
+	const TArray<UNetherCrownQuestData*> QuestData{ CachedNPCDataAsset->GetQuestDataArray() };
+	if (!(QuestData.IsValidIndex(CurrentQuestIndex)))
+	{
+		return;
+	}
+
+	const UNetherCrownQuestData* CurrentQuestData{ QuestData[CurrentQuestIndex] };
+	if (!ensureAlways(IsValid(CurrentQuestData)))
+	{
+		return;
+	}
+
+	UNetherCrownQuestComponent* QuestComponent{ InteractCharacter->GetQuestComponent() };
+	if (!ensureAlways(IsValid(QuestComponent)))
+	{
+		return;
+	}
+
+	const FGameplayTag& QuestTag{ CurrentQuestData->GetQuestTag() };
+	if (QuestComponent->GetQuestState(QuestTag) == ENetherCrownQuestState::Done)
+	{
+		QuestComponent->RequestGrantQuestReward(QuestTag);
+	}
+	else
+	{
+		QuestComponent->RequestAcceptQuestState(QuestTag, ENetherCrownQuestState::InProgress);
+	}
 }
 
 void ANetherCrownInteractNPC::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
@@ -205,7 +270,7 @@ void ANetherCrownInteractNPC::Multicast_ShowNPCDialogueWidget_Implementation(con
 		return;
 	}
 
-	NPCDialogueWidget->InitViewModel(InteractTargetCharacter, QuestData[CurrentQuestIndex]->GetQuestTag());
+	NPCDialogueWidget->InitViewModel(InteractTargetCharacter);
 	NPCDialogueWidget->SetDialogueText(GetQuestDialogueText(QuestState), 0);
 }
 

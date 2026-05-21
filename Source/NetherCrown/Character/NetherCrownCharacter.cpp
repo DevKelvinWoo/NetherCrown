@@ -434,6 +434,17 @@ float ANetherCrownCharacter::GetMainSpringArmLength() const
 	return MainSpringArmComponent->TargetArmLength;
 }
 
+void ANetherCrownCharacter::SetMeshVisibility(const bool bIsHidden)
+{
+	USkeletalMeshComponent* MeshComponent{ GetMesh() };
+	if (!ensureAlways(IsValid(MeshComponent)))
+	{
+		return;
+	}
+
+	MeshComponent->SetHiddenInGame(bIsHidden);
+}
+
 bool ANetherCrownCharacter::IsEquippedWeapon() const
 {
 	if (!ensureAlways(IsValid(NetherCrownEquipComponent)))

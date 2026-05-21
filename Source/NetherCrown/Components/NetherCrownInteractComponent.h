@@ -19,15 +19,31 @@ public:
 
 	void InteractToTarget();
 
+	void FinishInteract();
+
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	UFUNCTION(Client, Reliable)
+	void Client_MoveCameraToInteractPosition();
+
+	void RestoreCameraPosition();
+
 	UFUNCTION(Server, Reliable)
 	void Server_InteractToTarget();
 
+	UFUNCTION(Server, Reliable)
+	void Server_FinishInteract();
+
 	UPROPERTY(Transient, Replicated)
 	TObjectPtr<AActor> TargetInteractActor{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<AActor> PreviousViewTarget{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<ACameraActor> InteractCameraActor{};
 };
