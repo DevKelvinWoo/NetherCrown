@@ -6,6 +6,7 @@
 #include "UObject/Object.h"
 #include "NetherCrownQuestReward.generated.h"
 
+class ANetherCrownWeapon;
 class ANetherCrownCharacter;
 
 UCLASS(Blueprintable, EditInlineNew, DefaultToInstanced)
@@ -24,4 +25,8 @@ class NETHERCROWN_API UNetherCrownQuestWeaponReward : public UNetherCrownQuestRe
 
 public:
 	virtual bool GrantReward(ANetherCrownCharacter* QuestOwner) const override;
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "WeaponClass")
+	TArray<TSubclassOf<ANetherCrownWeapon>> WeaponClassArr{};
 };

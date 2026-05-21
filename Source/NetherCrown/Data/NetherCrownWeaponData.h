@@ -72,6 +72,9 @@ public:
 	int32 GetPhysicalPenetration() const { return PhysicalPenetration; }
 	int32 GetMagicPenetration() const { return MagicPenetration; }
 
+	float GetWeaponRiseDuration() const { return WeaponRiseDuration; }
+	float GetWeaponRiseOffset() const { return WeaponRiseOffset; }
+
 	const FGameplayTag& GetWeaponSwingSoundTag() const { return WeaponTagData.WeaponSwingSoundTag; }
 	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 	const FNetherCrownWeaponTraceData& GetWeaponTraceData() const { return WeaponTraceData; }
@@ -99,6 +102,12 @@ private:
 
 	UPROPERTY(EditAnywhere)
 	int32 WeaponCoolDownReduction{};
+
+	UPROPERTY(EditAnywhere)
+	float WeaponRiseDuration{ 2.f };
+
+	UPROPERTY(EditAnywhere)
+	float WeaponRiseOffset{ 300.f };
 
 	UPROPERTY(EditAnywhere, Category = "TagData")
 	FNetherCrownWeaponTagData WeaponTagData{};

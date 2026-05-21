@@ -8,7 +8,6 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownBasicAttackComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
-#include "NetherCrown/Skill/NetherCrownSkillObject.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 #include "NiagaraSystem.h"
@@ -18,7 +17,7 @@
 
 ANetherCrownWeapon::ANetherCrownWeapon()
 {
-	PrimaryActorTick.bCanEverTick = false;
+	PrimaryActorTick.bCanEverTick = true;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
@@ -32,6 +31,9 @@ ANetherCrownWeapon::ANetherCrownWeapon()
 
 	WeaponAuraNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponAuraNiagaraComponent"));
 	WeaponAuraNiagaraComponent->SetupAttachment(WeaponMeshComponent);
+
+	WeaponIdleAuraNiagaraComponent = CreateDefaultSubobject<UNiagaraComponent>(TEXT("WeaponIdleNiagaraComponent"));
+	WeaponIdleAuraNiagaraComponent->SetupAttachment(WeaponMeshComponent);
 
 	bNetLoadOnClient = true;
 	bReplicates = true;
@@ -67,6 +69,38 @@ void ANetherCrownWeapon::BeginPlay()
 
 	CacheWeaponSkillAuraMap();
 	CacheWeaponLastComboAttackAura();
+}
+
+void ANetherCrownWeapon::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	if (!HasAuthority() || !bCanRise || !IsValid(WeaponData))
+	{
+		return;
+	}
+
+	WeaponRiseElapsedTime += DeltaTime;
+
+	const float Alpha{ FMath::Clamp(WeaponRiseElapsedTime / WeaponData->GetWeaponRiseDuration(), 0.f, 1.f) };
+	const float SmoothAlpha{ FMath::InterpEaseOut(0.f, 1.f, Alpha, 2.f) };
+
+	SetActorLocation(FMath::Lerp(HiddenLocation, RaisedLocation, SmoothAlpha));
+
+	if (Alpha >= 1.f)
+	{
+		bCanRise = false;
+	}
+}
+
+void ANetherCrownWeapon::Multicast_SetActiveWeaponIdleAuraNiagaraComponent_Implementation(const bool bActive)
+{
+	if (!ensureAlways(IsValid(WeaponIdleAuraNiagaraComponent)) || HasAuthority())
+	{
+		return;
+	}
+
+	WeaponIdleAuraNiagaraComponent->SetActive(bActive);
 }
 
 void ANetherCrownWeapon::SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) const
@@ -172,6 +206,32 @@ void ANetherCrownWeapon::ActiveWeaponLastComboAttackAuraNiagara(const bool bActi
 		WeaponAuraNiagaraComponent->SetAsset(nullptr);
 		WeaponAuraNiagaraComponent->Deactivate();
 	}
+}
+
+void ANetherCrownWeapon::SetActiveWeaponIdleAuraNiagaraComponent(const bool bActive)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	Multicast_SetActiveWeaponIdleAuraNiagaraComponent(bActive);
+}
+
+void ANetherCrownWeapon::RiseUpWeapon()
+{
+	if (!HasAuthority() || !IsValid(WeaponData))
+	{
+		return;
+	}
+
+	SetActiveWeaponIdleAuraNiagaraComponent(true);
+
+	HiddenLocation = GetActorLocation();
+	RaisedLocation = HiddenLocation + FVector(0.f, 0.f, WeaponData->GetWeaponRiseOffset());
+	WeaponRiseElapsedTime = 0.f;
+
+	bCanRise = true;
 }
 
 void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap,

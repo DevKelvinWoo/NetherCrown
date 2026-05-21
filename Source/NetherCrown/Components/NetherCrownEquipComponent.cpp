@@ -311,6 +311,7 @@ void UNetherCrownEquipComponent::EquipOrStowWeaponInternal()
 
 	EquippedWeapon = EquipableWeapon;
 	EquippedWeapon->DisableEquipSphereCollision();
+	EquippedWeapon->SetActiveWeaponIdleAuraNiagaraComponent(false);
 
 	if (EquipableWeaponWeak.IsValid())
 	{

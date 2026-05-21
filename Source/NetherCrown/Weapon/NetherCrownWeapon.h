@@ -44,10 +44,18 @@ public:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_ActiveWeaponLastComboAttackAuraNiagara(const bool bActive);
 
+	void SetActiveWeaponIdleAuraNiagaraComponent(const bool bActive);
+
+	void RiseUpWeapon();
+
 protected:
 	virtual void BeginPlay() override;
+	virtual void Tick(float DeltaTime) override;
 
 private:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetActiveWeaponIdleAuraNiagaraComponent(const bool bActive);
+
 	UFUNCTION()
 	void HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
 
@@ -80,6 +88,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNiagaraComponent> WeaponAuraNiagaraComponent{};
 
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNiagaraComponent> WeaponIdleAuraNiagaraComponent{};
+
 	UPROPERTY(Transient)
 	TMap<ENetherCrownSkillKeyEnum, TObjectPtr<UNiagaraSystem>> CachedWeaponSkillAuraMap{};
 
@@ -88,4 +99,11 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownWeaponData> WeaponData{};
+
+	bool bCanRise{ false };
+
+	float WeaponRiseElapsedTime{};
+
+	FVector HiddenLocation{};
+	FVector RaisedLocation{};
 };
