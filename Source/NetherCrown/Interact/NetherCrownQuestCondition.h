@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "UObject/Object.h"
+#include "GameplayTagContainer.h"
 #include "NetherCrownQuestCondition.generated.h"
 
 class ANetherCrownCharacter;
@@ -14,7 +15,7 @@ class NETHERCROWN_API UNetherCrownQuestCondition : public UObject
 	GENERATED_BODY()
 
 public:
-	virtual bool IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner) const;
+	virtual bool IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner, const FGameplayTag& QuestTag) const;
 };
 
 UCLASS(Blueprintable, EditInlineNew, DefaultToInstanced)
@@ -23,7 +24,7 @@ class NETHERCROWN_API UNetherCrownQuestMonsterKillCondition : public UNetherCrow
 	GENERATED_BODY()
 
 public:
-	virtual bool IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner) const override;
+	virtual bool IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner, const FGameplayTag& QuestTag) const override;
 };
 
 UCLASS(Blueprintable, EditInlineNew, DefaultToInstanced)
@@ -32,7 +33,7 @@ class NETHERCROWN_API UNetherCrownQuestFindItemCondition : public UNetherCrownQu
 	GENERATED_BODY()
 
 public:
-	virtual bool IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner) const override;
+	virtual bool IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner, const FGameplayTag& QuestTag) const override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Condition")

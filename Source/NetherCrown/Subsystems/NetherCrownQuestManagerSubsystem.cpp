@@ -41,7 +41,7 @@ bool UNetherCrownQuestManagerSubsystem::CanCompleteQuest(const ANetherCrownChara
 
 	UE_LOG(LogNetherCrown, Log, TEXT("Check QuestCondition Class: %s"), *QuestCondition->GetClass()->GetName());
 
-	return QuestCondition->IsConditionSatisfied(QuestOwner);
+	return QuestCondition->IsConditionSatisfied(QuestOwner, QuestTag);
 }
 
 bool UNetherCrownQuestManagerSubsystem::TryGrantQuestReward(ANetherCrownCharacter* QuestOwner, const FGameplayTag& QuestTag) const

@@ -6,20 +6,20 @@
 #include "NetherCrown/Components/NetherCrownQuestComponent.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 
-bool UNetherCrownQuestCondition::IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner) const
+bool UNetherCrownQuestCondition::IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner, const FGameplayTag& QuestTag) const
 {
 	return IsValid(QuestOwner);
 }
 
-bool UNetherCrownQuestMonsterKillCondition::IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner) const
+bool UNetherCrownQuestMonsterKillCondition::IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner, const FGameplayTag& QuestTag) const
 {
 	//@TODO : 몬스터 처치 조건 데이터가 구현되면 QuestOwner의 진행도를 확인한다.
-	return Super::IsConditionSatisfied(QuestOwner);
+	return Super::IsConditionSatisfied(QuestOwner, QuestTag);
 }
 
-bool UNetherCrownQuestFindItemCondition::IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner) const
+bool UNetherCrownQuestFindItemCondition::IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner, const FGameplayTag& QuestTag) const
 {
-	if (!Super::IsConditionSatisfied(QuestOwner))
+	if (!Super::IsConditionSatisfied(QuestOwner, QuestTag))
 	{
 		return false;
 	}
@@ -30,6 +30,6 @@ bool UNetherCrownQuestFindItemCondition::IsConditionSatisfied(const ANetherCrown
 		return false;
 	}
 
-	const int32 CurrentWeaponSellQuestItemCount{ QuestComponent->GetQuestCountProgress(NetherCrownTags::Quest_WeaponSell) };
+	const int32 CurrentWeaponSellQuestItemCount{ QuestComponent->GetQuestCountProgress(QuestTag) };
 	return CurrentWeaponSellQuestItemCount >= RequiredWeaponSellQuestItemCount;
 }
