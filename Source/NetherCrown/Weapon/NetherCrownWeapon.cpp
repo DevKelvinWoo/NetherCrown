@@ -103,6 +103,21 @@ void ANetherCrownWeapon::Multicast_SetActiveWeaponIdleAuraNiagaraComponent_Imple
 	WeaponIdleAuraNiagaraComponent->SetActive(bActive);
 }
 
+void ANetherCrownWeapon::Multicast_PlayRiseUpSound_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(WeaponData)))
+	{
+		return;
+	}
+
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, WeaponData->GetWeaponRiseSoundTag());
+}
+
 void ANetherCrownWeapon::SetWeaponHitTraceEnable(const bool bEnableWeaponHitTrace) const
 {
 	if (!ensureAlways(IsValid(WeaponTraceComponent)) || !HasAuthority())
@@ -226,6 +241,7 @@ void ANetherCrownWeapon::RiseUpWeapon()
 	}
 
 	SetActiveWeaponIdleAuraNiagaraComponent(true);
+	Multicast_PlayRiseUpSound();
 
 	HiddenLocation = GetActorLocation();
 	RaisedLocation = HiddenLocation + FVector(0.f, 0.f, WeaponData->GetWeaponRiseOffset());

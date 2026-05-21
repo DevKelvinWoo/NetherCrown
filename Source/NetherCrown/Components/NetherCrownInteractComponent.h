@@ -35,6 +35,9 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_InteractToTarget();
 
+	UFUNCTION(Client, Reliable)
+	void Client_PlayInteractSound();
+
 	UFUNCTION(Server, Reliable)
 	void Server_FinishInteract();
 

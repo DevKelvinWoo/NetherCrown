@@ -11,6 +11,8 @@
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Interact/NetherCrownInteract.h"
 #include "NetherCrown/Interact/NetherCrownInteractNPC.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+#include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 UNetherCrownInteractComponent::UNetherCrownInteractComponent()
 {
@@ -60,6 +62,16 @@ void UNetherCrownInteractComponent::RestoreCameraPosition()
 			InteractCameraActor->Destroy();
 		}
 	}
+}
+
+void UNetherCrownInteractComponent::Client_PlayInteractSound_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, NetherCrownTags::Sound_Interact);
 }
 
 void UNetherCrownInteractComponent::Client_MoveCameraToInteractPosition_Implementation()
@@ -161,6 +173,8 @@ void UNetherCrownInteractComponent::Server_InteractToTarget_Implementation()
 	{
 		return;
 	}
+
+	Client_PlayInteractSound();
 
 	if (InteractActor->IsNeedCameraMoving())
 	{

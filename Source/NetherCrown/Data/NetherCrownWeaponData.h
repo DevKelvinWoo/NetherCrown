@@ -60,6 +60,9 @@ struct FNetherCrownWeaponTagData
 public:
 	UPROPERTY(EditAnywhere)
 	FGameplayTag WeaponSwingSoundTag{};
+
+	UPROPERTY(EditAnywhere)
+	FGameplayTag WeaponRiseSoundTag{};
 };
 
 UCLASS()
@@ -76,6 +79,7 @@ public:
 	float GetWeaponRiseOffset() const { return WeaponRiseOffset; }
 
 	const FGameplayTag& GetWeaponSwingSoundTag() const { return WeaponTagData.WeaponSwingSoundTag; }
+	const FGameplayTag& GetWeaponRiseSoundTag() const { return WeaponTagData.WeaponRiseSoundTag; }
 	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 	const FNetherCrownWeaponTraceData& GetWeaponTraceData() const { return WeaponTraceData; }
 	const TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>>& GetWeaponSkillAuraMap() const { return WeaponSkillAuraMap; }
