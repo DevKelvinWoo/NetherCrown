@@ -36,7 +36,7 @@ void UNetherCrownInteractComponent::GetLifetimeReplicatedProps(TArray<class FLif
 void UNetherCrownInteractComponent::RestoreCameraPosition()
 {
 	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
-	if (!ensureAlways(IsValid(OwnerCharacter)) || OwnerCharacter->HasAuthority())
+	if (!ensureAlways(IsValid(OwnerCharacter)) || GetNetMode() == NM_DedicatedServer || !OwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}
