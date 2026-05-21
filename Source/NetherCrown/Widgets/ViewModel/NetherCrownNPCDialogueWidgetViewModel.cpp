@@ -23,14 +23,14 @@ void UNetherCrownNPCDialogueWidgetViewModel::ResetViewModel()
 	QuestTag = FGameplayTag{};
 }
 
-void UNetherCrownNPCDialogueWidgetViewModel::RequestAcceptQuestState()
+void UNetherCrownNPCDialogueWidgetViewModel::RequestAcceptQuestStateInProgress()
 {
 	if (!ensureAlways(QuestTag.IsValid()))
 	{
 		return;
 	}
 
-	ANetherCrownCharacter* ModelCharacter{ ModelCharacterWeak.Get() };
+	const ANetherCrownCharacter* ModelCharacter{ ModelCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(ModelCharacter)))
 	{
 		return;
@@ -43,4 +43,48 @@ void UNetherCrownNPCDialogueWidgetViewModel::RequestAcceptQuestState()
 	}
 
 	QuestComponent->RequestAcceptQuestState(QuestTag, ENetherCrownQuestState::InProgress);
+}
+
+bool UNetherCrownNPCDialogueWidgetViewModel::IsQuestDone() const
+{
+	if (!ensureAlways(QuestTag.IsValid()))
+	{
+		return false;
+	}
+
+	const ANetherCrownCharacter* ModelCharacter{ ModelCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(ModelCharacter)))
+	{
+		return false;
+	}
+
+	const UNetherCrownQuestComponent* QuestComponent{ ModelCharacter->GetQuestComponent() };
+	if (!ensureAlways(IsValid(QuestComponent)))
+	{
+		return false;
+	}
+
+	return QuestComponent->GetQuestState(QuestTag) == ENetherCrownQuestState::Done;
+}
+
+void UNetherCrownNPCDialogueWidgetViewModel::RewardToInteractCharacter()
+{
+	if (!ensureAlways(QuestTag.IsValid()))
+	{
+		return;
+	}
+
+	const ANetherCrownCharacter* ModelCharacter{ ModelCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(ModelCharacter)))
+	{
+		return;
+	}
+
+	UNetherCrownQuestComponent* QuestComponent{ ModelCharacter->GetQuestComponent() };
+	if (!ensureAlways(IsValid(QuestComponent)))
+	{
+		return;
+	}
+
+	QuestComponent->RequestGrantQuestReward(QuestTag);
 }

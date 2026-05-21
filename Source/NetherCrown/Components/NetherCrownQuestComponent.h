@@ -27,6 +27,18 @@ struct FNetherCrownQuestStateEntry
 	ENetherCrownQuestState QuestState{ ENetherCrownQuestState::None };
 };
 
+USTRUCT()
+struct FNetherCrownQuestCountProgressEntry
+{
+	GENERATED_BODY()
+
+	UPROPERTY()
+	FGameplayTag QuestTag{};
+
+	UPROPERTY()
+	int32 ProgressCount{};
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownQuestComponent : public UActorComponent
 {
@@ -36,8 +48,11 @@ public:
 	UNetherCrownQuestComponent();
 
 	void RequestAcceptQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState);
+	void RequestGrantQuestReward(const FGameplayTag& QuestTag);
 
 	const ENetherCrownQuestState GetQuestState(const FGameplayTag& QuestTag) const;
+	void AddQuestCountProgress(const FGameplayTag& QuestTag, const int32 AddCount);
+	int32 GetQuestCountProgress(const FGameplayTag& QuestTag) const;
 
 protected:
 	virtual void BeginPlay() override;
@@ -51,6 +66,12 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_SetQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState);
 
+	UFUNCTION(Server, Reliable)
+	void Server_GrantQuestReward(const FGameplayTag& QuestTag);
+
 	UPROPERTY(Transient, Replicated)
 	TArray<FNetherCrownQuestStateEntry> QuestStateEntries{};
+
+	UPROPERTY(Transient, Replicated)
+	TArray<FNetherCrownQuestCountProgressEntry> QuestCountProgressEntries{};
 };

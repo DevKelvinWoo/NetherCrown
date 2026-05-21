@@ -83,8 +83,16 @@ FReply UNetherCrownNPCDialogueWidgetView::NativeOnKeyDown(const FGeometry& MyGeo
 		return FReply::Handled();
 	}
 
+	if (NPCDialogueWidgetViewModel->IsQuestDone())
+	{
+		NPCDialogueWidgetViewModel->RewardToInteractCharacter();
+	}
+	else
+	{
+		NPCDialogueWidgetViewModel->RequestAcceptQuestStateInProgress();
+	}
+
 	HideScreen();
-	NPCDialogueWidgetViewModel->RequestAcceptQuestState();
 
 	return FReply::Handled();
 }

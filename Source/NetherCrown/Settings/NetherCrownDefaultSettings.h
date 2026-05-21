@@ -42,6 +42,9 @@ public:
 	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
 	TSoftObjectPtr<UDataTable> LevelTravelDT;
 
+	UPROPERTY(Config, EditAnywhere, Category = "DataTable")
+	TSoftObjectPtr<UDataTable> QuestDT;
+
 	UPROPERTY(Config, EditAnywhere, Category = "MaterialParam")
 	FName FrozenTempestTargetMaterialParam{ TEXT("_VfxMix") };
 

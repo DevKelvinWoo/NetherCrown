@@ -31,6 +31,9 @@ protected:
 	void SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
 	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
 
+	UPROPERTY(Replicated)
+	TWeakObjectPtr<ANetherCrownCharacter> InteractTargetCharacterWeak{};
+
 private:
 	void CacheInteractWidgetTexture();
 
@@ -54,7 +57,4 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedInteractWidgetTexture{};
-
-	UPROPERTY(Replicated)
-	TWeakObjectPtr<ANetherCrownCharacter> InteractTargetCharacterWeak{};
 };

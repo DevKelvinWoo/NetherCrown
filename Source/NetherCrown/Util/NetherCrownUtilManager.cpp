@@ -12,6 +12,7 @@
 #include "Sound/SoundCue.h"
 #include "NiagaraSystem.h"
 #include "NiagaraFunctionLibrary.h"
+#include "NetherCrown/Data/NetherCrownQuestData.h"
 #include "NetherCrown/UI/NetherCrownUITypes.h"
 #include "LevelSequence.h"
 
@@ -23,6 +24,7 @@ TMap<FGameplayTag, FNetherCrownEffectData> FNetherCrownUtilManager::CachedEffect
 TMap<FGameplayTag, FNetherCrownUIScreenDefinition> FNetherCrownUtilManager::CachedScreenDefinitionDataByTag{};
 TMap<FGameplayTag, FNetherCrownEnemySkillDataTableRow> FNetherCrownUtilManager::CachedEnemySkillDataByTag{};
 TMap<FGameplayTag, FNetherCrownLevelSequenceData> FNetherCrownUtilManager::CachedLevelSequenceByTag{};
+TMap<FGameplayTag, FNetherCrownQuestDataTableRow> FNetherCrownUtilManager::CachedQuestDataByTag{};
 
 void FNetherCrownUtilManager::EnsureCacheBuilt()
 {
@@ -40,6 +42,8 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 	CachedWeaponDataByTag.Empty();
 	CachedEffectDataByTag.Empty();
 	CachedScreenDefinitionDataByTag.Empty();
+	CachedLevelSequenceByTag.Empty();
+	CachedQuestDataByTag.Empty();
 
 	UDataTable* SoundDT{ DefaultSettings->CharacterSoundDT.LoadSynchronous() };
 	if (IsValid(SoundDT))
@@ -135,6 +139,20 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 			if (Row)
 			{
 				CachedLevelSequenceByTag.Add(Row->GetLevelSequenceTag(), *Row);
+			}
+		}
+	}
+
+	UDataTable* QuestDT{ DefaultSettings->QuestDT.LoadSynchronous() };
+	if (IsValid(QuestDT))
+	{
+		TArray<FNetherCrownQuestDataTableRow*> OutRows{};
+		QuestDT->GetAllRows<FNetherCrownQuestDataTableRow>(TEXT("QuestTag"), OutRows);
+		for (FNetherCrownQuestDataTableRow* Row : OutRows)
+		{
+			if (Row)
+			{
+				CachedQuestDataByTag.Add(Row->GetQuestTag(), *Row);
 			}
 		}
 	}
@@ -353,4 +371,25 @@ ULevelSequence* FNetherCrownUtilManager::GetLevelSequenceByGameplayTag(const FGa
 	}
 
 	return FoundEffectData->GetLevelSequenceSoft().LoadSynchronous();
+}
+
+UNetherCrownQuestData* FNetherCrownUtilManager::GetQuestDataAssetByGameplayTag(const FGameplayTag& QuestTag)
+{
+	EnsureCacheBuilt();
+
+	if (!ensureAlways(!CachedQuestDataByTag.IsEmpty()))
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("There is No QuestData in %hs"), __FUNCTION__);
+
+		return nullptr;
+	}
+
+	const FNetherCrownQuestDataTableRow* FoundQuestData{ CachedQuestDataByTag.Find(QuestTag) };
+	if (!FoundQuestData)
+	{
+		UE_LOG(LogNetherCrown, Warning, TEXT("Quest Data Not Found for Tag: %s"), *QuestTag.ToString());
+		return nullptr;
+	}
+
+	return FoundQuestData->GetQuestDataAsset().LoadSynchronous();
 }

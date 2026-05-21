@@ -18,7 +18,10 @@ public:
 	void InitViewModel(ANetherCrownCharacter* InModelCharacter, const FGameplayTag& InQuestTag);
 	void ResetViewModel();
 
-	void RequestAcceptQuestState();
+	void RequestAcceptQuestStateInProgress();
+	bool IsQuestDone() const;
+
+	void RewardToInteractCharacter();
 
 private:
 	UPROPERTY(Transient)

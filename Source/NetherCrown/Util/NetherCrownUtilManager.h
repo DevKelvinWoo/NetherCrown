@@ -8,6 +8,7 @@
 #include "NetherCrown/Data/NetherCrownEffectData.h"
 #include "NetherCrown/Data/NetherCrownEnemySkillData.h"
 #include "NetherCrown/Data/NetherCrownLevelSequenceData.h"
+#include "NetherCrown/Data/NetherCrownQuestData.h"
 #include "NetherCrown/Data/NetherCrownSkillData.h"
 #include "NetherCrown/Data/NetherCrownSoundData.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
@@ -20,6 +21,7 @@ class ULevelSequence;
 
 class UNetherCrownSkillDataAsset;
 class UNetherCrownWeaponData;
+class UNetherCrownQuestData;
 
 class FNetherCrownUtilManager
 {
@@ -46,6 +48,9 @@ public:
 	//Sequence
 	static ULevelSequence* GetLevelSequenceByGameplayTag(const FGameplayTag& SequenceTag);
 
+	//Quest
+	static UNetherCrownQuestData* GetQuestDataAssetByGameplayTag(const FGameplayTag& QuestTag);
+
 private:
 	static void EnsureCacheBuilt();
 
@@ -57,4 +62,5 @@ private:
 	static TMap<FGameplayTag, FNetherCrownEffectData> CachedEffectDataByTag;
 	static TMap<FGameplayTag, FNetherCrownUIScreenDefinition> CachedScreenDefinitionDataByTag;
 	static TMap<FGameplayTag, FNetherCrownLevelSequenceData> CachedLevelSequenceByTag;
+	static TMap<FGameplayTag, FNetherCrownQuestDataTableRow> CachedQuestDataByTag;
 };

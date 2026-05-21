@@ -5,6 +5,7 @@
 #include "GameplayTagContainer.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Subsystems/NetherCrownQuestManagerSubsystem.h"
 
 UNetherCrownQuestComponent::UNetherCrownQuestComponent()
 {
@@ -29,6 +30,7 @@ void UNetherCrownQuestComponent::GetLifetimeReplicatedProps(TArray<class FLifeti
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, QuestStateEntries);
+	DOREPLIFETIME(ThisClass, QuestCountProgressEntries);
 }
 
 void UNetherCrownQuestComponent::SetQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState)
@@ -69,14 +71,41 @@ void UNetherCrownQuestComponent::RequestAcceptQuestState(const FGameplayTag& Que
 	Server_SetQuestState(QuestTag, QuestState);
 }
 
-const ENetherCrownQuestState UNetherCrownQuestComponent::GetQuestState(const FGameplayTag& QuestTag) const
+void UNetherCrownQuestComponent::RequestGrantQuestReward(const FGameplayTag& QuestTag)
 {
-	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	Server_GrantQuestReward(QuestTag);
+}
+
+void UNetherCrownQuestComponent::Server_GrantQuestReward_Implementation(const FGameplayTag& QuestTag)
+{
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
 	if (!ensureAlways(IsValid(OwnerCharacter)) || !OwnerCharacter->HasAuthority())
 	{
-		return ENetherCrownQuestState::None;
+		return;
 	}
 
+	if (!QuestTag.IsValid() || GetQuestState(QuestTag) != ENetherCrownQuestState::Done)
+	{
+		return;
+	}
+
+	const UGameInstance* GameInstance{ OwnerCharacter->GetGameInstance() };
+	if (!ensureAlways(IsValid(GameInstance)))
+	{
+		return;
+	}
+
+	const UNetherCrownQuestManagerSubsystem* QuestManagerSubsystem{ GameInstance->GetSubsystem<UNetherCrownQuestManagerSubsystem>() };
+	if (!ensureAlways(IsValid(QuestManagerSubsystem)))
+	{
+		return;
+	}
+
+	QuestManagerSubsystem->TryGrantQuestReward(OwnerCharacter, QuestTag);
+}
+
+const ENetherCrownQuestState UNetherCrownQuestComponent::GetQuestState(const FGameplayTag& QuestTag) const
+{
 	for (const FNetherCrownQuestStateEntry& QuestStateEntry : QuestStateEntries)
 	{
 		if (QuestStateEntry.QuestTag != QuestTag)
@@ -95,4 +124,50 @@ const ENetherCrownQuestState UNetherCrownQuestComponent::GetQuestState(const FGa
 	}
 
 	return ENetherCrownQuestState::None;
+}
+
+void UNetherCrownQuestComponent::AddQuestCountProgress(const FGameplayTag& QuestTag, const int32 AddCount)
+{
+	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)) || !OwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	if (!QuestTag.IsValid() || AddCount <= 0)
+	{
+		return;
+	}
+
+	for (FNetherCrownQuestCountProgressEntry& QuestProgressEntry : QuestCountProgressEntries)
+	{
+		if (QuestProgressEntry.QuestTag == QuestTag)
+		{
+			QuestProgressEntry.ProgressCount += AddCount;
+			return;
+		}
+	}
+
+	FNetherCrownQuestCountProgressEntry QuestProgressEntry{};
+	QuestProgressEntry.QuestTag = QuestTag;
+	QuestProgressEntry.ProgressCount = AddCount;
+	QuestCountProgressEntries.Add(QuestProgressEntry);
+}
+
+int32 UNetherCrownQuestComponent::GetQuestCountProgress(const FGameplayTag& QuestTag) const
+{
+	if (!QuestTag.IsValid())
+	{
+		return 0;
+	}
+
+	for (const FNetherCrownQuestCountProgressEntry& QuestProgressEntry : QuestCountProgressEntries)
+	{
+		if (QuestProgressEntry.QuestTag == QuestTag)
+		{
+			return QuestProgressEntry.ProgressCount;
+		}
+	}
+
+	return 0;
 }

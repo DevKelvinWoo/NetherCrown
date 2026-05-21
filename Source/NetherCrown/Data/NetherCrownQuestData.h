@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Engine/DataTable.h"
 #include "GameplayTagContainer.h"
 #include "Engine/DataAsset.h"
 #include "NetherCrownQuestData.generated.h"
@@ -21,6 +22,8 @@ public:
 	const TArray<FText>& GetQuestEndDialogues() const { return QuestEndDialogues; }
 
 	const FGameplayTag& GetQuestTag() const { return QuestTag; }
+	const UNetherCrownQuestCondition* GetQuestCondition() const { return QuestCondition; }
+	const UNetherCrownQuestReward* GetQuestReward() const { return QuestReward; }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Tag")
@@ -40,4 +43,21 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
 	TArray<FText> QuestEndDialogues{};
+};
+
+USTRUCT(BlueprintType)
+struct FNetherCrownQuestDataTableRow : public FTableRowBase
+{
+	GENERATED_BODY()
+
+public:
+	const FGameplayTag& GetQuestTag() const { return QuestTag; }
+	TSoftObjectPtr<UNetherCrownQuestData> GetQuestDataAsset() const { return QuestDataAssetSoft; }
+
+private:
+	UPROPERTY(EditAnywhere, Category = "QuestTag")
+	FGameplayTag QuestTag{};
+
+	UPROPERTY(EditAnywhere, Category = "QuestData")
+	TSoftObjectPtr<UNetherCrownQuestData> QuestDataAssetSoft{};
 };
