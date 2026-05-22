@@ -34,6 +34,16 @@ void ANetherCrownPlayerState::SetWeaponPersistentData(const FNetherCrownWeaponPe
 	WeaponPersistentData = InPersistentData;
 }
 
+void ANetherCrownPlayerState::SetQuestPersistentData(const FNetherCrownQuestPersistentData& InPersistentData)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	QuestPersistentData = InPersistentData;
+}
+
 void ANetherCrownPlayerState::CopyProperties(APlayerState* PlayerState)
 {
 	Super::CopyProperties(PlayerState);
@@ -45,6 +55,7 @@ void ANetherCrownPlayerState::CopyProperties(APlayerState* PlayerState)
 	}
 
 	NetherCrownPlayerState->WeaponPersistentData = WeaponPersistentData;
+	NetherCrownPlayerState->QuestPersistentData = QuestPersistentData;
 	NetherCrownPlayerState->PersistentPlayerId = PersistentPlayerId;
 }
 
@@ -59,6 +70,7 @@ void ANetherCrownPlayerState::OverrideWith(APlayerState* PlayerState)
 	}
 
 	WeaponPersistentData = NetherCrownPlayerState->WeaponPersistentData;
+	QuestPersistentData = NetherCrownPlayerState->QuestPersistentData;
 	PersistentPlayerId = NetherCrownPlayerState->PersistentPlayerId;
 }
 

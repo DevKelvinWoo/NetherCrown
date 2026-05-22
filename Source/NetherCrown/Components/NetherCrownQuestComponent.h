@@ -14,7 +14,8 @@ enum class ENetherCrownQuestState : uint8
 {
 	None,
 	InProgress,
-	Done
+	Done,
+	Rewarded
 };
 
 USTRUCT()
@@ -44,6 +45,19 @@ struct FNetherCrownQuestCountProgressEntry
 	int32 ProgressCount{};
 };
 
+USTRUCT()
+struct FNetherCrownQuestPersistentData
+{
+	GENERATED_BODY()
+
+public:
+	UPROPERTY()
+	TArray<FNetherCrownQuestStateEntry> QuestStateEntries{};
+
+	UPROPERTY()
+	TArray<FNetherCrownQuestCountProgressEntry> QuestCountProgressEntries{};
+};
+
 UCLASS(ClassGroup=(Custom), meta=(BlueprintSpawnableComponent))
 class NETHERCROWN_API UNetherCrownQuestComponent : public UActorComponent
 {
@@ -58,6 +72,8 @@ public:
 	const ENetherCrownQuestState GetQuestState(const FGameplayTag& QuestTag) const;
 	void AddQuestCountProgress(const FGameplayTag& QuestTag, const FGameplayTag& TargetTag, const int32 AddCount);
 	int32 GetQuestCountProgress(const FGameplayTag& QuestTag, const FGameplayTag& TargetTag) const;
+	FNetherCrownQuestPersistentData MakeQuestPersistentData() const;
+	bool RestoreQuestFromPersistentData(const FNetherCrownQuestPersistentData& InQuestPersistentData);
 
 	void CheckAndAddQuestCountProgress(const FGameplayTag& TargetTag, const int32 AddCount);
 	bool TryCompleteQuest(const FGameplayTag& QuestTag);
@@ -74,6 +90,7 @@ private:
 	bool TryGrantQuestReward(const FGameplayTag& QuestTag) const;
 
 	void SetQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState);
+	void SetQuestPersistentData() const;
 
 	UFUNCTION(Server, Reliable)
 	void Server_SetQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState);

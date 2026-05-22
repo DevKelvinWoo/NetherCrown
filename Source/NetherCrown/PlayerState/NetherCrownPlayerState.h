@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/PlayerState.h"
+#include "NetherCrown/Components/NetherCrownQuestComponent.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrownPlayerState.generated.h"
 
@@ -25,6 +26,9 @@ public:
 	const FNetherCrownWeaponPersistentData& GetWeaponPersistentData() const { return WeaponPersistentData; }
 	void SetWeaponPersistentData(const FNetherCrownWeaponPersistentData& InPersistentData);
 
+	const FNetherCrownQuestPersistentData& GetQuestPersistentData() const { return QuestPersistentData; }
+	void SetQuestPersistentData(const FNetherCrownQuestPersistentData& InPersistentData);
+
 protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 	virtual void CopyProperties(APlayerState* PlayerState) override;
@@ -39,4 +43,7 @@ private:
 
 	UPROPERTY(Transient)
 	FNetherCrownWeaponPersistentData WeaponPersistentData{};
+
+	UPROPERTY(Transient)
+	FNetherCrownQuestPersistentData QuestPersistentData{};
 };

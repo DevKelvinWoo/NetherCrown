@@ -83,8 +83,8 @@ FReply UNetherCrownNPCDialogueWidgetView::NativeOnKeyDown(const FGeometry& MyGeo
 		return FReply::Handled();
 	}
 
-	NPCDialogueWidgetViewModel->FinishInteract();
 	HideScreen();
+	NPCDialogueWidgetViewModel->FinishInteract();
 
 	return FReply::Handled();
 }

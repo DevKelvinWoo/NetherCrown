@@ -8,6 +8,7 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
+#include "NetherCrown/Components/NetherCrownQuestComponent.h"
 #include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 #include "NetherCrown/Settings/NetherCrownDefaultSettings.h"
 #include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
@@ -31,6 +32,7 @@ void UNetherCrownLevelTravelPersistenceSubsystem::BeginLevelTravelPersistence()
 	}
 
 	CaptureWeaponPersistentData();
+	CaptureQuestPersistentData();
 
 	for (const ULocalPlayer* LocalPlayer : GameInstance->GetLocalPlayers())
 	{
@@ -89,6 +91,11 @@ void UNetherCrownLevelTravelPersistenceSubsystem::RestoreLevelTravelPersistence(
 	const bool bIsWeaponRestoreComplete{ RestoreWeaponPersistentData() };
 	bHasRestoreTarget |= bHadWeaponRestoreTarget;
 	bIsRestoreComplete &= bIsWeaponRestoreComplete;
+
+	const bool bHadQuestRestoreTarget{ !QuestPersistentDataMap.IsEmpty() };
+	const bool bIsQuestRestoreComplete{ RestoreQuestPersistentData() };
+	bHasRestoreTarget |= bHadQuestRestoreTarget;
+	bIsRestoreComplete &= bIsQuestRestoreComplete;
 
 	if (bHasRestoreTarget && bIsRestoreComplete)
 	{
@@ -254,6 +261,165 @@ bool UNetherCrownLevelTravelPersistenceSubsystem::RestoreWeaponPersistentData()
 	}
 
 	return bIsRestoreComplete && WeaponPersistentDataMap.IsEmpty();
+}
+
+void UNetherCrownLevelTravelPersistenceSubsystem::CaptureQuestPersistentData()
+{
+	QuestPersistentDataMap.Empty();
+	QuestPersistentPlayerIdQueue.Empty();
+
+	UWorld* World{ GetWorld() };
+	if (!IsValid(World) || !World->GetAuthGameMode())
+	{
+		return;
+	}
+
+	for (FConstPlayerControllerIterator PlayerControllerIterator{ World->GetPlayerControllerIterator() }; PlayerControllerIterator; ++PlayerControllerIterator)
+	{
+		const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(PlayerControllerIterator->Get()) };
+		if (!IsValid(PlayerController))
+		{
+			continue;
+		}
+
+		const ANetherCrownPlayerState* PlayerState{ PlayerController->GetPlayerState<ANetherCrownPlayerState>() };
+		if (!IsValid(PlayerState))
+		{
+			continue;
+		}
+
+		const FGuid& PersistentPlayerId{ PlayerState->GetPersistentPlayerId() };
+		if (!PersistentPlayerId.IsValid())
+		{
+			continue;
+		}
+
+		ANetherCrownCharacter* ControlledCharacter{ PlayerController->GetCachedCharacter() };
+		if (!IsValid(ControlledCharacter))
+		{
+			ControlledCharacter = Cast<ANetherCrownCharacter>(PlayerController->GetPawn());
+		}
+
+		if (!IsValid(ControlledCharacter))
+		{
+			QuestPersistentDataMap.Add(PersistentPlayerId, PlayerState->GetQuestPersistentData());
+			QuestPersistentPlayerIdQueue.Add(PersistentPlayerId);
+			continue;
+		}
+
+		const UNetherCrownQuestComponent* QuestComponent{ ControlledCharacter->GetQuestComponent() };
+		if (!IsValid(QuestComponent))
+		{
+			QuestPersistentDataMap.Add(PersistentPlayerId, PlayerState->GetQuestPersistentData());
+			QuestPersistentPlayerIdQueue.Add(PersistentPlayerId);
+			continue;
+		}
+
+		const FNetherCrownQuestPersistentData QuestPersistentData{ QuestComponent->MakeQuestPersistentData() };
+		QuestPersistentDataMap.Add(PersistentPlayerId, QuestPersistentData);
+		QuestPersistentPlayerIdQueue.Add(PersistentPlayerId);
+	}
+}
+
+bool UNetherCrownLevelTravelPersistenceSubsystem::RestoreQuestPersistentData()
+{
+	if (QuestPersistentDataMap.IsEmpty())
+	{
+		return true;
+	}
+
+	UWorld* World{ GetWorld() };
+	if (!IsValid(World) || !World->GetAuthGameMode())
+	{
+		return true;
+	}
+
+	bool bIsRestoreComplete{ true };
+	TArray<FGuid> RestoredPlayerIds{};
+
+	for (FConstPlayerControllerIterator PlayerControllerIterator{ World->GetPlayerControllerIterator() }; PlayerControllerIterator; ++PlayerControllerIterator)
+	{
+		ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(PlayerControllerIterator->Get()) };
+		if (!IsValid(PlayerController))
+		{
+			continue;
+		}
+
+		ANetherCrownPlayerState* PlayerState{ PlayerController->GetPlayerState<ANetherCrownPlayerState>() };
+		if (!IsValid(PlayerState))
+		{
+			bIsRestoreComplete = false;
+			continue;
+		}
+
+		FGuid PersistentPlayerId{ PlayerState->GetPersistentPlayerId() };
+		if (!PersistentPlayerId.IsValid())
+		{
+			PersistentPlayerId = PlayerController->GetPersistentPlayerId();
+		}
+
+		if (!PersistentPlayerId.IsValid())
+		{
+			for (const FGuid& CandidatePersistentPlayerId : QuestPersistentPlayerIdQueue)
+			{
+				if (QuestPersistentDataMap.Contains(CandidatePersistentPlayerId))
+				{
+					PersistentPlayerId = CandidatePersistentPlayerId;
+					PlayerController->SetPersistentPlayerId(PersistentPlayerId);
+					PlayerState->SetPersistentPlayerId(PersistentPlayerId);
+					break;
+				}
+			}
+		}
+
+		if (!PersistentPlayerId.IsValid())
+		{
+			bIsRestoreComplete = false;
+			continue;
+		}
+
+		const FNetherCrownQuestPersistentData* QuestPersistentData{ QuestPersistentDataMap.Find(PersistentPlayerId) };
+		if (!QuestPersistentData)
+		{
+			continue;
+		}
+
+		ANetherCrownCharacter* ControlledCharacter{ PlayerController->GetCachedCharacter() };
+		if (!IsValid(ControlledCharacter))
+		{
+			ControlledCharacter = Cast<ANetherCrownCharacter>(PlayerController->GetPawn());
+		}
+
+		if (!IsValid(ControlledCharacter))
+		{
+			bIsRestoreComplete = false;
+			continue;
+		}
+
+		UNetherCrownQuestComponent* QuestComponent{ ControlledCharacter->GetQuestComponent() };
+		if (!IsValid(QuestComponent))
+		{
+			bIsRestoreComplete = false;
+			continue;
+		}
+
+		if (QuestComponent->RestoreQuestFromPersistentData(*QuestPersistentData))
+		{
+			RestoredPlayerIds.Add(PersistentPlayerId);
+		}
+		else
+		{
+			bIsRestoreComplete = false;
+		}
+	}
+
+	for (const FGuid& RestoredPlayerId : RestoredPlayerIds)
+	{
+		QuestPersistentDataMap.Remove(RestoredPlayerId);
+		QuestPersistentPlayerIdQueue.Remove(RestoredPlayerId);
+	}
+
+	return bIsRestoreComplete && QuestPersistentDataMap.IsEmpty();
 }
 
 void UNetherCrownLevelTravelPersistenceSubsystem::ShowLoadingScreen()

@@ -40,11 +40,12 @@ private:
 
 	void CacheNPCDataAsset();
 
+	int32 GetCurrentQuestIndexForPlayer(const ANetherCrownCharacter* InteractCharacter) const;
 	const ENetherCrownQuestState GetTargetPlayerQuestState() const;
-	TArray<FText> GetQuestDialogueText(const ENetherCrownQuestState InQuestState) const;
+	TArray<FText> GetQuestDialogueText(const int32 QuestIndex, const ENetherCrownQuestState InQuestState) const;
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_ShowNPCDialogueWidget(const ENetherCrownQuestState QuestState);
+	void Multicast_ShowNPCDialogueWidget(const int32 QuestIndex, const ENetherCrownQuestState QuestState);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible);
@@ -69,9 +70,6 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownNPCDataAsset> CachedNPCDataAsset{};
-
-	UPROPERTY(Transient, Replicated)
-	int32 CurrentQuestIndex{};
 
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> InteractTargetCharacterWeak{};

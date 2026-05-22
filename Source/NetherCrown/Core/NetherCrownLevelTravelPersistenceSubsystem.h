@@ -3,8 +3,9 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "Subsystems/GameInstanceSubsystem.h"
+#include "NetherCrown/Components/NetherCrownQuestComponent.h"
+#include "NetherCrown/Data/NetherCrownWeaponData.h"
 #include "NetherCrownLevelTravelPersistenceSubsystem.generated.h"
 
 class UNetherCrownLoadingScreenWidgetView;
@@ -21,6 +22,8 @@ public:
 private:
 	void CaptureWeaponPersistentData();
 	bool RestoreWeaponPersistentData();
+	void CaptureQuestPersistentData();
+	bool RestoreQuestPersistentData();
 	void ShowLoadingScreen();
 	void HideLoadingScreen();
 
@@ -32,6 +35,12 @@ private:
 
 	UPROPERTY(Transient)
 	TArray<FGuid> WeaponPersistentPlayerIdQueue{};
+
+	UPROPERTY(Transient)
+	TMap<FGuid, FNetherCrownQuestPersistentData> QuestPersistentDataMap{};
+
+	UPROPERTY(Transient)
+	TArray<FGuid> QuestPersistentPlayerIdQueue{};
 
 	bool bHasPendingPersistence{ false };
 };

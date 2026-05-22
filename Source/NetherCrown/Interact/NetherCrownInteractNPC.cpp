@@ -73,8 +73,9 @@ void ANetherCrownInteractNPC::Interact()
 		return;
 	}
 
-	Multicast_SetInteractWidgetVisibility(InteractTargetCharacterWeak.Get(), false);
-	Multicast_ShowNPCDialogueWidget(GetTargetPlayerQuestState());
+	const ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
+	Multicast_SetInteractWidgetVisibility(InteractTargetCharacter, false);
+	Multicast_ShowNPCDialogueWidget(GetCurrentQuestIndexForPlayer(InteractTargetCharacter), GetTargetPlayerQuestState());
 }
 
 void ANetherCrownInteractNPC::FinishInteract(ANetherCrownCharacter* InteractCharacter)
@@ -91,13 +92,13 @@ void ANetherCrownInteractNPC::FinishInteract(ANetherCrownCharacter* InteractChar
 		return;
 	}
 
-	const TArray<UNetherCrownQuestData*> QuestData{ CachedNPCDataAsset->GetQuestDataArray() };
-	if (!(QuestData.IsValidIndex(CurrentQuestIndex)))
+	const int32 CurrentQuestIndex{ GetCurrentQuestIndexForPlayer(InteractCharacter) };
+	if (!CachedNPCDataAsset->GetQuestDataArray().IsValidIndex(CurrentQuestIndex))
 	{
 		return;
 	}
 
-	const UNetherCrownQuestData* CurrentQuestData{ QuestData[CurrentQuestIndex] };
+	const UNetherCrownQuestData* CurrentQuestData{ CachedNPCDataAsset->GetQuestDataArray()[CurrentQuestIndex] };
 	if (!ensureAlways(IsValid(CurrentQuestData)))
 	{
 		return;
@@ -110,12 +111,12 @@ void ANetherCrownInteractNPC::FinishInteract(ANetherCrownCharacter* InteractChar
 	}
 
 	const FGameplayTag& QuestTag{ CurrentQuestData->GetQuestTag() };
-	if (QuestComponent->GetQuestState(QuestTag) == ENetherCrownQuestState::Done)
+	const ENetherCrownQuestState QuestState{ QuestComponent->GetQuestState(QuestTag) };
+	if (QuestState == ENetherCrownQuestState::Done)
 	{
-		++CurrentQuestIndex;
 		QuestComponent->RequestGrantQuestReward(QuestTag);
 	}
-	else
+	else if (QuestState == ENetherCrownQuestState::None)
 	{
 		QuestComponent->RequestAcceptQuestState(QuestTag, ENetherCrownQuestState::InProgress);
 	}
@@ -126,7 +127,6 @@ void ANetherCrownInteractNPC::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(ThisClass, InteractTargetCharacterWeak);
-	DOREPLIFETIME(ThisClass, CurrentQuestIndex);
 }
 
 void ANetherCrownInteractNPC::SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid)
@@ -172,6 +172,42 @@ void ANetherCrownInteractNPC::CacheNPCDataAsset()
 	CachedNPCDataAsset = NPCDataAssetSoft.LoadSynchronous();
 }
 
+int32 ANetherCrownInteractNPC::GetCurrentQuestIndexForPlayer(const ANetherCrownCharacter* InteractCharacter) const
+{
+	if (!ensureAlways(IsValid(InteractCharacter)))
+	{
+		return INDEX_NONE;
+	}
+
+	if (!ensureAlways(IsValid(CachedNPCDataAsset)))
+	{
+		return INDEX_NONE;
+	}
+
+	const UNetherCrownQuestComponent* QuestComponent{ InteractCharacter->GetQuestComponent() };
+	if (!ensureAlways(IsValid(QuestComponent)))
+	{
+		return INDEX_NONE;
+	}
+
+	const TArray<TObjectPtr<UNetherCrownQuestData>>& QuestDataArray{ CachedNPCDataAsset->GetQuestDataArray() };
+	for (int32 QuestIndex{ 0 }; QuestIndex < QuestDataArray.Num(); ++QuestIndex)
+	{
+		const UNetherCrownQuestData* QuestData{ QuestDataArray[QuestIndex] };
+		if (!IsValid(QuestData))
+		{
+			continue;
+		}
+
+		if (QuestComponent->GetQuestState(QuestData->GetQuestTag()) != ENetherCrownQuestState::Rewarded)
+		{
+			return QuestIndex;
+		}
+	}
+
+	return INDEX_NONE;
+}
+
 const ENetherCrownQuestState ANetherCrownInteractNPC::GetTargetPlayerQuestState() const
 {
 	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
@@ -185,8 +221,8 @@ const ENetherCrownQuestState ANetherCrownInteractNPC::GetTargetPlayerQuestState(
 		return ENetherCrownQuestState::None;
 	}
 
-	const TArray<UNetherCrownQuestData*> QuestData{ CachedNPCDataAsset->GetQuestDataArray() };
-	if (!(QuestData.IsValidIndex(CurrentQuestIndex)))
+	const int32 CurrentQuestIndex{ GetCurrentQuestIndexForPlayer(InteractTargetCharacter) };
+	if (!CachedNPCDataAsset->GetQuestDataArray().IsValidIndex(CurrentQuestIndex))
 	{
 		return ENetherCrownQuestState::None;
 	}
@@ -197,16 +233,16 @@ const ENetherCrownQuestState ANetherCrownInteractNPC::GetTargetPlayerQuestState(
 		return ENetherCrownQuestState::None;
 	}
 
-	const UNetherCrownQuestData* CurrentQuestData{ QuestData[CurrentQuestIndex] };
+	const UNetherCrownQuestData* CurrentQuestData{ CachedNPCDataAsset->GetQuestDataArray()[CurrentQuestIndex] };
 	const ENetherCrownQuestState QuestState{ QuestComponent->GetQuestState(CurrentQuestData->GetQuestTag()) };
 
 	return QuestState;
 }
 
-TArray<FText> ANetherCrownInteractNPC::GetQuestDialogueText(const ENetherCrownQuestState InQuestState) const
+TArray<FText> ANetherCrownInteractNPC::GetQuestDialogueText(const int32 QuestIndex, const ENetherCrownQuestState InQuestState) const
 {
 	const TArray<UNetherCrownQuestData*> QuestData{ CachedNPCDataAsset->GetQuestDataArray() };
-	if (!(QuestData.IsValidIndex(CurrentQuestIndex)))
+	if (!(QuestData.IsValidIndex(QuestIndex)))
 	{
 		return {};
 	}
@@ -215,13 +251,13 @@ TArray<FText> ANetherCrownInteractNPC::GetQuestDialogueText(const ENetherCrownQu
 	switch (InQuestState)
 	{
 	case ENetherCrownQuestState::None:
-		DialogueTexts = QuestData[CurrentQuestIndex]->GetQuestDialogues();
+		DialogueTexts = QuestData[QuestIndex]->GetQuestDialogues();
 		break;
 	case ENetherCrownQuestState::InProgress:
-		DialogueTexts = QuestData[CurrentQuestIndex]->GetQuestInprogressDialogues();
+		DialogueTexts = QuestData[QuestIndex]->GetQuestInprogressDialogues();
 		break;
 	case ENetherCrownQuestState::Done:
-		DialogueTexts = QuestData[CurrentQuestIndex]->GetQuestEndDialogues();
+		DialogueTexts = QuestData[QuestIndex]->GetQuestEndDialogues();
 		break;
 	default:
 		DialogueTexts = {};
@@ -231,7 +267,7 @@ TArray<FText> ANetherCrownInteractNPC::GetQuestDialogueText(const ENetherCrownQu
 	return DialogueTexts;
 }
 
-void ANetherCrownInteractNPC::Multicast_ShowNPCDialogueWidget_Implementation(const ENetherCrownQuestState QuestState)
+void ANetherCrownInteractNPC::Multicast_ShowNPCDialogueWidget_Implementation(const int32 QuestIndex, const ENetherCrownQuestState QuestState)
 {
 	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(InteractTargetCharacter)) || !InteractTargetCharacter->IsLocallyControlled())
@@ -269,8 +305,8 @@ void ANetherCrownInteractNPC::Multicast_ShowNPCDialogueWidget_Implementation(con
 	}
 
 	const TArray<UNetherCrownQuestData*> QuestData{ CachedNPCDataAsset->GetQuestDataArray() };
-	TArray<FText> DialogueText{ GetQuestDialogueText(QuestState) };
-	if (!(QuestData.IsValidIndex(CurrentQuestIndex)))
+	TArray<FText> DialogueText{ GetQuestDialogueText(QuestIndex, QuestState) };
+	if (!(QuestData.IsValidIndex(QuestIndex)))
 	{
 		DialogueText = { CachedNPCDataAsset->GetNonQuestNPCDialogues() };
 	}
