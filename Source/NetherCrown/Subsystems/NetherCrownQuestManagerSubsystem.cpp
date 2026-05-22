@@ -58,7 +58,7 @@ bool UNetherCrownQuestManagerSubsystem::TryGrantQuestReward(ANetherCrownCharacte
 	}
 
 	const UNetherCrownQuestReward* QuestReward{ QuestData->GetQuestReward() };
-	if (!ensureAlways(IsValid(QuestReward)))
+	if (!IsValid(QuestReward))
 	{
 		return false;
 	}

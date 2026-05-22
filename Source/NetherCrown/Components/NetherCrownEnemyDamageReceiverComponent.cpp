@@ -10,6 +10,7 @@
 #include "NetherCrownCrowdControlTypes.h"
 #include "NetherCrownEnemyStatComponent.h"
 #include "NetherCrownEquipComponent.h"
+#include "NetherCrownQuestComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
@@ -20,6 +21,8 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
+#include "NetherCrown/Subsystems/NetherCrownQuestManagerSubsystem.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 UNetherCrownEnemyDamageReceiverComponent::UNetherCrownEnemyDamageReceiverComponent()
@@ -56,7 +59,29 @@ void UNetherCrownEnemyDamageReceiverComponent::GetLifetimeReplicatedProps(TArray
 	DOREPLIFETIME(ThisClass, EnemyHitReactState);
 }
 
-float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser)
+void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDeadQuest(AActor* DamageCauser)
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
+	{
+		return;
+	}
+
+	ANetherCrownCharacter* DamageCauserCharacter{ Cast<ANetherCrownCharacter>(DamageCauser) };
+	if (!ensureAlways(IsValid(DamageCauserCharacter)))
+	{
+		return;
+	}
+
+	UNetherCrownQuestComponent* QuestComponent{ DamageCauserCharacter->GetQuestComponent() };
+	if (!ensureAlways(IsValid(QuestComponent)))
+	{
+		return;
+	}
+
+	QuestComponent->CheckAndAddQuestCountProgress(CachedOwnerEnemy->GetEnemyTag(), 1);
+}
+
+float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
@@ -70,7 +95,7 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 
 	if (IsDead())
 	{
-		HandleEnemyDead();
+		HandleEnemyDead(DamageCauser);
 	}
 	else
 	{
@@ -183,12 +208,14 @@ bool UNetherCrownEnemyDamageReceiverComponent::IsDead() const
 	return CurrentHP <= 0;
 }
 
-void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead()
+void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDead(AActor* DamageCauser)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
 		return;
 	}
+
+	HandleEnemyDeadQuest(DamageCauser);
 
 	ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(CachedOwnerEnemy->GetController()) };
 	if (!ensureAlways(IsValid(EnemyAIController)))

@@ -109,6 +109,7 @@ void ANetherCrownInteractNPC::FinishInteract(ANetherCrownCharacter* InteractChar
 	const FGameplayTag& QuestTag{ CurrentQuestData->GetQuestTag() };
 	if (QuestComponent->GetQuestState(QuestTag) == ENetherCrownQuestState::Done)
 	{
+		++CurrentQuestIndex;
 		QuestComponent->RequestGrantQuestReward(QuestTag);
 	}
 	else
@@ -127,7 +128,7 @@ void ANetherCrownInteractNPC::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 
 void ANetherCrownInteractNPC::SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid)
 {
-	if (!HasAuthority())
+	if (!HasAuthority() || !IsValid(InteractCharacter))
 	{
 		return;
 	}

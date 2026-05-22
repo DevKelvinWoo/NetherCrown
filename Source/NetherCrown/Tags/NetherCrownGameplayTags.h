@@ -97,6 +97,11 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_Skill_MagicSpike);
 #pragma endregion
 
+#pragma region Enemy
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_NormalEnemy1);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Enemy_BossEnemy);
+#pragma endregion
+
 #pragma region Sequence
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sequence_Boss1_Begin);
 #pragma endregion
@@ -109,10 +114,17 @@ namespace NetherCrownTags
 
 #pragma region Quest
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Quest_WeaponSell);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Quest_MainStory1NormalDungeon);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Quest_MainStory2BossDungeon);
 #pragma endregion
 
 #pragma region NPC
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(NPC_WeaponSell);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(NPC_MainStory);
+#pragma endregion
+
+#pragma region InteractActor
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InteractActor_WeaponSellQuestItem);
 #pragma endregion
 
 }

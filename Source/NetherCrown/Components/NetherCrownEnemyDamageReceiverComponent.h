@@ -29,7 +29,7 @@ class NETHERCROWN_API UNetherCrownEnemyDamageReceiverComponent : public UActorCo
 public:
 	UNetherCrownEnemyDamageReceiverComponent();
 
-	float HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser);
+	float HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);
 
 	bool IsHitReacting() const { return EnemyHitReactState == ENetherCrownEnemyHitReactState::HitReact; }
 
@@ -40,6 +40,8 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	void HandleEnemyDeadQuest(AActor* DamageCauser);
+
 	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
 
 	void ApplyFinalDamage(float FinalDamage);
@@ -48,7 +50,7 @@ private:
 	void ClearHitReactState();
 
 	bool IsDead() const;
-	void HandleEnemyDead();
+	void HandleEnemyDead(AActor* DamageCauser);
 	void HandleDeathTimer();
 
 	int32 GetWeaponPenetration(const bool bIsPhysicalDamage, const AActor* DamageCauser) const;

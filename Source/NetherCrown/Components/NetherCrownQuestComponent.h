@@ -36,6 +36,9 @@ struct FNetherCrownQuestCountProgressEntry
 	FGameplayTag QuestTag{};
 
 	UPROPERTY()
+	FGameplayTag TargetTag{};
+
+	UPROPERTY()
 	int32 ProgressCount{};
 };
 
@@ -51,8 +54,10 @@ public:
 	void RequestGrantQuestReward(const FGameplayTag& QuestTag);
 
 	const ENetherCrownQuestState GetQuestState(const FGameplayTag& QuestTag) const;
-	void AddQuestCountProgress(const FGameplayTag& QuestTag, const int32 AddCount);
-	int32 GetQuestCountProgress(const FGameplayTag& QuestTag) const;
+	void AddQuestCountProgress(const FGameplayTag& QuestTag, const FGameplayTag& TargetTag, const int32 AddCount);
+	int32 GetQuestCountProgress(const FGameplayTag& QuestTag, const FGameplayTag& TargetTag) const;
+
+	void CheckAndAddQuestCountProgress(const FGameplayTag& TargetTag, const int32 AddCount);
 
 protected:
 	virtual void BeginPlay() override;

@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "GameFramework/Character.h"
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
@@ -46,6 +47,8 @@ public:
 
 	void SetIsDead(const bool InbIsDead);
 	bool IsDead() { return bIsDead; }
+
+	const FGameplayTag& GetEnemyTag() const { return EnemyTag; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -117,4 +120,7 @@ private:
 
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> CurrentTargetCharacterWeak{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tag")
+	FGameplayTag EnemyTag{};
 };

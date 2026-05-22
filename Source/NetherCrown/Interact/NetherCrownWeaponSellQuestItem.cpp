@@ -41,7 +41,7 @@ void ANetherCrownWeaponSellQuestItem::Interact()
 		return;
 	}
 
-	QuestComponent->AddQuestCountProgress(NetherCrownTags::Quest_WeaponSell, 1);
+	QuestComponent->AddQuestCountProgress(NetherCrownTags::Quest_WeaponSell, GetInteractActorTag(), 1);
 
 	const UGameInstance* GameInstance{ GetGameInstance() };
 	if (!ensureAlways(IsValid(GameInstance)))

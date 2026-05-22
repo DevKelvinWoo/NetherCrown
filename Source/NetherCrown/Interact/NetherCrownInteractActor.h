@@ -3,6 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "GameplayTagContainer.h"
 #include "NetherCrownInteract.h"
 #include "GameFramework/Actor.h"
 #include "NetherCrownInteractActor.generated.h"
@@ -31,6 +32,8 @@ protected:
 	void SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
 	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
 
+	const FGameplayTag& GetInteractActorTag() const { return InteractActorTag; }
+
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> InteractTargetCharacterWeak{};
 
@@ -57,4 +60,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedInteractWidgetTexture{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tag")
+	FGameplayTag InteractActorTag{};
 };

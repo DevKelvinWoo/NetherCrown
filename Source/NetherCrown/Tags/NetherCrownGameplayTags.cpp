@@ -95,6 +95,11 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_Skill_MagicSpike, "Enemy.Skill.MagicSpike", "");
 #pragma endregion
 
+#pragma region Enemy
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_NormalEnemy1, "Enemy.NormalEnemy1", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Enemy_BossEnemy, "Enemy.BossEnemy", "");
+#pragma endregion
+
 #pragma region Sequence
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sequence_Boss1_Begin, "Sequence.Boss1.Begin", "");
 #pragma endregion
@@ -107,9 +112,16 @@ namespace NetherCrownTags
 
 #pragma region Quest
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Quest_WeaponSell, "Quest.WeaponSell", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Quest_MainStory1NormalDungeon, "Quest.MainStory1NormalDungeon", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Quest_MainStory2BossDungeon, "Quest.MainStory2BossDungeon", "");
 #pragma endregion
 
 #pragma region NPC
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(NPC_WeaponSell, "NPC.WeaponSell", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(NPC_MainStory, "NPC.MainStory", "");
+#pragma endregion
+
+#pragma region InteractActor
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InteractActor_WeaponSellQuestItem, "InteractActor.WeaponSellQuestItem", "");
 #pragma endregion
 }
