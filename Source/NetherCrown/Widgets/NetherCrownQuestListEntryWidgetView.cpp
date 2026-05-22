@@ -25,7 +25,7 @@ void UNetherCrownQuestListEntryWidgetView::NativeOnListItemObjectSet(UObject* Li
 
 	QuestDescriptionTextBlock->SetText(QuestEntryObject->GetQuestDescriptionText());
 
-	if (QuestEntryObject->ShouldPlayCompleteAnimation() && IsValid(QuestComplyeteAnimation.Get()))
+	if (QuestEntryObject->ShouldPlayCompleteAnimation() && IsValid(QuestCompleteAnimation.Get()))
 	{
 		PlayAnimation(QuestCompleteAnimation, 0.f, 0);
 	}
