@@ -64,6 +64,8 @@ class NETHERCROWN_API UNetherCrownQuestComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:
+	DECLARE_MULTICAST_DELEGATE(FOnQuestStateUpdated);
+
 	UNetherCrownQuestComponent();
 
 	void RequestAcceptQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState);
@@ -75,8 +77,12 @@ public:
 	FNetherCrownQuestPersistentData MakeQuestPersistentData() const;
 	bool RestoreQuestFromPersistentData(const FNetherCrownQuestPersistentData& InQuestPersistentData);
 
+	const TArray<FNetherCrownQuestStateEntry>& GetQuestStateEntries() const { return QuestStateEntries; }
+
 	void CheckAndAddQuestCountProgress(const FGameplayTag& TargetTag, const int32 AddCount);
 	bool TryCompleteQuest(const FGameplayTag& QuestTag);
+
+	FOnQuestStateUpdated& GetOnQuestStateUpdated() { return OnQuestStateUpdated; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -98,9 +104,17 @@ private:
 	UFUNCTION(Server, Reliable)
 	void Server_GrantQuestReward(const FGameplayTag& QuestTag);
 
-	UPROPERTY(Transient, Replicated)
+	UFUNCTION()
+	void OnRep_QuestStateEntries();
+
+	UFUNCTION()
+	void OnRep_QuestCountProgressEntries();
+
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_QuestStateEntries)
 	TArray<FNetherCrownQuestStateEntry> QuestStateEntries{};
 
-	UPROPERTY(Transient, Replicated)
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_QuestCountProgressEntries)
 	TArray<FNetherCrownQuestCountProgressEntry> QuestCountProgressEntries{};
+
+	FOnQuestStateUpdated OnQuestStateUpdated{};
 };

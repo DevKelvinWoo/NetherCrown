@@ -25,9 +25,14 @@ public:
 	const UNetherCrownQuestCondition* GetQuestCondition() const { return QuestCondition; }
 	const UNetherCrownQuestReward* GetQuestReward() const { return QuestReward; }
 
+	const FText& GetQuestDescription() const { return QuestDescription; }
+
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Tag")
 	FGameplayTag QuestTag{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Description")
+	FText QuestDescription{};
 
 	UPROPERTY(EditDefaultsOnly, Instanced, Category = "Condition")
 	TObjectPtr<UNetherCrownQuestCondition> QuestCondition{};

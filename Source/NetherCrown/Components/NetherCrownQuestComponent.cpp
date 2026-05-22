@@ -56,8 +56,14 @@ void UNetherCrownQuestComponent::SetQuestState(const FGameplayTag& QuestTag, con
 	{
 		if (QuestStateEntry.QuestTag == QuestTag)
 		{
+			if (QuestStateEntry.QuestState == QuestState)
+			{
+				return;
+			}
+
 			QuestStateEntry.QuestState = QuestState;
 			SetQuestPersistentData();
+			OnQuestStateUpdated.Broadcast();
 			return;
 		}
 	}
@@ -67,6 +73,7 @@ void UNetherCrownQuestComponent::SetQuestState(const FGameplayTag& QuestTag, con
 	QuestStateEntry.QuestState = QuestState;
 	QuestStateEntries.Add(QuestStateEntry);
 	SetQuestPersistentData();
+	OnQuestStateUpdated.Broadcast();
 }
 
 void UNetherCrownQuestComponent::Server_SetQuestState_Implementation(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState)
@@ -129,6 +136,7 @@ void UNetherCrownQuestComponent::AddQuestCountProgress(const FGameplayTag& Quest
 		{
 			QuestProgressEntry.ProgressCount += AddCount;
 			SetQuestPersistentData();
+			OnQuestStateUpdated.Broadcast();
 			return;
 		}
 	}
@@ -139,6 +147,7 @@ void UNetherCrownQuestComponent::AddQuestCountProgress(const FGameplayTag& Quest
 	QuestProgressEntry.ProgressCount = AddCount;
 	QuestCountProgressEntries.Add(QuestProgressEntry);
 	SetQuestPersistentData();
+	OnQuestStateUpdated.Broadcast();
 }
 
 int32 UNetherCrownQuestComponent::GetQuestCountProgress(const FGameplayTag& QuestTag, const FGameplayTag& TargetTag) const
@@ -179,8 +188,19 @@ bool UNetherCrownQuestComponent::RestoreQuestFromPersistentData(const FNetherCro
 	QuestStateEntries = InQuestPersistentData.QuestStateEntries;
 	QuestCountProgressEntries = InQuestPersistentData.QuestCountProgressEntries;
 	SetQuestPersistentData();
+	OnQuestStateUpdated.Broadcast();
 
 	return true;
+}
+
+void UNetherCrownQuestComponent::OnRep_QuestStateEntries()
+{
+	OnQuestStateUpdated.Broadcast();
+}
+
+void UNetherCrownQuestComponent::OnRep_QuestCountProgressEntries()
+{
+	OnQuestStateUpdated.Broadcast();
 }
 
 void UNetherCrownQuestComponent::CheckAndAddQuestCountProgress(const FGameplayTag& TargetTag, const int32 AddCount)
