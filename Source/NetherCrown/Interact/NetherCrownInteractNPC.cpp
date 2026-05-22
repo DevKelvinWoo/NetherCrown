@@ -73,6 +73,7 @@ void ANetherCrownInteractNPC::Interact()
 		return;
 	}
 
+	Multicast_SetInteractWidgetVisibility(InteractTargetCharacterWeak.Get(), false);
 	Multicast_ShowNPCDialogueWidget(GetTargetPlayerQuestState());
 }
 
@@ -82,6 +83,8 @@ void ANetherCrownInteractNPC::FinishInteract(ANetherCrownCharacter* InteractChar
 	{
 		return;
 	}
+
+	Multicast_SetInteractWidgetVisibility(InteractCharacter, true);
 
 	if (!ensureAlways(IsValid(CachedNPCDataAsset)))
 	{
@@ -266,25 +269,43 @@ void ANetherCrownInteractNPC::Multicast_ShowNPCDialogueWidget_Implementation(con
 	}
 
 	const TArray<UNetherCrownQuestData*> QuestData{ CachedNPCDataAsset->GetQuestDataArray() };
+	TArray<FText> DialogueText{ GetQuestDialogueText(QuestState) };
 	if (!(QuestData.IsValidIndex(CurrentQuestIndex)))
+	{
+		DialogueText = { CachedNPCDataAsset->GetNonQuestNPCDialogues() };
+	}
+
+	NPCDialogueWidget->InitViewModel(InteractTargetCharacter);
+	NPCDialogueWidget->SetDialogueText(DialogueText, 0);
+}
+
+void ANetherCrownInteractNPC::Multicast_SetInteractWidgetVisibility_Implementation(
+	const ANetherCrownCharacter* InteractTarget, bool bVisible)
+{
+	if (GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
 
-	NPCDialogueWidget->InitViewModel(InteractTargetCharacter);
-	NPCDialogueWidget->SetDialogueText(GetQuestDialogueText(QuestState), 0);
+	if (!ensureAlways(IsValid(InteractTarget)))
+	{
+		return;
+	}
+
+	SetInteractWidgetVisibility(InteractTarget, bVisible);
 }
 
 void ANetherCrownInteractNPC::HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent,
                                                                AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                                                const FHitResult& SweepResult)
 {
-	InteractTargetCharacterWeak = MakeWeakObjectPtr(Cast<ANetherCrownCharacter>(OtherActor));
-	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
+	ANetherCrownCharacter* InteractTargetCharacter{ Cast<ANetherCrownCharacter>(OtherActor) };
 	if (!IsValid(InteractTargetCharacter))
 	{
 		return;
 	}
+
+	InteractTargetCharacterWeak = MakeWeakObjectPtr(InteractTargetCharacter);
 
 	if (InteractTargetCharacter->IsLocallyControlled())
 	{
@@ -300,12 +321,13 @@ void ANetherCrownInteractNPC::HandleOnDetectSphereOverlapBegin(UPrimitiveCompone
 void ANetherCrownInteractNPC::HandleOnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent,
 	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {
-	InteractTargetCharacterWeak = MakeWeakObjectPtr(Cast<ANetherCrownCharacter>(OtherActor));
-	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
+	ANetherCrownCharacter* InteractTargetCharacter{ Cast<ANetherCrownCharacter>(OtherActor) };
 	if (!IsValid(InteractTargetCharacter))
 	{
 		return;
 	}
+
+	InteractTargetCharacterWeak = MakeWeakObjectPtr(InteractTargetCharacter);
 
 	if (InteractTargetCharacter->IsLocallyControlled())
 	{

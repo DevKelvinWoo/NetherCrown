@@ -41,7 +41,7 @@ bool UNetherCrownQuestWeaponReward::GrantReward(ANetherCrownCharacter* QuestOwne
 	SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 
 	constexpr float XOffset{ 100.f };
-	constexpr float YOffset{ -50.f };
+	constexpr float YOffset{ -100.f };
 	float WeaponSpawnYOffset{ YOffset };
 	for (TSubclassOf<ANetherCrownWeapon> WeaponClass : WeaponClassArr)
 	{

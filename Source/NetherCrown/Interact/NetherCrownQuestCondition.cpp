@@ -34,11 +34,6 @@ bool UNetherCrownQuestMonsterKillCondition::IsConditionTargetEqual(const FGamepl
 
 bool UNetherCrownQuestFindItemCondition::IsConditionSatisfied(const ANetherCrownCharacter* QuestOwner, const FGameplayTag& QuestTag) const
 {
-	if (!Super::IsConditionSatisfied(QuestOwner, QuestTag))
-	{
-		return false;
-	}
-
 	const UNetherCrownQuestComponent* QuestComponent{ QuestOwner->GetQuestComponent() };
 	if (!ensureAlways(IsValid(QuestComponent)))
 	{

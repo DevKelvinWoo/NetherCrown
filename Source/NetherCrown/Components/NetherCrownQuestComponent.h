@@ -7,6 +7,8 @@
 #include "GameplayTagContainer.h"
 #include "NetherCrownQuestComponent.generated.h"
 
+class UNetherCrownQuestData;
+
 UENUM()
 enum class ENetherCrownQuestState : uint8
 {
@@ -58,6 +60,7 @@ public:
 	int32 GetQuestCountProgress(const FGameplayTag& QuestTag, const FGameplayTag& TargetTag) const;
 
 	void CheckAndAddQuestCountProgress(const FGameplayTag& TargetTag, const int32 AddCount);
+	bool TryCompleteQuest(const FGameplayTag& QuestTag);
 
 protected:
 	virtual void BeginPlay() override;
@@ -66,6 +69,10 @@ protected:
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
+	UNetherCrownQuestData* GetQuestDataByGameplayTag(const FGameplayTag& QuestTag) const;
+	bool CanCompleteQuest(const FGameplayTag& QuestTag) const;
+	bool TryGrantQuestReward(const FGameplayTag& QuestTag) const;
+
 	void SetQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState);
 
 	UFUNCTION(Server, Reliable)

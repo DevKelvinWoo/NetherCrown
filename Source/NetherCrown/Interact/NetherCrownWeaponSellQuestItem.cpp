@@ -4,7 +4,6 @@
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownQuestComponent.h"
-#include "NetherCrown/Subsystems/NetherCrownQuestManagerSubsystem.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 
 ANetherCrownWeaponSellQuestItem::ANetherCrownWeaponSellQuestItem()
@@ -42,18 +41,5 @@ void ANetherCrownWeaponSellQuestItem::Interact()
 	}
 
 	QuestComponent->AddQuestCountProgress(NetherCrownTags::Quest_WeaponSell, GetInteractActorTag(), 1);
-
-	const UGameInstance* GameInstance{ GetGameInstance() };
-	if (!ensureAlways(IsValid(GameInstance)))
-	{
-		return;
-	}
-
-	const UNetherCrownQuestManagerSubsystem* QuestManagerSubsystem{ GameInstance->GetSubsystem<UNetherCrownQuestManagerSubsystem>() };
-	if (!ensureAlways(IsValid(QuestManagerSubsystem)))
-	{
-		return;
-	}
-
-	QuestManagerSubsystem->TryCompleteQuest(InteractCharacter, NetherCrownTags::Quest_WeaponSell);
+	QuestComponent->TryCompleteQuest(NetherCrownTags::Quest_WeaponSell);
 }

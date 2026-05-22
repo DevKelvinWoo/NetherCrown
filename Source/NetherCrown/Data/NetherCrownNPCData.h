@@ -15,6 +15,7 @@ class NETHERCROWN_API UNetherCrownNPCDataAsset : public UDataAsset
 
 public:
 	const TArray<TObjectPtr<UNetherCrownQuestData>>& GetQuestDataArray() const { return QuestDataArray; }
+	const FText& GetNonQuestNPCDialogues() const { return NonQuestNPCDialogues; }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Tag")
@@ -27,5 +28,5 @@ private:
 	TArray<TObjectPtr<UNetherCrownQuestData>> QuestDataArray{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
-	TArray<FText> NonQuestNPCDialogues{};
+	FText NonQuestNPCDialogues{};
 };
