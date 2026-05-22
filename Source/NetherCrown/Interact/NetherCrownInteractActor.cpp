@@ -6,8 +6,13 @@
 #include "Components/WidgetComponent.h"
 #include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Components/NetherCrownInteractComponent.h"
+#include "NetherCrown/Data/NetherCrownInteractData.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+#include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
 #include "NetherCrown/Widgets/NetherCrownInteractWidgetView.h"
+#include "NetherCrown/Widgets/NetherCrownNPCDialogueWidgetView.h"
 
 ANetherCrownInteractActor::ANetherCrownInteractActor()
 {
@@ -22,15 +27,49 @@ ANetherCrownInteractActor::ANetherCrownInteractActor()
 	InteractWidgetComponent->SetupAttachment(RootComponent);
 	InteractWidgetComponent->SetVisibility(false);
 
+	InteractCameraPosSphereComponent = CreateDefaultSubobject<USphereComponent>(TEXT("InteractCameraPosSphereComponent"));
+	InteractCameraPosSphereComponent->SetupAttachment(RootComponent);
+
 	bNetLoadOnClient = true;
 	bReplicates = true;
+}
+
+FVector ANetherCrownInteractActor::GetInteractCameraPos() const
+{
+	if (!ensureAlways(IsValid(InteractCameraPosSphereComponent)))
+	{
+		return FVector::ZeroVector;
+	}
+
+	return InteractCameraPosSphereComponent->GetComponentLocation();
+}
+
+FRotator ANetherCrownInteractActor::GetInteractCameraRot() const
+{
+	if (!ensureAlways(IsValid(InteractCameraPosSphereComponent)))
+	{
+		return FRotator::ZeroRotator;
+	}
+
+	return InteractCameraPosSphereComponent->GetComponentRotation();
+}
+
+const FGameplayTag& ANetherCrownInteractActor::GetInteractActorTag() const
+{
+	if (!IsValid(CachedInteractDataAsset))
+	{
+		static const FGameplayTag EmptyTag{};
+		return EmptyTag;
+	}
+
+	return CachedInteractDataAsset->GetInteractActorTag();
 }
 
 void ANetherCrownInteractActor::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CacheInteractWidgetTexture();
+	CacheInteractDataAsset();
 
 	if (ensureAlways(IsValid(InteractDetectSphereComponent)))
 	{
@@ -55,6 +94,17 @@ void ANetherCrownInteractActor::Interact()
 	}
 
 	Multicast_SetInteractWidgetVisibility(InteractTargetCharacter, false);
+	Multicast_ShowInteractActorDialogueWidget();
+}
+
+void ANetherCrownInteractActor::FinishInteract(ANetherCrownCharacter* InteractCharacter)
+{
+	if (!ensureAlways(IsValid(InteractCharacter)) || !InteractCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	Multicast_SetInteractWidgetVisibility(InteractCharacter, false);
 }
 
 void ANetherCrownInteractActor::HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent,
@@ -141,19 +191,70 @@ void ANetherCrownInteractActor::SetInteractWidgetVisibility(const ANetherCrownCh
 	InteractWidgetComponent->SetVisibility(bVisible);
 }
 
-void ANetherCrownInteractActor::CacheInteractWidgetTexture()
+void ANetherCrownInteractActor::CacheInteractDataAsset()
 {
+	if (InteractDataAssetSoft.IsNull())
+	{
+		return;
+	}
+
+	CachedInteractDataAsset = InteractDataAssetSoft.LoadSynchronous();
+	if (!ensureAlways(IsValid(CachedInteractDataAsset)))
+	{
+		return;
+	}
+
 	if (GetNetMode() == NM_DedicatedServer)
 	{
 		return;
 	}
 
-	if (InteractWidgetTextureSoft.IsNull())
+	TSoftObjectPtr<UTexture2D> InteractWidgetTextureSoft{ CachedInteractDataAsset->GetInteractWidgetTexture() };
+	if (!InteractWidgetTextureSoft.IsNull())
+	{
+		CachedInteractWidgetTexture = InteractWidgetTextureSoft.LoadSynchronous();
+	}
+}
+
+void ANetherCrownInteractActor::Multicast_ShowInteractActorDialogueWidget_Implementation()
+{
+	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(InteractTargetCharacter)) || !InteractTargetCharacter->IsLocallyControlled())
 	{
 		return;
 	}
 
-	CachedInteractWidgetTexture = InteractWidgetTextureSoft.LoadSynchronous();
+	const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(InteractTargetCharacter->GetController()) };
+	if (!ensureAlways(IsValid(PlayerController)))
+	{
+		return;
+	}
+
+	const ULocalPlayer* LocalPlayer{ PlayerController->GetLocalPlayer() };
+	if (!ensureAlways(IsValid(LocalPlayer)))
+	{
+		return;
+	}
+
+	UNetherCrownUIManagerSubsystem* UIManagerSubsystem{ LocalPlayer->GetSubsystem<UNetherCrownUIManagerSubsystem>() };
+	if (!ensureAlways(IsValid(UIManagerSubsystem)))
+	{
+		return;
+	}
+
+	UNetherCrownNPCDialogueWidgetView* NPCDialogueWidget{ Cast<UNetherCrownNPCDialogueWidgetView>(UIManagerSubsystem->ShowScreenByTag(NetherCrownTags::UI_Screen_NPCDialogue)) };
+	if (!ensureAlways(IsValid(NPCDialogueWidget)))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedInteractDataAsset)))
+	{
+		return;
+	}
+
+	NPCDialogueWidget->InitViewModel(InteractTargetCharacter);
+	NPCDialogueWidget->SetDialogueText({ CachedInteractDataAsset->GetDialogueText() }, 0);
 }
 
 void ANetherCrownInteractActor::Multicast_SetInteractWidgetVisibility_Implementation(

@@ -55,9 +55,9 @@ void ANetherCrownBossDungeonDoor::Tick(float DeltaTime)
 	}
 }
 
-void ANetherCrownBossDungeonDoor::Interact()
+void ANetherCrownBossDungeonDoor::FinishInteract(ANetherCrownCharacter* InteractCharacter)
 {
-	Super::Interact();
+	Super::FinishInteract(InteractCharacter);
 
 	if (HasAuthority())
 	{
@@ -69,14 +69,13 @@ void ANetherCrownBossDungeonDoor::Interact()
 
 void ANetherCrownBossDungeonDoor::CacheBossDungeonDoorData()
 {
-	if (DoorDataAssetSoft.IsNull())
+	const UNetherCrownBossDungeonDoorDataAsset* DoorDataAsset{ Cast<UNetherCrownBossDungeonDoorDataAsset>(GetCachedInteractDataAsset()) };
+	if (!ensureAlways(IsValid(DoorDataAsset)))
 	{
 		return;
 	}
 
-	CachedDoorDataAsset = DoorDataAssetSoft.LoadSynchronous();
-
-	const FNetherCrownBossDungeonDoorData& DoorData{ CachedDoorDataAsset->GetBossDungeonDoorData() };
+	const FNetherCrownBossDungeonDoorData& DoorData{ DoorDataAsset->GetBossDungeonDoorData() };
 	if (!DoorData.LeftDoorOpenCurve.IsNull())
 	{
 		CachedLeftDoorOpenCurve = DoorData.LeftDoorOpenCurve.LoadSynchronous();
@@ -101,12 +100,13 @@ void ANetherCrownBossDungeonDoor::Multicast_PlayOpenDoorCameraShake_Implementati
 		return;
 	}
 
-	if (!ensureAlways(IsValid(CameraShakePointSphereComponent)) || !ensureAlways(IsValid(CachedDoorDataAsset)))
+	const UNetherCrownBossDungeonDoorDataAsset* DoorDataAsset{ Cast<UNetherCrownBossDungeonDoorDataAsset>(GetCachedInteractDataAsset()) };
+	if (!ensureAlways(IsValid(CameraShakePointSphereComponent)) || !ensureAlways(IsValid(DoorDataAsset)))
 	{
 		return;
 	}
 
-	const FNetherCrownBossDungeonDoorData& DoorData{ CachedDoorDataAsset->GetBossDungeonDoorData() };
+	const FNetherCrownBossDungeonDoorData& DoorData{ DoorDataAsset->GetBossDungeonDoorData() };
 	UGameplayStatics::PlayWorldCameraShake(
 		this,
 		DoorData.OpenDoorCameraShakeClass,
@@ -123,12 +123,13 @@ void ANetherCrownBossDungeonDoor::Multicast_PlayOpenDoorSound_Implementation()
 		return;
 	}
 
-	if (!ensureAlways(IsValid(CachedDoorDataAsset)))
+	const UNetherCrownBossDungeonDoorDataAsset* DoorDataAsset{ Cast<UNetherCrownBossDungeonDoorDataAsset>(GetCachedInteractDataAsset()) };
+	if (!ensureAlways(IsValid(DoorDataAsset)))
 	{
 		return;
 	}
 
-	const FNetherCrownBossDungeonDoorData& DoorData{ CachedDoorDataAsset->GetBossDungeonDoorData() };
+	const FNetherCrownBossDungeonDoorData& DoorData{ DoorDataAsset->GetBossDungeonDoorData() };
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, DoorData.BossDungeonDoorTagData.OpenDoorSoundTag);
 }
 

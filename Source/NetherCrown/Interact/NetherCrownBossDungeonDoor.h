@@ -12,8 +12,6 @@
 class UBoxComponent;
 class USphereComponent;
 
-class UNetherCrownBossDungeonDoorDataAsset;
-
 UCLASS()
 class NETHERCROWN_API ANetherCrownBossDungeonDoor : public ANetherCrownInteractActor
 {
@@ -26,7 +24,7 @@ protected:
 	virtual void BeginPlay() override;
 	virtual void Tick(float DeltaTime) override;
 
-	virtual void Interact() override;
+	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) override;
 
 private:
 	void CacheBossDungeonDoorData();
@@ -54,12 +52,6 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USphereComponent> CameraShakePointSphereComponent{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "DoorDataAsset")
-	TSoftObjectPtr<UNetherCrownBossDungeonDoorDataAsset> DoorDataAssetSoft{};
-
-	UPROPERTY(Transient)
-	TObjectPtr<UNetherCrownBossDungeonDoorDataAsset> CachedDoorDataAsset{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UCurveFloat> CachedLeftDoorOpenCurve{};

@@ -20,6 +20,6 @@ class NETHERCROWN_API INetherCrownInteract
 
 public:
 	virtual void Interact() = 0;
-	virtual bool IsNeedCameraMoving() { return false; }
+	virtual bool IsNeedCameraMoving() { return true; }
 	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) {}
 };

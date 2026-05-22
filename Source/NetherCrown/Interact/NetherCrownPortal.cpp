@@ -2,6 +2,7 @@
 
 #include "NetherCrownPortal.h"
 
+#include "NetherCrown/Data/NetherCrownInteractData.h"
 #include "NetherCrown/GameMode/NetherCrownGameMode.h"
 
 ANetherCrownPortal::ANetherCrownPortal()
@@ -17,9 +18,9 @@ void ANetherCrownPortal::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ANetherCrownPortal::Interact()
+void ANetherCrownPortal::FinishInteract(ANetherCrownCharacter* InteractCharacter)
 {
-	Super::Interact();
+	Super::FinishInteract(InteractCharacter);
 
 	if (HasAuthority())
 	{
@@ -46,5 +47,11 @@ void ANetherCrownPortal::TravelByLevelTag()
 		return;
 	}
 
-	NetherCrownGameMode->TravelLevelByTag(LevelTag);
+	const UNetherCrownPortalDataAsset* PortalDataAsset{ Cast<UNetherCrownPortalDataAsset>(GetCachedInteractDataAsset()) };
+	if (!ensureAlways(IsValid(PortalDataAsset)))
+	{
+		return;
+	}
+
+	NetherCrownGameMode->TravelLevelByTag(PortalDataAsset->GetLevelTag());
 }

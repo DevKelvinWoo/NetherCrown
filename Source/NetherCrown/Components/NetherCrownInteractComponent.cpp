@@ -10,6 +10,7 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Interact/NetherCrownInteract.h"
+#include "NetherCrown/Interact/NetherCrownInteractActor.h"
 #include "NetherCrown/Interact/NetherCrownInteractNPC.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
@@ -99,11 +100,27 @@ void UNetherCrownInteractComponent::Client_MoveCameraToInteractPosition_Implemen
 	{
 		InteractCameraLocation = InteractNPC->GetInteractCameraPos();
 	}
+	else
+	{
+		ANetherCrownInteractActor* InteractActor{ Cast<ANetherCrownInteractActor>(TargetInteractActor) };
+		if (IsValid(InteractActor))
+		{
+			InteractCameraLocation = InteractActor->GetInteractCameraPos();
+		}
+	}
 
 	FRotator InteractCameraRotation{ UKismetMathLibrary::FindLookAtRotation(InteractCameraLocation, TargetInteractActor->GetActorLocation()) };
 	if (IsValid(InteractNPC))
 	{
 		InteractCameraRotation = InteractNPC->GetInteractCameraRot();
+	}
+	else
+	{
+		ANetherCrownInteractActor* InteractActor{ Cast<ANetherCrownInteractActor>(TargetInteractActor) };
+		if (IsValid(InteractActor))
+		{
+			InteractCameraRotation = InteractActor->GetInteractCameraRot();
+		}
 	}
 
 	InteractCameraActor = World->SpawnActor<ACameraActor>(ACameraActor::StaticClass(), InteractCameraLocation, InteractCameraRotation, SpawnParams);

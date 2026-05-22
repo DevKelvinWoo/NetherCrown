@@ -19,7 +19,7 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual void Interact() override;
+	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "Component")

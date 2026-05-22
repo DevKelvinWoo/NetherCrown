@@ -123,5 +123,8 @@ namespace NetherCrownTags
 
 #pragma region InteractActor
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InteractActor_WeaponSellQuestItem, "InteractActor.WeaponSellQuestItem", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InteractActor_BossDungeonDoor, "InteractActor.BossDungeonDoor", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InteractActor_Portal, "InteractActor.Portal", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(InteractActor_NormalPropItem, "InteractActor.NormalPropItem", "");
 #pragma endregion
 }

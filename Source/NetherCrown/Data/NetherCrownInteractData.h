@@ -7,6 +7,40 @@
 #include "Engine/DataAsset.h"
 #include "NetherCrownInteractData.generated.h"
 
+UCLASS()
+class NETHERCROWN_API UNetherCrownInteractActorDataAsset : public UDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FText& GetDialogueText() const { return DialogueText; }
+	TSoftObjectPtr<UTexture2D> GetInteractWidgetTexture() const { return InteractWidgetTextureSoft; }
+	const FGameplayTag& GetInteractActorTag() const { return InteractActorTag; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
+	FText DialogueText{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "InteractWidget")
+	TSoftObjectPtr<UTexture2D> InteractWidgetTextureSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Tag")
+	FGameplayTag InteractActorTag{};
+};
+
+UCLASS()
+class NETHERCROWN_API UNetherCrownPortalDataAsset : public UNetherCrownInteractActorDataAsset
+{
+	GENERATED_BODY()
+
+public:
+	const FGameplayTag& GetLevelTag() const { return LevelTag; }
+
+private:
+	UPROPERTY(EditDefaultsOnly, Category = "Tag")
+	FGameplayTag LevelTag{};
+};
+
 USTRUCT()
 struct FNetherCrownBossDungeonDoorTagData
 {
@@ -43,7 +77,7 @@ public:
 };
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownBossDungeonDoorDataAsset : public UDataAsset
+class NETHERCROWN_API UNetherCrownBossDungeonDoorDataAsset : public UNetherCrownInteractActorDataAsset
 {
 	GENERATED_BODY()
 

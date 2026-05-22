@@ -13,6 +13,7 @@ class USphereComponent;
 class UTexture2D;
 
 class ANetherCrownCharacter;
+class UNetherCrownInteractActorDataAsset;
 
 UCLASS()
 class NETHERCROWN_API ANetherCrownInteractActor : public AActor, public INetherCrownInteract
@@ -22,23 +23,31 @@ class NETHERCROWN_API ANetherCrownInteractActor : public AActor, public INetherC
 public:
 	ANetherCrownInteractActor();
 
+	FVector GetInteractCameraPos() const;
+	FRotator GetInteractCameraRot() const;
+
 protected:
 	virtual void BeginPlay() override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 	virtual void Interact() override;
+	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) override;
 
 	void SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
 	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
 
-	const FGameplayTag& GetInteractActorTag() const { return InteractActorTag; }
+	const UNetherCrownInteractActorDataAsset* GetCachedInteractDataAsset() const { return CachedInteractDataAsset; }
+	const FGameplayTag& GetInteractActorTag() const;
 
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> InteractTargetCharacterWeak{};
 
 private:
-	void CacheInteractWidgetTexture();
+	void CacheInteractDataAsset();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ShowInteractActorDialogueWidget();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
@@ -55,12 +64,15 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UWidgetComponent> InteractWidgetComponent{};
 
-	UPROPERTY(EditDefaultsOnly, Category = "InteractWidget")
-	TSoftObjectPtr<UTexture2D> InteractWidgetTextureSoft{};
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<USphereComponent> InteractCameraPosSphereComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Data")
+	TSoftObjectPtr<UNetherCrownInteractActorDataAsset> InteractDataAssetSoft{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UNetherCrownInteractActorDataAsset> CachedInteractDataAsset{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UTexture2D> CachedInteractWidgetTexture{};
-
-	UPROPERTY(EditDefaultsOnly, Category = "Tag")
-	FGameplayTag InteractActorTag{};
 };

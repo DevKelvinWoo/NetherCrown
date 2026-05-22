@@ -19,17 +19,11 @@ void ANetherCrownWeaponSellQuestItem::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ANetherCrownWeaponSellQuestItem::Interact()
+void ANetherCrownWeaponSellQuestItem::FinishInteract(ANetherCrownCharacter* InteractCharacter)
 {
-	Super::Interact();
+	Super::FinishInteract(InteractCharacter);
 
-	if (!HasAuthority())
-	{
-		return;
-	}
-
-	ANetherCrownCharacter* InteractCharacter{ InteractTargetCharacterWeak.Get() };
-	if (!IsValid(InteractCharacter))
+	if (!HasAuthority() || !IsValid(InteractCharacter))
 	{
 		return;
 	}

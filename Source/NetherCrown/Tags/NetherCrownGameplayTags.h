@@ -125,6 +125,9 @@ namespace NetherCrownTags
 
 #pragma region InteractActor
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InteractActor_WeaponSellQuestItem);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InteractActor_BossDungeonDoor);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InteractActor_Portal);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(InteractActor_NormalPropItem);
 #pragma endregion
 
 }
