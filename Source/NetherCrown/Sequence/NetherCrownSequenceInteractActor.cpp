@@ -41,6 +41,27 @@ void ANetherCrownSequenceInteractActor::GetLifetimeReplicatedProps(
 	DOREPLIFETIME(ThisClass, InteractCharacterWeak);
 }
 
+void ANetherCrownSequenceInteractActor::ToggleInteractBoxCollision(const bool bOn)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	Multicast_SetInteractBoxCollision(bOn);
+}
+
+void ANetherCrownSequenceInteractActor::Multicast_SetInteractBoxCollision_Implementation(const bool bOn)
+{
+	if (!ensureAlways(IsValid(InteractBoxComponent)))
+	{
+		return;
+	}
+
+	InteractBoxComponent->SetGenerateOverlapEvents(bOn);
+	InteractBoxComponent->SetCollisionEnabled(bOn ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+}
+
 void ANetherCrownSequenceInteractActor::HandleOnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent,
                                                                         AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
                                                                         const FHitResult& SweepResult)

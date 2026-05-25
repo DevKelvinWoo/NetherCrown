@@ -26,10 +26,15 @@ protected:
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
+	void ToggleInteractBoxCollision(const bool bOn);
+
 	UPROPERTY(Replicated)
 	TWeakObjectPtr<ANetherCrownCharacter> InteractCharacterWeak{};
 
 private:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetInteractBoxCollision(const bool bOn);
+
 	UFUNCTION()
 	void HandleOnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
 

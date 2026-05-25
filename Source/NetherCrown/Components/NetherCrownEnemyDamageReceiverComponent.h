@@ -11,6 +11,7 @@
 
 
 class ANetherCrownEnemy;
+class ANetherCrownDamageNumberActor;
 class UNetherCrownDamageType;
 class UMaterialInstanceDynamic;
 
@@ -77,6 +78,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SpawnDeathEffectAndSound();
 
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_SpawnDamageNumber(const int32 DamageAmount, const bool bIsCriticalDamage);
+
 	UFUNCTION()
 	void ApplyDeadMaterialParam(float FloatCurveValue);
 
@@ -103,6 +107,15 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyDamageAndDeathCosmeticDataAsset")
 	TSoftObjectPtr<UNetherCrownEnemyDamageAndDeathCosmeticDataAsset> EnemyDamageAndDeathCosmeticDataAssetSoft{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageNumber")
+	TSubclassOf<ANetherCrownDamageNumberActor> DamageNumberActorClass{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageNumber")
+	FVector DamageNumberSpawnOffset{ 0.f, 0.f, 120.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "DamageNumber")
+	float DamageNumberRandomHorizontalOffset{ 30.f };
 
 	UPROPERTY(Replicated)
 	ENetherCrownEnemyHitReactState EnemyHitReactState{ ENetherCrownEnemyHitReactState::None };

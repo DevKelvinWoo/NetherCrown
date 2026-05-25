@@ -28,6 +28,8 @@ void ANetherCrownBossBeginSequenceInteractActor::HandleOnSequenceFinished()
 		return;
 	}
 
+	ToggleInteractBoxCollision(false);
+
 	if (!ensureAlways(IsValid(BossEnemy)) || !ensureAlways(IsValid(SequenceDummyActor)))
 	{
 		return;

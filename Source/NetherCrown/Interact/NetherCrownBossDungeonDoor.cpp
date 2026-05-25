@@ -64,6 +64,8 @@ void ANetherCrownBossDungeonDoor::FinishInteract(ANetherCrownCharacter* Interact
 		Multicast_PlayOpenDoorSound();
 		Multicast_PlayOpenDoorCameraShake();
 		Multicast_PlayOpenDoor();
+
+		ToggleInteractBoxCollision(false);
 	}
 }
 

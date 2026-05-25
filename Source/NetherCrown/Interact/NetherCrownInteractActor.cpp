@@ -191,6 +191,27 @@ void ANetherCrownInteractActor::SetInteractWidgetVisibility(const ANetherCrownCh
 	InteractWidgetComponent->SetVisibility(bVisible);
 }
 
+void ANetherCrownInteractActor::ToggleInteractBoxCollision(const bool bOn)
+{
+	if (!HasAuthority())
+	{
+		return;
+	}
+
+	Multicast_SetInteractDetectSphereCollision(bOn);
+}
+
+void ANetherCrownInteractActor::Multicast_SetInteractDetectSphereCollision_Implementation(const bool bOn)
+{
+	if (!ensureAlways(IsValid(InteractDetectSphereComponent)))
+	{
+		return;
+	}
+
+	InteractDetectSphereComponent->SetGenerateOverlapEvents(bOn);
+	InteractDetectSphereComponent->SetCollisionEnabled(bOn ? ECollisionEnabled::QueryOnly : ECollisionEnabled::NoCollision);
+}
+
 void ANetherCrownInteractActor::CacheInteractDataAsset()
 {
 	if (InteractDataAssetSoft.IsNull())

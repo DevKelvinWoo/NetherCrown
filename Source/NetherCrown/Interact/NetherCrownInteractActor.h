@@ -37,6 +37,8 @@ protected:
 	void SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
 	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
 
+	void ToggleInteractBoxCollision(const bool bOn);
+
 	const UNetherCrownInteractActorDataAsset* GetCachedInteractDataAsset() const { return CachedInteractDataAsset; }
 	const FGameplayTag& GetInteractActorTag() const;
 
@@ -51,6 +53,9 @@ private:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetInteractDetectSphereCollision(const bool bOn);
 
 	UFUNCTION()
 	void HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);

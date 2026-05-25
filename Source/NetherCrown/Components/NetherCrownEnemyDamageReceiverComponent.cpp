@@ -18,6 +18,7 @@
 #include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Data/NetherCrownWeaponData.h"
+#include "NetherCrown/Effects/NetherCrownDamageNumberActor.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
@@ -90,7 +91,9 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 	SetHitReactStateAndTimer();
 
 	const float FinalDamage{ CalculateFinalDamage(DamageAmount, DamageEvent, DamageCauser) };
+	const bool bIsCriticalDamage{ DamageEvent.DamageTypeClass == UNetherCrownCriticalPhysicalDamageType::StaticClass() };
 	ApplyFinalDamage(FinalDamage);
+	Multicast_SpawnDamageNumber(FMath::RoundToInt(FinalDamage), bIsCriticalDamage);
 
 	if (IsDead())
 	{
@@ -98,7 +101,6 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 	}
 	else
 	{
-		const bool bIsCriticalDamage{ DamageEvent.DamageTypeClass == UNetherCrownCriticalPhysicalDamageType::StaticClass() };
 		Multicast_PlayTakeDamageAnimation(bIsCriticalDamage);
 		Multicast_PlayTakeDamageSound(ResolveHurtImpactSoundTag(DamageEvent));
 	}
@@ -465,6 +467,45 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_SpawnDeathEffectAndSoun
 
 		FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerEnemy, EnemyDeathCosmeticData.EnemyDeathTagData.FrozenEnemyDeathSoundTag);
 	}
+}
+
+void UNetherCrownEnemyDamageReceiverComponent::Multicast_SpawnDamageNumber_Implementation(const int32 DamageAmount, const bool bIsCriticalDamage)
+{
+	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || CachedOwnerEnemy->GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!DamageNumberActorClass || DamageAmount <= 0)
+	{
+		return;
+	}
+
+	UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	FVector SpawnOffset{ DamageNumberSpawnOffset };
+	if (DamageNumberRandomHorizontalOffset > 0.f)
+	{
+		SpawnOffset.X += FMath::RandRange(-DamageNumberRandomHorizontalOffset, DamageNumberRandomHorizontalOffset);
+		SpawnOffset.Y += FMath::RandRange(-DamageNumberRandomHorizontalOffset, DamageNumberRandomHorizontalOffset);
+	}
+
+	FActorSpawnParameters SpawnParameters{};
+	SpawnParameters.Owner = CachedOwnerEnemy;
+	SpawnParameters.ObjectFlags = RF_Transient;
+	SpawnParameters.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	ANetherCrownDamageNumberActor* DamageNumberActor{ World->SpawnActor<ANetherCrownDamageNumberActor>(DamageNumberActorClass, CachedOwnerEnemy->GetActorLocation() + SpawnOffset, FRotator::ZeroRotator, SpawnParameters) };
+	if (!ensureAlways(IsValid(DamageNumberActor)))
+	{
+		return;
+	}
+
+	DamageNumberActor->InitDamageNumber(DamageAmount, bIsCriticalDamage);
 }
 
 void UNetherCrownEnemyDamageReceiverComponent::ApplyDeadMaterialParam(float FloatCurveValue)
