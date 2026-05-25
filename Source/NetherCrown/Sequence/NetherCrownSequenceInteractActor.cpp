@@ -5,6 +5,7 @@
 #include "LevelSequencePlayer.h"
 #include "MovieSceneSequencePlaybackSettings.h"
 #include "Components/BoxComponent.h"
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 #include "Runtime/LevelSequence/Public/LevelSequence.h"
@@ -32,20 +33,30 @@ void ANetherCrownSequenceInteractActor::BeginPlay()
 	}
 }
 
+void ANetherCrownSequenceInteractActor::GetLifetimeReplicatedProps(
+	TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, InteractCharacterWeak);
+}
+
 void ANetherCrownSequenceInteractActor::HandleOnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
-	const FHitResult& SweepResult)
+                                                                        AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                                        const FHitResult& SweepResult)
 {
 	if (!HasAuthority())
 	{
 		return;
 	}
 
-	if (!OtherActor->IsA<ANetherCrownCharacter>() || !LevelSequenceTag.IsValid())
+	ANetherCrownCharacter* InteractCharacter{ Cast<ANetherCrownCharacter>(OtherActor) };
+	if (!IsValid(InteractCharacter) || !LevelSequenceTag.IsValid())
 	{
 		return;
 	}
 
+	InteractCharacterWeak = MakeWeakObjectPtr(InteractCharacter);
 	Multicast_PlaySequence();
 }
 

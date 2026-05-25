@@ -2,7 +2,12 @@
 
 #include "NetherCrownBossBeginSequenceInteractActor.h"
 
+#include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
+#include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+#include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
+#include "NetherCrown/Widgets/NetherCrownBossEnemyHpWidgetView.h"
 
 ANetherCrownBossBeginSequenceInteractActor::ANetherCrownBossBeginSequenceInteractActor()
 {
@@ -28,6 +33,8 @@ void ANetherCrownBossBeginSequenceInteractActor::HandleOnSequenceFinished()
 		return;
 	}
 
+	Multicast_ShowBossEnemyHpWidget();
+
 	BossEnemy->SetActorHiddenInGame(false);
 	BossEnemy->SetActorEnableCollision(true);
 	BossEnemy->SetActorTickEnabled(true);
@@ -37,5 +44,50 @@ void ANetherCrownBossBeginSequenceInteractActor::HandleOnSequenceFinished()
 	BossEnemy->SetActorTransform(TargetTransform);
 
 	SequenceDummyActor->Destroy();
+}
+
+void ANetherCrownBossBeginSequenceInteractActor::Multicast_ShowBossEnemyHpWidget_Implementation()
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	const ANetherCrownCharacter* InteractTargetCharacter{ InteractCharacterWeak.Get() };
+	if (!ensureAlways(IsValid(InteractTargetCharacter)))
+	{
+		return;
+	}
+
+	if (!InteractTargetCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(InteractTargetCharacter->GetController()) };
+	if (!ensureAlways(IsValid(PlayerController)))
+	{
+		return;
+	}
+
+	const ULocalPlayer* LocalPlayer{ PlayerController->GetLocalPlayer() };
+	if (!ensureAlways(IsValid(LocalPlayer)))
+	{
+		return;
+	}
+
+	UNetherCrownUIManagerSubsystem* UIManagerSubsystem{ LocalPlayer->GetSubsystem<UNetherCrownUIManagerSubsystem>() };
+	if (!ensureAlways(IsValid(UIManagerSubsystem)))
+	{
+		return;
+	}
+
+	UNetherCrownBossEnemyHpWidgetView* BossEnemyHpWidgetView{ Cast<UNetherCrownBossEnemyHpWidgetView>(UIManagerSubsystem->ShowScreenByTag(NetherCrownTags::UI_Screen_BossEnemyHP)) };
+	if (!ensureAlways(IsValid(BossEnemyHpWidgetView)))
+	{
+		return;
+	}
+
+	BossEnemyHpWidgetView->InitNormalEnemyHPWidget(BossEnemy);
 }
 

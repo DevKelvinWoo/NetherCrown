@@ -48,7 +48,7 @@ public:
 
 	void SetCharacterMaxSpeed(const bool bIsRunChase);
 
-	void SetIsDead(const bool InbIsDead);
+	virtual void SetIsDead(const bool InbIsDead);
 	bool IsDead() { return bIsDead; }
 
 	const FGameplayTag& GetEnemyTag() const { return EnemyTag; }

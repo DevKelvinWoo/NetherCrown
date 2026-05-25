@@ -138,8 +138,7 @@ void ANetherCrownEnemy::BeginPlay()
 		EnemyHPWidgetComponent->InitWidget();
 
 		UNetherCrownNormalEnemyHPWidgetView* EnemyHPWidgetView{ Cast<UNetherCrownNormalEnemyHPWidgetView>(EnemyHPWidgetComponent->GetWidget()) };
-
-		if (ensureAlways(IsValid(EnemyHPWidgetView)))
+		if (IsValid(EnemyHPWidgetView))
 		{
 			EnemyHPWidgetView->InitNormalEnemyHPWidget(this);
 		}

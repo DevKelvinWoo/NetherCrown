@@ -7,6 +7,7 @@
 #include "GameFramework/Actor.h"
 #include "NetherCrownSequenceInteractActor.generated.h"
 
+class ANetherCrownCharacter;
 class UBoxComponent;
 
 UCLASS()
@@ -22,6 +23,11 @@ protected:
 
 	UFUNCTION()
 	virtual void HandleOnSequenceFinished(){};
+
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(Replicated)
+	TWeakObjectPtr<ANetherCrownCharacter> InteractCharacterWeak{};
 
 private:
 	UFUNCTION()

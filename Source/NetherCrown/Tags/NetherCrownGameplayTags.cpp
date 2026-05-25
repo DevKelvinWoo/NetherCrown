@@ -85,6 +85,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Screen_HUD, "UI.Screen.HUD", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Screen_NPCDialogue, "UI.Screen.NPCDialogue", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Screen_QuestList, "UI.Screen.QuestList", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(UI_Screen_BossEnemyHP, "UI.Screen.BossEnemyHP", "");
 #pragma endregion
 
 #pragma region EnemySkill

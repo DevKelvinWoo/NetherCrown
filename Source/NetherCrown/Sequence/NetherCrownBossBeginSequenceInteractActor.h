@@ -22,6 +22,9 @@ protected:
 	virtual void HandleOnSequenceFinished() override;
 
 private:
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_ShowBossEnemyHpWidget();
+
 	UPROPERTY(EditInstanceOnly, Category = "Boss")
 	TObjectPtr<ANetherCrownBossEnemy> BossEnemy{};
 
