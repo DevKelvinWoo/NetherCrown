@@ -8,6 +8,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownEnemy.generated.h"
 
+class UWidgetComponent;
 class UNetherCrownEnemyActionControlComponent;
 class ANetherCrownCharacter;
 class UNetherCrownEnemySkillComponent;
@@ -40,6 +41,8 @@ public:
 
 	virtual UNetherCrownStatusEffectControlComponent* GetStatusEffectControlComponent() const override;
 
+	void SetHpWidgetVisibility(const bool bIsVisible);
+
 	void SetCurrentTargetCharacter(ANetherCrownCharacter* InTargetCharacter);
 	ANetherCrownCharacter* GetCurrentTargetCharacter() const { return CurrentTargetCharacterWeak.Get(); }
 
@@ -55,6 +58,9 @@ protected:
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SetEnemyHPWidgetVisibility(const bool bIsVisible);
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	ENetherCrownCrowdControlType GetCrowdControlType() const;
@@ -108,6 +114,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownEnemyActionControlComponent> EnemyActionControlComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UWidgetComponent> EnemyHPWidgetComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyWeaponClass")
 	TSubclassOf<ANetherCrownEnemyWeapon> EnemyWeaponClass{};

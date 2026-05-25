@@ -5,7 +5,6 @@
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "BehaviorTree/BehaviorTree.h"
 #include "BehaviorTree/BlackboardComponent.h"
-#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "Perception/AIPerceptionComponent.h"
 #include "Perception/AISenseConfig_Sight.h"
@@ -113,6 +112,7 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 
 		BlackboardComponentCached->SetValueAsObject(EnemyAITuningData.TargetActorBlackboardKeyName, TargetCharacter);
 		OwnerEnemy->SetCurrentTargetCharacter(TargetCharacter);
+		OwnerEnemy->SetHpWidgetVisibility(true);
 	}
 	else
 	{
@@ -127,6 +127,7 @@ void ANetherCrownEnemyAIController::HandleTargetPerceptionUpdated(AActor* Actor,
 
 		OwnerEnemy->SetCharacterMaxSpeed(false);
 		OwnerEnemy->SetCurrentTargetCharacter(nullptr);
+		OwnerEnemy->SetHpWidgetVisibility(false);
 	}
 }
 

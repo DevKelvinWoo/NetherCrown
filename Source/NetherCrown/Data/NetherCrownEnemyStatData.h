@@ -13,6 +13,9 @@ struct FNetherCrownEnemyStat
 
 public:
 	UPROPERTY(EditAnywhere)
+	int32 EnemyMaxHP{ 100 };
+
+	UPROPERTY(EditAnywhere)
 	int32 EnemyHP{ 100 };
 
 	UPROPERTY(EditAnywhere)

@@ -14,22 +14,31 @@ class NETHERCROWN_API UNetherCrownEnemyStatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnEnemyHPModified, const float);
+
 public:
 	UNetherCrownEnemyStatComponent();
 
 	const FNetherCrownEnemyStat& GetEnemyStatData() const { return EnemyStatData; }
+
+	FOnEnemyHPModified& GetOnEnemyHPModified() { return OnEnemyHPModified; }
 
 	void ModifyEnemyHp(float HpDelta);
 
 protected:
 	virtual void BeginPlay() override;
 
+	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
 	void CacheOwnerEnemy();
 
 	void LoadEnemyStatData();
 
-	UPROPERTY(Transient)
+	UFUNCTION()
+	void OnRep_EnemyStatData(const FNetherCrownEnemyStat& OldEnemyStatData);
+
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_EnemyStatData)
 	FNetherCrownEnemyStat EnemyStatData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "StatDataAsset")
@@ -37,4 +46,6 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
+
+	FOnEnemyHPModified OnEnemyHPModified{};
 };

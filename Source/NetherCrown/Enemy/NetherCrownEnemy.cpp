@@ -13,12 +13,14 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "Components/NetherCrownEnemyActionControlComponent.h"
+#include "Components/WidgetComponent.h"
 #include "NetherCrown/Components/NetherCrownCrowdControlComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyBTCosmeticComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyDamageReceiverComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
 #include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
 #include "NetherCrown/Weapon/NetherCrownEnemyWeapon.h"
+#include "NetherCrown/Widgets/NetherCrownNormalEnemyHPWidgetView.h"
 
 ANetherCrownEnemy::ANetherCrownEnemy()
 {
@@ -46,6 +48,10 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 
 	EnemyActionControlComponent = CreateDefaultSubobject<UNetherCrownEnemyActionControlComponent>(TEXT("EnemyActionControlComponent"));
 
+	EnemyHPWidgetComponent = CreateDefaultSubobject<UWidgetComponent>(TEXT("EnemyHPWidgetComponent"));
+	EnemyHPWidgetComponent->SetupAttachment(RootComponent);
+	EnemyHPWidgetComponent->SetVisibility(false);
+
 	bNetLoadOnClient = true;
 	bReplicates = true;
 	SetReplicatingMovement(true);
@@ -56,6 +62,29 @@ ANetherCrownEnemy::ANetherCrownEnemy()
 UNetherCrownStatusEffectControlComponent* ANetherCrownEnemy::GetStatusEffectControlComponent() const
 {
 	return StatusEffectControlComponent;
+}
+
+void ANetherCrownEnemy::SetHpWidgetVisibility(const bool bIsVisible)
+{
+	if (HasAuthority())
+	{
+		Multicast_SetEnemyHPWidgetVisibility(bIsVisible);
+	}
+}
+
+void ANetherCrownEnemy::Multicast_SetEnemyHPWidgetVisibility_Implementation(const bool bIsVisible)
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(EnemyHPWidgetComponent)))
+	{
+		return;
+	}
+
+	EnemyHPWidgetComponent->SetVisibility(bIsVisible);
 }
 
 void ANetherCrownEnemy::SetCurrentTargetCharacter(ANetherCrownCharacter* InTargetCharacter)
@@ -102,6 +131,18 @@ void ANetherCrownEnemy::BeginPlay()
 	if (GetNetMode() != NM_DedicatedServer && ensureAlways(IsValid(StatusNiagaraComponent)))
 	{
 		StatusEffectControlComponent->SetHandledStatusNiagaraComponent(StatusNiagaraComponent);
+	}
+
+	if (GetNetMode() != NM_DedicatedServer && ensureAlways(IsValid(EnemyHPWidgetComponent)))
+	{
+		EnemyHPWidgetComponent->InitWidget();
+
+		UNetherCrownNormalEnemyHPWidgetView* EnemyHPWidgetView{ Cast<UNetherCrownNormalEnemyHPWidgetView>(EnemyHPWidgetComponent->GetWidget()) };
+
+		if (ensureAlways(IsValid(EnemyHPWidgetView)))
+		{
+			EnemyHPWidgetView->InitNormalEnemyHPWidget(this);
+		}
 	}
 
 	SetReplicateMovement(true);

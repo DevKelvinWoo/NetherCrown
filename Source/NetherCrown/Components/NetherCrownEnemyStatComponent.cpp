@@ -2,11 +2,14 @@
 
 #include "NetherCrownEnemyStatComponent.h"
 
+#include "Net/UnrealNetwork.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 
 UNetherCrownEnemyStatComponent::UNetherCrownEnemyStatComponent()
 {
 	PrimaryComponentTick.bCanEverTick = false;
+
+	SetIsReplicatedByDefault(true);
 }
 
 void UNetherCrownEnemyStatComponent::BeginPlay()
@@ -16,6 +19,13 @@ void UNetherCrownEnemyStatComponent::BeginPlay()
 	CacheOwnerEnemy();
 
 	LoadEnemyStatData();
+}
+
+void UNetherCrownEnemyStatComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ThisClass, EnemyStatData);
 }
 
 void UNetherCrownEnemyStatComponent::CacheOwnerEnemy()
@@ -39,6 +49,14 @@ void UNetherCrownEnemyStatComponent::LoadEnemyStatData()
 	EnemyStatData = PlayerStatDataAsset->GetEnemyStatData();
 }
 
+void UNetherCrownEnemyStatComponent::OnRep_EnemyStatData(const FNetherCrownEnemyStat& OldEnemyStatData)
+{
+	if (EnemyStatData.EnemyHP != OldEnemyStatData.EnemyHP)
+	{
+		OnEnemyHPModified.Broadcast(static_cast<float>(EnemyStatData.EnemyHP) / EnemyStatData.EnemyMaxHP);
+	}
+}
+
 void UNetherCrownEnemyStatComponent::ModifyEnemyHp(float HpDelta)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
@@ -47,4 +65,6 @@ void UNetherCrownEnemyStatComponent::ModifyEnemyHp(float HpDelta)
 	}
 
 	EnemyStatData.EnemyHP += HpDelta;
+
+	OnEnemyHPModified.Broadcast(static_cast<float>(EnemyStatData.EnemyHP / EnemyStatData.EnemyMaxHP));
 }
