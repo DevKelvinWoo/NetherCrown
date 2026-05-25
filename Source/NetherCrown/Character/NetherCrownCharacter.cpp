@@ -144,6 +144,8 @@ void ANetherCrownCharacter::BeginPlay()
 	if (ensureAlways(IsValid(NetherCrownControlPPComponent)) && ensureAlways(IsValid(NetherCrownPostProcessComponent)))
 	{
 		NetherCrownControlPPComponent->SetHandlingPostProcessComponent(NetherCrownPostProcessComponent);
+		NetherCrownControlPPComponent->SetHandlingCameraComponent(MainCameraComponent);
+		NetherCrownControlPPComponent->TryBindLowHealthPostProcess();
 	}
 
 	if (ensureAlways(IsValid(NetherCrownControlGhostTrailComponent)) && ensureAlways(IsValid(NetherCrownGhostTrailNiagaraComponent)))
@@ -511,6 +513,11 @@ void ANetherCrownCharacter::OnRep_PlayerState()
 	if (!IsLocallyControlled())
 	{
 		return;
+	}
+
+	if (ensureAlways(IsValid(NetherCrownControlPPComponent)))
+	{
+		NetherCrownControlPPComponent->TryBindLowHealthPostProcess();
 	}
 
 	OnRepPlayerState.Broadcast();

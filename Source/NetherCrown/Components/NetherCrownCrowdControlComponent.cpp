@@ -4,11 +4,13 @@
 
 #include "AIController.h"
 #include "NetherCrown/NetherCrown.h"
+#include "NetherCrownControlPPComponent.h"
 #include "NetherCrownStatusEffectControlComponent.h"
 #include "Animation/AnimMontage.h"
 #include "Curves/CurveFloat.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Net/UnrealNetwork.h"
+#include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 
 UNetherCrownCrowdControlComponent::UNetherCrownCrowdControlComponent()
@@ -103,6 +105,16 @@ void UNetherCrownCrowdControlComponent::Multicast_SetCrowdControlState_Implement
 	SetCrowdControlActive(InCrowdControlType, true);
 	RefreshCrowdControlType();
 	RefreshMovementAndAnimationSettings();
+
+	ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(CachedOwner) };
+	if (IsValid(OwnerCharacter) && OwnerCharacter->IsLocallyControlled())
+	{
+		UNetherCrownControlPPComponent* ControlPPComponent{ OwnerCharacter->GetControlPPComponent() };
+		if (ensureAlways(IsValid(ControlPPComponent)))
+		{
+			ControlPPComponent->FlashCrowdControlPostProcess();
+		}
+	}
 }
 
 void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime)

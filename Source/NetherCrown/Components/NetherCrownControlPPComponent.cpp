@@ -2,9 +2,12 @@
 
 #include "NetherCrownControlPPComponent.h"
 
+#include "Camera/CameraComponent.h"
 #include "Components/PostProcessComponent.h"
 #include "Curves/CurveFloat.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Components/NetherCrownPlayerStatComponent.h"
+#include "NetherCrown/PlayerState/NetherCrownPlayerState.h"
 
 UNetherCrownControlPPComponent::UNetherCrownControlPPComponent()
 {
@@ -29,6 +32,24 @@ void UNetherCrownControlPPComponent::SetHandlingPostProcessComponent(UPostProces
 	HandledPostProcessComponent->bUnbound = true;
 	HandledPostProcessComponent->Priority = 10.f;
 	HandledPostProcessComponent->BlendWeight = 0.f;
+}
+
+void UNetherCrownControlPPComponent::SetHandlingCameraComponent(UCameraComponent* CameraComponent)
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	HandledCameraComponentWeak = MakeWeakObjectPtr(CameraComponent);
+
+	UCameraComponent* HandledCameraComponent{ HandledCameraComponentWeak.Get() };
+	if (!ensureAlways(IsValid(HandledCameraComponent)))
+	{
+		return;
+	}
+
+	HandledCameraComponent->PostProcessBlendWeight = 0.f;
 }
 
 void UNetherCrownControlPPComponent::ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic/*true*/)
@@ -73,6 +94,80 @@ void UNetherCrownControlPPComponent::ClearPostProcessImmediately()
 	PostProcessBlendEndFloatTimeline.Stop();
 
 	ResetPostProcess();
+}
+
+void UNetherCrownControlPPComponent::TryBindLowHealthPostProcess()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(HandledCameraComponentWeak.Get())))
+	{
+		return;
+	}
+
+	ANetherCrownPlayerState* NetherCrownPlayerState{ CachedCharacter->GetPlayerState<ANetherCrownPlayerState>() };
+	if (!IsValid(NetherCrownPlayerState))
+	{
+		SetLowHealthCameraPostProcessActive(false);
+		return;
+	}
+
+	UNetherCrownPlayerStatComponent* PlayerStatComponent{ NetherCrownPlayerState->GetNetherCrownPlayerStatComponent() };
+	if (!ensureAlways(IsValid(PlayerStatComponent)))
+	{
+		SetLowHealthCameraPostProcessActive(false);
+		return;
+	}
+
+	if (BoundPlayerStatComponent == PlayerStatComponent)
+	{
+		return;
+	}
+
+	if (IsValid(BoundPlayerStatComponent))
+	{
+		BoundPlayerStatComponent->GetOnCharacterHPModified().RemoveAll(this);
+	}
+
+	BoundPlayerStatComponent = PlayerStatComponent;
+	BoundPlayerStatComponent->GetOnCharacterHPModified().AddUObject(this, &ThisClass::HandleCharacterHPModified);
+
+	const FNetherCrownPlayerStat& PlayerStatData{ BoundPlayerStatComponent->GetPlayerStatData() };
+	if (PlayerStatData.CharacterMaxHP <= 0.f)
+	{
+		SetLowHealthCameraPostProcessActive(false);
+		return;
+	}
+
+	HandleCharacterHPModified(PlayerStatData.CharacterHP / PlayerStatData.CharacterMaxHP);
+}
+
+void UNetherCrownControlPPComponent::FlashCrowdControlPostProcess()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	SetLowHealthCameraPostProcessActive(true);
+
+	UWorld* World{ GetWorld() };
+	if (!ensureAlways(IsValid(World)))
+	{
+		return;
+	}
+
+	World->GetTimerManager().ClearTimer(TimerHandle_CrowdControlPostProcessFlash);
+	World->GetTimerManager().SetTimer(
+		TimerHandle_CrowdControlPostProcessFlash,
+		this,
+		&ThisClass::RestorePostProcessAfterCrowdControlFlash,
+		CrowdControlPostProcessFlashDuration,
+		false
+	);
 }
 
 void UNetherCrownControlPPComponent::BeginPlay()
@@ -158,6 +253,50 @@ void UNetherCrownControlPPComponent::BindTimelineFunctions()
 	FOnTimelineEvent PostProcessBlendEndFinishedFunc{};
 	PostProcessBlendEndFinishedFunc.BindUFunction(this, FName("HandlePostProcessBlendEndTimelineFinished"));
 	PostProcessBlendEndFloatTimeline.SetTimelineFinishedFunc(PostProcessBlendEndFinishedFunc);
+}
+
+void UNetherCrownControlPPComponent::HandleCharacterHPModified(const float RemainHPRatio)
+{
+	SetLowHealthCameraPostProcessActive(RemainHPRatio < LowHealthPostProcessThreshold);
+}
+
+void UNetherCrownControlPPComponent::SetLowHealthCameraPostProcessActive(const bool bInActive)
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	UCameraComponent* HandledCameraComponent{ HandledCameraComponentWeak.Get() };
+	if (!ensureAlways(IsValid(HandledCameraComponent)))
+	{
+		return;
+	}
+
+	HandledCameraComponent->PostProcessBlendWeight = bInActive ? 1.f : 0.f;
+}
+
+void UNetherCrownControlPPComponent::RestorePostProcessAfterCrowdControlFlash()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	if (!IsValid(BoundPlayerStatComponent))
+	{
+		SetLowHealthCameraPostProcessActive(false);
+		return;
+	}
+
+	const FNetherCrownPlayerStat& PlayerStatData{ BoundPlayerStatComponent->GetPlayerStatData() };
+	if (PlayerStatData.CharacterMaxHP <= 0.f)
+	{
+		SetLowHealthCameraPostProcessActive(false);
+		return;
+	}
+
+	HandleCharacterHPModified(PlayerStatData.CharacterHP / PlayerStatData.CharacterMaxHP);
 }
 
 void UNetherCrownControlPPComponent::StartClearPostProcessTimer(float Duration)
