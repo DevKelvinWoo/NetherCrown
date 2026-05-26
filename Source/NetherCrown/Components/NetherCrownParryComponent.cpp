@@ -5,6 +5,7 @@
 #include "NetherCrownCrowdControlComponent.h"
 #include "NetherCrownPlayerStatComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/Character/NetherCrownPlayerController.h"
 #include "NetherCrown/DamageTypes/NetherCrownDamageType.h"
 #include "NetherCrown/DamageTypes/NetherCrownPhysicalDamageType.h"
 #include "NetherCrown/Data/NetherCrownParryData.h"
@@ -77,41 +78,52 @@ bool UNetherCrownParryComponent::IsParrying() const
 	return PlayerState->IsParrying();
 }
 
-void UNetherCrownParryComponent::Parry(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass)
+bool UNetherCrownParryComponent::Parry(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass)
 {
 	if (!IsValid(CachedCharacter) || !CachedCharacter->HasAuthority())
 	{
-		return;
+		return false;
+	}
+
+	if (!CanParryDamageCauser(DamageCauser))
+	{
+		return false;
 	}
 
 	ANetherCrownEnemyMagicProjectile* EnemyMagicProjectile{ Cast<ANetherCrownEnemyMagicProjectile>(DamageCauser) };
 	if (IsValid(EnemyMagicProjectile))
 	{
+		Client_PlayParryCameraShake();
 		Multicast_PlayParrySoundAndEffect();
 		ReflectEnemyMagicProjectile(EnemyMagicProjectile);
-		return;
+		return true;
 	}
 
 	ANetherCrownEnemy* DamageCauserEnemy{ Cast<ANetherCrownEnemy>(DamageCauser) };
 	if (IsValid(DamageCauserEnemy) && DamageTypeClass == UNetherCrownPhysicalDamageType::StaticClass())
 	{
+		Client_PlayParryCameraShake();
 		Multicast_PlayParrySoundAndEffect();
 
 		UNetherCrownCrowdControlComponent* CCControlComponent{ DamageCauserEnemy->GetCrowdControlComponent() };
 		if (!ensureAlways(IsValid(CCControlComponent)))
 		{
-			return;
+			return true;
 		}
 
 		if (!ensureAlways(IsValid(CachedParryDataAsset)))
 		{
-			return;
+			return true;
 		}
 
 		const FNetherCrownParryData& ParryData{ CachedParryDataAsset->GetParryData() };
 		CCControlComponent->ApplyCrowdControl(ENetherCrownCrowdControlType::STUN, ParryData.ParryStunDuration);
 		CCControlComponent->Stun();
+
+		return true;
 	}
+
+	return false;
 }
 
 void UNetherCrownParryComponent::BeginPlay()
@@ -135,6 +147,46 @@ void UNetherCrownParryComponent::CacheParryData()
 	}
 
 	CachedParryDataAsset = ParryDataAssetSoft.LoadSynchronous();
+}
+
+bool UNetherCrownParryComponent::CanParryDamageCauser(const AActor* DamageCauser) const
+{
+	if (!ensureAlways(IsValid(CachedCharacter)))
+	{
+		return false;
+	}
+
+	if (!IsValid(DamageCauser))
+	{
+		return false;
+	}
+
+	if (!ensureAlways(IsValid(CachedParryDataAsset)))
+	{
+		return false;
+	}
+
+	const FVector& CharacterLocation{ CachedCharacter->GetActorLocation() };
+	const FVector& CharacterForwardVector{ CachedCharacter->GetActorForwardVector() };
+
+	FVector DirectionToTarget{};
+	if (DamageCauser->IsA<ANetherCrownEnemyMagicProjectile>())
+	{
+		DirectionToTarget = -DamageCauser->GetActorForwardVector();
+	}
+	else
+	{
+		const FVector& DamageCauserLocation{ DamageCauser->GetActorLocation() };
+		DirectionToTarget = DamageCauserLocation - CharacterLocation;
+	}
+
+	DirectionToTarget.Normalize();
+
+	const FNetherCrownParryData& ParryData{ CachedParryDataAsset->GetParryData() };
+	const float CosThreshold{ FMath::Cos(FMath::DegreesToRadians(ParryData.ParryThresholdDegrees)) };
+	const double DotResult{ FVector::DotProduct(DirectionToTarget, CharacterForwardVector) };
+
+	return DotResult >= CosThreshold;
 }
 
 void UNetherCrownParryComponent::ReflectEnemyMagicProjectile(ANetherCrownEnemyMagicProjectile* EnemyMagicProjectile) const
@@ -269,6 +321,34 @@ UNetherCrownPlayerStatComponent* UNetherCrownParryComponent::GetPlayerStatCompon
 	}
 
 	return PlayerStatComponent;
+}
+
+void UNetherCrownParryComponent::Client_PlayParryCameraShake_Implementation()
+{
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(CachedCharacter->GetController()) };
+	if (!ensureAlways(IsValid(PlayerController)))
+	{
+		return;
+	}
+
+	APlayerCameraManager* CameraManager{ PlayerController->PlayerCameraManager };
+	if (!ensureAlways(IsValid(CameraManager)))
+	{
+		return;
+	}
+
+	if (!ensureAlways(IsValid(CachedParryDataAsset)))
+	{
+		return;
+	}
+
+	const FNetherCrownParryData& ParryData{ CachedParryDataAsset->GetParryData() };
+	CameraManager->StartCameraShake(ParryData.ParryCameraShakeClass, 1.f);
 }
 
 void UNetherCrownParryComponent::Multicast_PlayParrySoundAndEffect_Implementation()

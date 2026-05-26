@@ -23,7 +23,7 @@ public:
 	void DeactivateParry();
 	bool IsParrying() const;
 
-	void Parry(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass);
+	bool Parry(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass);
 
 protected:
 	virtual void BeginPlay() override;
@@ -33,6 +33,7 @@ private:
 
 	void CacheParryData();
 
+	bool CanParryDamageCauser(const AActor* DamageCauser) const;
 	void ReflectEnemyMagicProjectile(ANetherCrownEnemyMagicProjectile* EnemyMagicProjectile) const;
 	FVector GetMagicProjectileReflectDirection(const ANetherCrownEnemyMagicProjectile* EnemyMagicProjectile) const;
 
@@ -45,6 +46,9 @@ private:
 
 	UFUNCTION(Server, Reliable)
 	void Server_DeactivateParry();
+
+	UFUNCTION(Client, Reliable)
+	void Client_PlayParryCameraShake();
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayParrySoundAndEffect();

@@ -45,7 +45,7 @@ private:
 
 	bool IsParrying() const;
 
-	void HandleParrying(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass);
+	bool HandleParrying(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass);
 
 	UFUNCTION(Client, Unreliable)
 	void Client_PlayHitCameraShake();

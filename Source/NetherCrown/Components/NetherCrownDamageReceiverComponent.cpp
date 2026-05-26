@@ -32,9 +32,8 @@ float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmou
 		return 0.f;
 	}
 
-	if (IsParrying())
+	if (IsParrying() && HandleParrying(DamageCauser, DamageEvent.DamageTypeClass))
 	{
-		HandleParrying(DamageCauser, DamageEvent.DamageTypeClass);
 		return 0.f;
 	}
 
@@ -167,20 +166,20 @@ bool UNetherCrownDamageReceiverComponent::IsParrying() const
 	return OwnerPlayerState->IsParrying();
 }
 
-void UNetherCrownDamageReceiverComponent::HandleParrying(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass)
+bool UNetherCrownDamageReceiverComponent::HandleParrying(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass)
 {
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
 	{
-		return;
+		return false;
 	}
 
 	UNetherCrownParryComponent* ParryComponent{ CachedOwnerCharacter->GetParryComponent() };
 	if (!ensureAlways(IsValid(ParryComponent)))
 	{
-		return;
+		return false;
 	}
 
-	ParryComponent->Parry(DamageCauser, DamageTypeClass);
+	return ParryComponent->Parry(DamageCauser, DamageTypeClass);
 }
 
 void UNetherCrownDamageReceiverComponent::Client_PlayHitCameraShake_Implementation()

@@ -31,6 +31,12 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category = "ParryData")
 	float ParryStunDuration{ 2.5f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "ParryData")
+	float ParryThresholdDegrees{ 45.f };
+
+	UPROPERTY(EditDefaultsOnly, Category = "ParryData")
+	TSubclassOf<UCameraShakeBase> ParryCameraShakeClass{};
 };
 
 UCLASS()
