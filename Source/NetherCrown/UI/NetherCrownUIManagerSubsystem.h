@@ -53,6 +53,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 	void ClearLayer(const FGameplayTag& LayerTag);
 
+	void HideActiveScreensForInteraction();
+	void RestoreHiddenScreensAfterInteraction();
+
 protected:
 	virtual void Deinitialize() override;
 	virtual void PlayerControllerChanged(APlayerController* NewPlayerController) override;
@@ -94,5 +97,9 @@ private:
 	UPROPERTY(Transient)
 	TArray<FGameplayTag> TravelCachedActiveScreenTags{};
 
+	UPROPERTY(Transient)
+	TArray<FGameplayTag> InteractionHiddenScreenTags{};
+
 	bool bPendingTravelRestore{ false };
+	bool bAreScreensHiddenForInteraction{ false };
 };

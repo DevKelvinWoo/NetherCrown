@@ -263,6 +263,8 @@ void ANetherCrownInteractActor::Multicast_ShowInteractActorDialogueWidget_Implem
 		return;
 	}
 
+	UIManagerSubsystem->HideActiveScreensForInteraction();
+
 	UNetherCrownNPCDialogueWidgetView* NPCDialogueWidget{ Cast<UNetherCrownNPCDialogueWidgetView>(UIManagerSubsystem->ShowScreenByTag(NetherCrownTags::UI_Screen_NPCDialogue)) };
 	if (!ensureAlways(IsValid(NPCDialogueWidget)))
 	{

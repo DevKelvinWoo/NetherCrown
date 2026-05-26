@@ -31,6 +31,7 @@ private:
 	void Client_MoveCameraToInteractPosition();
 
 	void RestoreCameraPosition();
+	void RestoreHiddenScreensAfterInteraction() const;
 
 	UFUNCTION(Server, Reliable)
 	void Server_InteractToTarget();

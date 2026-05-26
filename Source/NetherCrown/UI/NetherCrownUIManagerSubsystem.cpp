@@ -254,11 +254,55 @@ void UNetherCrownUIManagerSubsystem::ClearLayer(const FGameplayTag& LayerTag)
 	}
 }
 
+void UNetherCrownUIManagerSubsystem::HideActiveScreensForInteraction()
+{
+	if (bAreScreensHiddenForInteraction)
+	{
+		return;
+	}
+
+	InteractionHiddenScreenTags.Empty();
+	for (const TPair<FGameplayTag, TObjectPtr<UNetherCrownUIScreenBase>>& ActiveScreenPair : ActiveScreenMap)
+	{
+		if (ActiveScreenPair.Key.IsValid() && IsValid(ActiveScreenPair.Value))
+		{
+			InteractionHiddenScreenTags.AddUnique(ActiveScreenPair.Key);
+		}
+	}
+
+	bAreScreensHiddenForInteraction = true;
+
+	const TArray<FGameplayTag> ScreenTagsToHide{ InteractionHiddenScreenTags };
+	for (const FGameplayTag& ScreenTagToHide : ScreenTagsToHide)
+	{
+		HideScreenByTag(ScreenTagToHide);
+	}
+}
+
+void UNetherCrownUIManagerSubsystem::RestoreHiddenScreensAfterInteraction()
+{
+	if (!bAreScreensHiddenForInteraction)
+	{
+		return;
+	}
+
+	const TArray<FGameplayTag> ScreenTagsToRestore{ InteractionHiddenScreenTags };
+	InteractionHiddenScreenTags.Empty();
+	bAreScreensHiddenForInteraction = false;
+
+	for (const FGameplayTag& ScreenTagToRestore : ScreenTagsToRestore)
+	{
+		ShowScreenByTag(ScreenTagToRestore);
+	}
+}
+
 void UNetherCrownUIManagerSubsystem::Deinitialize()
 {
 	ResetRuntimeWidgets();
 	TravelCachedActiveScreenTags.Empty();
+	InteractionHiddenScreenTags.Empty();
 	bPendingTravelRestore = false;
+	bAreScreensHiddenForInteraction = false;
 	ScreenDefinitionMap.Empty();
 
 	Super::Deinitialize();

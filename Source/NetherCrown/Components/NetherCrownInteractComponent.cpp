@@ -13,6 +13,7 @@
 #include "NetherCrown/Interact/NetherCrownInteractActor.h"
 #include "NetherCrown/Interact/NetherCrownInteractNPC.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
+#include "NetherCrown/UI/NetherCrownUIManagerSubsystem.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 UNetherCrownInteractComponent::UNetherCrownInteractComponent()
@@ -63,6 +64,35 @@ void UNetherCrownInteractComponent::RestoreCameraPosition()
 			InteractCameraActor->Destroy();
 		}
 	}
+}
+
+void UNetherCrownInteractComponent::RestoreHiddenScreensAfterInteraction() const
+{
+	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!ensureAlways(IsValid(OwnerCharacter)) || GetNetMode() == NM_DedicatedServer || !OwnerCharacter->IsLocallyControlled())
+	{
+		return;
+	}
+
+	const ANetherCrownPlayerController* PlayerController{ Cast<ANetherCrownPlayerController>(OwnerCharacter->GetController()) };
+	if (!ensureAlways(IsValid(PlayerController)))
+	{
+		return;
+	}
+
+	const ULocalPlayer* LocalPlayer{ PlayerController->GetLocalPlayer() };
+	if (!ensureAlways(IsValid(LocalPlayer)))
+	{
+		return;
+	}
+
+	UNetherCrownUIManagerSubsystem* UIManagerSubsystem{ LocalPlayer->GetSubsystem<UNetherCrownUIManagerSubsystem>() };
+	if (!ensureAlways(IsValid(UIManagerSubsystem)))
+	{
+		return;
+	}
+
+	UIManagerSubsystem->RestoreHiddenScreensAfterInteraction();
 }
 
 void UNetherCrownInteractComponent::Client_PlayInteractSound_Implementation()
@@ -231,5 +261,6 @@ void UNetherCrownInteractComponent::InteractToTarget()
 void UNetherCrownInteractComponent::FinishInteract()
 {
 	RestoreCameraPosition();
+	RestoreHiddenScreensAfterInteraction();
 	Server_FinishInteract();
 }
