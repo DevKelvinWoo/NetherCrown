@@ -53,6 +53,9 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	int32 ShieldValue{ 0 };
+
+	UPROPERTY(EditAnywhere)
+	bool bParrying{ false };
 };
 
 UCLASS()

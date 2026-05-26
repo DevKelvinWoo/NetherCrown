@@ -9,6 +9,7 @@
 #include "NetherCrown/Interface/NetherCrownCrowdControlInterface.h"
 #include "NetherCrownCharacter.generated.h"
 
+class UNetherCrownParryComponent;
 class UNetherCrownInteractComponent;
 class UNetherCrownActionControlComponent;
 class ANetherCrownEnemy;
@@ -59,6 +60,8 @@ public:
 	void EquipCharacter(const FInputActionValue& Value);
 	void ChangeWeapon(const FInputActionValue& Value);
 	void InteractToTarget(const FInputActionValue& Value);
+	void ActiveParry(const FInputActionValue& Value);
+	void DeactivateParry(const FInputActionValue& Value);
 
 	void ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const;
 	void ActiveQSkill(const FInputActionValue& Value) const;
@@ -87,6 +90,9 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	ENetherCrownCrowdControlType GetCrowdControlType() const;
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	bool IsParrying() const;
+
 	UFUNCTION(Server, Reliable)
 	void Server_ReportHitBasicAttackByEnemy(ANetherCrownEnemy* HitCauserEnemy, const int32 EnemyAttackDamage);
 
@@ -100,6 +106,7 @@ public:
 	UNetherCrownDamageReceiverComponent* GetDamageReceiverComponent() const { return NetherCrownDamageReceiverComponent; }
 	UNetherCrownInteractComponent* GetInteractComponent() const { return InteractComponent; }
 	UNetherCrownQuestComponent* GetQuestComponent() const { return QuestComponent; }
+	UNetherCrownParryComponent* GetParryComponent() const { return ParryComponent; }
 
 	FVector GetLastMoveDirection() const { return CachedLastMoveDirection; }
 
@@ -193,6 +200,9 @@ private:
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UNetherCrownQuestComponent> QuestComponent{};
+
+	UPROPERTY(EditDefaultsOnly, Category = "Component")
+	TObjectPtr<UNetherCrownParryComponent> ParryComponent{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "TagData")
 	FNetherCrownCharacterTagData CharacterTagData{};

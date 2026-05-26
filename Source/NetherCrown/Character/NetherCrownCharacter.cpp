@@ -19,6 +19,7 @@
 #include "NetherCrown/Components/NetherCrownDamageReceiverComponent.h"
 #include "NetherCrown/Components/NetherCrownEquipComponent.h"
 #include "NetherCrown/Components/NetherCrownInteractComponent.h"
+#include "NetherCrown/Components/NetherCrownParryComponent.h"
 #include "NetherCrown/Components/NetherCrownQuestComponent.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
 #include "NetherCrown/Components/NetherCrownStatusEffectControlComponent.h"
@@ -45,6 +46,7 @@ ANetherCrownCharacter::ANetherCrownCharacter()
 	StatusEffectControlComponent = CreateDefaultSubobject<UNetherCrownStatusEffectControlComponent>(TEXT("StatusEffectControlComponent"));
 	InteractComponent = CreateDefaultSubobject<UNetherCrownInteractComponent>(TEXT("InteractComponent"));
 	QuestComponent = CreateDefaultSubobject<UNetherCrownQuestComponent>(TEXT("QuestComponent"));
+	ParryComponent = CreateDefaultSubobject<UNetherCrownParryComponent>(TEXT("ParryComponent"));
 
 	SetCharacterDefaultMovementSettings();
 
@@ -369,6 +371,31 @@ void ANetherCrownCharacter::InteractToTarget(const FInputActionValue& Value)
 	}
 }
 
+void ANetherCrownCharacter::ActiveParry(const FInputActionValue& Value)
+{
+	if (!ensureAlways(IsValid(ParryComponent)))
+	{
+		return;
+	}
+
+	if (!Value.Get<bool>())
+	{
+		return;
+	}
+
+	ParryComponent->ActiveParry();
+}
+
+void ANetherCrownCharacter::DeactivateParry(const FInputActionValue& Value)
+{
+	if (!ensureAlways(IsValid(ParryComponent)))
+	{
+		return;
+	}
+
+	ParryComponent->DeactivateParry();
+}
+
 void ANetherCrownCharacter::ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const
 {
 	if (!Value.Get<bool>())
@@ -489,6 +516,16 @@ ENetherCrownCrowdControlType ANetherCrownCharacter::GetCrowdControlType() const
 	}
 
 	return NetherCrownCrowdControlComponent->GetCrowdControlType();
+}
+
+bool ANetherCrownCharacter::IsParrying() const
+{
+	if (!ensureAlways(IsValid(ParryComponent)))
+	{
+		return false;
+	}
+
+	return ParryComponent->IsParrying();
 }
 
 void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(ANetherCrownEnemy* HitCauserEnemy, const int32 EnemyAttackDamage)

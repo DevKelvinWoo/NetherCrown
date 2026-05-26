@@ -22,6 +22,7 @@
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/AnimInstance/NetherCrownEnemyAnimInstance.h"
+#include "NetherCrown/Projectile/NetherCrownEnemyMagicProjectile.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
@@ -115,13 +116,21 @@ float UNetherCrownEnemyDamageReceiverComponent::CalculateFinalDamage(float Damag
 		return 0.f;
 	}
 
+	int32 FinalDamage{};
+	if (const ANetherCrownEnemyMagicProjectile* EnemyMagicProjectile = Cast<ANetherCrownEnemyMagicProjectile>(DamageCauser))
+	{
+		FinalDamage = EnemyMagicProjectile->GetProjectileDamage();
+		return FinalDamage;
+	}
+
 	const bool bIsPhysicalDamage{ DamageEvent.DamageTypeClass->IsChildOf(UNetherCrownPhysicalDamageType::StaticClass()) };
 
 	const int32 ArmorStat{ GetArmorStat(bIsPhysicalDamage) };
+
 	const int32 EffectiveArmor{ FMath::Max(0, ArmorStat - GetWeaponPenetration(bIsPhysicalDamage, DamageCauser)) };
 
 	const float DamageMultiplier{ 100.f / (100.f + EffectiveArmor) };
-	const int32 FinalDamage{ FMath::RoundToInt(DamageAmount * DamageMultiplier) };
+	FinalDamage = FMath::RoundToInt(DamageAmount * DamageMultiplier);
 
 	return FinalDamage;
 }
@@ -276,7 +285,7 @@ int32 UNetherCrownEnemyDamageReceiverComponent::GetWeaponPenetration(const bool 
 	}
 
 	const ANetherCrownCharacter* NetherCrownCharacter = Cast<ANetherCrownCharacter>(DamageCauser);
-	if (!ensureAlways(IsValid(NetherCrownCharacter)))
+	if (!IsValid(NetherCrownCharacter))
 	{
 		return 0;
 	}

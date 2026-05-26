@@ -36,6 +36,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_BossDungeon_DoorSlide);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Quest_WeaponRewardRise);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Interact);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Sound_Character_Knight_Parry);
 #pragma endregion
 
 #pragma region Effect
@@ -58,6 +59,7 @@ namespace NetherCrownTags
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_MagicSpike_Range);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_MagicSpike_Impact);
 	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Boss1_MagicSpike_Hit);
+	NETHERCROWN_API UE_DECLARE_GAMEPLAY_TAG_EXTERN(Effect_Knight_Parry);
 #pragma endregion
 
 #pragma region Weapon

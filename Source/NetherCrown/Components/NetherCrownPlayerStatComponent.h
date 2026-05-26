@@ -29,6 +29,9 @@ public:
 	void ModifyMP(float MPDelta);
 	void ModifyHp(float HpDelta);
 
+	void SetParryingState(bool bActive);
+	bool IsParrying() const;
+
 	//Delegate
 	FOnChacterHPModified& GetOnCharacterHPModified() { return OnCharacterHPModified; }
 	FOnChacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }

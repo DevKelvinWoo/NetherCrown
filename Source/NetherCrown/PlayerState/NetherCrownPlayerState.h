@@ -19,6 +19,7 @@ public:
 	ANetherCrownPlayerState();
 
 	UNetherCrownPlayerStatComponent* GetNetherCrownPlayerStatComponent() const { return NetherCrownPlayerStatComponent; }
+	bool IsParrying() const;
 
 	const FGuid& GetPersistentPlayerId() const { return PersistentPlayerId; }
 	void SetPersistentPlayerId(const FGuid& InPersistentPlayerId);

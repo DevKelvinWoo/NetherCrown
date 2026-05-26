@@ -34,6 +34,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_BossDungeon_DoorSlide, "Sound.BossDungeon.DoorSlide", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Quest_WeaponRewardRise, "Sound.Quest.WeaponRewardRise", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Interact, "Sound.Interact", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Sound_Character_Knight_Parry, "Sound.Character.Knight.Parry", "");
 #pragma endregion
 
 #pragma region Effect
@@ -56,6 +57,7 @@ namespace NetherCrownTags
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_MagicSpike_Range, "Effect.Boss1.MagicSpike.Range", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_MagicSpike_Impact, "Effect.Boss1.MagicSpike.Impact", "");
 	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Boss1_MagicSpike_Hit, "Effect.Boss1.MagicSpike.Hit", "");
+	UE_DEFINE_GAMEPLAY_TAG_COMMENT(Effect_Knight_Parry, "Effect.Knight.Parry", "");
 #pragma endregion
 
 #pragma region Weapon

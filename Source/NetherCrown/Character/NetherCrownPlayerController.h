@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "NetherCrownCharacter.h"
-#include "NetherCrown/UI/NetherCrownUITypes.h"
 #include "GameFramework/PlayerController.h"
 #include "NetherCrownPlayerController.generated.h"
 
@@ -65,6 +64,10 @@ private:
 	void HandleInputActiveCSkill(const FInputActionValue& InActionValue);
 	UFUNCTION()
 	void HandleInputActiveInteract(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void HandleInputActiveParry(const FInputActionValue& InActionValue);
+	UFUNCTION()
+	void HandleInputDeactivateParry(const FInputActionValue& InActionValue);
 
 	template<typename FuncType, typename... ArgsType>
 	void ExecuteCharacterAction(FuncType Func, ArgsType&&... Args);
@@ -93,6 +96,8 @@ private:
 	TObjectPtr<UInputAction> CSkillAction{};
 	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
 	TObjectPtr<UInputAction> InteractionAction{};
+	UPROPERTY(EditDefaultsOnly, Category = "InputAction")
+	TObjectPtr<UInputAction> ParryAction{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "InputMappingContext")
 	TObjectPtr<UInputMappingContext> MappingContext{};

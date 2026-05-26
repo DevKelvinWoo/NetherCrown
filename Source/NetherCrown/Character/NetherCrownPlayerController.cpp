@@ -112,7 +112,7 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	check(EnhancedInputLocalPlayerSubSystem);
 
 	if (!ensure(MappingContext && MoveAction && LookAtAction && JumpAction && AttackBasicAction && EquipAction && ChangeWeaponAction
-					&& QSkillAction && ESkillAction && RSkillAction && ShiftSkillAction && CSkillAction && InteractionAction))
+					&& QSkillAction && ESkillAction && RSkillAction && ShiftSkillAction && CSkillAction && InteractionAction && ParryAction))
 	{
 		UE_LOG(LogNetherCrown, Warning, TEXT("Can't add Mapping Context and InputActions in %hs"), __FUNCTION__);
 
@@ -135,6 +135,9 @@ void ANetherCrownPlayerController::AddIMCAndBindAction()
 	EnhancedPlayerInputComponent->BindAction(ShiftSkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveShiftSkill);
 	EnhancedPlayerInputComponent->BindAction(CSkillAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveCSkill);
 	EnhancedPlayerInputComponent->BindAction(InteractionAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveInteract);
+	EnhancedPlayerInputComponent->BindAction(ParryAction, ETriggerEvent::Started, this, &ThisClass::HandleInputActiveParry);
+	EnhancedPlayerInputComponent->BindAction(ParryAction, ETriggerEvent::Completed, this, &ThisClass::HandleInputDeactivateParry);
+	EnhancedPlayerInputComponent->BindAction(ParryAction, ETriggerEvent::Canceled, this, &ThisClass::HandleInputDeactivateParry);
 }
 
 void ANetherCrownPlayerController::HandleInputMoveCharacter(const FInputActionValue& InActionValue)
@@ -200,6 +203,16 @@ void ANetherCrownPlayerController::HandleInputActiveCSkill(const FInputActionVal
 void ANetherCrownPlayerController::HandleInputActiveInteract(const FInputActionValue& InActionValue)
 {
 	ExecuteCharacterAction(&ANetherCrownCharacter::InteractToTarget, InActionValue);
+}
+
+void ANetherCrownPlayerController::HandleInputActiveParry(const FInputActionValue& InActionValue)
+{
+	ExecuteCharacterAction(&ANetherCrownCharacter::ActiveParry, InActionValue);
+}
+
+void ANetherCrownPlayerController::HandleInputDeactivateParry(const FInputActionValue& InActionValue)
+{
+	ExecuteCharacterAction(&ANetherCrownCharacter::DeactivateParry, InActionValue);
 }
 
 void ANetherCrownPlayerController::Client_BeginLevelTravelPersistence_Implementation()

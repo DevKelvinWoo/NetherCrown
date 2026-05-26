@@ -178,6 +178,10 @@ void UNetherCrownEnemyRangedBasicAttackComponent::SpawnRangedBasicAttackProjecti
 	InitData.ProjectileSpeed = EnemyProjectileData.ProjectileSpeed;
 	InitData.DestroyNiagaraEffectTag = EnemyProjectileTagData.ProjectileDestroyNiagaraEffectTag;
 	InitData.DestroySoundTag = EnemyProjectileTagData.ProjectileDestroySoundTag;
+	InitData.HitImpactEffectTag = EnemyProjectileTagData.ProjectileHitImpactEffectTag;
+	InitData.HitImpactSoundTag = EnemyProjectileTagData.ProjectileHitImpactSoundTag;
+	InitData.ProjectileDamage = GetEnemyMagicAttackDamage();
+	InitData.OwnerEnemyWeak = MakeWeakObjectPtr(CachedOwnerEnemy);
 
 	EnemyMagicProjectile->InitProjectile(InitData);
 }

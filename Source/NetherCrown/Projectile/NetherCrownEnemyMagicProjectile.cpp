@@ -8,6 +8,9 @@
 #include "Net/UnrealNetwork.h"
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
+#include "NetherCrown/DamageTypes/NetherCrownDamageEvent.h"
+#include "NetherCrown/DamageTypes/NetherCrownMagicDamageType.h"
+#include "NetherCrown/Enemy/NetherCrownEnemy.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
 
 ANetherCrownEnemyMagicProjectile::ANetherCrownEnemyMagicProjectile()
@@ -39,8 +42,25 @@ void ANetherCrownEnemyMagicProjectile::InitProjectile(const FNetherCrownEnemyMag
 	ProjectileMovementComponent->MaxSpeed = InitData.ProjectileSpeed;
 	ProjectileMovementComponent->Velocity = InitData.Direction * InitData.ProjectileSpeed;
 
+	OwnerEnemy = InitData.OwnerEnemyWeak.Get();
+	ReflectedOwnerCharacter = InitData.ReflectedOwnerCharacterWeak.Get();
+
 	DestroyNiagaraEffectTag = InitData.DestroyNiagaraEffectTag;
 	DestroySoundTag = InitData.DestroySoundTag;
+	HitImpactEffectTag = InitData.HitImpactEffectTag;
+	HitImpactSoundTag = InitData.HitImpactSoundTag;
+	ProjectileDamage = InitData.ProjectileDamage;
+	bReflected = InitData.bReflected;
+}
+
+float ANetherCrownEnemyMagicProjectile::GetProjectileSpeed() const
+{
+	if (!ensureAlways(IsValid(ProjectileMovementComponent)))
+	{
+		return 0.f;
+	}
+
+	return ProjectileMovementComponent->MaxSpeed;
 }
 
 void ANetherCrownEnemyMagicProjectile::BeginPlay()
@@ -59,6 +79,12 @@ void ANetherCrownEnemyMagicProjectile::GetLifetimeReplicatedProps(TArray<class F
 
 	DOREPLIFETIME(ThisClass, DestroyNiagaraEffectTag);
 	DOREPLIFETIME(ThisClass, DestroySoundTag);
+	DOREPLIFETIME(ThisClass, OwnerEnemy);
+	DOREPLIFETIME(ThisClass, ReflectedOwnerCharacter);
+	DOREPLIFETIME(ThisClass, HitImpactEffectTag);
+	DOREPLIFETIME(ThisClass, HitImpactSoundTag);
+	DOREPLIFETIME(ThisClass, ProjectileDamage);
+	DOREPLIFETIME(ThisClass, bReflected);
 }
 
 void ANetherCrownEnemyMagicProjectile::HandleOnHitSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap,
@@ -72,6 +98,35 @@ void ANetherCrownEnemyMagicProjectile::HandleOnHitSphereBeginOverlap(UPrimitiveC
 
 	if (!IsValid(OtherActor) || OtherActor == this || OtherActor == GetOwner() || OtherActor == GetInstigator())
 	{
+		return;
+	}
+
+	if (bReflected)
+	{
+		ANetherCrownEnemy* HitEnemy{ Cast<ANetherCrownEnemy>(OtherActor) };
+		if (!IsValid(HitEnemy))
+		{
+			return;
+		}
+
+		FNetherCrownDamageEvent::ApplyDamage(
+			HitEnemy,
+			ProjectileDamage,
+			IsValid(ReflectedOwnerCharacter) ? ReflectedOwnerCharacter->GetController() : nullptr,
+			this,
+			UNetherCrownMagicDamageType::StaticClass(),
+			HitImpactSoundTag,
+			HitImpactEffectTag
+		);
+
+		const FTransform& HitImpactTransform{ FTransform(FRotator(), SweepResult.Location, FVector::OneVector) };
+		Multicast_SpawnHitImpactEffect(HitImpactTransform);
+
+		const FTransform& DestroyNiagaraSystemTransform{ HitImpactTransform };
+		//Multicast_SpawnDestroyProjectileEffect(DestroyNiagaraSystemTransform);
+		//Multicast_PlayDestroyProjectileSound();
+
+		Destroy();
 		return;
 	}
 
@@ -108,4 +163,14 @@ void ANetherCrownEnemyMagicProjectile::Multicast_SpawnDestroyProjectileEffect_Im
 	}
 
 	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, DestroyNiagaraEffectTag, DestroyTransform);
+}
+
+void ANetherCrownEnemyMagicProjectile::Multicast_SpawnHitImpactEffect_Implementation(const FTransform& HitImpactTransform)
+{
+	if (GetNetMode() == NM_DedicatedServer)
+	{
+		return;
+	}
+
+	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, HitImpactEffectTag, HitImpactTransform);
 }

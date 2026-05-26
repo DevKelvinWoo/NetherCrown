@@ -12,6 +12,7 @@ class UProjectileMovementComponent;
 class USphereComponent;
 
 class ANetherCrownCharacter;
+class ANetherCrownEnemy;
 
 USTRUCT()
 struct FNetherCrownEnemyMagicProjectileInitData
@@ -30,6 +31,24 @@ public:
 
 	UPROPERTY()
 	FGameplayTag DestroySoundTag{};
+
+	UPROPERTY()
+	FGameplayTag HitImpactEffectTag{};
+
+	UPROPERTY()
+	FGameplayTag HitImpactSoundTag{};
+
+	UPROPERTY()
+	TWeakObjectPtr<ANetherCrownEnemy> OwnerEnemyWeak{};
+
+	UPROPERTY()
+	TWeakObjectPtr<ANetherCrownCharacter> ReflectedOwnerCharacterWeak{};
+
+	UPROPERTY()
+	int32 ProjectileDamage{};
+
+	UPROPERTY()
+	bool bReflected{ false };
 };
 
 UCLASS()
@@ -46,6 +65,14 @@ public:
 
 	FOnMagicProjectileHit& GetOnMagicProjectileHit() { return OnMagicProjectileHit; }
 
+	ANetherCrownEnemy* GetOwnerEnemy() const { return OwnerEnemy; }
+	float GetProjectileSpeed() const;
+	int32 GetProjectileDamage() const { return ProjectileDamage; }
+	const FGameplayTag& GetDestroyNiagaraEffectTag() const { return DestroyNiagaraEffectTag; }
+	const FGameplayTag& GetDestroySoundTag() const { return DestroySoundTag; }
+	const FGameplayTag& GetHitImpactEffectTag() const { return HitImpactEffectTag; }
+	const FGameplayTag& GetHitImpactSoundTag() const { return HitImpactSoundTag; }
+
 protected:
 	virtual void BeginPlay() override;
 
@@ -61,6 +88,9 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_PlayDestroyProjectileSound();
 
+	UFUNCTION(NetMulticast, Reliable)
+	void Multicast_SpawnHitImpactEffect(const FTransform& HitImpactTransform);
+
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USphereComponent> HitSphereComponent{};
 
@@ -75,6 +105,24 @@ private:
 
 	UPROPERTY(Replicated)
 	FGameplayTag DestroySoundTag{};
+
+	UPROPERTY(Replicated)
+	TObjectPtr<ANetherCrownEnemy> OwnerEnemy{};
+
+	UPROPERTY(Replicated)
+	TObjectPtr<ANetherCrownCharacter> ReflectedOwnerCharacter{};
+
+	UPROPERTY(Replicated)
+	FGameplayTag HitImpactEffectTag{};
+
+	UPROPERTY(Replicated)
+	FGameplayTag HitImpactSoundTag{};
+
+	UPROPERTY(Replicated)
+	int32 ProjectileDamage{};
+
+	UPROPERTY(Replicated)
+	bool bReflected{ false };
 
 	FOnMagicProjectileHit OnMagicProjectileHit;
 };

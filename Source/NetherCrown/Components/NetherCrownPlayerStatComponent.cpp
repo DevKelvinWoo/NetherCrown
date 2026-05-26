@@ -121,3 +121,20 @@ void UNetherCrownPlayerStatComponent::ModifyHp(float HpDelta)
 
 	OnCharacterHPModified.Broadcast(PlayerStatData.CharacterHP / PlayerStatData.CharacterMaxHP);
 }
+
+void UNetherCrownPlayerStatComponent::SetParryingState(bool bActive)
+{
+	CacheOwnerCharacter();
+
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	PlayerStatData.bParrying = bActive;
+}
+
+bool UNetherCrownPlayerStatComponent::IsParrying() const
+{
+	return PlayerStatData.bParrying;
+}

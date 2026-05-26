@@ -5,6 +5,7 @@
 
 #include "NetherCrownActionControlComponent.h"
 #include "NetherCrownCrowdControlComponent.h"
+#include "NetherCrownParryComponent.h"
 #include "NetherCrownPlayerStatComponent.h"
 #include "Engine/DamageEvents.h"
 #include "Net/UnrealNetwork.h"
@@ -28,6 +29,12 @@ float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmou
 {
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
 	{
+		return 0.f;
+	}
+
+	if (IsParrying())
+	{
+		HandleParrying(DamageCauser, DamageEvent.DamageTypeClass);
 		return 0.f;
 	}
 
@@ -142,6 +149,38 @@ void UNetherCrownDamageReceiverComponent::SetHitReactStateAndTimer()
 
 	const FNetherCrownCharacterDamageReceiveData& DamageReceiveData{ CachedDamageReceiveDataAsset->GetDamageReceiveData() };
 	TimerManager.SetTimer(HitReactTimerHandle, HitReactTimerDelegate, DamageReceiveData.HitReactDuration, false);
+}
+
+bool UNetherCrownDamageReceiverComponent::IsParrying() const
+{
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
+	{
+		return false;
+	}
+
+	const ANetherCrownPlayerState* OwnerPlayerState{ Cast<ANetherCrownPlayerState>(CachedOwnerCharacter->GetPlayerState()) };
+	if (!ensureAlways(IsValid(OwnerPlayerState)))
+	{
+		return false;
+	}
+
+	return OwnerPlayerState->IsParrying();
+}
+
+void UNetherCrownDamageReceiverComponent::HandleParrying(AActor* DamageCauser, const TSubclassOf<UDamageType> DamageTypeClass)
+{
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
+	{
+		return;
+	}
+
+	UNetherCrownParryComponent* ParryComponent{ CachedOwnerCharacter->GetParryComponent() };
+	if (!ensureAlways(IsValid(ParryComponent)))
+	{
+		return;
+	}
+
+	ParryComponent->Parry(DamageCauser, DamageTypeClass);
 }
 
 void UNetherCrownDamageReceiverComponent::Client_PlayHitCameraShake_Implementation()

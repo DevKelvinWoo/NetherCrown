@@ -14,6 +14,16 @@ ANetherCrownPlayerState::ANetherCrownPlayerState()
 	NetherCrownPlayerStatComponent->SetIsReplicated(true);
 }
 
+bool ANetherCrownPlayerState::IsParrying() const
+{
+	if (!ensureAlways(IsValid(NetherCrownPlayerStatComponent)))
+	{
+		return false;
+	}
+
+	return NetherCrownPlayerStatComponent->IsParrying();
+}
+
 void ANetherCrownPlayerState::SetPersistentPlayerId(const FGuid& InPersistentPlayerId)
 {
 	if (!HasAuthority())
