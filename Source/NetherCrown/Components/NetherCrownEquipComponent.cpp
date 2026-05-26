@@ -226,6 +226,11 @@ const UNetherCrownWeaponData* UNetherCrownEquipComponent::GetEquippedWeaponData(
 	return EquippedWeapon->GetWeaponData();
 }
 
+void UNetherCrownEquipComponent::OnRep_EquippedWeapon()
+{
+	OnEquipWeapon.Broadcast(IsValid(EquippedWeapon));
+}
+
 ANetherCrownWeapon* UNetherCrownEquipComponent::GetStowedWeapon(const ENetherCrownStowWeaponPosition StowWeaponPosition) const
 {
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };

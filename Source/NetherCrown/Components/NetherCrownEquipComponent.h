@@ -62,6 +62,9 @@ protected:
 	virtual void BeginPlay() override;
 
 private:
+	UFUNCTION()
+	void OnRep_EquippedWeapon();
+
 	UFUNCTION(Server, Reliable)
 	void Server_EquipOrStowWeapon();
 
@@ -94,7 +97,7 @@ private:
 
 	TWeakObjectPtr<ANetherCrownWeapon> EquipableWeaponWeak{};
 
-	UPROPERTY(Transient, Replicated)
+	UPROPERTY(Transient, ReplicatedUsing = OnRep_EquippedWeapon)
 	TObjectPtr<ANetherCrownWeapon> EquippedWeapon{};
 
 	UPROPERTY(Transient)

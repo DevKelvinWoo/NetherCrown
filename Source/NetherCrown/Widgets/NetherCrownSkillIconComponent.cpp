@@ -6,6 +6,7 @@
 
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Components/NetherCrownSkillComponent.h"
+#include "Animation/WidgetAnimation.h"
 #include "Components/ProgressBar.h"
 #include "Components/MenuAnchor.h"
 #include "Components/TextBlock.h"
@@ -85,6 +86,22 @@ void UNetherCrownSkillIconComponent::SetSkillCoolDownProgress(float Percent)
 	}
 
 	NativeSkillThumbnailProgressBar->SetPercent(Percent);
+}
+
+void UNetherCrownSkillIconComponent::SetSkillIconActive(const bool bActive, const bool bPlayActivateAnimation)
+{
+	if (GetIsEnabled() == bActive)
+	{
+		return;
+	}
+
+	SetIsEnabled(bActive);
+	SetRenderOpacity(bActive ? 1.f : 0.35f);
+
+	if (bActive && bPlayActivateAnimation && IsValid(SkillIconActivateAnimation.Get()))
+	{
+		PlayAnimation(SkillIconActivateAnimation, 0.f, 1);
+	}
 }
 
 void UNetherCrownSkillIconComponent::ApplySkillVisual()

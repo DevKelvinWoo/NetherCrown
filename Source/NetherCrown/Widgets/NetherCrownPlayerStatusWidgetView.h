@@ -42,6 +42,8 @@ private:
 	void ApplyHealthSlider(const float RemainHPRatio);
 	void ApplyMPSlider(const float RemainMPRatio);
 	void ApplySkillCoolDownSlider(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum);
+	void HandleOnEquipWeapon(const bool bEquipWeapon);
+	void SetSkillIconsActive(const bool bActive, const bool bPlayActivateAnimation);
 
 	void InitViewModel();
 

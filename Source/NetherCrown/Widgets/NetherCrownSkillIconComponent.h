@@ -12,6 +12,7 @@ class UProgressBar;
 class UImage;
 class UTextBlock;
 class UMenuAnchor;
+class UWidgetAnimation;
 
 UCLASS()
 class NETHERCROWN_API UNetherCrownSkillIconComponent : public UUserWidget
@@ -21,6 +22,7 @@ class NETHERCROWN_API UNetherCrownSkillIconComponent : public UUserWidget
 public:
 	void SetHandlingSkillObject(UNetherCrownSkillObject* InHandlingSkillObject);
 	void SetSkillCoolDownProgress(float Percent);
+	void SetSkillIconActive(const bool bActive, const bool bPlayActivateAnimation = false);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FText SkillKeyText{};
@@ -48,6 +50,9 @@ protected:
 
 	UPROPERTY(EditAnywhere)
 	TSubclassOf<UNetherCrownSkillTooltipView> SkillTooltipWidgetClass{};
+
+	UPROPERTY(Transient, meta = (BindWidgetAnimOptional))
+	TObjectPtr<UWidgetAnimation> SkillIconActivateAnimation{};
 
 private:
 	void ApplySkillVisual();
