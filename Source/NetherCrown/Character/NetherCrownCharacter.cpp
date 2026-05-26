@@ -28,6 +28,7 @@
 #include "NetherCrown/Enemy/Components/NetherCrownEnemyBasicAttackComponent.h"
 #include "NetherCrown/Settings/NetherCrownCharacterDefaultSettings.h"
 #include "NetherCrown/Util/NetherCrownUtilManager.h"
+#include "NetherCrown/Weapon/NetherCrownWeapon.h"
 
 ANetherCrownCharacter::ANetherCrownCharacter()
 {
@@ -445,6 +446,29 @@ void ANetherCrownCharacter::SetMeshVisibility(const bool bIsHidden)
 	}
 
 	MeshComponent->SetHiddenInGame(bIsHidden);
+
+	if (!ensureAlways(IsValid(NetherCrownEquipComponent)))
+	{
+		return;
+	}
+
+	ANetherCrownWeapon* EquippedWeapon{ NetherCrownEquipComponent->GetEquippedWeapon() };
+	if (IsValid(EquippedWeapon))
+	{
+		EquippedWeapon->SetActorHiddenInGame(bIsHidden);
+	}
+
+	const TArray<TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>> StowedWeaponsPair{ NetherCrownEquipComponent->GetStowedWeapons() };
+	for (const TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>& StowedWeaponPair : StowedWeaponsPair)
+	{
+		ANetherCrownWeapon* StowedWeapon{ StowedWeaponPair.Value };
+		if (!IsValid(StowedWeapon))
+		{
+			continue;
+		}
+
+		StowedWeapon->SetActorHiddenInGame(bIsHidden);
+	}
 }
 
 bool ANetherCrownCharacter::IsEquippedWeapon() const

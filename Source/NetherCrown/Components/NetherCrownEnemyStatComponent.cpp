@@ -53,8 +53,18 @@ void UNetherCrownEnemyStatComponent::OnRep_EnemyStatData(const FNetherCrownEnemy
 {
 	if (EnemyStatData.EnemyHP != OldEnemyStatData.EnemyHP)
 	{
-		OnEnemyHPModified.Broadcast(static_cast<float>(EnemyStatData.EnemyHP) / EnemyStatData.EnemyMaxHP);
+		OnEnemyHPModified.Broadcast(GetEnemyHPRatio());
 	}
+}
+
+float UNetherCrownEnemyStatComponent::GetEnemyHPRatio() const
+{
+	if (EnemyStatData.EnemyMaxHP <= 0)
+	{
+		return 0.f;
+	}
+
+	return FMath::Clamp(static_cast<float>(EnemyStatData.EnemyHP) / static_cast<float>(EnemyStatData.EnemyMaxHP), 0.f, 1.f);
 }
 
 void UNetherCrownEnemyStatComponent::ModifyEnemyHp(float HpDelta)
@@ -66,5 +76,5 @@ void UNetherCrownEnemyStatComponent::ModifyEnemyHp(float HpDelta)
 
 	EnemyStatData.EnemyHP += HpDelta;
 
-	OnEnemyHPModified.Broadcast(static_cast<float>(EnemyStatData.EnemyHP / EnemyStatData.EnemyMaxHP));
+	OnEnemyHPModified.Broadcast(GetEnemyHPRatio());
 }

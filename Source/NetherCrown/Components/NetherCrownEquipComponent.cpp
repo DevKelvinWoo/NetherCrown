@@ -226,6 +226,57 @@ const UNetherCrownWeaponData* UNetherCrownEquipComponent::GetEquippedWeaponData(
 	return EquippedWeapon->GetWeaponData();
 }
 
+ANetherCrownWeapon* UNetherCrownEquipComponent::GetStowedWeapon(const ENetherCrownStowWeaponPosition StowWeaponPosition) const
+{
+	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
+	check(CharacterDefaultSettings);
+
+	FName StowWeaponSocketName{};
+	if (StowWeaponPosition == ENetherCrownStowWeaponPosition::Left)
+	{
+		StowWeaponSocketName = CharacterDefaultSettings->GetStowWeaponSocketLName();
+	}
+	else if (StowWeaponPosition == ENetherCrownStowWeaponPosition::Right)
+	{
+		StowWeaponSocketName = CharacterDefaultSettings->GetStowWeaponSocketRName();
+	}
+
+	ANetherCrownWeapon* AttachedStowedWeapon{ FindAttachedWeaponBySocket(StowWeaponSocketName) };
+	if (IsValid(AttachedStowedWeapon))
+	{
+		return AttachedStowedWeapon;
+	}
+
+	for (const TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>& StowWeaponPair : StowWeaponContainer)
+	{
+		if (StowWeaponPair.Key == StowWeaponPosition && IsValid(StowWeaponPair.Value))
+		{
+			return StowWeaponPair.Value;
+		}
+	}
+
+	return nullptr;
+}
+
+TArray<TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>> UNetherCrownEquipComponent::GetStowedWeapons() const
+{
+	TArray<TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>> ResultStowedWeapons{};
+
+	ANetherCrownWeapon* LeftStowedWeapon{ GetStowedWeapon(ENetherCrownStowWeaponPosition::Left) };
+	if (IsValid(LeftStowedWeapon))
+	{
+		ResultStowedWeapons.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ ENetherCrownStowWeaponPosition::Left, LeftStowedWeapon });
+	}
+
+	ANetherCrownWeapon* RightStowedWeapon{ GetStowedWeapon(ENetherCrownStowWeaponPosition::Right) };
+	if (IsValid(RightStowedWeapon))
+	{
+		ResultStowedWeapons.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ ENetherCrownStowWeaponPosition::Right, RightStowedWeapon });
+	}
+
+	return ResultStowedWeapons;
+}
+
 void UNetherCrownEquipComponent::Server_ChangeWeapon_Implementation()
 {
 	ChangeWeaponInternal();
@@ -378,6 +429,12 @@ void UNetherCrownEquipComponent::ChangeWeaponInternal()
 
 void UNetherCrownEquipComponent::StowCurrentWeapon()
 {
+	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
+	{
+		return;
+	}
+
+
 	const UNetherCrownCharacterDefaultSettings* CharacterDefaultSettings{ GetDefault<UNetherCrownCharacterDefaultSettings>() };
 	check(CharacterDefaultSettings);
 

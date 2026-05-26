@@ -52,6 +52,9 @@ public:
 	ANetherCrownWeapon* GetEquippedWeapon() const { return EquippedWeapon; }
 	const UNetherCrownWeaponData* GetEquippedWeaponData() const;
 
+	ANetherCrownWeapon* GetStowedWeapon(const ENetherCrownStowWeaponPosition StowWeaponPosition) const;
+	TArray<TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>> GetStowedWeapons() const;
+
 	FOnEquipWeapon& GetOnEquipWeapon() { return OnEquipWeapon; }
 
 protected:

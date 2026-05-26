@@ -34,6 +34,7 @@ private:
 	void CacheOwnerEnemy();
 
 	void LoadEnemyStatData();
+	float GetEnemyHPRatio() const;
 
 	UFUNCTION()
 	void OnRep_EnemyStatData(const FNetherCrownEnemyStat& OldEnemyStatData);
