@@ -8,6 +8,8 @@
 #include "GameFramework/Actor.h"
 #include "NetherCrownPortal.generated.h"
 
+class UTextureRenderTargetCube;
+
 UCLASS(Blueprintable)
 class NETHERCROWN_API ANetherCrownPortal : public ANetherCrownInteractActor
 {
@@ -22,5 +24,15 @@ protected:
 	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) override;
 
 private:
+	void InitializePortalRenderTargets();
+	void CapturePortalScene();
+
 	void TravelByLevelTag();
+
+	UPROPERTY(Transient)
+	TArray<TObjectPtr<UTextureRenderTargetCube>> RuntimePortalRenderTargets{};
+
+	FTimerHandle TimerHandle_CapturePortalScene{};
+
+	int32 RemainPortalCaptureRetryCount{ 3 };
 };
