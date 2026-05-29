@@ -47,7 +47,7 @@ void UNetherCrownLevelTravelManagerSubsystem::CacheLevelTravelDT()
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
-	const TSoftObjectPtr<UDataTable> LevelTravelDTSoft{ DefaultSettings->LevelTravelDT };
+	const TSoftObjectPtr<UDataTable> LevelTravelDTSoft{ DefaultSettings->GetLevelTravelDT() };
 	if (LevelTravelDTSoft.IsNull())
 	{
 		return;

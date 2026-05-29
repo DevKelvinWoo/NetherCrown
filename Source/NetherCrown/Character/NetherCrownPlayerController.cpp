@@ -98,7 +98,7 @@ void ANetherCrownPlayerController::InitializeUI()
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
-	UIManagerSubsystem->SetPrimaryLayoutClass(DefaultSettings->PrimaryLayoutWidgetClass);
+	UIManagerSubsystem->SetPrimaryLayoutClass(DefaultSettings->GetPrimaryLayoutWidgetClass());
 	UIManagerSubsystem->RegisterScreenDefinitions(FNetherCrownUtilManager::GetUIScreenDefinitionData());
 	UIManagerSubsystem->InitializePrimaryLayout();
 }

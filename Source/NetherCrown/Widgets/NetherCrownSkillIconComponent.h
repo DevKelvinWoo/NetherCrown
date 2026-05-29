@@ -24,35 +24,11 @@ public:
 	void SetSkillCoolDownProgress(const float Percent);
 	void SetSkillIconActive(const bool bActive, const bool bPlayActivateAnimation = false);
 
-	UPROPERTY(BlueprintReadWrite, EditAnywhere)
-	FText SkillKeyText{};
-
-	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Skill")
-	ENetherCrownSkillKeyEnum SkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
-
 protected:
 	virtual void NativeOnInitialized() override;
 
 	virtual void NativeOnMouseEnter(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent) override;
 	virtual void NativeOnMouseLeave(const FPointerEvent& InMouseEvent) override;
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	TObjectPtr<UImage> NativeSkillThumbnailImage{};
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	TObjectPtr<UProgressBar> NativeSkillThumbnailProgressBar{};
-
-	UPROPERTY(BlueprintReadWrite, meta = (BindWidget))
-	TObjectPtr<UTextBlock> NativeSkillKeyText{};
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UMenuAnchor> NativeSkillTooltipAnchor{};
-
-	UPROPERTY(EditAnywhere)
-	TSubclassOf<UNetherCrownSkillTooltipView> SkillTooltipWidgetClass{};
-
-	UPROPERTY(Transient, meta = (BindWidgetAnimOptional))
-	TObjectPtr<UWidgetAnimation> SkillIconActivateAnimation{};
 
 private:
 	void ApplySkillVisual();
@@ -60,6 +36,30 @@ private:
 
 	UFUNCTION()
 	UUserWidget* HandleOnGetSkillTooltipWidgetInMenuAnchor();
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	FText SkillKeyText{};
+
+	UPROPERTY(BlueprintReadWrite, EditAnywhere, Category = "Skill", meta = (AllowPrivateAccess = "true"))
+	ENetherCrownSkillKeyEnum SkillKeyEnum{ ENetherCrownSkillKeyEnum::None };
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UImage> NativeSkillThumbnailImage{};
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UProgressBar> NativeSkillThumbnailProgressBar{};
+
+	UPROPERTY(BlueprintReadWrite, meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UTextBlock> NativeSkillKeyText{};
+
+	UPROPERTY(meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UMenuAnchor> NativeSkillTooltipAnchor{};
+
+	UPROPERTY(EditAnywhere, meta = (AllowPrivateAccess = "true"))
+	TSubclassOf<UNetherCrownSkillTooltipView> SkillTooltipWidgetClass{};
+
+	UPROPERTY(Transient, meta = (BindWidgetAnimOptional, AllowPrivateAccess = "true"))
+	TObjectPtr<UWidgetAnimation> SkillIconActivateAnimation{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownSkillObject> HandlingSkillObject{};

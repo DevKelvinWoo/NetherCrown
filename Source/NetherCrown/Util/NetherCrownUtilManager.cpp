@@ -45,7 +45,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 	CachedLevelSequenceByTag.Empty();
 	CachedQuestDataByTag.Empty();
 
-	UDataTable* SoundDT{ DefaultSettings->CharacterSoundDT.LoadSynchronous() };
+	UDataTable* SoundDT{ DefaultSettings->GetCharacterSoundDT().LoadSynchronous() };
 	if (IsValid(SoundDT))
 	{
 		TArray<FNetherCrownSoundData*> OutRows{};
@@ -59,7 +59,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	UDataTable* WeaponDT{ DefaultSettings->WeaponDT.LoadSynchronous() };
+	UDataTable* WeaponDT{ DefaultSettings->GetWeaponDT().LoadSynchronous() };
 	if (IsValid(WeaponDT))
 	{
 		TArray<FNetherCrownWeaponDataTableRow*> OutRows{};
@@ -73,7 +73,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	UDataTable* SkillDT{ DefaultSettings->SkillDT.LoadSynchronous() };
+	UDataTable* SkillDT{ DefaultSettings->GetSkillDT().LoadSynchronous() };
 	if (IsValid(SkillDT))
 	{
 		TArray<FNetherCrownSkillDataTableRow*> OutRows{};
@@ -87,7 +87,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	UDataTable* EnemySkillDT{ DefaultSettings->EnemySkillDT.LoadSynchronous() };
+	UDataTable* EnemySkillDT{ DefaultSettings->GetEnemySkillDT().LoadSynchronous() };
 	if (IsValid(EnemySkillDT))
 	{
 		TArray<FNetherCrownEnemySkillDataTableRow*> OutRows{};
@@ -101,7 +101,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	UDataTable* EffectDT{ DefaultSettings->EffectDT.LoadSynchronous() };
+	UDataTable* EffectDT{ DefaultSettings->GetEffectDT().LoadSynchronous() };
 	if (IsValid(EffectDT))
 	{
 		TArray<FNetherCrownEffectData*> OutRows{};
@@ -115,7 +115,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	UDataTable* ScreenDefinitionDT{ DefaultSettings->ScreenDefinitionDT.LoadSynchronous() };
+	UDataTable* ScreenDefinitionDT{ DefaultSettings->GetScreenDefinitionDT().LoadSynchronous() };
 	if (IsValid(ScreenDefinitionDT))
 	{
 		TArray<FNetherCrownUIScreenDefinition*> OutRows{};
@@ -129,7 +129,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	UDataTable* LevelSequenceDT{ DefaultSettings->LevelSequenceDT.LoadSynchronous() };
+	UDataTable* LevelSequenceDT{ DefaultSettings->GetLevelSequenceDT().LoadSynchronous() };
 	if (IsValid(LevelSequenceDT))
 	{
 		TArray<FNetherCrownLevelSequenceData*> OutRows{};
@@ -143,7 +143,7 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 		}
 	}
 
-	UDataTable* QuestDT{ DefaultSettings->QuestDT.LoadSynchronous() };
+	UDataTable* QuestDT{ DefaultSettings->GetQuestDT().LoadSynchronous() };
 	if (IsValid(QuestDT))
 	{
 		TArray<FNetherCrownQuestDataTableRow*> OutRows{};

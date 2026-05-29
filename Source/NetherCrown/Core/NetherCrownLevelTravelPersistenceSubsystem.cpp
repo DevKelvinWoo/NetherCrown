@@ -432,7 +432,7 @@ void UNetherCrownLevelTravelPersistenceSubsystem::ShowLoadingScreen()
 	const UNetherCrownDefaultSettings* DefaultSettings{ GetDefault<UNetherCrownDefaultSettings>() };
 	check(DefaultSettings);
 
-	if (!DefaultSettings->LoadingScreenWidgetClass)
+	if (!DefaultSettings->GetLoadingScreenWidgetClass())
 	{
 		return;
 	}
@@ -456,7 +456,7 @@ void UNetherCrownLevelTravelPersistenceSubsystem::ShowLoadingScreen()
 			continue;
 		}
 
-		UNetherCrownLoadingScreenWidgetView* LoadingScreenWidget{ CreateWidget<UNetherCrownLoadingScreenWidgetView>(PlayerController, DefaultSettings->LoadingScreenWidgetClass) };
+		UNetherCrownLoadingScreenWidgetView* LoadingScreenWidget{ CreateWidget<UNetherCrownLoadingScreenWidgetView>(PlayerController, DefaultSettings->GetLoadingScreenWidgetClass()) };
 		if (!ensureAlways(IsValid(LoadingScreenWidget)))
 		{
 			continue;

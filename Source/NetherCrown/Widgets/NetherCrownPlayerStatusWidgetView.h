@@ -22,21 +22,6 @@ protected:
 	virtual void NativeDestruct() override;
 	virtual void HandleOwningCharacterChanged(ANetherCrownCharacter* NewOwningCharacter) override;
 
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UNetherCrownSliderComponent> NativeHealthBar{};
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UNetherCrownSliderComponent> NativeMPBar{};
-
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UNetherCrownSkillIconComponent> NativeQSkillIcon{};
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UNetherCrownSkillIconComponent> NativeESkillIcon{};
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UNetherCrownSkillIconComponent> NativeRSkillIcon{};
-	UPROPERTY(meta = (BindWidget))
-	TObjectPtr<UNetherCrownSkillIconComponent> NativeShiftSkillIcon{};
-
 private:
 	void UnbindCharacterDelegates();
 	void ApplyHealthSlider(const float RemainHPRatio);
@@ -46,6 +31,21 @@ private:
 	void SetSkillIconsActive(const bool bActive, const bool bPlayActivateAnimation);
 
 	void InitViewModel();
+
+	UPROPERTY(meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UNetherCrownSliderComponent> NativeHealthBar{};
+
+	UPROPERTY(meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UNetherCrownSliderComponent> NativeMPBar{};
+
+	UPROPERTY(meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UNetherCrownSkillIconComponent> NativeQSkillIcon{};
+	UPROPERTY(meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UNetherCrownSkillIconComponent> NativeESkillIcon{};
+	UPROPERTY(meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UNetherCrownSkillIconComponent> NativeRSkillIcon{};
+	UPROPERTY(meta = (BindWidget, AllowPrivateAccess = "true"))
+	TObjectPtr<UNetherCrownSkillIconComponent> NativeShiftSkillIcon{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownPlayerStatusWidgetViewModel> PlayerStatusWidgetViewModel{};
