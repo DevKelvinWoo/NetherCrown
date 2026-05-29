@@ -22,7 +22,6 @@ private:
 	void StartShockwaveRepulseKnockbackTimer();
 	void ApplyShockwaveRepulse();
 
-	UPROPERTY(Transient)
 	FNetherCrownEnemyShockwaveRepulseData CachedEnemyShockwaveRepulseData{};
 
 	FTimerHandle ShockwaveRepulseKnockbackTimerHandle{};

@@ -25,6 +25,5 @@ private:
 
 	void DodgeCharacter();
 
-	UPROPERTY(Transient)
 	FNetherCrownDodgeSkillData DodgeSkillData{};
 };

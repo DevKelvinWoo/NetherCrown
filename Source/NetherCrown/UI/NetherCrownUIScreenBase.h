@@ -69,6 +69,5 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "UI")
 	bool bShowMouseCursor{ false };
 
-	UPROPERTY(Transient)
 	TWeakObjectPtr<ANetherCrownCharacter> CachedOwningCharacterWeak{};
 };

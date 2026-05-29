@@ -57,7 +57,6 @@ private:
 
 	void SetupFrozenTempestHitTimers();
 
-	UPROPERTY(Transient)
 	FNetherCrownFrozenTempestData FrozenTempestData{};
 
 	UPROPERTY(Transient)

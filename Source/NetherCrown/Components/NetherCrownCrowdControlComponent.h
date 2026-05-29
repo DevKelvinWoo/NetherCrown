@@ -75,7 +75,6 @@ private:
 
 	FTimeline FrozenTargetOverlayEndMaterialFloatTimeline{};
 
-	UPROPERTY(Transient)
 	FNetherCrownCrowdControlCosmeticData CrowdControlCosmeticData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "CrowdControlCosmeticDataAsset")

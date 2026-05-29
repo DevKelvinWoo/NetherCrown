@@ -33,7 +33,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<UTextBlock> DialogueText{};
 
-	UPROPERTY(Transient)
 	TArray<FText> DialogueArray{};
 
 	UPROPERTY(Transient)

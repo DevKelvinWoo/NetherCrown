@@ -27,7 +27,6 @@ protected:
 private:
 	void LoadStatusEffectCosmeticData();
 
-	UPROPERTY(Transient)
 	FNetherCrownStatusEffectCosmeticData StatusEffectCosmeticData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "StatusEffectCosmeticDataAsset")

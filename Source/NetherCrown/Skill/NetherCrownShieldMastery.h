@@ -32,7 +32,6 @@ private:
 	void AddPlayerShieldAndSetShieldEndTimer(const int32 InShieldValue) const;
 	void ClearPlayerShield() const;
 
-	UPROPERTY(Transient)
 	FNetherCrownShieldMasteryData ShieldMasteryData{};
 
 	UPROPERTY(Transient)

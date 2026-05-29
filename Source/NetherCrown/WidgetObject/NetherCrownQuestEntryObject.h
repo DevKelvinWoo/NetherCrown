@@ -21,9 +21,7 @@ public:
 	void SetShouldPlayCompleteAnimation(const bool bInShouldPlayCompleteAnimation) { bShouldPlayCompleteAnimation = bInShouldPlayCompleteAnimation; }
 
 private:
-	UPROPERTY(Transient)
 	FText QuestDescriptionText{};
 
-	UPROPERTY(Transient)
 	bool bShouldPlayCompleteAnimation{ false };
 };

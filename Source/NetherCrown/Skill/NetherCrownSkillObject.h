@@ -137,7 +137,6 @@ private:
 	UPROPERTY(Replicated)
 	bool bIsCoolDown{ false };
 
-	UPROPERTY()
 	float SkillCoolDownAccumulator{ 0.f };
 
 	FOnSkillCoolDownModified OnSkillCoolDownModified;

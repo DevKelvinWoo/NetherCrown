@@ -32,6 +32,5 @@ private:
 
 	void CacheEnemyDashAttackData();
 
-	UPROPERTY(Transient)
 	FNetherCrownEnemyDashAttackData CachedEnemyDashAttackData{};
 };

@@ -50,6 +50,5 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownPlayerStatusWidgetViewModel> PlayerStatusWidgetViewModel{};
 
-	UPROPERTY(Transient)
 	TWeakObjectPtr<ANetherCrownCharacter> BoundCharacterWeak{};
 };

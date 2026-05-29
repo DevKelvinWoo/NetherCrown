@@ -92,7 +92,6 @@ private:
 	FTimerHandle DashAttackTimerHandle{};
 	FTimerHandle DashAttackHitTimerHandle{};
 
-	UPROPERTY(Transient)
 	FNetherCrownDashAttackData DashAttackData{};
 
 	int32 CurrentTargetIndex{ 0 };

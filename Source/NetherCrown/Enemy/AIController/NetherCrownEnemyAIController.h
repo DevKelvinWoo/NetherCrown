@@ -37,10 +37,8 @@ private:
 	void LoadEnemyAITuningData();
 	void SetSightConfigAndPerceptionComponentValue();
 
-	UPROPERTY(Transient)
 	FNetherCrownEnemyAITuningData EnemyAITuningData{};
 
-	UPROPERTY(Transient)
 	FNetherCrownBossRangedCombatData BossRangedCombatData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyAITuningDataAsset")

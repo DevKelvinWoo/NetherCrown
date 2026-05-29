@@ -100,7 +100,6 @@ private:
 	UPROPERTY(Transient, ReplicatedUsing = OnRep_EquippedWeapon)
 	TObjectPtr<ANetherCrownWeapon> EquippedWeapon{};
 
-	UPROPERTY(Transient)
 	FNetherCrownEquipData EquipData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EquipDataAsset")

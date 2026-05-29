@@ -34,7 +34,6 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_ShowMagicSpikeEffectAndPlaySound(const FGameplayTag& InEffectTag, const FGameplayTag& InSoundTag, const FVector& InMagicSpikePointVector);
 
-	UPROPERTY(Transient)
 	FNetherCrownMagicSpikeData CachedMagicSpikeData{};
 
 	UPROPERTY(Replicated)

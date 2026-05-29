@@ -59,7 +59,6 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "PostProcessCosmeticDataAsset")
 	TSoftObjectPtr<UNetherCrownPostProcessCosmeticDataAsset> PostProcessCosmeticDataAssetSoft{};
 
-	UPROPERTY(Transient)
 	FNetherCrownPostProcessCosmeticData PostProcessCosmeticData{};
 
 	UPROPERTY(Transient)

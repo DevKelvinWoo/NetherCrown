@@ -20,34 +20,24 @@ struct FNetherCrownEnemyMagicProjectileInitData
 	GENERATED_BODY()
 
 public:
-	UPROPERTY()
 	FVector Direction{};
 
-	UPROPERTY()
 	float ProjectileSpeed{};
 
-	UPROPERTY()
 	FGameplayTag DestroyNiagaraEffectTag{};
 
-	UPROPERTY()
 	FGameplayTag DestroySoundTag{};
 
-	UPROPERTY()
 	FGameplayTag HitImpactEffectTag{};
 
-	UPROPERTY()
 	FGameplayTag HitImpactSoundTag{};
 
-	UPROPERTY()
 	TWeakObjectPtr<ANetherCrownEnemy> OwnerEnemyWeak{};
 
-	UPROPERTY()
 	TWeakObjectPtr<ANetherCrownCharacter> ReflectedOwnerCharacterWeak{};
 
-	UPROPERTY()
 	int32 ProjectileDamage{};
 
-	UPROPERTY()
 	bool bReflected{ false };
 };
 

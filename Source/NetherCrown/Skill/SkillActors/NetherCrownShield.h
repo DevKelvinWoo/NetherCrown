@@ -41,7 +41,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UStaticMeshComponent> ShieldMeshComponent{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TObjectPtr<UMaterialInstanceDynamic> ShieldDynamicMaterialInstance{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "CurveData")

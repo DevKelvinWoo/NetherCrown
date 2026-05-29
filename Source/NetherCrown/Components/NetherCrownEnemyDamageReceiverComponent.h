@@ -87,10 +87,8 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
 
-	UPROPERTY(Transient)
 	FUNetherCrownEnemyDamageCosmeticData EnemyDamageCosmeticData{};
 
-	UPROPERTY(Transient)
 	FNetherCrownEnemyDeathCosmeticData EnemyDeathCosmeticData{};
 
 	UPROPERTY(Transient)

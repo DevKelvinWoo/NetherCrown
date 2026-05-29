@@ -29,6 +29,5 @@ private:
 	UPROPERTY(Transient, Replicated)
 	FVector TeleportStartVector{};
 
-	UPROPERTY(Transient)
 	FNetherCrownEnemyTeleportData CachedTeleportData{};
 };

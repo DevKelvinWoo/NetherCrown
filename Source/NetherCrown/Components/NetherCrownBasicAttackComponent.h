@@ -123,7 +123,6 @@ private:
 	UFUNCTION()
 	void HandleCurrentComboCountReplicated();
 
-	UPROPERTY(Transient)
 	FNetherCrownBasicAttackData BasicAttackData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "BasicAttackDataAsset")

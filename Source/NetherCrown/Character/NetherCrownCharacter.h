@@ -210,7 +210,6 @@ private:
 	UPROPERTY(Replicated)
 	bool bIsJumping{ false };
 
-	UPROPERTY()
 	FVector CachedLastMoveDirection{};
 
 	FTimerHandle TimerHandle_ResetHardLanding;

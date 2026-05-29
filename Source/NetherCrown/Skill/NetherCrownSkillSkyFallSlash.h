@@ -54,7 +54,6 @@ private:
 
 	void CreateArmMaterialInstanceDynamic();
 
-	UPROPERTY(Transient)
 	FNetherCrownSkyFallSlashData SkyFallSlashData{};
 
 	UPROPERTY(Transient)

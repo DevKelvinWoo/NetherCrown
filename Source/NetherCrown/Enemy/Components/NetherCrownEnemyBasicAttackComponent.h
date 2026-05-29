@@ -67,10 +67,8 @@ private:
 
 	FVector GetWeaponTraceSocketLocation() const;
 
-	UPROPERTY(Transient)
 	FNetherCrownEnemyBasicAttackData EnemyBasicAttackData{};
 
-	UPROPERTY(Transient)
 	FNetherCrownEnemyBasicAttackData ActiveEnemyBasicAttackData{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "EnemyBasicAttackDataAsset")

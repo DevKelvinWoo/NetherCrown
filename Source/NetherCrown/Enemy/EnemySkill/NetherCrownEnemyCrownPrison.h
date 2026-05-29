@@ -26,6 +26,5 @@ private:
 
 	void HandleOnCrownPrisonExplosionHit(ANetherCrownCharacter* HitCharacter);
 
-	UPROPERTY(Transient)
 	FNetherCrownEnemyCrownPrisonData CachedCrownEnemyCrownPrisonData{};
 };

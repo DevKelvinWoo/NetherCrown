@@ -47,7 +47,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "SkillObject")
 	TArray<TSubclassOf<UNetherCrownEnemySkillObject>> EnemySkillObjectClasses{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TMap<FGameplayTag, UNetherCrownEnemySkillObject*> EnemySkillObjectMap{};
 
 	UPROPERTY(Transient)

@@ -20,6 +20,5 @@ public:
 	void FinishInteract();
 
 private:
-	UPROPERTY(Transient)
 	TWeakObjectPtr<ANetherCrownCharacter> ModelCharacterWeak{};
 };

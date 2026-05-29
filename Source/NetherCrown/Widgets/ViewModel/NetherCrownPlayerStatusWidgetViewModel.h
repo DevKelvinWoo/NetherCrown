@@ -37,13 +37,10 @@ private:
 	void HandleOnCharacterMPModified(const float RemainMPRatio);
 	void HandleOnSkillCoolDownModified(const float CoolDownRatio, const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
-	UPROPERTY(Transient)
 	TWeakObjectPtr<ANetherCrownCharacter> ModelCharacterWeak{};
 
-	UPROPERTY(Transient)
 	TWeakObjectPtr<UNetherCrownPlayerStatComponent> BoundPlayerStatComponentWeak{};
 
-	UPROPERTY(Transient)
 	TWeakObjectPtr<UNetherCrownSkillComponent> BoundSkillComponentWeak{};
 
 	FOnCharacterHPModified OnCharacterHPModified;

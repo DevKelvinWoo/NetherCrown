@@ -58,7 +58,6 @@ private:
 	UPROPERTY(Replicated)
 	FVector LastEndLocation{};
 
-	UPROPERTY(Transient)
 	FNetherCrownWeaponTraceData WeaponTraceData{};
 
 	UPROPERTY(Replicated)

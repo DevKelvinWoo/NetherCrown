@@ -38,7 +38,6 @@ private:
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownQuestListWidgetViewModel> QuestListWidgetViewModel{};
 
-	UPROPERTY(Transient)
 	TWeakObjectPtr<UNetherCrownQuestComponent> BoundQuestComponentWeak{};
 
 	TSet<FGameplayTag> PendingCompleteAnimationQuestTags{};

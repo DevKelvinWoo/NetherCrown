@@ -69,7 +69,7 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = "SkillObject")
 	TArray<TSubclassOf<UNetherCrownSkillObject>> SkillObjectClasses{};
 
-	UPROPERTY()
+	UPROPERTY(Transient)
 	TMap<ENetherCrownSkillKeyEnum, UNetherCrownSkillObject*> SkillObjectMap{};
 
 	UPROPERTY(ReplicatedUsing=OnRep_ReplicatedSkillObjects)
