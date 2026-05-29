@@ -26,13 +26,13 @@ class NETHERCROWN_API UNetherCrownDamageReceiverComponent : public UActorCompone
 public:
 	UNetherCrownDamageReceiverComponent();
 
-	float HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);
+	float HandleIncomingDamage(const float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser);
 
 	bool IsHitReacting() const { return HitReactState == ENetherCrownHitReactState::HitReact; }
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -59,8 +59,8 @@ private:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitImpactSound(const FGameplayTag& HitImpactSoundTag);
 
-	float CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
-	void ApplyFinalDamage(float FinalDamage);
+	float CalculateFinalDamage(const float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const;
+	void ApplyFinalDamage(const float FinalDamage);
 	FGameplayTag ResolveHitImpactEffectTag(FDamageEvent const& DamageEvent) const;
 	FGameplayTag ResolveHitImpactSoundTag(FDamageEvent const& DamageEvent) const;
 

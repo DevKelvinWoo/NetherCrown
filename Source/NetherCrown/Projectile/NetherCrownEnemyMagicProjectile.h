@@ -80,7 +80,7 @@ protected:
 
 private:
 	UFUNCTION()
-	void HandleOnHitSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult & SweepResult);
+	void HandleOnHitSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap, AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex, const bool bFromSweep, const FHitResult & SweepResult);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SpawnDestroyProjectileEffect(const FTransform& DestroyTransform);

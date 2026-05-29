@@ -52,7 +52,7 @@ void UNetherCrownControlPPComponent::SetHandlingCameraComponent(UCameraComponent
 	HandledCameraComponent->PostProcessBlendWeight = 0.f;
 }
 
-void UNetherCrownControlPPComponent::ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic/*true*/)
+void UNetherCrownControlPPComponent::ApplyPostProcess(const ENetherCrownPPType PPType, const float Duration, const bool bEndTimerAutomatic/*true*/)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
 	{
@@ -209,7 +209,7 @@ void UNetherCrownControlPPComponent::LoadPostProcessCosmeticData()
 	PostProcessCosmeticData = PostProcessCosmeticDataAsset->GetPostProcessCosmeticData();
 }
 
-void UNetherCrownControlPPComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownControlPPComponent::TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -299,7 +299,7 @@ void UNetherCrownControlPPComponent::RestorePostProcessAfterCrowdControlFlash()
 	HandleCharacterHPModified(PlayerStatData.CharacterHP / PlayerStatData.CharacterMaxHP);
 }
 
-void UNetherCrownControlPPComponent::StartClearPostProcessTimer(float Duration)
+void UNetherCrownControlPPComponent::StartClearPostProcessTimer(const float Duration)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
 	{
@@ -346,7 +346,7 @@ void UNetherCrownControlPPComponent::StartSetPostProcessBlendEndTimeline()
 	PostProcessBlendEndFloatTimeline.PlayFromStart();
 }
 
-void UNetherCrownControlPPComponent::SetPostProcessBlendStartByFloatTimeline(float FloatCurveValue)
+void UNetherCrownControlPPComponent::SetPostProcessBlendStartByFloatTimeline(const float FloatCurveValue)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
 	{
@@ -362,7 +362,7 @@ void UNetherCrownControlPPComponent::SetPostProcessBlendStartByFloatTimeline(flo
 	HandledPostProcessComponent->BlendWeight = FloatCurveValue;
 }
 
-void UNetherCrownControlPPComponent::SetPostProcessBlendEndByFloatTimeline(float FloatCurveValue)
+void UNetherCrownControlPPComponent::SetPostProcessBlendEndByFloatTimeline(const float FloatCurveValue)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->IsLocallyControlled())
 	{

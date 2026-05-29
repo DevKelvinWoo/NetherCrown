@@ -40,7 +40,7 @@ void ANetherCrownBossDungeonDoor::BeginPlay()
 	RightDoorOpenTimeline.AddInterpFloat(CachedRightDoorOpenCurve, RightDoorTimelineFloat);
 }
 
-void ANetherCrownBossDungeonDoor::Tick(float DeltaTime)
+void ANetherCrownBossDungeonDoor::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -135,12 +135,12 @@ void ANetherCrownBossDungeonDoor::Multicast_PlayOpenDoorSound_Implementation()
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, DoorData.BossDungeonDoorTagData.OpenDoorSoundTag);
 }
 
-void ANetherCrownBossDungeonDoor::OpenLeftDoor(float CurveFloat)
+void ANetherCrownBossDungeonDoor::OpenLeftDoor(const float CurveFloat)
 {
 	LeftDoorMeshComponent->SetRelativeLocation(FVector(0.f, CurveFloat, 0.f));
 }
 
-void ANetherCrownBossDungeonDoor::OpenRightDoor(float CurveFloat)
+void ANetherCrownBossDungeonDoor::OpenRightDoor(const float CurveFloat)
 {
 	RightDoorMeshComponent->SetRelativeLocation(FVector(0.f, CurveFloat, 0.f));
 }

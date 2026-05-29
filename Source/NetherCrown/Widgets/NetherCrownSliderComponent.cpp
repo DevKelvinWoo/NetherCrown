@@ -6,7 +6,7 @@
 #include "Components/ProgressBar.h"
 #include "NetherCrown/NetherCrown.h"
 
-void UNetherCrownSliderComponent::SetProgress(float Percent)
+void UNetherCrownSliderComponent::SetProgress(const float Percent)
 {
 	if (!ensureAlways(IsValid(NativeProgressBar)))
 	{

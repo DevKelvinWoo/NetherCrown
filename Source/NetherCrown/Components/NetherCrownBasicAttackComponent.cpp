@@ -684,7 +684,7 @@ void UNetherCrownBasicAttackComponent::ApplyDamageInternal(AActor* HitEnemy) con
 		return;
 	}
 
-	TSubclassOf<UDamageType> DamageTypeClass{ IsLastComboAttack() ? UNetherCrownCriticalPhysicalDamageType::StaticClass() : UNetherCrownPhysicalDamageType::StaticClass() };
+	const TSubclassOf<UDamageType> DamageTypeClass{ IsLastComboAttack() ? UNetherCrownCriticalPhysicalDamageType::StaticClass() : UNetherCrownPhysicalDamageType::StaticClass() };
 	FNetherCrownDamageEvent::ApplyDamage(HitEnemy, CalculateBasicAttackDamage(), CachedCharacter->GetInstigatorController(), CachedCharacter, DamageTypeClass);
 }
 
@@ -769,10 +769,7 @@ void UNetherCrownBasicAttackComponent::SpawnHitImpactEffect(const FVector& HitLo
 		return;
 	}
 
-	FTransform SpawnTransform{};
-	SpawnTransform.SetLocation(HitLocation);
-	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
-	SpawnTransform.SetScale3D(FVector(1.0f));
+	const FTransform SpawnTransform{ FRotator::ZeroRotator, HitLocation, FVector(1.0f) };
 
 	const UNetherCrownCrowdControlComponent* CCComponent{ HitEnemy->GetCrowdControlComponent() };
 	if (!ensureAlways(IsValid(CCComponent)))

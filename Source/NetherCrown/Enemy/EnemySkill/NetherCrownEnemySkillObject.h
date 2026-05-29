@@ -60,7 +60,7 @@ protected:
 
 private:
 	void CacheSkillData();
-	void ApplyEnemySkillDamage(ANetherCrownCharacter* TargetCharacter, int32 DamageAmount, TSubclassOf<UDamageType> DamageTypeClass) const;
+	void ApplyEnemySkillDamage(ANetherCrownCharacter* TargetCharacter, const int32 DamageAmount, const TSubclassOf<UDamageType> DamageTypeClass) const;
 
 	void StartSkillCoolDownTimer();
 	void StopSkillCoolDownTimer();

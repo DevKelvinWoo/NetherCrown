@@ -80,7 +80,7 @@ void ANetherCrownEnemyCrownPrisonWall::BeginPlay()
 	SetActorTickEnabled(false);
 }
 
-void ANetherCrownEnemyCrownPrisonWall::Tick(float DeltaTime)
+void ANetherCrownEnemyCrownPrisonWall::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 

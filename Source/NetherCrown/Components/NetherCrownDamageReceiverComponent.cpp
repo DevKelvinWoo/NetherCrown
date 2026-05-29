@@ -25,7 +25,7 @@ UNetherCrownDamageReceiverComponent::UNetherCrownDamageReceiverComponent()
 	SetIsReplicatedByDefault(true);
 }
 
-float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser)
+float UNetherCrownDamageReceiverComponent::HandleIncomingDamage(const float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser)
 {
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
 	{
@@ -67,7 +67,7 @@ void UNetherCrownDamageReceiverComponent::BeginPlay()
 	CacheHitReactAnimMontage();
 }
 
-void UNetherCrownDamageReceiverComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownDamageReceiverComponent::TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
@@ -299,7 +299,7 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactSound_Implement
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(CachedOwnerCharacter->GetWorld(), HitImpactSoundTag);
 }
 
-float UNetherCrownDamageReceiverComponent::CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const
+float UNetherCrownDamageReceiverComponent::CalculateFinalDamage(const float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const
 {
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
 	{
@@ -315,7 +315,7 @@ float UNetherCrownDamageReceiverComponent::CalculateFinalDamage(float DamageAmou
 	return FinalDamage;
 }
 
-void UNetherCrownDamageReceiverComponent::ApplyFinalDamage(float FinalDamage)
+void UNetherCrownDamageReceiverComponent::ApplyFinalDamage(const float FinalDamage)
 {
 	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->HasAuthority())
 	{

@@ -92,7 +92,7 @@ void UNetherCrownSkillComponent::BeginPlay()
 	ConstructSkillObjects();
 }
 
-void UNetherCrownSkillComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownSkillComponent::TickComponent(const float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 

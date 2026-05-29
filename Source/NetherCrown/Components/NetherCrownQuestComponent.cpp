@@ -25,7 +25,7 @@ void UNetherCrownQuestComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UNetherCrownQuestComponent::TickComponent(float DeltaTime, ELevelTick TickType,
+void UNetherCrownQuestComponent::TickComponent(const float DeltaTime, ELevelTick TickType,
 FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);

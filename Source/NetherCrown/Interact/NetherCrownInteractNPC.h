@@ -28,15 +28,15 @@ public:
 protected:
 	virtual void BeginPlay() override;
 
-	virtual bool IsNeedCameraMoving() override { return true; };
+	virtual bool IsNeedCameraMoving() const override { return true; };
 	virtual void Interact() override;
 	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
-	void SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
-	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
+	void SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, const bool bTargetValid);
+	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, const bool bVisible) const;
 
 	void CacheNPCDataAsset();
 
@@ -48,13 +48,13 @@ private:
 	void Multicast_ShowNPCDialogueWidget(const int32 QuestIndex, const ENetherCrownQuestState QuestState);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible);
+	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, const bool bVisible);
 
 	UFUNCTION()
-	void HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex, const bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void HandleOnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void HandleOnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USphereComponent> InteractDetectSphereComponent{};

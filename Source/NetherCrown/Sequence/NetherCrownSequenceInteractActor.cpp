@@ -63,7 +63,7 @@ void ANetherCrownSequenceInteractActor::Multicast_SetInteractBoxCollision_Implem
 }
 
 void ANetherCrownSequenceInteractActor::HandleOnInteractBoxBeginOverlap(UPrimitiveComponent* OverlappedComponent,
-                                                                        AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                                        AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex, const bool bFromSweep,
                                                                         const FHitResult& SweepResult)
 {
 	if (!HasAuthority())

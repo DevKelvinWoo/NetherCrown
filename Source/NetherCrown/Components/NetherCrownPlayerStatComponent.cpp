@@ -70,7 +70,7 @@ void UNetherCrownPlayerStatComponent::OnRep_PlayerStatData(const FNetherCrownPla
 	}
 }
 
-void UNetherCrownPlayerStatComponent::AddPlayerShield(int32 InShieldValue)
+void UNetherCrownPlayerStatComponent::AddPlayerShield(const int32 InShieldValue)
 {
 	CacheOwnerCharacter();
 
@@ -94,7 +94,7 @@ void UNetherCrownPlayerStatComponent::ClearPlayerShield()
 	PlayerStatData.ShieldValue = 0;
 }
 
-void UNetherCrownPlayerStatComponent::ModifyMP(float MPDelta)
+void UNetherCrownPlayerStatComponent::ModifyMP(const float MPDelta)
 {
 	CacheOwnerCharacter();
 
@@ -108,7 +108,7 @@ void UNetherCrownPlayerStatComponent::ModifyMP(float MPDelta)
 	OnCharacterMPModified.Broadcast(PlayerStatData.CharacterMP / PlayerStatData.CharacterMaxMP);
 }
 
-void UNetherCrownPlayerStatComponent::ModifyHp(float HpDelta)
+void UNetherCrownPlayerStatComponent::ModifyHp(const float HpDelta)
 {
 	CacheOwnerCharacter();
 
@@ -122,7 +122,7 @@ void UNetherCrownPlayerStatComponent::ModifyHp(float HpDelta)
 	OnCharacterHPModified.Broadcast(PlayerStatData.CharacterHP / PlayerStatData.CharacterMaxHP);
 }
 
-void UNetherCrownPlayerStatComponent::SetParryingState(bool bActive)
+void UNetherCrownPlayerStatComponent::SetParryingState(const bool bActive)
 {
 	CacheOwnerCharacter();
 

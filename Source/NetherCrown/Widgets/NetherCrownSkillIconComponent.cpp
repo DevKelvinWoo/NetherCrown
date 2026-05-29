@@ -78,7 +78,7 @@ UUserWidget* UNetherCrownSkillIconComponent::HandleOnGetSkillTooltipWidgetInMenu
 	return SkillTooltipWidget;
 }
 
-void UNetherCrownSkillIconComponent::SetSkillCoolDownProgress(float Percent)
+void UNetherCrownSkillIconComponent::SetSkillCoolDownProgress(const float Percent)
 {
 	if (!ensureAlways(IsValid(NativeSkillThumbnailProgressBar)))
 	{

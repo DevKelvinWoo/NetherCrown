@@ -39,7 +39,7 @@ void ANetherCrownShield::BeginPlay()
 	StartSetBeginShieldMaterialTimeline();
 }
 
-void ANetherCrownShield::Tick(float DeltaTime)
+void ANetherCrownShield::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -96,7 +96,7 @@ void ANetherCrownShield::StartSetEndShieldMaterialTimeline()
 	EndShieldMaterialFloatTimeline.PlayFromStart();
 }
 
-void ANetherCrownShield::SetBeginShieldMaterialByFloatTimeline(float FloatCurveValue)
+void ANetherCrownShield::SetBeginShieldMaterialByFloatTimeline(const float FloatCurveValue)
 {
 	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)) || GetNetMode() == NM_DedicatedServer)
 	{
@@ -106,7 +106,7 @@ void ANetherCrownShield::SetBeginShieldMaterialByFloatTimeline(float FloatCurveV
 	ShieldDynamicMaterialInstance->SetScalarParameterValue(ShieldMaterialScalarParameterName, FloatCurveValue);
 }
 
-void ANetherCrownShield::SetEndShieldMaterialByFloatTimeline(float FloatCurveValue)
+void ANetherCrownShield::SetEndShieldMaterialByFloatTimeline(const float FloatCurveValue)
 {
 	if (!ensureAlways(IsValid(ShieldDynamicMaterialInstance)) || GetNetMode() == NM_DedicatedServer)
 	{

@@ -105,15 +105,9 @@ FVector UNetherCrownEnemyCrownPrison::GetCrownPrisonWallSpawnLocation() const
 		return FVector::ZeroVector;
 	}
 
-	FVector GroundLocation{ CurrentTargetCharacter->GetActorLocation() };
-
 	const UCapsuleComponent* TargetCapsuleComponent{ CurrentTargetCharacter->GetCapsuleComponent() };
-	if (IsValid(TargetCapsuleComponent))
-	{
-		GroundLocation.Z -= TargetCapsuleComponent->GetScaledCapsuleHalfHeight();
-	}
-
-	GroundLocation.Z += CachedCrownEnemyCrownPrisonData.WallHiddenZOffset;
+	const float TargetCapsuleHalfHeight{ IsValid(TargetCapsuleComponent) ? TargetCapsuleComponent->GetScaledCapsuleHalfHeight() : 0.f };
+	const FVector GroundLocation{ CurrentTargetCharacter->GetActorLocation() + FVector(0.f, 0.f, CachedCrownEnemyCrownPrisonData.WallHiddenZOffset - TargetCapsuleHalfHeight) };
 	return GroundLocation;
 }
 

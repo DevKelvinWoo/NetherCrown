@@ -272,7 +272,7 @@ FVector UNetherCrownParryComponent::GetMagicProjectileReflectDirection(const ANe
 	return ReflectDirection;
 }
 
-void UNetherCrownParryComponent::SetLocalParryState(bool bActive)
+void UNetherCrownParryComponent::SetLocalParryState(const bool bActive)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)))
 	{
@@ -285,7 +285,7 @@ void UNetherCrownParryComponent::SetLocalParryState(bool bActive)
 	}
 }
 
-void UNetherCrownParryComponent::SetParryState(bool bActive)
+void UNetherCrownParryComponent::SetParryState(const bool bActive)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())
 	{

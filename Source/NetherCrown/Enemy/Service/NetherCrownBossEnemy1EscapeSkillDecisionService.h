@@ -17,7 +17,7 @@ public:
 	UNetherCrownBossEnemy1EscapeSkillDecisionService();
 
 protected:
-	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, const float DeltaSeconds) override;
 
 private:
 	bool IsEnemySkillCoolDown(const FGameplayTag& InSkillTag) const;

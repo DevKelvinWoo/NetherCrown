@@ -26,7 +26,7 @@ public:
 	void SetHandlingPostProcessComponent(UPostProcessComponent* PostProcessComponent);
 	void SetHandlingCameraComponent(UCameraComponent* CameraComponent);
 
-	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true);
+	void ApplyPostProcess(const ENetherCrownPPType PPType, const float Duration, const bool bEndTimerAutomatic = true);
 	void TryBindLowHealthPostProcess();
 	void FlashCrowdControlPostProcess();
 	void StartSetPostProcessBlendEndTimeline();
@@ -34,13 +34,13 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
 private:
 	void LoadPostProcessCosmeticData();
 	void BindTimelineFunctions();
 
-	void StartClearPostProcessTimer(float Duration);
+	void StartClearPostProcessTimer(const float Duration);
 	void ResetPostProcess();
 	void ClearPostProcessImmediately();
 	void HandleCharacterHPModified(const float RemainHPRatio);

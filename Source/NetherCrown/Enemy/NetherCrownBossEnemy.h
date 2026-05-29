@@ -22,7 +22,7 @@ public:
 
 	FOnBossEnemyDead& GetOnBossEnemyDead() { return OnBossEnemyDead; }
 
-	virtual void SetIsDead(const bool InbIsDead) override;
+	virtual void SetIsDead(const bool bInIsDead) override;
 
 protected:
 	virtual void BeginPlay() override;

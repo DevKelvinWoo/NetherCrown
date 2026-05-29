@@ -84,7 +84,7 @@ private:
 	void ChangeWeaponInternal();
 
 	void StowCurrentWeapon();
-	ANetherCrownWeapon* SpawnPersistentWeapon(TSubclassOf<ANetherCrownWeapon> WeaponClass, const FName& SocketName);
+	ANetherCrownWeapon* SpawnPersistentWeapon(const TSubclassOf<ANetherCrownWeapon> WeaponClass, const FName& SocketName);
 	ANetherCrownWeapon* FindAttachedWeaponBySocket(const FName& SocketName) const;
 	void ClearRestoredWeapons();
 

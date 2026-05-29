@@ -88,7 +88,7 @@ void ANetherCrownEnemyMagicProjectile::GetLifetimeReplicatedProps(TArray<class F
 }
 
 void ANetherCrownEnemyMagicProjectile::HandleOnHitSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap,
-                                                                     AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                                     AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex, const bool bFromSweep,
                                                                      const FHitResult& SweepResult)
 {
 	if (!HasAuthority())

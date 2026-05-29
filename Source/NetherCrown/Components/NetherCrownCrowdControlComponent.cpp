@@ -117,7 +117,7 @@ void UNetherCrownCrowdControlComponent::Multicast_SetCrowdControlState_Implement
 	}
 }
 
-void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime)
+void UNetherCrownCrowdControlComponent::ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, const float DurationTime)
 {
 	if (!ensureAlways(IsValid(CachedOwner)) || !CachedOwner->HasAuthority())
 	{
@@ -460,7 +460,7 @@ void UNetherCrownCrowdControlComponent::ClearCrowdControl(const ENetherCrownCrow
 	Multicast_ClearCrowdControl_Cosmetics(InCrowdControlType);
 }
 
-void UNetherCrownCrowdControlComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownCrowdControlComponent::TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -497,7 +497,7 @@ void UNetherCrownCrowdControlComponent::StartSetFrozenTargetOverlayEndMaterialTi
 	FrozenTargetOverlayEndMaterialFloatTimeline.PlayFromStart();
 }
 
-void UNetherCrownCrowdControlComponent::SetFrozenTargetOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
+void UNetherCrownCrowdControlComponent::SetFrozenTargetOverlayEndMaterialByFloatTimeline(const float FloatCurveValue)
 {
 	if (!ensureAlways(IsValid(CachedOwner)) || CachedOwner->GetNetMode() == NM_DedicatedServer)
 	{

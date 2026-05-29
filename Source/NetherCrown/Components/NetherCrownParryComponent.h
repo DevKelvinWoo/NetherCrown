@@ -37,8 +37,8 @@ private:
 	void ReflectEnemyMagicProjectile(ANetherCrownEnemyMagicProjectile* EnemyMagicProjectile) const;
 	FVector GetMagicProjectileReflectDirection(const ANetherCrownEnemyMagicProjectile* EnemyMagicProjectile) const;
 
-	void SetLocalParryState(bool bActive);
-	void SetParryState(bool bActive);
+	void SetLocalParryState(const bool bActive);
+	void SetParryState(const bool bActive);
 	UNetherCrownPlayerStatComponent* GetPlayerStatComponent() const;
 
 	UFUNCTION(Server, Reliable)

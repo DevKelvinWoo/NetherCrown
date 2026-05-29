@@ -18,7 +18,7 @@ UNetherCrownUpdateBossRangedAttackAvailableService::UNetherCrownUpdateBossRanged
 	RandomDeviation = 0.0f;
 }
 
-void UNetherCrownUpdateBossRangedAttackAvailableService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UNetherCrownUpdateBossRangedAttackAvailableService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, const float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 

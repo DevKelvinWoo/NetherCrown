@@ -15,7 +15,7 @@ UNetherCrownBossEnemy1EscapeSkillDecisionService::UNetherCrownBossEnemy1EscapeSk
 	SelectedEscapeSkillKeyNameBlackboardKey.AddNameFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, SelectedEscapeSkillKeyNameBlackboardKey));
 }
 
-void UNetherCrownBossEnemy1EscapeSkillDecisionService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UNetherCrownBossEnemy1EscapeSkillDecisionService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, const float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 

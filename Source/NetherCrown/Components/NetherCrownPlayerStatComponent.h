@@ -14,8 +14,8 @@ class NETHERCROWN_API UNetherCrownPlayerStatComponent : public UActorComponent
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnChacterHPModified, const float);
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnChacterMPModified, const float);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterHPModified, const float);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterMPModified, const float);
 
 public:
 	UNetherCrownPlayerStatComponent();
@@ -23,18 +23,18 @@ public:
 	const FNetherCrownPlayerStat& GetPlayerStatData() const { return PlayerStatData; }
 
 	//Set Stat
-	void AddPlayerShield(int32 InShieldValue);
+	void AddPlayerShield(const int32 InShieldValue);
 	void ClearPlayerShield();
 
-	void ModifyMP(float MPDelta);
-	void ModifyHp(float HpDelta);
+	void ModifyMP(const float MPDelta);
+	void ModifyHp(const float HpDelta);
 
-	void SetParryingState(bool bActive);
+	void SetParryingState(const bool bActive);
 	bool IsParrying() const;
 
 	//Delegate
-	FOnChacterHPModified& GetOnCharacterHPModified() { return OnCharacterHPModified; }
-	FOnChacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }
+	FOnCharacterHPModified& GetOnCharacterHPModified() { return OnCharacterHPModified; }
+	FOnCharacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }
 
 protected:
 	virtual void BeginPlay() override;
@@ -58,6 +58,6 @@ private:
 	TObjectPtr<ANetherCrownCharacter> CachedOwnerCharacter{};
 
 	//Delegate
-	FOnChacterHPModified OnCharacterHPModified;
-	FOnChacterMPModified OnCharacterMPModified;
+	FOnCharacterHPModified OnCharacterHPModified;
+	FOnCharacterMPModified OnCharacterMPModified;
 };

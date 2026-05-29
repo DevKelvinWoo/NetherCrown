@@ -23,7 +23,7 @@ protected:
 	virtual void ExecuteSkillGameplay() override;
 	virtual void PlaySkillCosmetics() override;
 
-	virtual void TickFloatTimeline(float DeltaTime) override;
+	virtual void TickFloatTimeline(const float DeltaTime) override;
 
 private:
 	void CacheFrozenTempestData();
@@ -34,10 +34,10 @@ private:
 	void StartSetCharacterOverlayStartMaterialTimeline();
 	void StartSetCharacterOverlayEndMaterialTimeline();
 
-	UFUNCTION(NetMulticast, UnReliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_StartFrozenTempestHitCosmetics();
 
-	UFUNCTION(NetMulticast, UnReliable)
+	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_SetDetectedEnemyOverlayMaterial();
 
 	UFUNCTION()

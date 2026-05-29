@@ -24,7 +24,7 @@ protected:
 	virtual void ExecuteSkillGameplay() override;
 	virtual void PlaySkillCosmetics() override;
 
-	virtual void TickFloatTimeline(float DeltaTime) override;
+	virtual void TickFloatTimeline(const float DeltaTime) override;
 
 private:
 	void CacheSkyFallSlashData();

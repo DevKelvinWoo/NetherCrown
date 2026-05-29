@@ -38,7 +38,7 @@ class NETHERCROWN_API UNetherCrownEnemyBTCosmeticData : public UDataAsset
 	GENERATED_BODY()
 
 public:
-	const FNetherCrownEnemyBTFoundCosmeticData& GetEnemyFoundCosmeticData() { return EnemyFoundCosmeticData; }
+	const FNetherCrownEnemyBTFoundCosmeticData& GetEnemyFoundCosmeticData() const { return EnemyFoundCosmeticData; }
 
 private:
 	UPROPERTY(EditDefaultsOnly)

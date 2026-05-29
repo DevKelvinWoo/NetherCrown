@@ -61,7 +61,7 @@ void UNetherCrownEnemyBasicAttackComponent::BeginPlay()
 	CachedActiveAttackMontage = CachedBasicAttackMontage;
 }
 
-void UNetherCrownEnemyBasicAttackComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownEnemyBasicAttackComponent::TickComponent(const float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 

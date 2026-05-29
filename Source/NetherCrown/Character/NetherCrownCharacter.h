@@ -63,7 +63,7 @@ public:
 	void ActiveParry(const FInputActionValue& Value);
 	void DeactivateParry(const FInputActionValue& Value);
 
-	void ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const;
+	void ExecuteSkillByKey(const FInputActionValue& Value, const ENetherCrownSkillKeyEnum SkillKey) const;
 	void ActiveQSkill(const FInputActionValue& Value) const;
 	void ActiveESkill(const FInputActionValue& Value) const;
 	void ActiveRSkill(const FInputActionValue& Value) const;
@@ -124,13 +124,13 @@ protected:
 
 	virtual void OnRep_PlayerState() override;
 
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
+	virtual float TakeDamage(const float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 private:
 	void DestroyVisualOnlyComponentsOnDS();
 
 	UFUNCTION(Server, Reliable)
-	void Server_SetPressedMoveKey(const bool InbPressedMoveKey, const FVector& InLastMoveDirection);
+	void Server_SetPressedMoveKey(const bool bInPressedMoveKey, const FVector& InLastMoveDirection);
 
 	void SetUseControllerSettings();
 	void SetMainSpringArmComponentSettings();

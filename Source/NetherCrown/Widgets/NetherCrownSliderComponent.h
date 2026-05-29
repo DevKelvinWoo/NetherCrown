@@ -14,7 +14,7 @@ class NETHERCROWN_API UNetherCrownSliderComponent : public UUserWidget
 	GENERATED_BODY()
 
 public:
-	void SetProgress(float Percent);
+	void SetProgress(const float Percent);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)
 	FLinearColor FillColor{};

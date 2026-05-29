@@ -111,16 +111,16 @@ void ANetherCrownEnemy::SetCharacterMaxSpeed(const bool bIsRunChase)
 	CharacterMovementComponent->MaxWalkSpeed = Speed;
 }
 
-void ANetherCrownEnemy::SetIsDead(const bool InbIsDead)
+void ANetherCrownEnemy::SetIsDead(const bool bInIsDead)
 {
 	if (HasAuthority())
 	{
-		bIsDead = InbIsDead;
+		bIsDead = bInIsDead;
 
 		Multicast_SetAllMontageDisable();
 		Multicast_SetHitBoxCollisionEnabled(false);
 		Multicast_SetCapsuleCollisionResponse(ECC_Pawn, ECR_Ignore);
-		Multicast_DeActiveStatusNiagaraSystem();
+		Multicast_DeactivateStatusNiagaraSystem();
 	}
 }
 
@@ -147,7 +147,7 @@ void ANetherCrownEnemy::BeginPlay()
 	SetReplicateMovement(true);
 }
 
-float ANetherCrownEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+float ANetherCrownEnemy::TakeDamage(const float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
 	//@NOTE : This function is only executed by server RPC
 	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
@@ -253,7 +253,7 @@ void ANetherCrownEnemy::Multicast_SetAllMontageDisable_Implementation()
 	EnemyAnimInstance->StopAllMontages(true);
 }
 
-void ANetherCrownEnemy::Multicast_DeActiveStatusNiagaraSystem_Implementation()
+void ANetherCrownEnemy::Multicast_DeactivateStatusNiagaraSystem_Implementation()
 {
 	if (GetNetMode() == NM_DedicatedServer)
 	{

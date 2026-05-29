@@ -245,7 +245,7 @@ int32 UNetherCrownSkillObject::CalculateSkillDamage() const
 	return ResultSkillDamage;
 }
 
-void UNetherCrownSkillObject::ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic) const
+void UNetherCrownSkillObject::ApplyPostProcess(const ENetherCrownPPType PPType, const float Duration, const bool bEndTimerAutomatic) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->IsLocallyControlled())
@@ -574,7 +574,7 @@ void UNetherCrownSkillObject::ExecuteSkillGameplay()
 	SetupSkillStateTimer();
 }
 
-void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(float InPlayRate) const
+void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(const float InPlayRate) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)

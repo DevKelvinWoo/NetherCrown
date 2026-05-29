@@ -26,15 +26,10 @@ bool UNetherCrownQuestWeaponReward::GrantReward(ANetherCrownCharacter* QuestOwne
 		return false;
 	}
 
-	FVector GroundLocation{ QuestOwner->GetActorLocation() };
 	const UCapsuleComponent* TargetCapsuleComponent{ QuestOwner->GetCapsuleComponent() };
-	if (IsValid(TargetCapsuleComponent))
-	{
-		GroundLocation.Z -= TargetCapsuleComponent->GetScaledCapsuleHalfHeight();
-	}
-
 	constexpr float WeaponSpawnOffset{ -200.f };
-	GroundLocation.Z += WeaponSpawnOffset;
+	const float TargetCapsuleHalfHeight{ IsValid(TargetCapsuleComponent) ? TargetCapsuleComponent->GetScaledCapsuleHalfHeight() : 0.f };
+	const FVector GroundLocation{ QuestOwner->GetActorLocation() + FVector(0.f, 0.f, WeaponSpawnOffset - TargetCapsuleHalfHeight) };
 
 	FActorSpawnParameters SpawnParams{};
 	SpawnParams.ObjectFlags = RF_Transient;

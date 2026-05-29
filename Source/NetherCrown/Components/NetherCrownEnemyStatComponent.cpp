@@ -67,7 +67,7 @@ float UNetherCrownEnemyStatComponent::GetEnemyHPRatio() const
 	return FMath::Clamp(static_cast<float>(EnemyStatData.EnemyHP) / static_cast<float>(EnemyStatData.EnemyMaxHP), 0.f, 1.f);
 }
 
-void UNetherCrownEnemyStatComponent::ModifyEnemyHp(float HpDelta)
+void UNetherCrownEnemyStatComponent::ModifyEnemyHp(const float HpDelta)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{

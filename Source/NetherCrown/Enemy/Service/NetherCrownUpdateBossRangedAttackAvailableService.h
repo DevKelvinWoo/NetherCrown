@@ -19,7 +19,7 @@ public:
 	UNetherCrownUpdateBossRangedAttackAvailableService();
 
 protected:
-	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds) override;
+	virtual void TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, const float DeltaSeconds) override;
 
 private:
 	void SetIsTargetInRangedAttackRange(UBlackboardComponent* BlackboardComponent, const bool bIsTargetInRangedAttackRange) const;

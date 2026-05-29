@@ -129,7 +129,7 @@ void ANetherCrownInteractNPC::GetLifetimeReplicatedProps(TArray<class FLifetimeP
 	DOREPLIFETIME(ThisClass, InteractTargetCharacterWeak);
 }
 
-void ANetherCrownInteractNPC::SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid)
+void ANetherCrownInteractNPC::SetTargetInteractNPC(const ANetherCrownCharacter* InteractCharacter, const bool bTargetValid)
 {
 	if (!HasAuthority() || !IsValid(InteractCharacter))
 	{
@@ -147,7 +147,7 @@ void ANetherCrownInteractNPC::SetTargetInteractNPC(const ANetherCrownCharacter* 
 }
 
 void ANetherCrownInteractNPC::SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget,
-	bool bVisible) const
+	const bool bVisible) const
 {
 	if (!InteractTarget->IsLocallyControlled())
 	{
@@ -254,7 +254,7 @@ TArray<FText> ANetherCrownInteractNPC::GetQuestDialogueText(const int32 QuestInd
 		DialogueTexts = QuestData[QuestIndex]->GetQuestDialogues();
 		break;
 	case ENetherCrownQuestState::InProgress:
-		DialogueTexts = QuestData[QuestIndex]->GetQuestInprogressDialogues();
+		DialogueTexts = QuestData[QuestIndex]->GetQuestInProgressDialogues();
 		break;
 	case ENetherCrownQuestState::Done:
 		DialogueTexts = QuestData[QuestIndex]->GetQuestEndDialogues();
@@ -318,7 +318,7 @@ void ANetherCrownInteractNPC::Multicast_ShowNPCDialogueWidget_Implementation(con
 }
 
 void ANetherCrownInteractNPC::Multicast_SetInteractWidgetVisibility_Implementation(
-	const ANetherCrownCharacter* InteractTarget, bool bVisible)
+	const ANetherCrownCharacter* InteractTarget, const bool bVisible)
 {
 	if (GetNetMode() == NM_DedicatedServer)
 	{
@@ -334,7 +334,7 @@ void ANetherCrownInteractNPC::Multicast_SetInteractWidgetVisibility_Implementati
 }
 
 void ANetherCrownInteractNPC::HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent,
-                                                               AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                               AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex, const bool bFromSweep,
                                                                const FHitResult& SweepResult)
 {
 	ANetherCrownCharacter* InteractTargetCharacter{ Cast<ANetherCrownCharacter>(OtherActor) };
@@ -357,7 +357,7 @@ void ANetherCrownInteractNPC::HandleOnDetectSphereOverlapBegin(UPrimitiveCompone
 }
 
 void ANetherCrownInteractNPC::HandleOnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent,
-	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+	AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex)
 {
 	ANetherCrownCharacter* InteractTargetCharacter{ Cast<ANetherCrownCharacter>(OtherActor) };
 	if (!IsValid(InteractTargetCharacter))

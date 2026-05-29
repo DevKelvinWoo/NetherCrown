@@ -18,7 +18,7 @@ class NETHERCROWN_API UNetherCrownQuestData : public UDataAsset
 
 public:
 	const TArray<FText>& GetQuestDialogues() const { return QuestDialogues; }
-	const TArray<FText>& GetQuestInprogressDialogues() const { return QuestInprogressDialogues; }
+	const TArray<FText>& GetQuestInProgressDialogues() const { return QuestInProgressDialogues; }
 	const TArray<FText>& GetQuestEndDialogues() const { return QuestEndDialogues; }
 
 	const FGameplayTag& GetQuestTag() const { return QuestTag; }
@@ -44,7 +44,7 @@ private:
 	TArray<FText> QuestDialogues{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
-	TArray<FText> QuestInprogressDialogues{};
+	TArray<FText> QuestInProgressDialogues{};
 
 	UPROPERTY(EditDefaultsOnly, Category = "Dialogue")
 	TArray<FText> QuestEndDialogues{};

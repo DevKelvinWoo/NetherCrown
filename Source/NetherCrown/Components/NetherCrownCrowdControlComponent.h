@@ -22,7 +22,7 @@ public:
 	ENetherCrownCrowdControlType GetCrowdControlType() const { return CrowdControlType; }
 	bool IsCrowdControlActive() const;
 	bool IsCrowdControlActive(const ENetherCrownCrowdControlType InCrowdControlType) const;
-	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, float DurationTime);
+	void ApplyCrowdControl(const ENetherCrownCrowdControlType InCrowdControlType, const float DurationTime);
 
 	//@NOTE : CC Implements
 	void KnockBack(const FVector& KnockBackVector) const;
@@ -31,7 +31,7 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
-	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
+	virtual void TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:

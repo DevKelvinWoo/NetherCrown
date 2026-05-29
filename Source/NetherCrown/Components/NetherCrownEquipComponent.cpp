@@ -465,7 +465,7 @@ void UNetherCrownEquipComponent::StowCurrentWeapon()
 	StowWeaponContainer.Add(TPair<ENetherCrownStowWeaponPosition, ANetherCrownWeapon*>{ StowWeaponPosition, EquippedWeapon });
 }
 
-ANetherCrownWeapon* UNetherCrownEquipComponent::SpawnPersistentWeapon(TSubclassOf<ANetherCrownWeapon> WeaponClass, const FName& SocketName)
+ANetherCrownWeapon* UNetherCrownEquipComponent::SpawnPersistentWeapon(const TSubclassOf<ANetherCrownWeapon> WeaponClass, const FName& SocketName)
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority() || !WeaponClass)
 	{

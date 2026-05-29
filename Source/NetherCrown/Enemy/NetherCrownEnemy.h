@@ -48,14 +48,14 @@ public:
 
 	void SetCharacterMaxSpeed(const bool bIsRunChase);
 
-	virtual void SetIsDead(const bool InbIsDead);
+	virtual void SetIsDead(const bool bInIsDead);
 	bool IsDead() { return bIsDead; }
 
 	const FGameplayTag& GetEnemyTag() const { return EnemyTag; }
 
 protected:
 	virtual void BeginPlay() override;
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
+	virtual float TakeDamage(const float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;
 
 	virtual void GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const override;
 
@@ -82,8 +82,8 @@ private:
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCapsuleCollisionResponse(const ECollisionChannel Channel, const ECollisionResponse Response);
 
-	UFUNCTION(NetMulticast, UnReliable)
-	void Multicast_DeActiveStatusNiagaraSystem();
+	UFUNCTION(NetMulticast, Unreliable)
+	void Multicast_DeactivateStatusNiagaraSystem();
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<UCapsuleComponent> EnemyHitBoxComponent{};

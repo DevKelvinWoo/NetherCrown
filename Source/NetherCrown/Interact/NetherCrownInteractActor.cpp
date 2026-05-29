@@ -108,7 +108,7 @@ void ANetherCrownInteractActor::FinishInteract(ANetherCrownCharacter* InteractCh
 }
 
 void ANetherCrownInteractActor::HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent,
-                                                                 AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                                 AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex, const bool bFromSweep,
                                                                  const FHitResult& SweepResult)
 {
 	InteractTargetCharacterWeak = MakeWeakObjectPtr(Cast<ANetherCrownCharacter>(OtherActor));
@@ -130,7 +130,7 @@ void ANetherCrownInteractActor::HandleOnDetectSphereOverlapBegin(UPrimitiveCompo
 }
 
 void ANetherCrownInteractActor::HandleOnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent,
-	AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+	AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex)
 {
 	InteractTargetCharacterWeak = MakeWeakObjectPtr(Cast<ANetherCrownCharacter>(OtherActor));
 	ANetherCrownCharacter* InteractTargetCharacter{ InteractTargetCharacterWeak.Get() };
@@ -150,7 +150,7 @@ void ANetherCrownInteractActor::HandleOnDetectSphereOverlapEnd(UPrimitiveCompone
 	}
 }
 
-void ANetherCrownInteractActor::SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid)
+void ANetherCrownInteractActor::SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, const bool bTargetValid)
 {
 	if (!HasAuthority())
 	{
@@ -167,7 +167,7 @@ void ANetherCrownInteractActor::SetTargetInteractActor(const ANetherCrownCharact
 	InteractComponent->SetTargetInteractActor(InteractActor);
 }
 
-void ANetherCrownInteractActor::SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const
+void ANetherCrownInteractActor::SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, const bool bVisible) const
 {
 	if (!InteractTarget->IsLocallyControlled())
 	{
@@ -281,7 +281,7 @@ void ANetherCrownInteractActor::Multicast_ShowInteractActorDialogueWidget_Implem
 }
 
 void ANetherCrownInteractActor::Multicast_SetInteractWidgetVisibility_Implementation(
-	const ANetherCrownCharacter* InteractTarget, bool bVisible) const
+	const ANetherCrownCharacter* InteractTarget, const bool bVisible) const
 {
 	if (!ensureAlways(IsValid(InteractTarget)) || !InteractTarget->IsLocallyControlled())
 	{

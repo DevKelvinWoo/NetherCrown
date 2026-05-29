@@ -16,7 +16,7 @@ UNetherCrownBossEnemy1SkillDecisionService::UNetherCrownBossEnemy1SkillDecisionS
 	SelectedSkillKeyNameBlackboardKey.AddNameFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, SelectedSkillKeyNameBlackboardKey));
 }
 
-void UNetherCrownBossEnemy1SkillDecisionService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UNetherCrownBossEnemy1SkillDecisionService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, const float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 

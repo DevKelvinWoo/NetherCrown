@@ -19,7 +19,7 @@ UNetherCrownCheckAttackRangeService::UNetherCrownCheckAttackRangeService()
 	RandomDeviation = 0.0f;
 }
 
-void UNetherCrownCheckAttackRangeService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, float DeltaSeconds)
+void UNetherCrownCheckAttackRangeService::TickNode(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory, const float DeltaSeconds)
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 

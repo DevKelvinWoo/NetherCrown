@@ -17,8 +17,8 @@ class NETHERCROWN_API UNetherCrownPlayerStatusWidgetViewModel : public UMVVMView
 {
 	GENERATED_BODY()
 
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnChacterHPModified, const float);
-	DECLARE_MULTICAST_DELEGATE_OneParam(FOnChacterMPModified, const float);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterHPModified, const float);
+	DECLARE_MULTICAST_DELEGATE_OneParam(FOnCharacterMPModified, const float);
 	DECLARE_MULTICAST_DELEGATE_TwoParams(FOnSkillCoolDownModified, const float, const ENetherCrownSkillKeyEnum);
 
 public:
@@ -27,8 +27,8 @@ public:
 
 	UNetherCrownSkillObject* GetSkillObject(const ENetherCrownSkillKeyEnum SkillKeyEnum) const;
 
-	FOnChacterHPModified& GetOnCharacterHPModified() { return OnCharacterHPModified; }
-	FOnChacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }
+	FOnCharacterHPModified& GetOnCharacterHPModified() { return OnCharacterHPModified; }
+	FOnCharacterMPModified& GetOnCharacterMPModified() { return OnCharacterMPModified; }
 	FOnSkillCoolDownModified& GetOnSkillCoolDownModified() { return OnSkillCoolDownModified; }
 
 private:
@@ -46,7 +46,7 @@ private:
 	UPROPERTY(Transient)
 	TWeakObjectPtr<UNetherCrownSkillComponent> BoundSkillComponentWeak{};
 
-	FOnChacterHPModified OnCharacterHPModified;
-	FOnChacterMPModified OnCharacterMPModified;
+	FOnCharacterHPModified OnCharacterHPModified;
+	FOnCharacterMPModified OnCharacterMPModified;
 	FOnSkillCoolDownModified OnSkillCoolDownModified;
 };

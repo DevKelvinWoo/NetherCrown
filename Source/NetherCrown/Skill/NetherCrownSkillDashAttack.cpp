@@ -65,7 +65,7 @@ void UNetherCrownSkillDashAttack::CacheDashAttackData()
 	DashAttackData = DashAttackDataAsset->GetDashAttackData();
 }
 
-void UNetherCrownSkillDashAttack::TickFloatTimeline(float DeltaTime)
+void UNetherCrownSkillDashAttack::TickFloatTimeline(const float DeltaTime)
 {
 	Super::TickFloatTimeline(DeltaTime);
 

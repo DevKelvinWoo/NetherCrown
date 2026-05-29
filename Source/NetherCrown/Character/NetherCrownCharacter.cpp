@@ -279,9 +279,9 @@ void ANetherCrownCharacter::MoveCharacter(const FInputActionValue& Value)
 	}
 }
 
-void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool InbPressedMoveKey, const FVector& InLastMoveDirection)
+void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool bInPressedMoveKey, const FVector& InLastMoveDirection)
 {
-	bPressedMoveKey = InbPressedMoveKey;
+	bPressedMoveKey = bInPressedMoveKey;
 
 	if (InLastMoveDirection.IsNearlyZero())
 	{
@@ -396,7 +396,7 @@ void ANetherCrownCharacter::DeactivateParry(const FInputActionValue& Value)
 	ParryComponent->DeactivateParry();
 }
 
-void ANetherCrownCharacter::ExecuteSkillByKey(const FInputActionValue& Value, ENetherCrownSkillKeyEnum SkillKey) const
+void ANetherCrownCharacter::ExecuteSkillByKey(const FInputActionValue& Value, const ENetherCrownSkillKeyEnum SkillKey) const
 {
 	if (!Value.Get<bool>())
 	{
@@ -584,7 +584,7 @@ void ANetherCrownCharacter::OnRep_PlayerState()
 	OnRepPlayerState.Broadcast();
 }
 
-float ANetherCrownCharacter::TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
+float ANetherCrownCharacter::TakeDamage(const float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser)
 {
 	float ResultDamage = Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
 

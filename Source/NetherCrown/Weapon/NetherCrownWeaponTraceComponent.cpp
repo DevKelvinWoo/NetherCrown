@@ -55,7 +55,7 @@ void UNetherCrownWeaponTraceComponent::CacheWeaponTraceData()
 	WeaponTraceData = OwnerWeaponData->GetWeaponTraceData();
 }
 
-void UNetherCrownWeaponTraceComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownWeaponTraceComponent::TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 

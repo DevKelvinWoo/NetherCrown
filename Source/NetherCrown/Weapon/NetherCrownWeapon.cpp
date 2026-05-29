@@ -71,7 +71,7 @@ void ANetherCrownWeapon::BeginPlay()
 	CacheWeaponLastComboAttackAura();
 }
 
-void ANetherCrownWeapon::Tick(float DeltaTime)
+void ANetherCrownWeapon::Tick(const float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
@@ -251,7 +251,7 @@ void ANetherCrownWeapon::RiseUpWeapon()
 }
 
 void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap,
-                                                         AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep,
+                                                         AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex, const bool bFromSweep,
                                                          const FHitResult& SweepResult)
 {
 	if (!(OtherActor->IsA<ANetherCrownCharacter>()))
@@ -267,7 +267,7 @@ void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* On
 }
 
 void ANetherCrownWeapon::HandleOnEquipSphereEndOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
-	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+	UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex)
 {
 	if (!(OtherActor->IsA<ANetherCrownCharacter>()))
 	{

@@ -28,7 +28,7 @@ public:
 	virtual void ExecuteSkillGameplay();
 
 	//@NOTE : Timeline
-	virtual void TickFloatTimeline(float DeltaTime){};
+	virtual void TickFloatTimeline(const float DeltaTime){};
 
 	ENetherCrownSkillKeyEnum GetSkillEnum() const;
 	const FNetherCrownSkillData& GetSkillData() const;
@@ -59,7 +59,7 @@ protected:
 
 	int32 CalculateSkillDamage() const;
 
-	void ApplyPostProcess(const ENetherCrownPPType PPType, float Duration, const bool bEndTimerAutomatic = true) const;
+	void ApplyPostProcess(const ENetherCrownPPType PPType, const float Duration, const bool bEndTimerAutomatic = true) const;
 
 	void SetupSkillStateTimer();
 	void SetupSkillMovementModeTimer();
@@ -123,7 +123,7 @@ protected:
 	FTimerHandle SkillCoolDownTimerHandle{};
 
 private:
-	void SetSkillMontageSlowPlayRate(float InPlayRate) const;
+	void SetSkillMontageSlowPlayRate(const float InPlayRate) const;
 
 	void StartSkillCoolDownTimer();
 	void StopSkillCoolDownTimer();

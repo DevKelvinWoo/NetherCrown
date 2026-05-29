@@ -83,7 +83,7 @@ public:
 	const FNetherCrownWeaponTagData& GetWeaponTagData() const { return WeaponTagData; }
 	const FNetherCrownWeaponTraceData& GetWeaponTraceData() const { return WeaponTraceData; }
 	const TMap<ENetherCrownSkillKeyEnum, TSoftObjectPtr<UNiagaraSystem>>& GetWeaponSkillAuraMap() const { return WeaponSkillAuraMap; }
-	const TSoftObjectPtr<UNiagaraSystem>& GetWeaponLastComboAttackAura() { return WeaponLastComboAttackAuraSoft; }
+	const TSoftObjectPtr<UNiagaraSystem>& GetWeaponLastComboAttackAura() const { return WeaponLastComboAttackAuraSoft; }
 
 private:
 	UPROPERTY(EditAnywhere)

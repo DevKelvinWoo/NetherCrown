@@ -118,7 +118,7 @@ void UNetherCrownShieldMastery::PlayShieldOnSound() const
 	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), NetherCrownTags::Sound_Shield_On);
 }
 
-void UNetherCrownShieldMastery::AddPlayerShieldAndSetShieldEndTimer(int32 InShieldValue) const
+void UNetherCrownShieldMastery::AddPlayerShieldAndSetShieldEndTimer(const int32 InShieldValue) const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->HasAuthority())

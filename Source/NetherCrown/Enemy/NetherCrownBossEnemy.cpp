@@ -28,11 +28,11 @@ void ANetherCrownBossEnemy::BeginPlay()
 	Super::BeginPlay();
 }
 
-void ANetherCrownBossEnemy::SetIsDead(const bool InbIsDead)
+void ANetherCrownBossEnemy::SetIsDead(const bool bInIsDead)
 {
-	Super::SetIsDead(InbIsDead);
+	Super::SetIsDead(bInIsDead);
 
-	if (!HasAuthority() || !InbIsDead)
+	if (!HasAuthority() || !bInIsDead)
 	{
 		return;
 	}

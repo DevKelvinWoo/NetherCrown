@@ -23,7 +23,7 @@ public:
 
 	FOnEnemyHPModified& GetOnEnemyHPModified() { return OnEnemyHPModified; }
 
-	void ModifyEnemyHp(float HpDelta);
+	void ModifyEnemyHp(const float HpDelta);
 
 protected:
 	virtual void BeginPlay() override;

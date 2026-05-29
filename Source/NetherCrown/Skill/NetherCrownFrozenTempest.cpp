@@ -84,7 +84,7 @@ void UNetherCrownFrozenTempest::PlaySkillCosmetics()
 	PlayChargeCameraShake();
 }
 
-void UNetherCrownFrozenTempest::TickFloatTimeline(float DeltaTime)
+void UNetherCrownFrozenTempest::TickFloatTimeline(const float DeltaTime)
 {
 	Super::TickFloatTimeline(DeltaTime);
 
@@ -223,7 +223,7 @@ void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector Vecto
 	SkillOwnerCharacter->SetMainSpringArmZOffset(VectorCurveValue.Z);
 }
 
-void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(float FloatCurveValue)
+void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(const float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
@@ -248,7 +248,7 @@ void UNetherCrownFrozenTempest::SetCharacterOverlayStartMaterialByFloatTimeline(
 	CachedDynamicFrozenTempestMaterial->SetScalarParameterValue(FrozenTempestData.FrozenTempestTargetMaterialParam, FloatCurveValue);
 }
 
-void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(float FloatCurveValue)
+void UNetherCrownFrozenTempest::SetCharacterOverlayEndMaterialByFloatTimeline(const float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)

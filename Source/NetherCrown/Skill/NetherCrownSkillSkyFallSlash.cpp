@@ -89,7 +89,7 @@ void UNetherCrownSkillSkyFallSlash::PlaySkillCosmetics()
 	StartSetArmMaterialParamTimeline();
 }
 
-void UNetherCrownSkillSkyFallSlash::TickFloatTimeline(float DeltaTime)
+void UNetherCrownSkillSkyFallSlash::TickFloatTimeline(const float DeltaTime)
 {
 	Super::TickFloatTimeline(DeltaTime);
 
@@ -175,7 +175,7 @@ void UNetherCrownSkillSkyFallSlash::Client_StartCameraShake_Implementation()
 	CameraManager->StartCameraShake(SkyFallSlashData.SkillCameraShakeBaseClass, 1.f);
 }
 
-void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(float FloatCurveValue)
+void UNetherCrownSkillSkyFallSlash::SetArmMaterialParamByFloatTimeline(const float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
@@ -279,8 +279,7 @@ const TArray<ANetherCrownEnemy*> UNetherCrownSkillSkyFallSlash::GetSkillDetected
 	for (AActor* OverlappedActor : OverlappedActors)
 	{
 		const FVector& OverlappedActorLocation{ OverlappedActor->GetActorLocation() };
-		FVector DirectionToTarget{ (OverlappedActorLocation - SkillOwnerCharacterLocation) };
-		DirectionToTarget.Normalize();
+		const FVector DirectionToTarget{ (OverlappedActorLocation - SkillOwnerCharacterLocation).GetSafeNormal() };
 
 		const double DotResult{ FVector::DotProduct(DirectionToTarget, SkillOwnerCharacterForwardVector) };
 		if (DotResult >= CosThreshold)
@@ -347,7 +346,7 @@ void UNetherCrownSkillSkyFallSlash::Multicast_SpawnSkyFallSlashTraceEffect_Imple
 	}
 }
 
-void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffsetByFloatTimeline(float FloatCurveValue)
+void UNetherCrownSkillSkyFallSlash::SetSpringArmZOffsetByFloatTimeline(const float FloatCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)

@@ -21,7 +21,7 @@ class NETHERCROWN_API UNetherCrownSkillIconComponent : public UUserWidget
 
 public:
 	void SetHandlingSkillObject(UNetherCrownSkillObject* InHandlingSkillObject);
-	void SetSkillCoolDownProgress(float Percent);
+	void SetSkillCoolDownProgress(const float Percent);
 	void SetSkillIconActive(const bool bActive, const bool bPlayActivateAnimation = false);
 
 	UPROPERTY(BlueprintReadWrite, EditAnywhere)

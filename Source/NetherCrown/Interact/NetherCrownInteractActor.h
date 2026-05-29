@@ -34,8 +34,8 @@ protected:
 	virtual void Interact() override;
 	virtual void FinishInteract(ANetherCrownCharacter* InteractCharacter) override;
 
-	void SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, bool bTargetValid);
-	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
+	void SetTargetInteractActor(const ANetherCrownCharacter* InteractCharacter, const bool bTargetValid);
+	void SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, const bool bVisible) const;
 
 	void ToggleInteractBoxCollision(const bool bOn);
 
@@ -52,16 +52,16 @@ private:
 	void Multicast_ShowInteractActorDialogueWidget();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, bool bVisible) const;
+	void Multicast_SetInteractWidgetVisibility(const ANetherCrownCharacter* InteractTarget, const bool bVisible) const;
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetInteractDetectSphereCollision(const bool bOn);
 
 	UFUNCTION()
-	void HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
+	void HandleOnDetectSphereOverlapBegin(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex, const bool bFromSweep, const FHitResult& SweepResult);
 
 	UFUNCTION()
-	void HandleOnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
+	void HandleOnDetectSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, const int32 OtherBodyIndex);
 
 	UPROPERTY(EditDefaultsOnly, Category = "Component")
 	TObjectPtr<USphereComponent> InteractDetectSphereComponent{};

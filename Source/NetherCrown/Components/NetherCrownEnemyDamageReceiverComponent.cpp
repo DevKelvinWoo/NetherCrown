@@ -43,7 +43,7 @@ void UNetherCrownEnemyDamageReceiverComponent::BeginPlay()
 	BindTimelineFunctions();
 }
 
-void UNetherCrownEnemyDamageReceiverComponent::TickComponent(float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownEnemyDamageReceiverComponent::TickComponent(const float DeltaTime, enum ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
@@ -82,7 +82,7 @@ void UNetherCrownEnemyDamageReceiverComponent::HandleEnemyDeadQuest(AActor* Dama
 	QuestComponent->CheckAndAddQuestCountProgress(CachedOwnerEnemy->GetEnemyTag(), 1);
 }
 
-float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser)
+float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(const float DamageAmount, FDamageEvent const& DamageEvent, AActor* DamageCauser)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
@@ -109,7 +109,7 @@ float UNetherCrownEnemyDamageReceiverComponent::HandleIncomingDamage(float Damag
 	return FinalDamage;
 }
 
-float UNetherCrownEnemyDamageReceiverComponent::CalculateFinalDamage(float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const
+float UNetherCrownEnemyDamageReceiverComponent::CalculateFinalDamage(const float DamageAmount, FDamageEvent const& DamageEvent, const AActor* DamageCauser) const
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
@@ -135,7 +135,7 @@ float UNetherCrownEnemyDamageReceiverComponent::CalculateFinalDamage(float Damag
 	return FinalDamage;
 }
 
-void UNetherCrownEnemyDamageReceiverComponent::ApplyFinalDamage(float FinalDamage)
+void UNetherCrownEnemyDamageReceiverComponent::ApplyFinalDamage(const float FinalDamage)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || !CachedOwnerEnemy->HasAuthority())
 	{
@@ -457,10 +457,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_SpawnDeathEffectAndSoun
 		return;
 	}
 
-	FTransform SpawnTransform{};
-	SpawnTransform.SetLocation(CachedOwnerEnemy->GetActorLocation());
-	SpawnTransform.SetRotation(FRotator::ZeroRotator.Quaternion());
-	SpawnTransform.SetScale3D(FVector(1.0f));
+	const FTransform SpawnTransform{ FRotator::ZeroRotator, CachedOwnerEnemy->GetActorLocation(), FVector(1.0f) };
 
 	UNetherCrownCrowdControlComponent* CCComponent{ CachedOwnerEnemy->GetCrowdControlComponent() };
 	if (!ensureAlways(IsValid(CCComponent)))
@@ -517,7 +514,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_SpawnDamageNumber_Imple
 	DamageNumberActor->InitDamageNumber(DamageAmount, bIsCriticalDamage);
 }
 
-void UNetherCrownEnemyDamageReceiverComponent::ApplyDeadMaterialParam(float FloatCurveValue)
+void UNetherCrownEnemyDamageReceiverComponent::ApplyDeadMaterialParam(const float FloatCurveValue)
 {
 	if (!ensureAlways(IsValid(CachedOwnerEnemy)) || GetNetMode() == NM_DedicatedServer)
 	{

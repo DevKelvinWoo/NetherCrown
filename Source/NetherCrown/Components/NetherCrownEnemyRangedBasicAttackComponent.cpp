@@ -63,7 +63,7 @@ void UNetherCrownEnemyRangedBasicAttackComponent::BeginPlay()
 	CacheInitData();
 }
 
-void UNetherCrownEnemyRangedBasicAttackComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
+void UNetherCrownEnemyRangedBasicAttackComponent::TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }

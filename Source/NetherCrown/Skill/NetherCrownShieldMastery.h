@@ -29,7 +29,7 @@ private:
 
 	void PlayShieldOnSound() const;
 
-	void AddPlayerShieldAndSetShieldEndTimer(int32 InShieldValue) const;
+	void AddPlayerShieldAndSetShieldEndTimer(const int32 InShieldValue) const;
 	void ClearPlayerShield() const;
 
 	UPROPERTY(Transient)
