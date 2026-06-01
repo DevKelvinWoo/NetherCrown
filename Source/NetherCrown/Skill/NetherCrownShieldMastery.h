@@ -29,8 +29,8 @@ private:
 
 	void PlayShieldOnSound() const;
 
-	void AddPlayerShieldAndSetShieldEndTimer(const int32 InShieldValue) const;
-	void ClearPlayerShield() const;
+	void AddPlayerShieldAndSetShieldEndTimer(const int32 InShieldValue);
+	void ClearPlayerShield();
 
 	FNetherCrownShieldMasteryData ShieldMasteryData{};
 
@@ -39,4 +39,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownShield> HandledShieldMasteryActor{};
+
+	FTimerHandle ShieldMasteryDeactivateTimerHandle{};
+	FTimerHandle ShieldMasteryClearPlayerShieldTimerHandle{};
 };

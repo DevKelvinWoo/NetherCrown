@@ -90,6 +90,11 @@ void UNetherCrownControlPPComponent::ClearPostProcessImmediately()
 		return;
 	}
 
+	if (const UWorld* World{ GetWorld() })
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle_ClearPostProcess);
+	}
+
 	PostProcessBlendStartFloatTimeline.Stop();
 	PostProcessBlendEndFloatTimeline.Stop();
 
@@ -309,9 +314,8 @@ void UNetherCrownControlPPComponent::StartClearPostProcessTimer(const float Dura
 	const UWorld* World{ GetWorld() };
 	check(World);
 
-	FTimerHandle TimerHandle{};
-
-	World->GetTimerManager().SetTimer(TimerHandle, this, &UNetherCrownControlPPComponent::StartSetPostProcessBlendEndTimeline, Duration, false);
+	World->GetTimerManager().ClearTimer(TimerHandle_ClearPostProcess);
+	World->GetTimerManager().SetTimer(TimerHandle_ClearPostProcess, this, &UNetherCrownControlPPComponent::StartSetPostProcessBlendEndTimeline, Duration, false);
 }
 
 void UNetherCrownControlPPComponent::ResetPostProcess()

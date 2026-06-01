@@ -84,5 +84,6 @@ private:
 
 	FTimeline PostProcessBlendStartFloatTimeline{};
 	FTimeline PostProcessBlendEndFloatTimeline{};
-	FTimerHandle TimerHandle_CrowdControlPostProcessFlash;
+	FTimerHandle TimerHandle_CrowdControlPostProcessFlash{};
+	FTimerHandle TimerHandle_ClearPostProcess{};
 };

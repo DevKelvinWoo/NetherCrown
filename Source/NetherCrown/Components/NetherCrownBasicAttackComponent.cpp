@@ -917,6 +917,7 @@ void UNetherCrownBasicAttackComponent::ServerHandleAttackEnd()
 		World->GetTimerManager().ClearTimer(ComboWindowOpenTimerHandle);
 		World->GetTimerManager().ClearTimer(ComboWindowCloseTimerHandle);
 		World->GetTimerManager().ClearTimer(AttackEndTimerHandle);
+		World->GetTimerManager().ClearTimer(HitTraceEnableHandle);
 		World->GetTimerManager().ClearTimer(HitStopTimer);
 		World->GetTimerManager().ClearTimer(PushInTimerHandle);
 	}

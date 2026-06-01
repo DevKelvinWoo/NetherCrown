@@ -615,6 +615,7 @@ void UNetherCrownSkillObject::StartSkillCoolDownTimer()
 	SkillCoolDownAccumulator = SkillData.SkillCooldown;
 	Client_SkillCoolDownModify(1.f);
 
+	World->GetTimerManager().ClearTimer(SkillCoolDownTimerHandle);
 	World->GetTimerManager().SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, GetSkillCoolDownDecreaseOffset(), true);
 
 	bIsCoolDown = true;

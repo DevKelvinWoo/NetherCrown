@@ -125,6 +125,7 @@ void UNetherCrownEnemySkillObject::StartSkillCoolDownTimer()
 	bIsCoolDown = true;
 
 	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(SkillCoolDownTimerHandle);
 	TimerManager.SetTimer(SkillCoolDownTimerHandle, this, &ThisClass::StopSkillCoolDownTimer, EnemySkillData.EnemySkillCoolDown, false);
 }
 
@@ -134,6 +135,11 @@ void UNetherCrownEnemySkillObject::StopSkillCoolDownTimer()
 	if (!IsValid(SkillOwnerEnemy) || !SkillOwnerEnemy->HasAuthority())
 	{
 		return;
+	}
+
+	if (const UWorld* World{ GetWorld() })
+	{
+		World->GetTimerManager().ClearTimer(SkillCoolDownTimerHandle);
 	}
 
 	bIsCoolDown = false;

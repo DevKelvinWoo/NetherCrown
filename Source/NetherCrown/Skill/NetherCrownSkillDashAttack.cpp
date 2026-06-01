@@ -151,6 +151,7 @@ void UNetherCrownSkillDashAttack::DashAttackToTargets()
 		return;
 	}
 
+	World->GetTimerManager().ClearTimer(DashAttackHitTimerHandle);
 	World->GetTimerManager().SetTimer(DashAttackHitTimerHandle, this, &ThisClass::HitDashAttack, DashAttackData.DashDuration, false, 0.f);
 
 	const FVector CurrentTargetLocation{ CurrentTargetActor->GetActorLocation() };

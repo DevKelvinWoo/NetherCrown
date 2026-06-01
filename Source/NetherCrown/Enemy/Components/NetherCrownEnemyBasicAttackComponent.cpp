@@ -149,6 +149,15 @@ void UNetherCrownEnemyBasicAttackComponent::EndAttack()
 		return;
 	}
 
+	if (const UWorld* World{ GetWorld() })
+	{
+		FTimerManager& TimerManager{ World->GetTimerManager() };
+		TimerManager.ClearTimer(EnableHitTraceTimerHandle);
+		TimerManager.ClearTimer(DisableHitTraceTimerHandle);
+		TimerManager.ClearTimer(AttackEndTimerHandle);
+	}
+
+	bEnableHitTrace = false;
 	EnemyBasicAttackState = ENetherCrownEnemyBasicAttackState::NotAttacking;
 }
 

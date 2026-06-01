@@ -239,6 +239,7 @@ void UNetherCrownEnemyRangedBasicAttackComponent::StartRangedBasicAttack()
 
 	FTimerManager& TimerManager{ World->GetTimerManager() };
 	TimerManager.ClearTimer(ComboAttackTimerHandle);
+	TimerManager.ClearTimer(ComboAttackEndTimerHandle);
 
 	const TMap<int32, FNetherCrownEnemyRangedBasicAttackComboData>& EnemyRangedBasicAttackComboDataMap{ CachedEnemyRangedBasicAttackDataAsset->GetEnemyRangedBasicAttackData().EnemyRangedBasicAttackComboDataMap };
 	const FNetherCrownEnemyRangedBasicAttackComboData* FoundComboDataPtr{ EnemyRangedBasicAttackComboDataMap.Find(CurrentComboIndex - 1) };

@@ -144,6 +144,7 @@ void UNetherCrownEnemyMagicSpike::StartMagicSpikeRangeTimer()
 	}
 
 	FTimerManager& TimerManager{ World->GetTimerManager() };
+	TimerManager.ClearTimer(MagicSpikeRangeTimerHandle);
 	TimerManager.SetTimer(MagicSpikeRangeTimerHandle, this, &ThisClass::ShowMagicSpikeRange, CachedMagicSpikeData.MagicSpikeRangeInterval, true);
 }
 

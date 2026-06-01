@@ -30,6 +30,16 @@ void ANetherCrownPortal::BeginPlay()
 	}
 }
 
+void ANetherCrownPortal::EndPlay(const EEndPlayReason::Type EndPlayReason)
+{
+	if (UWorld* World{ GetWorld() })
+	{
+		World->GetTimerManager().ClearTimer(TimerHandle_CapturePortalScene);
+	}
+
+	Super::EndPlay(EndPlayReason);
+}
+
 void ANetherCrownPortal::FinishInteract(ANetherCrownCharacter* InteractCharacter)
 {
 	Super::FinishInteract(InteractCharacter);
