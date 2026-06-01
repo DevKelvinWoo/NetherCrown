@@ -11,6 +11,7 @@
 UNetherCrownEnemyRangedBasicAttackTask::UNetherCrownEnemyRangedBasicAttackTask()
 {
 	NodeName = TEXT("EnemyRangedBasicAttackTask");
+	bCreateNodeInstance = true;
 
 	ShouldRepositionBlackboardKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, ShouldRepositionBlackboardKey));
 }
@@ -37,18 +38,28 @@ EBTNodeResult::Type UNetherCrownEnemyRangedBasicAttackTask::ExecuteTask(UBehavio
 		return EBTNodeResult::Failed;
 	}
 
+	CachedEnemyRangedBasicAttackComponentWeak = MakeWeakObjectPtr(EnemyRangedBasicAttackComponent);
+	EnemyRangedBasicAttackComponent->GetOnEnemyRangedBasicAttackFinished().RemoveAll(this);
 	EnemyRangedBasicAttackComponent->GetOnEnemyRangedBasicAttackFinished().AddUObject(this, &ThisClass::HandleRangedBasicAttackFinished);
 
 	CachedOwnerCompWeak = MakeWeakObjectPtr(&OwnerComp);
 
 	if (!EnemyRangedBasicAttackComponent->RequestEnemyRangedAttack())
 	{
-		EnemyRangedBasicAttackComponent->GetOnEnemyRangedBasicAttackFinished().RemoveAll(this);
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return EBTNodeResult::Failed;
 	}
 
 	return EBTNodeResult::InProgress;
+}
+
+EBTNodeResult::Type UNetherCrownEnemyRangedBasicAttackTask::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::AbortTask(OwnerComp, NodeMemory);
+
+	ResetTaskState();
+
+	return EBTNodeResult::Aborted;
 }
 
 void UNetherCrownEnemyRangedBasicAttackTask::HandleRangedBasicAttackFinished()
@@ -56,7 +67,7 @@ void UNetherCrownEnemyRangedBasicAttackTask::HandleRangedBasicAttackFinished()
 	UBehaviorTreeComponent* CachedOwnerComp{ CachedOwnerCompWeak.Get() };
 	if (!ensureAlways(IsValid(CachedOwnerComp)))
 	{
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return;
 	}
 
@@ -66,5 +77,17 @@ void UNetherCrownEnemyRangedBasicAttackTask::HandleRangedBasicAttackFinished()
 		BlackboardComponent->SetValueAsBool(ShouldRepositionBlackboardKey.SelectedKeyName, true);
 	}
 
+	ResetTaskState();
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+}
+
+void UNetherCrownEnemyRangedBasicAttackTask::ResetTaskState()
+{
+	if (UNetherCrownEnemyRangedBasicAttackComponent* EnemyRangedBasicAttackComponent{ CachedEnemyRangedBasicAttackComponentWeak.Get() })
+	{
+		EnemyRangedBasicAttackComponent->GetOnEnemyRangedBasicAttackFinished().RemoveAll(this);
+	}
+
+	CachedEnemyRangedBasicAttackComponentWeak.Reset();
+	CachedOwnerCompWeak.Reset();
 }

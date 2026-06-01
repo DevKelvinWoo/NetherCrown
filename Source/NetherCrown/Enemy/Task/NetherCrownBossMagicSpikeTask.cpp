@@ -11,6 +11,7 @@
 UNetherCrownBossMagicSpikeTask::UNetherCrownBossMagicSpikeTask()
 {
 	NodeName = TEXT("BossMagicSpike");
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UNetherCrownBossMagicSpikeTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -42,16 +43,26 @@ EBTNodeResult::Type UNetherCrownBossMagicSpikeTask::ExecuteTask(UBehaviorTreeCom
 	{
 		return EBTNodeResult::Failed;
 	}
+	CachedMagicSpikeSkillObjectWeak = MakeWeakObjectPtr(MagicSpikeSkillObject);
+	MagicSpikeSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
 	MagicSpikeSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnMagicSpikeSkillFinished);
 
 	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_MagicSpike))
 	{
-		MagicSpikeSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return EBTNodeResult::Failed;
 	}
 
 	return EBTNodeResult::InProgress;
+}
+
+EBTNodeResult::Type UNetherCrownBossMagicSpikeTask::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::AbortTask(OwnerComp, NodeMemory);
+
+	ResetTaskState();
+
+	return EBTNodeResult::Aborted;
 }
 
 void UNetherCrownBossMagicSpikeTask::HandleOnMagicSpikeSkillFinished()
@@ -59,9 +70,21 @@ void UNetherCrownBossMagicSpikeTask::HandleOnMagicSpikeSkillFinished()
 	UBehaviorTreeComponent* CachedOwnerComp{ CachedOwnerCompWeak.Get() };
 	if (!ensureAlways(IsValid(CachedOwnerComp)))
 	{
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return;
 	}
 
+	ResetTaskState();
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+}
+
+void UNetherCrownBossMagicSpikeTask::ResetTaskState()
+{
+	if (UNetherCrownEnemySkillObject* MagicSpikeSkillObject{ CachedMagicSpikeSkillObjectWeak.Get() })
+	{
+		MagicSpikeSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+	}
+
+	CachedMagicSpikeSkillObjectWeak.Reset();
+	CachedOwnerCompWeak.Reset();
 }

@@ -6,6 +6,8 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "NetherCrownBossVoidPiercerTask.generated.h"
 
+class UNetherCrownEnemySkillObject;
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownBossVoidPiercerTask : public UBTTaskNode
 {
@@ -16,12 +18,15 @@ public:
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
 	void HandleVoidPiercerFinished();
+	void ResetTaskState();
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector BlockFaceTargetBlackboardKey{};
 
 	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerCompWeak{};
+	TWeakObjectPtr<UNetherCrownEnemySkillObject> CachedVoidPiercerSkillObjectWeak{};
 };

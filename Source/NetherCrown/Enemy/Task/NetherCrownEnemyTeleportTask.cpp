@@ -12,6 +12,7 @@
 UNetherCrownEnemyTeleportTask::UNetherCrownEnemyTeleportTask()
 {
 	NodeName = TEXT("Teleport");
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UNetherCrownEnemyTeleportTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -43,16 +44,26 @@ EBTNodeResult::Type UNetherCrownEnemyTeleportTask::ExecuteTask(UBehaviorTreeComp
 	{
 		return EBTNodeResult::Failed;
 	}
+	CachedTeleportSkillObjectWeak = MakeWeakObjectPtr(TeleportSkillObject);
+	TeleportSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
 	TeleportSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnTeleportSkillFinished);
 
 	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_Teleport))
 	{
-		TeleportSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return EBTNodeResult::Failed;
 	}
 
 	return EBTNodeResult::InProgress;
+}
+
+EBTNodeResult::Type UNetherCrownEnemyTeleportTask::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::AbortTask(OwnerComp, NodeMemory);
+
+	ResetTaskState();
+
+	return EBTNodeResult::Aborted;
 }
 
 void UNetherCrownEnemyTeleportTask::HandleOnTeleportSkillFinished()
@@ -60,9 +71,21 @@ void UNetherCrownEnemyTeleportTask::HandleOnTeleportSkillFinished()
 	UBehaviorTreeComponent* CachedOwnerComp{ CachedOwnerCompWeak.Get() };
 	if (!ensureAlways(IsValid(CachedOwnerComp)))
 	{
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return;
 	}
 
+	ResetTaskState();
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+}
+
+void UNetherCrownEnemyTeleportTask::ResetTaskState()
+{
+	if (UNetherCrownEnemySkillObject* TeleportSkillObject{ CachedTeleportSkillObjectWeak.Get() })
+	{
+		TeleportSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+	}
+
+	CachedTeleportSkillObjectWeak.Reset();
+	CachedOwnerCompWeak.Reset();
 }

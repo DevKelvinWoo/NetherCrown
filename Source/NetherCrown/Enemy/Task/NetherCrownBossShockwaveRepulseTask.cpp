@@ -11,6 +11,7 @@
 UNetherCrownBossShockwaveRepulseTask::UNetherCrownBossShockwaveRepulseTask()
 {
 	NodeName = TEXT("Boss Shockwave Repulse");
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UNetherCrownBossShockwaveRepulseTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -42,16 +43,26 @@ EBTNodeResult::Type UNetherCrownBossShockwaveRepulseTask::ExecuteTask(UBehaviorT
 	{
 		return EBTNodeResult::Failed;
 	}
+	CachedShockwaveRepulseSkillObjectWeak = MakeWeakObjectPtr(ShockwaveRepulseSkillObject);
+	ShockwaveRepulseSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
 	ShockwaveRepulseSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnShockwaveRepulseSkillFinished);
 
 	if (!OwnerBossEnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_ShockwaveRepulse))
 	{
-		ShockwaveRepulseSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return EBTNodeResult::Failed;
 	}
 
 	return EBTNodeResult::InProgress;
+}
+
+EBTNodeResult::Type UNetherCrownBossShockwaveRepulseTask::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::AbortTask(OwnerComp, NodeMemory);
+
+	ResetTaskState();
+
+	return EBTNodeResult::Aborted;
 }
 
 void UNetherCrownBossShockwaveRepulseTask::HandleOnShockwaveRepulseSkillFinished()
@@ -59,9 +70,21 @@ void UNetherCrownBossShockwaveRepulseTask::HandleOnShockwaveRepulseSkillFinished
 	UBehaviorTreeComponent* CachedOwnerComp{ CachedOwnerCompWeak.Get() };
 	if (!ensureAlways(IsValid(CachedOwnerComp)))
 	{
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return;
 	}
 
+	ResetTaskState();
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+}
+
+void UNetherCrownBossShockwaveRepulseTask::ResetTaskState()
+{
+	if (UNetherCrownEnemySkillObject* ShockwaveRepulseSkillObject{ CachedShockwaveRepulseSkillObjectWeak.Get() })
+	{
+		ShockwaveRepulseSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+	}
+
+	CachedShockwaveRepulseSkillObjectWeak.Reset();
+	CachedOwnerCompWeak.Reset();
 }

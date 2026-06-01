@@ -19,6 +19,13 @@ void UNetherCrownNormalEnemyHPWidgetView::InitNormalEnemyHPWidget(ANetherCrownEn
 		return;
 	}
 
+	if (UNetherCrownEnemyStatComponent* BoundEnemyStatComponent{ BoundEnemyStatComponentWeak.Get() })
+	{
+		BoundEnemyStatComponent->GetOnEnemyHPModified().RemoveAll(this);
+	}
+
+	BoundEnemyStatComponentWeak = MakeWeakObjectPtr(EnemyStatComponent);
+	EnemyStatComponent->GetOnEnemyHPModified().RemoveAll(this);
 	EnemyStatComponent->GetOnEnemyHPModified().AddUObject(this, &ThisClass::SetEnemyHPSliderValue);
 	SetEnemyHPSliderValue(1.f);
 }
@@ -26,6 +33,18 @@ void UNetherCrownNormalEnemyHPWidgetView::InitNormalEnemyHPWidget(ANetherCrownEn
 void UNetherCrownNormalEnemyHPWidgetView::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+}
+
+void UNetherCrownNormalEnemyHPWidgetView::NativeDestruct()
+{
+	if (UNetherCrownEnemyStatComponent* BoundEnemyStatComponent{ BoundEnemyStatComponentWeak.Get() })
+	{
+		BoundEnemyStatComponent->GetOnEnemyHPModified().RemoveAll(this);
+	}
+
+	BoundEnemyStatComponentWeak.Reset();
+
+	Super::NativeDestruct();
 }
 
 void UNetherCrownNormalEnemyHPWidgetView::SetEnemyHPSliderValue(const float HpRatio)

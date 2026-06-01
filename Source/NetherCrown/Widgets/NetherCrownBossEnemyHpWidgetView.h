@@ -8,6 +8,7 @@
 
 class UNetherCrownSliderComponent;
 class ANetherCrownEnemy;
+class UNetherCrownEnemyStatComponent;
 
 UCLASS()
 class NETHERCROWN_API UNetherCrownBossEnemyHpWidgetView : public UNetherCrownUIScreenBase
@@ -20,8 +21,11 @@ public:
 
 protected:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 private:
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<UNetherCrownSliderComponent> BossEnemyHPSlider{};
+
+	TWeakObjectPtr<UNetherCrownEnemyStatComponent> BoundEnemyStatComponentWeak{};
 };

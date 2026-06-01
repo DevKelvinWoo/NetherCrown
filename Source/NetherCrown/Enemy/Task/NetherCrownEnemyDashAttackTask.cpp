@@ -23,6 +23,7 @@ UNetherCrownEnemyDashAttackTask::UNetherCrownEnemyDashAttackTask()
 EBTNodeResult::Type UNetherCrownEnemyDashAttackTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
+	ResetTaskState();
 
 	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
 	if (!ensureAlways(IsValid(EnemyAIController)))

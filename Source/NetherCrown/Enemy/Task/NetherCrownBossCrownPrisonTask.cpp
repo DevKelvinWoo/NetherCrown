@@ -11,6 +11,7 @@
 UNetherCrownBossCrownPrisonTask::UNetherCrownBossCrownPrisonTask()
 {
 	NodeName = TEXT("BossCrownPrison");
+	bCreateNodeInstance = true;
 }
 
 EBTNodeResult::Type UNetherCrownBossCrownPrisonTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
@@ -42,16 +43,26 @@ EBTNodeResult::Type UNetherCrownBossCrownPrisonTask::ExecuteTask(UBehaviorTreeCo
 	{
 		return EBTNodeResult::Failed;
 	}
+	CachedCrownPrisonSkillObjectWeak = MakeWeakObjectPtr(CrownPrisonSkillObject);
+	CrownPrisonSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
 	CrownPrisonSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleOnCrownPrisonSkillFinished);
 
 	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_CrownPrison))
 	{
-		CrownPrisonSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return EBTNodeResult::Failed;
 	}
 
 	return EBTNodeResult::InProgress;
+}
+
+EBTNodeResult::Type UNetherCrownBossCrownPrisonTask::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::AbortTask(OwnerComp, NodeMemory);
+
+	ResetTaskState();
+
+	return EBTNodeResult::Aborted;
 }
 
 void UNetherCrownBossCrownPrisonTask::HandleOnCrownPrisonSkillFinished()
@@ -59,9 +70,21 @@ void UNetherCrownBossCrownPrisonTask::HandleOnCrownPrisonSkillFinished()
 	UBehaviorTreeComponent* CachedOwnerComp{ CachedOwnerCompWeak.Get() };
 	if (!ensureAlways(IsValid(CachedOwnerComp)))
 	{
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return;
 	}
 
+	ResetTaskState();
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+}
+
+void UNetherCrownBossCrownPrisonTask::ResetTaskState()
+{
+	if (UNetherCrownEnemySkillObject* CrownPrisonSkillObject{ CachedCrownPrisonSkillObjectWeak.Get() })
+	{
+		CrownPrisonSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+	}
+
+	CachedCrownPrisonSkillObjectWeak.Reset();
+	CachedOwnerCompWeak.Reset();
 }

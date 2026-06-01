@@ -7,6 +7,8 @@
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "NetherCrownEnemyRangedBasicAttackTask.generated.h"
 
+class UNetherCrownEnemyRangedBasicAttackComponent;
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownEnemyRangedBasicAttackTask : public UBTTaskNode
 {
@@ -17,12 +19,15 @@ public:
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
 	void HandleRangedBasicAttackFinished();
+	void ResetTaskState();
 
 	UPROPERTY(EditAnywhere, Category = "Blackboard")
 	FBlackboardKeySelector ShouldRepositionBlackboardKey{};
 
 	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerCompWeak{};
+	TWeakObjectPtr<UNetherCrownEnemyRangedBasicAttackComponent> CachedEnemyRangedBasicAttackComponentWeak{};
 };

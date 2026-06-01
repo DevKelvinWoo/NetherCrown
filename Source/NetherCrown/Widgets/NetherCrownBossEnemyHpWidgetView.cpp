@@ -19,6 +19,13 @@ void UNetherCrownBossEnemyHpWidgetView::InitNormalEnemyHPWidget(ANetherCrownEnem
 		return;
 	}
 
+	if (UNetherCrownEnemyStatComponent* BoundEnemyStatComponent{ BoundEnemyStatComponentWeak.Get() })
+	{
+		BoundEnemyStatComponent->GetOnEnemyHPModified().RemoveAll(this);
+	}
+
+	BoundEnemyStatComponentWeak = MakeWeakObjectPtr(EnemyStatComponent);
+	EnemyStatComponent->GetOnEnemyHPModified().RemoveAll(this);
 	EnemyStatComponent->GetOnEnemyHPModified().AddUObject(this, &ThisClass::SetBossEnemyHPSliderValue);
 	SetBossEnemyHPSliderValue(1.f);
 }
@@ -36,4 +43,16 @@ void UNetherCrownBossEnemyHpWidgetView::SetBossEnemyHPSliderValue(const float Pe
 void UNetherCrownBossEnemyHpWidgetView::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
+}
+
+void UNetherCrownBossEnemyHpWidgetView::NativeDestruct()
+{
+	if (UNetherCrownEnemyStatComponent* BoundEnemyStatComponent{ BoundEnemyStatComponentWeak.Get() })
+	{
+		BoundEnemyStatComponent->GetOnEnemyHPModified().RemoveAll(this);
+	}
+
+	BoundEnemyStatComponentWeak.Reset();
+
+	Super::NativeDestruct();
 }

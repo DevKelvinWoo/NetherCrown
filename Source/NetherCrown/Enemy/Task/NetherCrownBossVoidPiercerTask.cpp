@@ -13,6 +13,7 @@
 UNetherCrownBossVoidPiercerTask::UNetherCrownBossVoidPiercerTask()
 {
 	NodeName = TEXT("BossVoidPiercer");
+	bCreateNodeInstance = true;
 
 	BlockFaceTargetBlackboardKey.AddBoolFilter(this, GET_MEMBER_NAME_CHECKED(ThisClass, BlockFaceTargetBlackboardKey));
 }
@@ -46,6 +47,7 @@ EBTNodeResult::Type UNetherCrownBossVoidPiercerTask::ExecuteTask(UBehaviorTreeCo
 	{
 		return EBTNodeResult::Failed;
 	}
+	CachedVoidPiercerSkillObjectWeak = MakeWeakObjectPtr(VoidPiercerSkillObject);
 
 	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
 	if (!ensureAlways(IsValid(BlackboardComponent)))
@@ -55,17 +57,31 @@ EBTNodeResult::Type UNetherCrownBossVoidPiercerTask::ExecuteTask(UBehaviorTreeCo
 
 	BlackboardComponent->SetValueAsBool(BlockFaceTargetBlackboardKey.SelectedKeyName, true);
 
+	VoidPiercerSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
 	VoidPiercerSkillObject->GetOnEnemySkillFinished().AddUObject(this, &ThisClass::HandleVoidPiercerFinished);
 
 	if (!EnemySkillComponent->ActivateEnemySkill(NetherCrownTags::Enemy_Skill_VoidPiercer))
 	{
-		VoidPiercerSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
 		BlackboardComponent->SetValueAsBool(BlockFaceTargetBlackboardKey.SelectedKeyName, false);
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return EBTNodeResult::Failed;
 	}
 
 	return EBTNodeResult::InProgress;
+}
+
+EBTNodeResult::Type UNetherCrownBossVoidPiercerTask::AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
+{
+	Super::AbortTask(OwnerComp, NodeMemory);
+
+	if (UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() })
+	{
+		BlackboardComponent->SetValueAsBool(BlockFaceTargetBlackboardKey.SelectedKeyName, false);
+	}
+
+	ResetTaskState();
+
+	return EBTNodeResult::Aborted;
 }
 
 void UNetherCrownBossVoidPiercerTask::HandleVoidPiercerFinished()
@@ -73,18 +89,30 @@ void UNetherCrownBossVoidPiercerTask::HandleVoidPiercerFinished()
 	UBehaviorTreeComponent* CachedOwnerComp{ CachedOwnerCompWeak.Get() };
 	if (!ensureAlways(IsValid(CachedOwnerComp)))
 	{
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return;
 	}
 
 	UBlackboardComponent* BlackboardComponent{ CachedOwnerComp->GetBlackboardComponent() };
 	if (!ensureAlways(IsValid(BlackboardComponent)))
 	{
-		CachedOwnerCompWeak.Reset();
+		ResetTaskState();
 		return;
 	}
 
 	BlackboardComponent->SetValueAsBool(BlockFaceTargetBlackboardKey.SelectedKeyName, false);
 
+	ResetTaskState();
 	FinishLatentTask(*CachedOwnerComp, EBTNodeResult::Succeeded);
+}
+
+void UNetherCrownBossVoidPiercerTask::ResetTaskState()
+{
+	if (UNetherCrownEnemySkillObject* VoidPiercerSkillObject{ CachedVoidPiercerSkillObjectWeak.Get() })
+	{
+		VoidPiercerSkillObject->GetOnEnemySkillFinished().RemoveAll(this);
+	}
+
+	CachedVoidPiercerSkillObjectWeak.Reset();
+	CachedOwnerCompWeak.Reset();
 }

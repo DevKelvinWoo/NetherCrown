@@ -6,6 +6,8 @@
 #include "BehaviorTree/BTTaskNode.h"
 #include "NetherCrownBossMagicSpikeTask.generated.h"
 
+class UNetherCrownEnemySkillObject;
+
 UCLASS()
 class NETHERCROWN_API UNetherCrownBossMagicSpikeTask : public UBTTaskNode
 {
@@ -16,9 +18,12 @@ public:
 
 protected:
 	virtual EBTNodeResult::Type ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
+	virtual EBTNodeResult::Type AbortTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory) override;
 
 private:
 	void HandleOnMagicSpikeSkillFinished();
+	void ResetTaskState();
 
 	TWeakObjectPtr<UBehaviorTreeComponent> CachedOwnerCompWeak{};
+	TWeakObjectPtr<UNetherCrownEnemySkillObject> CachedMagicSpikeSkillObjectWeak{};
 };

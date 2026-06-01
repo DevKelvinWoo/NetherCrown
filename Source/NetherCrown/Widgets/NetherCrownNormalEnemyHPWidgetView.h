@@ -7,6 +7,7 @@
 #include "NetherCrownNormalEnemyHPWidgetView.generated.h"
 
 class ANetherCrownEnemy;
+class UNetherCrownEnemyStatComponent;
 class UNetherCrownNormalEnemyHPWidgetViewModel;
 class UNetherCrownSliderComponent;
 
@@ -20,10 +21,13 @@ public:
 
 protected:
 	virtual void NativeOnInitialized() override;
+	virtual void NativeDestruct() override;
 
 private:
 	void SetEnemyHPSliderValue(const float HpRatio);
 
 	UPROPERTY(EditDefaultsOnly, meta = (BindWidget))
 	TObjectPtr<UNetherCrownSliderComponent> HPSliderComponent{};
+
+	TWeakObjectPtr<UNetherCrownEnemyStatComponent> BoundEnemyStatComponentWeak{};
 };
