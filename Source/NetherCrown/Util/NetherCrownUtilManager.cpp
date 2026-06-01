@@ -25,6 +25,13 @@ TMap<FGameplayTag, FNetherCrownUIScreenDefinition> FNetherCrownUtilManager::Cach
 TMap<FGameplayTag, FNetherCrownEnemySkillDataTableRow> FNetherCrownUtilManager::CachedEnemySkillDataByTag{};
 TMap<FGameplayTag, FNetherCrownLevelSequenceData> FNetherCrownUtilManager::CachedLevelSequenceByTag{};
 TMap<FGameplayTag, FNetherCrownQuestDataTableRow> FNetherCrownUtilManager::CachedQuestDataByTag{};
+TMap<FGameplayTag, TWeakObjectPtr<USoundCue>> FNetherCrownUtilManager::CachedSoundCueByTag{};
+TMap<FGameplayTag, TWeakObjectPtr<UNetherCrownSkillDataAsset>> FNetherCrownUtilManager::CachedSkillDataAssetByTag{};
+TMap<FGameplayTag, TWeakObjectPtr<UNetherCrownEnemySkillDataAsset>> FNetherCrownUtilManager::CachedEnemySkillDataAssetByTag{};
+TMap<FGameplayTag, TWeakObjectPtr<UNetherCrownWeaponData>> FNetherCrownUtilManager::CachedWeaponDataAssetByTag{};
+TMap<FGameplayTag, TWeakObjectPtr<UNiagaraSystem>> FNetherCrownUtilManager::CachedNiagaraSystemByTag{};
+TMap<FGameplayTag, TWeakObjectPtr<ULevelSequence>> FNetherCrownUtilManager::CachedLevelSequenceAssetByTag{};
+TMap<FGameplayTag, TWeakObjectPtr<UNetherCrownQuestData>> FNetherCrownUtilManager::CachedQuestDataAssetByTag{};
 
 void FNetherCrownUtilManager::EnsureCacheBuilt()
 {
@@ -44,6 +51,13 @@ void FNetherCrownUtilManager::EnsureCacheBuilt()
 	CachedScreenDefinitionDataByTag.Empty();
 	CachedLevelSequenceByTag.Empty();
 	CachedQuestDataByTag.Empty();
+	CachedSoundCueByTag.Empty();
+	CachedSkillDataAssetByTag.Empty();
+	CachedEnemySkillDataAssetByTag.Empty();
+	CachedWeaponDataAssetByTag.Empty();
+	CachedNiagaraSystemByTag.Empty();
+	CachedLevelSequenceAssetByTag.Empty();
+	CachedQuestDataAssetByTag.Empty();
 
 	UDataTable* SoundDT{ DefaultSettings->GetCharacterSoundDT().LoadSynchronous() };
 	if (IsValid(SoundDT))
@@ -184,7 +198,15 @@ USoundCue* FNetherCrownUtilManager::GetSoundCueByGameplayTag(const FGameplayTag&
 		return nullptr;
 	}
 
-	return FoundSoundData->GetSoundCue().LoadSynchronous();
+	const TWeakObjectPtr<USoundCue>* CachedSoundCue{ CachedSoundCueByTag.Find(SoundTag) };
+	if (CachedSoundCue && CachedSoundCue->IsValid())
+	{
+		return CachedSoundCue->Get();
+	}
+
+	USoundCue* SoundCue{ FoundSoundData->GetSoundCue().LoadSynchronous() };
+	CachedSoundCueByTag.Add(SoundTag, SoundCue);
+	return SoundCue;
 }
 
 void FNetherCrownUtilManager::PlaySound2DByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& SoundTag)
@@ -231,7 +253,15 @@ UNetherCrownSkillDataAsset* FNetherCrownUtilManager::GetSkillDataAssetByGameplay
 		return nullptr;
 	}
 
-	return FoundSkillData->GetSkillDataAsset().LoadSynchronous();
+	const TWeakObjectPtr<UNetherCrownSkillDataAsset>* CachedSkillDataAsset{ CachedSkillDataAssetByTag.Find(SkillTag) };
+	if (CachedSkillDataAsset && CachedSkillDataAsset->IsValid())
+	{
+		return CachedSkillDataAsset->Get();
+	}
+
+	UNetherCrownSkillDataAsset* SkillDataAsset{ FoundSkillData->GetSkillDataAsset().LoadSynchronous() };
+	CachedSkillDataAssetByTag.Add(SkillTag, SkillDataAsset);
+	return SkillDataAsset;
 }
 
 UNetherCrownEnemySkillDataAsset* FNetherCrownUtilManager::GetEnemySkillDataAssetByGameplayTag(const FGameplayTag& SkillTag)
@@ -253,7 +283,15 @@ UNetherCrownEnemySkillDataAsset* FNetherCrownUtilManager::GetEnemySkillDataAsset
 		return nullptr;
 	}
 
-	return FoundSkillData->GetEnemySkillDataAsset().LoadSynchronous();
+	const TWeakObjectPtr<UNetherCrownEnemySkillDataAsset>* CachedEnemySkillDataAsset{ CachedEnemySkillDataAssetByTag.Find(SkillTag) };
+	if (CachedEnemySkillDataAsset && CachedEnemySkillDataAsset->IsValid())
+	{
+		return CachedEnemySkillDataAsset->Get();
+	}
+
+	UNetherCrownEnemySkillDataAsset* EnemySkillDataAsset{ FoundSkillData->GetEnemySkillDataAsset().LoadSynchronous() };
+	CachedEnemySkillDataAssetByTag.Add(SkillTag, EnemySkillDataAsset);
+	return EnemySkillDataAsset;
 }
 
 UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(const FGameplayTag& WeaponTag)
@@ -275,7 +313,15 @@ UNetherCrownWeaponData* FNetherCrownUtilManager::GetWeaponDataByGameplayTag(cons
 		return nullptr;
 	}
 
-	return FoundWeaponData->GetWeaponData().LoadSynchronous();
+	const TWeakObjectPtr<UNetherCrownWeaponData>* CachedWeaponDataAsset{ CachedWeaponDataAssetByTag.Find(WeaponTag) };
+	if (CachedWeaponDataAsset && CachedWeaponDataAsset->IsValid())
+	{
+		return CachedWeaponDataAsset->Get();
+	}
+
+	UNetherCrownWeaponData* WeaponDataAsset{ FoundWeaponData->GetWeaponData().LoadSynchronous() };
+	CachedWeaponDataAssetByTag.Add(WeaponTag, WeaponDataAsset);
+	return WeaponDataAsset;
 }
 
 UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGameplayTag& EffectTag)
@@ -296,7 +342,15 @@ UNiagaraSystem* FNetherCrownUtilManager::GetNiagaraSystemByGameplayTag(const FGa
 		return nullptr;
 	}
 
-	return FoundEffectData->GetEffectNiagaraSystem().LoadSynchronous();
+	const TWeakObjectPtr<UNiagaraSystem>* CachedNiagaraSystem{ CachedNiagaraSystemByTag.Find(EffectTag) };
+	if (CachedNiagaraSystem && CachedNiagaraSystem->IsValid())
+	{
+		return CachedNiagaraSystem->Get();
+	}
+
+	UNiagaraSystem* NiagaraSystem{ FoundEffectData->GetEffectNiagaraSystem().LoadSynchronous() };
+	CachedNiagaraSystemByTag.Add(EffectTag, NiagaraSystem);
+	return NiagaraSystem;
 }
 
 void FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(const UObject* WorldContextObject, const FGameplayTag& EffectTag, const FTransform& SpawnTransform)
@@ -370,7 +424,15 @@ ULevelSequence* FNetherCrownUtilManager::GetLevelSequenceByGameplayTag(const FGa
 		return nullptr;
 	}
 
-	return FoundEffectData->GetLevelSequenceSoft().LoadSynchronous();
+	const TWeakObjectPtr<ULevelSequence>* CachedLevelSequenceAsset{ CachedLevelSequenceAssetByTag.Find(SequenceTag) };
+	if (CachedLevelSequenceAsset && CachedLevelSequenceAsset->IsValid())
+	{
+		return CachedLevelSequenceAsset->Get();
+	}
+
+	ULevelSequence* LevelSequence{ FoundEffectData->GetLevelSequenceSoft().LoadSynchronous() };
+	CachedLevelSequenceAssetByTag.Add(SequenceTag, LevelSequence);
+	return LevelSequence;
 }
 
 UNetherCrownQuestData* FNetherCrownUtilManager::GetQuestDataAssetByGameplayTag(const FGameplayTag& QuestTag)
@@ -391,5 +453,13 @@ UNetherCrownQuestData* FNetherCrownUtilManager::GetQuestDataAssetByGameplayTag(c
 		return nullptr;
 	}
 
-	return FoundQuestData->GetQuestDataAsset().LoadSynchronous();
+	const TWeakObjectPtr<UNetherCrownQuestData>* CachedQuestDataAsset{ CachedQuestDataAssetByTag.Find(QuestTag) };
+	if (CachedQuestDataAsset && CachedQuestDataAsset->IsValid())
+	{
+		return CachedQuestDataAsset->Get();
+	}
+
+	UNetherCrownQuestData* QuestDataAsset{ FoundQuestData->GetQuestDataAsset().LoadSynchronous() };
+	CachedQuestDataAssetByTag.Add(QuestTag, QuestDataAsset);
+	return QuestDataAsset;
 }

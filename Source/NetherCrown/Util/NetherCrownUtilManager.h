@@ -63,4 +63,12 @@ private:
 	static TMap<FGameplayTag, FNetherCrownUIScreenDefinition> CachedScreenDefinitionDataByTag;
 	static TMap<FGameplayTag, FNetherCrownLevelSequenceData> CachedLevelSequenceByTag;
 	static TMap<FGameplayTag, FNetherCrownQuestDataTableRow> CachedQuestDataByTag;
+
+	static TMap<FGameplayTag, TWeakObjectPtr<USoundCue>> CachedSoundCueByTag;
+	static TMap<FGameplayTag, TWeakObjectPtr<UNetherCrownSkillDataAsset>> CachedSkillDataAssetByTag;
+	static TMap<FGameplayTag, TWeakObjectPtr<UNetherCrownEnemySkillDataAsset>> CachedEnemySkillDataAssetByTag;
+	static TMap<FGameplayTag, TWeakObjectPtr<UNetherCrownWeaponData>> CachedWeaponDataAssetByTag;
+	static TMap<FGameplayTag, TWeakObjectPtr<UNiagaraSystem>> CachedNiagaraSystemByTag;
+	static TMap<FGameplayTag, TWeakObjectPtr<ULevelSequence>> CachedLevelSequenceAssetByTag;
+	static TMap<FGameplayTag, TWeakObjectPtr<UNetherCrownQuestData>> CachedQuestDataAssetByTag;
 };

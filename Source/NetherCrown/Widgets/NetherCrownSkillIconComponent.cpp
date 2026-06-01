@@ -13,6 +13,11 @@
 
 void UNetherCrownSkillIconComponent::SetHandlingSkillObject(UNetherCrownSkillObject* InHandlingSkillObject)
 {
+	if (HandlingSkillObject != InHandlingSkillObject)
+	{
+		CachedSkillIconTexture = nullptr;
+	}
+
 	HandlingSkillObject = InHandlingSkillObject;
 	ApplySkillVisual();
 }
@@ -121,8 +126,12 @@ void UNetherCrownSkillIconComponent::ApplySkillVisual()
 	if (ensureAlways(IsValid(NativeSkillThumbnailProgressBar)))
 	{
 		const FNetherCrownSkillData& SkillData{ HandlingSkillObject->GetSkillData() };
-		UTexture2D* SkillIconTexture{ SkillData.SkillIconTextureSoft.IsNull() ? nullptr : SkillData.SkillIconTextureSoft.LoadSynchronous() };
-		if (!ensureAlways(IsValid(SkillIconTexture)))
+		if (!IsValid(CachedSkillIconTexture))
+		{
+			CachedSkillIconTexture = SkillData.SkillIconTextureSoft.IsNull() ? nullptr : SkillData.SkillIconTextureSoft.LoadSynchronous();
+		}
+
+		if (!ensureAlways(IsValid(CachedSkillIconTexture)))
 		{
 			return;
 		}
@@ -130,11 +139,11 @@ void UNetherCrownSkillIconComponent::ApplySkillVisual()
 		FProgressBarStyle ProgressBarStyle{ NativeSkillThumbnailProgressBar->GetWidgetStyle() };
 
 		FSlateBrush FillBrush{ ProgressBarStyle.FillImage };
-		FillBrush.SetResourceObject(SkillIconTexture);
+		FillBrush.SetResourceObject(CachedSkillIconTexture);
 		ProgressBarStyle.SetFillImage(FillBrush);
 
 		FSlateBrush BackgroundBrush{ ProgressBarStyle.BackgroundImage };
-		BackgroundBrush.SetResourceObject(SkillIconTexture);
+		BackgroundBrush.SetResourceObject(CachedSkillIconTexture);
 		ProgressBarStyle.SetBackgroundImage(BackgroundBrush);
 
 		NativeSkillThumbnailProgressBar->SetWidgetStyle(ProgressBarStyle);

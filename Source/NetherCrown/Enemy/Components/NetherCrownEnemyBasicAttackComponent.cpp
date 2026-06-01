@@ -237,12 +237,28 @@ void UNetherCrownEnemyBasicAttackComponent::CacheBasicAttackAnimMontage()
 		return;
 	}
 
-	if (EnemyBasicAttackData.BasicAttackMontageSoft.IsNull())
+	CachedBasicAttackMontage = GetCachedBasicAttackMontage(EnemyBasicAttackData);
+}
+
+UAnimMontage* UNetherCrownEnemyBasicAttackComponent::GetCachedBasicAttackMontage(const FNetherCrownEnemyBasicAttackData& InEnemyBasicAttackData)
+{
+	if (InEnemyBasicAttackData.BasicAttackMontageSoft.IsNull())
 	{
-		return;
+		return nullptr;
 	}
 
-	CachedBasicAttackMontage = EnemyBasicAttackData.BasicAttackMontageSoft.LoadSynchronous();
+	const FSoftObjectPath BasicAttackMontagePath{ InEnemyBasicAttackData.BasicAttackMontageSoft.ToSoftObjectPath() };
+	if (TObjectPtr<UAnimMontage>* CachedMontage{ CachedBasicAttackMontageByPath.Find(BasicAttackMontagePath) })
+	{
+		if (IsValid(*CachedMontage))
+		{
+			return CachedMontage->Get();
+		}
+	}
+
+	UAnimMontage* BasicAttackMontage{ InEnemyBasicAttackData.BasicAttackMontageSoft.LoadSynchronous() };
+	CachedBasicAttackMontageByPath.Add(BasicAttackMontagePath, BasicAttackMontage);
+	return BasicAttackMontage;
 }
 
 FVector UNetherCrownEnemyBasicAttackComponent::GetWeaponTraceSocketLocation() const
@@ -307,7 +323,7 @@ void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttackByDA(const UNether
 	}
 
 	const FNetherCrownEnemyBasicAttackData DashEnemyBasicAttackData{ InEnemyBasicAttackDataAsset->GetEnemyBasicAttackData() };
-	UAnimMontage* DashEnemyBasicAttackMontage{ DashEnemyBasicAttackData.BasicAttackMontageSoft.IsNull() ? nullptr : DashEnemyBasicAttackData.BasicAttackMontageSoft.LoadSynchronous() };
+	UAnimMontage* DashEnemyBasicAttackMontage{ GetCachedBasicAttackMontage(DashEnemyBasicAttackData) };
 
 	StartEnemyAttack(DashEnemyBasicAttackData, DashEnemyBasicAttackMontage);
 }

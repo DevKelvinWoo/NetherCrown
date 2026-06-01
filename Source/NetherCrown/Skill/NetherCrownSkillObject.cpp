@@ -590,13 +590,12 @@ void UNetherCrownSkillObject::SetSkillMontageSlowPlayRate(const float InPlayRate
 		return;
 	}
 
-	UAnimMontage* SkillAnimMontage{ GetSkillAnimMontageSoft().IsNull() ? nullptr : GetSkillAnimMontageSoft().LoadSynchronous() };
-	if (!ensureAlways(IsValid(SkillAnimMontage)))
+	if (!ensureAlways(IsValid(CachedSkillAnimMontage)))
 	{
 		return;
 	}
 
-	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(SkillAnimMontage, InPlayRate);
+	NetherCrownCharacterAnimInstance->Montage_SetPlayRate(CachedSkillAnimMontage, InPlayRate);
 }
 
 void UNetherCrownSkillObject::StartSkillCoolDownTimer()

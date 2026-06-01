@@ -12,6 +12,7 @@ class UProgressBar;
 class UImage;
 class UTextBlock;
 class UMenuAnchor;
+class UTexture2D;
 class UWidgetAnimation;
 
 UCLASS()
@@ -63,4 +64,7 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UNetherCrownSkillObject> HandlingSkillObject{};
+
+	UPROPERTY(Transient)
+	TObjectPtr<UTexture2D> CachedSkillIconTexture{};
 };

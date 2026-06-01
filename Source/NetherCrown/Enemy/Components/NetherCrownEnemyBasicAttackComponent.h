@@ -64,6 +64,7 @@ private:
 
 	void LoadEnemyBasicAttackData();
 	void CacheBasicAttackAnimMontage();
+	UAnimMontage* GetCachedBasicAttackMontage(const FNetherCrownEnemyBasicAttackData& InEnemyBasicAttackData);
 
 	FVector GetWeaponTraceSocketLocation() const;
 
@@ -79,6 +80,9 @@ private:
 
 	UPROPERTY(Transient)
 	TObjectPtr<UAnimMontage> CachedActiveAttackMontage{};
+
+	UPROPERTY(Transient)
+	TMap<FSoftObjectPath, TObjectPtr<UAnimMontage>> CachedBasicAttackMontageByPath{};
 
 	UPROPERTY(Transient)
 	TObjectPtr<ANetherCrownEnemy> CachedOwnerEnemy{};
