@@ -115,7 +115,7 @@ void UNetherCrownShieldMastery::DeactivateShieldEffectAndActor()
 void UNetherCrownShieldMastery::PlayShieldOnSound() const
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}

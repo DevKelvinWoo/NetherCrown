@@ -144,7 +144,7 @@ void ANetherCrownCharacter::BeginPlay()
 
 	DestroyVisualOnlyComponentsOnDS();
 
-	if (ensureAlways(IsValid(NetherCrownControlPPComponent)) && ensureAlways(IsValid(NetherCrownPostProcessComponent)))
+	if (IsLocallyControlled() && ensureAlways(IsValid(NetherCrownControlPPComponent)) && ensureAlways(IsValid(NetherCrownPostProcessComponent)))
 	{
 		NetherCrownControlPPComponent->SetHandlingPostProcessComponent(NetherCrownPostProcessComponent);
 		NetherCrownControlPPComponent->SetHandlingCameraComponent(MainCameraComponent);
@@ -436,7 +436,7 @@ void ANetherCrownCharacter::ActiveCSkill(const FInputActionValue& Value) const
 
 void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffset)
 {
-	if (!ensureAlways(IsValid(MainSpringArmComponent)) || GetNetMode() == NM_DedicatedServer)
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || !IsLocallyControlled())
 	{
 		return;
 	}
@@ -446,7 +446,7 @@ void ANetherCrownCharacter::SetMainSpringArmZOffset(const float InSpringArmZOffs
 
 void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength)
 {
-	if (!ensureAlways(IsValid(MainSpringArmComponent)) || GetNetMode() == NM_DedicatedServer)
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || !IsLocallyControlled())
 	{
 		return;
 	}
@@ -456,7 +456,7 @@ void ANetherCrownCharacter::SetMainSpringArmLength(const float InSpringArmLength
 
 float ANetherCrownCharacter::GetMainSpringArmLength() const
 {
-	if (!ensureAlways(IsValid(MainSpringArmComponent)) || GetNetMode() == NM_DedicatedServer)
+	if (!ensureAlways(IsValid(MainSpringArmComponent)) || !IsLocallyControlled())
 	{
 		return 0.f;
 	}
@@ -663,7 +663,7 @@ void ANetherCrownCharacter::DisableMovementAndSetResetTimerWhenHardLanding()
 
 void ANetherCrownCharacter::OnRep_IsHardLanding()
 {
-	if (bIsHardLanding)
+	if (bIsHardLanding && IsLocallyControlled())
 	{
 		FNetherCrownUtilManager::PlaySound2DByGameplayTag(this, CharacterTagData.HardLandingSoundTag);
 	}

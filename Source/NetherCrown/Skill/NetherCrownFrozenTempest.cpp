@@ -122,7 +122,7 @@ void UNetherCrownFrozenTempest::BindTimelineFunctions()
 void UNetherCrownFrozenTempest::StartSetSkillCameraZoomTimeline()
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}
@@ -214,7 +214,7 @@ void UNetherCrownFrozenTempest::Multicast_SetDetectedEnemyOverlayMaterial_Implem
 void UNetherCrownFrozenTempest::SetSkillCameraZoomByVectorTimeline(FVector VectorCurveValue)
 {
 	ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
-	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || SkillOwnerCharacter->GetNetMode() == NM_DedicatedServer)
+	if (!ensureAlways(IsValid(SkillOwnerCharacter)) || !SkillOwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}

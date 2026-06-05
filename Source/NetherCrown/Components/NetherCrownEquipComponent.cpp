@@ -326,7 +326,10 @@ void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementa
 
 	NetherCrownCharacterAnimInstance->Montage_Play(CachedEquipMontage);
 
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), EquipData.EquipTagData.EquipSoundTag);
+	if (CachedCharacter->IsLocallyControlled())
+	{
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), EquipData.EquipTagData.EquipSoundTag);
+	}
 }
 
 void UNetherCrownEquipComponent::AttachWeaponToCharacterMesh(ANetherCrownWeapon* TargetWeapon, const FName& WeaponSocketName) const

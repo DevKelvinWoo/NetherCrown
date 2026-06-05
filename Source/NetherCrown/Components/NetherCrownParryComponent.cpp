@@ -364,7 +364,10 @@ void UNetherCrownParryComponent::Multicast_PlayParrySoundAndEffect_Implementatio
 	}
 
 	const FNetherCrownParryData& ParryData{ CachedParryDataAsset->GetParryData() };
-	FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), ParryData.ParryTagData.ParrySoundTag);
+	if (CachedCharacter->IsLocallyControlled())
+	{
+		FNetherCrownUtilManager::PlaySound2DByGameplayTag(GetWorld(), ParryData.ParryTagData.ParrySoundTag);
+	}
 	FNetherCrownUtilManager::SpawnNiagaraSystemByGameplayTag(this, ParryData.ParryTagData.ParryEffectTag, CachedCharacter->GetActorTransform());
 }
 

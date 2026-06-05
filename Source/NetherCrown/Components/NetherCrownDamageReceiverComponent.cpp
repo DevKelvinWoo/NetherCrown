@@ -184,7 +184,7 @@ bool UNetherCrownDamageReceiverComponent::HandleParrying(AActor* DamageCauser, c
 
 void UNetherCrownDamageReceiverComponent::Client_PlayHitCameraShake_Implementation()
 {
-	if (!ensureAlways(IsValid(CachedOwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}
@@ -284,7 +284,7 @@ void UNetherCrownDamageReceiverComponent::Multicast_PlayHitImpactSound_Implement
 		return;
 	}
 
-	if (!ensureAlways(IsValid(CachedOwnerCharacter)))
+	if (!ensureAlways(IsValid(CachedOwnerCharacter)) || !CachedOwnerCharacter->IsLocallyControlled())
 	{
 		return;
 	}
