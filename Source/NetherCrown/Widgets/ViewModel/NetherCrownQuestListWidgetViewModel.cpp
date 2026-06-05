@@ -41,7 +41,7 @@ TArray<FText> UNetherCrownQuestListWidgetViewModel::GetCurrentQuestEntryDescript
 	}
 
 	TArray<FText> QuestEntryDescriptions{};
-	for (const FNetherCrownQuestStateEntry QuestStateEntry : QuestStateEntries)
+	for (const FNetherCrownQuestStateEntry& QuestStateEntry : QuestStateEntries)
 	{
 		const FGameplayTag& QuestTag{ QuestStateEntry.QuestTag };
 		if (!QuestTag.IsValid())

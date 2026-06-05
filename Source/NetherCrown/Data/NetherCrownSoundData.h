@@ -15,7 +15,7 @@ struct FNetherCrownSoundData : public FTableRowBase
 
 public:
 	const FGameplayTag& GetSoundTag() const { return SoundTag; }
-	TSoftObjectPtr<USoundCue> GetSoundCue() const { return SoundCue; }
+	const TSoftObjectPtr<USoundCue>& GetSoundCue() const { return SoundCue; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "SoundTag")

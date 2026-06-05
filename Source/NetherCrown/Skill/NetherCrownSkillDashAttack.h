@@ -56,7 +56,7 @@ private:
 	void Multicast_SetOwnerCharacterRotToTarget(const FRotator& InTargetRot);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void Multicast_DashOwnerCharacter(const FVector StartLoc, const FVector TargetVec);
+	void Multicast_DashOwnerCharacter(const FVector& StartLoc, const FVector& TargetVec);
 
 	UFUNCTION(NetMulticast, Reliable)
 	void Multicast_SetCharacterCapsuleCollisionData(const bool bStartDashAttack);

@@ -15,7 +15,7 @@ struct FNetherCrownEffectData : public FTableRowBase
 
 public:
 	const FGameplayTag& GetEffectTag() const { return EffectTag; }
-	TSoftObjectPtr<UNiagaraSystem> GetEffectNiagaraSystem() const { return EffectNiagaraSystem; }
+	const TSoftObjectPtr<UNiagaraSystem>& GetEffectNiagaraSystem() const { return EffectNiagaraSystem; }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "EffectTag")

@@ -108,7 +108,7 @@ public:
 	UNetherCrownQuestComponent* GetQuestComponent() const { return QuestComponent; }
 	UNetherCrownParryComponent* GetParryComponent() const { return ParryComponent; }
 
-	FVector GetLastMoveDirection() const { return CachedLastMoveDirection; }
+	const FVector& GetLastMoveDirection() const { return CachedLastMoveDirection; }
 
 	FOnRepPlayerState& GetOnRepPlayerState() { return OnRepPlayerState; }
 

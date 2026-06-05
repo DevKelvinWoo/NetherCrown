@@ -68,7 +68,7 @@ struct FNetherCrownEnemySkillDataTableRow : public FTableRowBase
 
 public:
 	const FGameplayTag& GetEnemySkillTag() const { return EnemySkillTag; }
-	TSoftObjectPtr<UNetherCrownEnemySkillDataAsset> GetEnemySkillDataAsset() const { return EnemySkillDataAssetSoft; }
+	const TSoftObjectPtr<UNetherCrownEnemySkillDataAsset>& GetEnemySkillDataAsset() const { return EnemySkillDataAssetSoft; }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "EnemySkillTag")

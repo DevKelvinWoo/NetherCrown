@@ -331,7 +331,7 @@ void UNetherCrownEnemyBasicAttackComponent::RequestEnemyAttackByDA(const UNether
 		return;
 	}
 
-	const FNetherCrownEnemyBasicAttackData DashEnemyBasicAttackData{ InEnemyBasicAttackDataAsset->GetEnemyBasicAttackData() };
+	const FNetherCrownEnemyBasicAttackData& DashEnemyBasicAttackData{ InEnemyBasicAttackDataAsset->GetEnemyBasicAttackData() };
 	UAnimMontage* DashEnemyBasicAttackMontage{ GetCachedBasicAttackMontage(DashEnemyBasicAttackData) };
 
 	StartEnemyAttack(DashEnemyBasicAttackData, DashEnemyBasicAttackMontage);

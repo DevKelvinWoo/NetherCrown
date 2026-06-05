@@ -57,7 +57,7 @@ struct FNetherCrownQuestDataTableRow : public FTableRowBase
 
 public:
 	const FGameplayTag& GetQuestTag() const { return QuestTag; }
-	TSoftObjectPtr<UNetherCrownQuestData> GetQuestDataAsset() const { return QuestDataAssetSoft; }
+	const TSoftObjectPtr<UNetherCrownQuestData>& GetQuestDataAsset() const { return QuestDataAssetSoft; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "QuestTag")

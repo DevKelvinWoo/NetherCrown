@@ -15,7 +15,7 @@ struct FNetherCrownLevelSequenceData : public FTableRowBase
 
 public:
 	const FGameplayTag& GetLevelSequenceTag() const { return LevelSequenceTag; }
-	TSoftObjectPtr<ULevelSequence> GetLevelSequenceSoft() const { return LevelSequenceSoft; }
+	const TSoftObjectPtr<ULevelSequence>& GetLevelSequenceSoft() const { return LevelSequenceSoft; }
 
 private:
 	UPROPERTY(EditDefaultsOnly, Category = "LevelSequenceTag")

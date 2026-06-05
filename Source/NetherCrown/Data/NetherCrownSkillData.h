@@ -378,7 +378,7 @@ struct FNetherCrownSkillDataTableRow : public FTableRowBase
 
 public:
 	const FGameplayTag& GetSkillTag() const { return SkillTag; }
-	TSoftObjectPtr<UNetherCrownSkillDataAsset> GetSkillDataAsset() const { return SkillDataAssetSoft; }
+	const TSoftObjectPtr<UNetherCrownSkillDataAsset>& GetSkillDataAsset() const { return SkillDataAssetSoft; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "SkillTag")

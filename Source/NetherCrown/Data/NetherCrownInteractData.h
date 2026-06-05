@@ -14,7 +14,7 @@ class NETHERCROWN_API UNetherCrownInteractActorDataAsset : public UDataAsset
 
 public:
 	const FText& GetDialogueText() const { return DialogueText; }
-	TSoftObjectPtr<UTexture2D> GetInteractWidgetTexture() const { return InteractWidgetTextureSoft; }
+	const TSoftObjectPtr<UTexture2D>& GetInteractWidgetTexture() const { return InteractWidgetTextureSoft; }
 	const FGameplayTag& GetInteractActorTag() const { return InteractActorTag; }
 
 private:

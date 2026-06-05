@@ -133,7 +133,7 @@ struct FNetherCrownWeaponDataTableRow : public FTableRowBase
 
 public:
 	const FGameplayTag& GetWeaponTag() const { return WeaponTag; }
-	TSoftObjectPtr<UNetherCrownWeaponData> GetWeaponData() const { return WeaponData; }
+	const TSoftObjectPtr<UNetherCrownWeaponData>& GetWeaponData() const { return WeaponData; }
 
 private:
 	UPROPERTY(EditAnywhere, Category = "WeaponTag")

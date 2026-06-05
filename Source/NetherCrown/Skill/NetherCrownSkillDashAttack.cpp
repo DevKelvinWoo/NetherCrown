@@ -616,7 +616,7 @@ void UNetherCrownSkillDashAttack::Multicast_SetCharacterCapsuleCollisionData_Imp
 	SkillOwnerCapsuleComponent->SetCollisionResponseToChannel(ECC_Pawn, CollisionEnabled);
 }
 
-void UNetherCrownSkillDashAttack::Multicast_DashOwnerCharacter_Implementation(const FVector StartLoc, const FVector TargetVec)
+void UNetherCrownSkillDashAttack::Multicast_DashOwnerCharacter_Implementation(const FVector& StartLoc, const FVector& TargetVec)
 {
 	const ANetherCrownCharacter* SkillOwnerCharacter{ SkillOwnerCharacterWeak.Get() };
 	if (!ensureAlways(IsValid(SkillOwnerCharacter)))
