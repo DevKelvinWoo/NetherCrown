@@ -20,7 +20,7 @@
 
 UNetherCrownDamageReceiverComponent::UNetherCrownDamageReceiverComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -65,11 +65,6 @@ void UNetherCrownDamageReceiverComponent::BeginPlay()
 	CacheOwnerCharacter();
 	CacheDamageReceiveDataAsset();
 	CacheHitReactAnimMontage();
-}
-
-void UNetherCrownDamageReceiverComponent::TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UNetherCrownDamageReceiverComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

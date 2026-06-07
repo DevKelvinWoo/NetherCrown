@@ -25,12 +25,6 @@ void UNetherCrownQuestComponent::BeginPlay()
 	Super::BeginPlay();
 }
 
-void UNetherCrownQuestComponent::TickComponent(const float DeltaTime, ELevelTick TickType,
-FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
-}
-
 void UNetherCrownQuestComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);

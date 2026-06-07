@@ -16,6 +16,7 @@
 UNetherCrownCrowdControlComponent::UNetherCrownCrowdControlComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -468,6 +469,11 @@ void UNetherCrownCrowdControlComponent::TickComponent(const float DeltaTime, ELe
 	{
 		FrozenTargetOverlayEndMaterialFloatTimeline.TickTimeline(DeltaTime);
 	}
+
+	if (!FrozenTargetOverlayEndMaterialFloatTimeline.IsPlaying())
+	{
+		SetComponentTickEnabled(false);
+	}
 }
 
 void UNetherCrownCrowdControlComponent::BindTimelineFunctions()
@@ -494,6 +500,7 @@ void UNetherCrownCrowdControlComponent::StartSetFrozenTargetOverlayEndMaterialTi
 		return;
 	}
 
+	SetComponentTickEnabled(true);
 	FrozenTargetOverlayEndMaterialFloatTimeline.PlayFromStart();
 }
 

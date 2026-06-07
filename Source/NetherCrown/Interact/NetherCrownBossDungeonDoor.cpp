@@ -11,6 +11,7 @@
 ANetherCrownBossDungeonDoor::ANetherCrownBossDungeonDoor()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	LeftDoorMeshComponent = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("LeftDoorMeshComponent"));
 	LeftDoorMeshComponent->SetupAttachment(RootComponent);
@@ -53,6 +54,11 @@ void ANetherCrownBossDungeonDoor::Tick(const float DeltaTime)
 	{
 		RightDoorOpenTimeline.TickTimeline(DeltaTime);
 	}
+
+	if (!LeftDoorOpenTimeline.IsPlaying() && !RightDoorOpenTimeline.IsPlaying())
+	{
+		SetActorTickEnabled(false);
+	}
 }
 
 void ANetherCrownBossDungeonDoor::FinishInteract(ANetherCrownCharacter* InteractCharacter)
@@ -91,6 +97,7 @@ void ANetherCrownBossDungeonDoor::CacheBossDungeonDoorData()
 
 void ANetherCrownBossDungeonDoor::Multicast_PlayOpenDoor_Implementation()
 {
+	SetActorTickEnabled(true);
 	LeftDoorOpenTimeline.PlayFromStart();
 	RightDoorOpenTimeline.PlayFromStart();
 }

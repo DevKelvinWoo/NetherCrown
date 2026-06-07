@@ -18,6 +18,7 @@
 ANetherCrownWeapon::ANetherCrownWeapon()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
@@ -90,6 +91,7 @@ void ANetherCrownWeapon::Tick(const float DeltaTime)
 	if (Alpha >= 1.f)
 	{
 		bCanRise = false;
+		SetActorTickEnabled(false);
 	}
 }
 
@@ -248,6 +250,7 @@ void ANetherCrownWeapon::RiseUpWeapon()
 	WeaponRiseElapsedTime = 0.f;
 
 	bCanRise = true;
+	SetActorTickEnabled(true);
 }
 
 void ANetherCrownWeapon::HandleOnEquipSphereBeginOverlap(UPrimitiveComponent* OnComponentBeginOverlap,

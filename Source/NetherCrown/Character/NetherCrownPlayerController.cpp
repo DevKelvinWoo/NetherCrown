@@ -105,6 +105,11 @@ void ANetherCrownPlayerController::InitializeUI()
 
 void ANetherCrownPlayerController::AddIMCAndBindAction()
 {
+	if (!IsLocalController())
+	{
+		return;
+	}
+
 	UEnhancedInputComponent* EnhancedPlayerInputComponent = Cast<UEnhancedInputComponent>(InputComponent);
 	check(EnhancedPlayerInputComponent);
 

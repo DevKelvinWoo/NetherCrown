@@ -29,6 +29,7 @@
 UNetherCrownEnemyDamageReceiverComponent::UNetherCrownEnemyDamageReceiverComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -50,6 +51,11 @@ void UNetherCrownEnemyDamageReceiverComponent::TickComponent(const float DeltaTi
 	if (DeathMaterialParamTimeline.IsPlaying())
 	{
 		DeathMaterialParamTimeline.TickTimeline(DeltaTime);
+	}
+
+	if (!DeathMaterialParamTimeline.IsPlaying())
+	{
+		SetComponentTickEnabled(false);
 	}
 }
 
@@ -447,6 +453,7 @@ void UNetherCrownEnemyDamageReceiverComponent::Multicast_StartDeathDissolve_Impl
 		return;
 	}
 
+	SetComponentTickEnabled(true);
 	DeathMaterialParamTimeline.PlayFromStart();
 }
 

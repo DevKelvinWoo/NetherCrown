@@ -18,7 +18,7 @@
 
 UNetherCrownEnemyRangedBasicAttackComponent::UNetherCrownEnemyRangedBasicAttackComponent()
 {
-	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bCanEverTick = false;
 
 	SetIsReplicatedByDefault(true);
 }
@@ -61,11 +61,6 @@ void UNetherCrownEnemyRangedBasicAttackComponent::BeginPlay()
 	Super::BeginPlay();
 
 	CacheInitData();
-}
-
-void UNetherCrownEnemyRangedBasicAttackComponent::TickComponent(const float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction)
-{
-	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 }
 
 void UNetherCrownEnemyRangedBasicAttackComponent::GetLifetimeReplicatedProps(TArray<class FLifetimeProperty>& OutLifetimeProps) const

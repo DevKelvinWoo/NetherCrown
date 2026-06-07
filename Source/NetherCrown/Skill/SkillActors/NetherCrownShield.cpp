@@ -5,6 +5,7 @@
 ANetherCrownShield::ANetherCrownShield()
 {
 	PrimaryActorTick.bCanEverTick = true;
+	PrimaryActorTick.bStartWithTickEnabled = false;
 
 	RootComponent = CreateDefaultSubobject<USceneComponent>(TEXT("RootComponent"));
 
@@ -52,6 +53,11 @@ void ANetherCrownShield::Tick(const float DeltaTime)
 	{
 		EndShieldMaterialFloatTimeline.TickTimeline(DeltaTime);
 	}
+
+	if (!BeginShieldMaterialFloatTimeline.IsPlaying() && !EndShieldMaterialFloatTimeline.IsPlaying())
+	{
+		SetActorTickEnabled(false);
+	}
 }
 
 void ANetherCrownShield::CreateShieldDynamicMaterialInstance()
@@ -83,6 +89,7 @@ void ANetherCrownShield::StartSetBeginShieldMaterialTimeline()
 		return;
 	}
 
+	SetActorTickEnabled(true);
 	BeginShieldMaterialFloatTimeline.PlayFromStart();
 }
 
@@ -93,6 +100,7 @@ void ANetherCrownShield::StartSetEndShieldMaterialTimeline()
 		return;
 	}
 
+	SetActorTickEnabled(true);
 	EndShieldMaterialFloatTimeline.PlayFromStart();
 }
 
@@ -120,4 +128,3 @@ void ANetherCrownShield::SetEndShieldMaterialByFloatTimeline(const float FloatCu
 		Destroy();
 	}
 }
-

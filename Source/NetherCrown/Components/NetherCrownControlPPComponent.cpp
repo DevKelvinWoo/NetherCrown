@@ -12,6 +12,7 @@
 UNetherCrownControlPPComponent::UNetherCrownControlPPComponent()
 {
 	PrimaryComponentTick.bCanEverTick = true;
+	PrimaryComponentTick.bStartWithTickEnabled = false;
 }
 
 void UNetherCrownControlPPComponent::SetHandlingPostProcessComponent(UPostProcessComponent* PostProcessComponent)
@@ -232,6 +233,11 @@ void UNetherCrownControlPPComponent::TickComponent(const float DeltaTime, ELevel
 	{
 		PostProcessBlendEndFloatTimeline.TickTimeline(DeltaTime);
 	}
+
+	if (!PostProcessBlendStartFloatTimeline.IsPlaying() && !PostProcessBlendEndFloatTimeline.IsPlaying())
+	{
+		SetComponentTickEnabled(false);
+	}
 }
 
 void UNetherCrownControlPPComponent::BindTimelineFunctions()
@@ -342,11 +348,13 @@ void UNetherCrownControlPPComponent::ResetPostProcess()
 
 void UNetherCrownControlPPComponent::StartSetPostProcessBlendStartTimeline()
 {
+	SetComponentTickEnabled(true);
 	PostProcessBlendStartFloatTimeline.PlayFromStart();
 }
 
 void UNetherCrownControlPPComponent::StartSetPostProcessBlendEndTimeline()
 {
+	SetComponentTickEnabled(true);
 	PostProcessBlendEndFloatTimeline.PlayFromStart();
 }
 

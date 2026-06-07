@@ -384,6 +384,14 @@ UNiagaraComponent* FNetherCrownUtilManager::AttachNiagaraSystemByGameplayTag(con
 		return nullptr;
 	}
 
+	const UWorld* World{ WorldContextObject->GetWorld() };
+	check(World);
+
+	if (World->GetNetMode() == NM_DedicatedServer)
+	{
+		return nullptr;
+	}
+
 	UNiagaraSystem* NiagaraSystem{ GetNiagaraSystemByGameplayTag(EffectTag) };
 	if (!ensureAlways(IsValid(NiagaraSystem)))
 	{
