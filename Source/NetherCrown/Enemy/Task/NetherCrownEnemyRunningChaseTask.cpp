@@ -5,7 +5,6 @@
 #include "NetherCrownEnemySelectChaseTypeTask.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 
 UNetherCrownEnemyRunningChaseTask::UNetherCrownEnemyRunningChaseTask()
 {
@@ -18,20 +17,14 @@ UNetherCrownEnemyRunningChaseTask::UNetherCrownEnemyRunningChaseTask()
 
 EBTNodeResult::Type UNetherCrownEnemyRunningChaseTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	ANetherCrownEnemy* OwnerEnemy{ GetControlledEnemy(OwnerComp) };
+	if (!IsValid(OwnerEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}

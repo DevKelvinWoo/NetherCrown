@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
+#include "NetherCrownEnemyBTTaskBase.h"
 #include "NetherCrownBossMagicSpikeTask.generated.h"
 
 class UNetherCrownEnemySkillObject;
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownBossMagicSpikeTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownBossMagicSpikeTask : public UNetherCrownEnemyBTTaskBase
 {
 	GENERATED_BODY()
 

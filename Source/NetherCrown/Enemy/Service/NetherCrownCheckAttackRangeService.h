@@ -3,13 +3,13 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTService.h"
+#include "NetherCrownEnemyBTServiceBase.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "NetherCrownCheckAttackRangeService.generated.h"
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownCheckAttackRangeService : public UBTService
+class NETHERCROWN_API UNetherCrownCheckAttackRangeService : public UNetherCrownEnemyBTServiceBase
 {
 	GENERATED_BODY()
 

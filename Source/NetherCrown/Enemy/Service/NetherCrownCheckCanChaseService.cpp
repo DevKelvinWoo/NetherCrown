@@ -4,7 +4,6 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemyActionControlComponent.h"
 
 UNetherCrownCheckCanChaseService::UNetherCrownCheckCanChaseService()
@@ -21,14 +20,8 @@ void UNetherCrownCheckCanChaseService::TickNode(UBehaviorTreeComponent& OwnerCom
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
-	{
-		return;
-	}
-
-	const ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerEnemy)))
+	const ANetherCrownEnemy* OwnerEnemy{ GetControlledEnemy(OwnerComp, false) };
+	if (!IsValid(OwnerEnemy))
 	{
 		return;
 	}
@@ -39,8 +32,8 @@ void UNetherCrownCheckCanChaseService::TickNode(UBehaviorTreeComponent& OwnerCom
 		return;
 	}
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return;
 	}

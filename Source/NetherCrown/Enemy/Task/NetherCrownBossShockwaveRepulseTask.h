@@ -1,15 +1,15 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
+#include "NetherCrownEnemyBTTaskBase.h"
 #include "NetherCrownBossShockwaveRepulseTask.generated.h"
 
 class UNetherCrownEnemySkillObject;
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownBossShockwaveRepulseTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownBossShockwaveRepulseTask : public UNetherCrownEnemyBTTaskBase
 {
 	GENERATED_BODY()
 

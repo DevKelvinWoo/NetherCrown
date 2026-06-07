@@ -3,7 +3,6 @@
 #include "NetherCrownBossShockwaveRepulseTask.h"
 
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
 #include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemySkillObject.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
@@ -18,14 +17,8 @@ EBTNodeResult::Type UNetherCrownBossShockwaveRepulseTask::ExecuteTask(UBehaviorT
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	const ANetherCrownBossEnemy* OwnerBossEnemy{ Cast<ANetherCrownBossEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerBossEnemy)))
+	const ANetherCrownBossEnemy* OwnerBossEnemy{ GetControlledEnemy<ANetherCrownBossEnemy>(OwnerComp) };
+	if (!IsValid(OwnerBossEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}

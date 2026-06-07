@@ -2,7 +2,6 @@
 
 #include "NetherCrownFindPatrolLocationTask.h"
 
-#include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NavigationSystem.h"
 #include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
@@ -17,8 +16,8 @@ EBTNodeResult::Type UNetherCrownFindPatrolLocationTask::ExecuteTask(UBehaviorTre
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	const ANetherCrownEnemyAIController* OwnerAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(OwnerAIController)))
+	const ANetherCrownEnemyAIController* OwnerAIController{ GetEnemyAIController(OwnerComp) };
+	if (!IsValid(OwnerAIController))
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -42,8 +41,8 @@ EBTNodeResult::Type UNetherCrownFindPatrolLocationTask::ExecuteTask(UBehaviorTre
 		return EBTNodeResult::Failed;
 	}
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return EBTNodeResult::Failed;
 	}

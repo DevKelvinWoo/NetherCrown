@@ -6,7 +6,6 @@
 #include "NavigationSystem.h"
 #include "NetherCrown/Data/NetherCrownEnemyAITuningData.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemyActionControlComponent.h"
 
 UNetherCrownBossRangedMoveLocationTask::UNetherCrownBossRangedMoveLocationTask()
@@ -21,14 +20,14 @@ EBTNodeResult::Type UNetherCrownBossRangedMoveLocationTask::ExecuteTask(UBehavio
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
+	const ANetherCrownEnemyAIController* EnemyAIController{ GetEnemyAIController(OwnerComp) };
+	if (!IsValid(EnemyAIController))
 	{
 		return EBTNodeResult::Failed;
 	}
 
-	const ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	const ANetherCrownEnemy* OwnerEnemy{ GetControlledEnemy(OwnerComp) };
+	if (!IsValid(OwnerEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -39,8 +38,8 @@ EBTNodeResult::Type UNetherCrownBossRangedMoveLocationTask::ExecuteTask(UBehavio
 		return EBTNodeResult::Failed;
 	}
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return EBTNodeResult::Failed;
 	}

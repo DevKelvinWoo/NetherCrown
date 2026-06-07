@@ -1,9 +1,9 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
+#include "NetherCrownEnemyBTTaskBase.h"
 #include "NetherCrownEnemySelectChaseTypeTask.generated.h"
 
 UENUM(BlueprintType)
@@ -15,7 +15,7 @@ enum class ENetherCrownEnemyChaseType : uint8
 };
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownEnemySelectChaseTypeTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownEnemySelectChaseTypeTask : public UNetherCrownEnemyBTTaskBase
 {
 	GENERATED_BODY()
 

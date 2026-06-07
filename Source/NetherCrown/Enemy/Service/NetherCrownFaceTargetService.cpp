@@ -22,14 +22,14 @@ void UNetherCrownFaceTargetService::TickNode(UBehaviorTreeComponent& OwnerComp, 
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
+	ANetherCrownEnemyAIController* EnemyAIController{ GetEnemyAIController(OwnerComp) };
+	if (!IsValid(EnemyAIController))
 	{
 		return;
 	}
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return;
 	}
@@ -39,8 +39,8 @@ void UNetherCrownFaceTargetService::TickNode(UBehaviorTreeComponent& OwnerComp, 
 		return;
 	}
 
-	ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	ANetherCrownEnemy* OwnerEnemy{ GetControlledEnemy(OwnerComp) };
+	if (!IsValid(OwnerEnemy))
 	{
 		return;
 	}

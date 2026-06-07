@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
+#include "NetherCrownEnemyBTTaskBase.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "NetherCrownSetBlackboardBoolTask.generated.h"
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownSetBlackboardBoolTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownSetBlackboardBoolTask : public UNetherCrownEnemyBTTaskBase
 {
 	GENERATED_BODY()
 

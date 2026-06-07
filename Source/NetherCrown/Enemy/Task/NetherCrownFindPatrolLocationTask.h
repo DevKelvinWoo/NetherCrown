@@ -3,12 +3,12 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
+#include "NetherCrownEnemyBTTaskBase.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "NetherCrownFindPatrolLocationTask.generated.h"
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownFindPatrolLocationTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownFindPatrolLocationTask : public UNetherCrownEnemyBTTaskBase
 {
 	GENERATED_BODY()
 

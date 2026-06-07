@@ -6,7 +6,6 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyRangedBasicAttackComponent.h"
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 
 UNetherCrownEnemyRangedBasicAttackTask::UNetherCrownEnemyRangedBasicAttackTask()
 {
@@ -20,14 +19,8 @@ EBTNodeResult::Type UNetherCrownEnemyRangedBasicAttackTask::ExecuteTask(UBehavio
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	const ANetherCrownBossEnemy* BossEnemy{ EnemyAIController->GetPawn() };
-	if (!ensureAlways(IsValid(BossEnemy)) || !BossEnemy->HasAuthority())
+	const ANetherCrownBossEnemy* BossEnemy{ GetControlledEnemy<ANetherCrownBossEnemy>(OwnerComp) };
+	if (!IsValid(BossEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}

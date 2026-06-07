@@ -2,9 +2,7 @@
 
 #include "NetherCrownEnemyBasicAttackTask.h"
 
-#include "AIController.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemyBasicAttackComponent.h"
 
 UNetherCrownEnemyBasicAttackTask::UNetherCrownEnemyBasicAttackTask()
@@ -16,14 +14,8 @@ EBTNodeResult::Type UNetherCrownEnemyBasicAttackTask::ExecuteTask(UBehaviorTreeC
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	const ANetherCrownEnemy* ControlledEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(ControlledEnemy)) || !ControlledEnemy->HasAuthority())
+	const ANetherCrownEnemy* ControlledEnemy{ GetControlledEnemy(OwnerComp) };
+	if (!IsValid(ControlledEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}

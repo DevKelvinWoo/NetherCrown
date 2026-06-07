@@ -7,7 +7,6 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Character/NetherCrownCharacter.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
 #include "NetherCrown/Enemy/EnemySkill/NetherCrownSkillEnemyDashAttack.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
@@ -25,14 +24,8 @@ EBTNodeResult::Type UNetherCrownEnemyDashAttackTask::ExecuteTask(UBehaviorTreeCo
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 	ResetTaskState();
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	const ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	const ANetherCrownEnemy* OwnerEnemy{ GetControlledEnemy(OwnerComp) };
+	if (!IsValid(OwnerEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -64,8 +57,8 @@ EBTNodeResult::Type UNetherCrownEnemyDashAttackTask::ExecuteTask(UBehaviorTreeCo
 		return EBTNodeResult::Failed;
 	}
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		ResetTaskState();
 		return EBTNodeResult::Failed;

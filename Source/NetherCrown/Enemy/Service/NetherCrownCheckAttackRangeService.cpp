@@ -2,11 +2,9 @@
 
 #include "NetherCrownCheckAttackRangeService.h"
 
-#include "AIController.h"
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyStatComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 
 UNetherCrownCheckAttackRangeService::UNetherCrownCheckAttackRangeService()
 {
@@ -23,20 +21,14 @@ void UNetherCrownCheckAttackRangeService::TickNode(UBehaviorTreeComponent& Owner
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
+	const ANetherCrownEnemy* ControlledEnemy{ GetControlledEnemy(OwnerComp) };
+	if (!IsValid(ControlledEnemy))
 	{
 		return;
 	}
 
-	const ANetherCrownEnemy* ControlledEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(ControlledEnemy)) || !ControlledEnemy->HasAuthority())
-	{
-		return;
-	}
-
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return;
 	}

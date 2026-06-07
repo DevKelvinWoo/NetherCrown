@@ -5,7 +5,6 @@
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Components/NetherCrownEnemyBTCosmeticComponent.h"
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 
 UNetherCrownEnemyPlayFoundCosmeticTask::UNetherCrownEnemyPlayFoundCosmeticTask()
 {
@@ -15,14 +14,8 @@ UNetherCrownEnemyPlayFoundCosmeticTask::UNetherCrownEnemyPlayFoundCosmeticTask()
 
 EBTNodeResult::Type UNetherCrownEnemyPlayFoundCosmeticTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	const ANetherCrownEnemyAIController* OwnerAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(OwnerAIController)))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	const ANetherCrownEnemy* ControlledEnemy{ Cast<ANetherCrownEnemy>(OwnerAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(ControlledEnemy)))
+	const ANetherCrownEnemy* ControlledEnemy{ GetControlledEnemy(OwnerComp, false) };
+	if (!IsValid(ControlledEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -35,8 +28,8 @@ EBTNodeResult::Type UNetherCrownEnemyPlayFoundCosmeticTask::ExecuteTask(UBehavio
 
 	EnemyBTCosmeticComponent->PlayEnemyFoundCosmetic();
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return EBTNodeResult::Failed;
 	}

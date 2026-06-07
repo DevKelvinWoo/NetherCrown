@@ -3,11 +3,11 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
+#include "NetherCrownEnemyBTTaskBase.h"
 #include "NetherCrownEnemyBasicAttackTask.generated.h"
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownEnemyBasicAttackTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownEnemyBasicAttackTask : public UNetherCrownEnemyBTTaskBase
 {
 	GENERATED_BODY()
 

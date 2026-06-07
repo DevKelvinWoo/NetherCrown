@@ -5,7 +5,6 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
 #include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemyVoidPiercer.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
@@ -22,14 +21,8 @@ EBTNodeResult::Type UNetherCrownBossVoidPiercerTask::ExecuteTask(UBehaviorTreeCo
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	const ANetherCrownBossEnemy* BossEnemy{ Cast<ANetherCrownBossEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(BossEnemy)))
+	const ANetherCrownBossEnemy* BossEnemy{ GetControlledEnemy<ANetherCrownBossEnemy>(OwnerComp) };
+	if (!IsValid(BossEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}
@@ -49,8 +42,8 @@ EBTNodeResult::Type UNetherCrownBossVoidPiercerTask::ExecuteTask(UBehaviorTreeCo
 	}
 	CachedVoidPiercerSkillObjectWeak = MakeWeakObjectPtr(VoidPiercerSkillObject);
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return EBTNodeResult::Failed;
 	}

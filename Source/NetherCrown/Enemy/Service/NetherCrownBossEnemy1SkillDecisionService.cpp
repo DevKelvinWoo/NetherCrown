@@ -5,7 +5,6 @@
 
 #include "BehaviorTree/BlackboardComponent.h"
 #include "NetherCrown/Enemy/NetherCrownBossEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
 
@@ -20,20 +19,14 @@ void UNetherCrownBossEnemy1SkillDecisionService::TickNode(UBehaviorTreeComponent
 {
 	Super::TickNode(OwnerComp, NodeMemory, DeltaSeconds);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
+	const ANetherCrownBossEnemy* OwnerBossEnemy{ GetControlledEnemy<ANetherCrownBossEnemy>(OwnerComp, false) };
+	if (!IsValid(OwnerBossEnemy))
 	{
 		return;
 	}
 
-	const ANetherCrownBossEnemy* OwnerBossEnemy{ Cast<ANetherCrownBossEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerBossEnemy)))
-	{
-		return;
-	}
-
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return;
 	}

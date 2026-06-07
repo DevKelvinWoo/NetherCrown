@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTTaskNode.h"
+#include "NetherCrownEnemyBTTaskBase.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Vector.h"
 #include "NetherCrownBossRangedMoveLocationTask.generated.h"
@@ -18,7 +18,7 @@ enum class ENetherCrownBossRangedMoveType : uint8
 };
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownBossRangedMoveLocationTask : public UBTTaskNode
+class NETHERCROWN_API UNetherCrownBossRangedMoveLocationTask : public UNetherCrownEnemyBTTaskBase
 {
 	GENERATED_BODY()
 

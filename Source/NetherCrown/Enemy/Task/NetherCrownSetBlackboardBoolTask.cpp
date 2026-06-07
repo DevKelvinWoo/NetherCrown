@@ -15,8 +15,8 @@ EBTNodeResult::Type UNetherCrownSetBlackboardBoolTask::ExecuteTask(UBehaviorTree
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return EBTNodeResult::Failed;
 	}

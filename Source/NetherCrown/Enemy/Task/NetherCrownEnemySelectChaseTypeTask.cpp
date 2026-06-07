@@ -14,8 +14,8 @@ UNetherCrownEnemySelectChaseTypeTask::UNetherCrownEnemySelectChaseTypeTask()
 
 EBTNodeResult::Type UNetherCrownEnemySelectChaseTypeTask::ExecuteTask(UBehaviorTreeComponent& OwnerComp, uint8* NodeMemory)
 {
-	UBlackboardComponent* BlackboardComponent{ OwnerComp.GetBlackboardComponent() };
-	if (!ensureAlways(IsValid(BlackboardComponent)))
+	UBlackboardComponent* BlackboardComponent{ GetBlackboardComponent(OwnerComp) };
+	if (!IsValid(BlackboardComponent))
 	{
 		return EBTNodeResult::Failed;
 	}

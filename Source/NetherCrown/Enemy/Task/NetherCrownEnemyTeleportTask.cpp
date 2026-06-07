@@ -4,7 +4,6 @@
 #include "NetherCrownEnemyTeleportTask.h"
 
 #include "NetherCrown/Enemy/NetherCrownEnemy.h"
-#include "NetherCrown/Enemy/AIController/NetherCrownEnemyAIController.h"
 #include "NetherCrown/Enemy/Components/NetherCrownEnemySkillComponent.h"
 #include "NetherCrown/Enemy/EnemySkill/NetherCrownEnemySkillObject.h"
 #include "NetherCrown/Tags/NetherCrownGameplayTags.h"
@@ -19,14 +18,8 @@ EBTNodeResult::Type UNetherCrownEnemyTeleportTask::ExecuteTask(UBehaviorTreeComp
 {
 	Super::ExecuteTask(OwnerComp, NodeMemory);
 
-	const ANetherCrownEnemyAIController* EnemyAIController{ Cast<ANetherCrownEnemyAIController>(OwnerComp.GetAIOwner()) };
-	if (!ensureAlways(IsValid(EnemyAIController)))
-	{
-		return EBTNodeResult::Failed;
-	}
-
-	const ANetherCrownEnemy* OwnerEnemy{ Cast<ANetherCrownEnemy>(EnemyAIController->GetPawn()) };
-	if (!ensureAlways(IsValid(OwnerEnemy)) || !OwnerEnemy->HasAuthority())
+	const ANetherCrownEnemy* OwnerEnemy{ GetControlledEnemy(OwnerComp) };
+	if (!IsValid(OwnerEnemy))
 	{
 		return EBTNodeResult::Failed;
 	}

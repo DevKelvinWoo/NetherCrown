@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTService.h"
+#include "NetherCrownEnemyBTServiceBase.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Bool.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Float.h"
 #include "BehaviorTree/Blackboard/BlackboardKeyType_Object.h"
@@ -12,7 +12,7 @@
 class UBlackboardComponent;
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownUpdateRangedBossMovementService : public UBTService
+class NETHERCROWN_API UNetherCrownUpdateRangedBossMovementService : public UNetherCrownEnemyBTServiceBase
 {
 	GENERATED_BODY()
 

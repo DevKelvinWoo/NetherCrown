@@ -1,15 +1,15 @@
-﻿// Fill out your copyright notice in the Description page of Project Settings.
+// Fill out your copyright notice in the Description page of Project Settings.
 
 #pragma once
 
 #include "CoreMinimal.h"
-#include "BehaviorTree/BTService.h"
+#include "NetherCrownEnemyBTServiceBase.h"
 #include "NetherCrownBossEnemy1EscapeSkillDecisionService.generated.h"
 
 class UNetherCrownEnemySkillComponent;
 
 UCLASS()
-class NETHERCROWN_API UNetherCrownBossEnemy1EscapeSkillDecisionService : public UBTService
+class NETHERCROWN_API UNetherCrownBossEnemy1EscapeSkillDecisionService : public UNetherCrownEnemyBTServiceBase
 {
 	GENERATED_BODY()
 
