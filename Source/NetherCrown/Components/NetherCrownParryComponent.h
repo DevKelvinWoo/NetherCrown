@@ -41,10 +41,10 @@ private:
 	void SetParryState(const bool bActive);
 	UNetherCrownPlayerStatComponent* GetPlayerStatComponent() const;
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ActiveParry();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_DeactivateParry();
 
 	UFUNCTION(Client, Reliable)

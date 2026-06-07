@@ -238,3 +238,50 @@ void UNetherCrownWeaponTraceComponent::Server_ReportHit_Implementation(ANetherCr
 		OnHitEnemy.Broadcast(HitEnemy, HitLocation);
 	}
 }
+
+bool UNetherCrownWeaponTraceComponent::Server_ReportHit_Validate(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation)
+{
+	if (!IsValid(HitEnemy) || HitLocation.ContainsNaN())
+	{
+		return false;
+	}
+
+	if (!bIsTraceEnabled || HitIgnoreEnemies.Contains(HitEnemy))
+	{
+		return false;
+	}
+
+	const ANetherCrownWeapon* OwnerWeapon{ Cast<ANetherCrownWeapon>(GetOwner()) };
+	if (!IsValid(OwnerWeapon))
+	{
+		return false;
+	}
+
+	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(OwnerWeapon->GetOwner()) };
+	if (!IsValid(OwnerCharacter))
+	{
+		return false;
+	}
+
+	if (WeaponTraceData.SwingTraceRadius <= 0.f && WeaponTraceData.ThrustTraceRadius <= 0.f)
+	{
+		CacheWeaponTraceData();
+	}
+
+	const float MaxMeleeHitDistance
+	{
+		FMath::Max(WeaponTraceData.ThrustTraceLength + WeaponTraceData.ThrustTraceRadius, WeaponTraceData.SwingTraceRadius) + 300.f
+	};
+
+	if (FVector::DistSquared(OwnerCharacter->GetActorLocation(), HitEnemy->GetActorLocation()) > FMath::Square(MaxMeleeHitDistance))
+	{
+		return false;
+	}
+
+	if (FVector::DistSquared(HitLocation, HitEnemy->GetActorLocation()) > FMath::Square(300.f))
+	{
+		return false;
+	}
+
+	return true;
+}

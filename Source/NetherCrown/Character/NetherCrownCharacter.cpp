@@ -291,6 +291,22 @@ void ANetherCrownCharacter::Server_SetPressedMoveKey_Implementation(const bool b
 	CachedLastMoveDirection = InLastMoveDirection.GetSafeNormal2D();
 }
 
+bool ANetherCrownCharacter::Server_SetPressedMoveKey_Validate(const bool bInPressedMoveKey, const FVector& InLastMoveDirection)
+{
+	if (InLastMoveDirection.ContainsNaN())
+	{
+		return false;
+	}
+
+	if (!bInPressedMoveKey)
+	{
+		return InLastMoveDirection.IsNearlyZero();
+	}
+
+	const FVector2D MoveDirection2D{ InLastMoveDirection.X, InLastMoveDirection.Y };
+	return !MoveDirection2D.IsNearlyZero() && MoveDirection2D.SizeSquared() <= FMath::Square(1.1f);
+}
+
 void ANetherCrownCharacter::LookAtCharacter(const FInputActionValue& Value)
 {
 	const FVector2D& MovementVector{ Value.Get<FVector2D>() };
@@ -560,6 +576,23 @@ void ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Implementation(AN
 	NetherCrownCrowdControlComponent->KnockBack(KnockBackDirection * KnockBackDistance);
 
 	FNetherCrownDamageEvent::ApplyDamage(this, EnemyAttackDamage, HitCauserEnemy->GetInstigatorController(), HitCauserEnemy, UNetherCrownPhysicalDamageType::StaticClass());
+}
+
+bool ANetherCrownCharacter::Server_ReportHitBasicAttackByEnemy_Validate(ANetherCrownEnemy* HitCauserEnemy, const int32 EnemyAttackDamage)
+{
+	if (!IsValid(HitCauserEnemy) || EnemyAttackDamage <= 0 || EnemyAttackDamage > 10000)
+	{
+		return false;
+	}
+
+	const UNetherCrownEnemyBasicAttackComponent* EnemyBasicAttackComponent{ HitCauserEnemy->GetEnemyBasicAttackComponent() };
+	if (!IsValid(EnemyBasicAttackComponent) || !EnemyBasicAttackComponent->IsAttacking())
+	{
+		return false;
+	}
+
+	constexpr float MaxEnemyBasicAttackDistance{ 500.f };
+	return FVector::DistSquared(GetActorLocation(), HitCauserEnemy->GetActorLocation()) <= FMath::Square(MaxEnemyBasicAttackDistance);
 }
 
 UNetherCrownStatusEffectControlComponent* ANetherCrownCharacter::GetStatusEffectControlComponent() const

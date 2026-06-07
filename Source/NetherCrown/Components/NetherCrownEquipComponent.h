@@ -65,10 +65,10 @@ private:
 	UFUNCTION()
 	void OnRep_EquippedWeapon();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_EquipOrStowWeapon();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ChangeWeapon();
 
 	UFUNCTION(NetMulticast, Reliable) //Unreliable 시 패킷 손실로 애니메이션 출력이 안됨

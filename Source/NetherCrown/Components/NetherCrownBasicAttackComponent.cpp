@@ -177,6 +177,28 @@ void UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Implementation(
 	}
 }
 
+bool UNetherCrownBasicAttackComponent::Server_RequestBasicAttack_Validate()
+{
+	if (!IsValid(CachedCharacter))
+	{
+		return false;
+	}
+
+	const UNetherCrownActionControlComponent* ActionControlComponent{ CachedCharacter->GetActionControlComponent() };
+	if (!IsValid(ActionControlComponent))
+	{
+		return false;
+	}
+
+	const UNetherCrownEquipComponent* EquipComponent{ CachedCharacter->GetEquipComponent() };
+	if (!IsValid(EquipComponent) || !IsValid(EquipComponent->GetEquippedWeapon()))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void UNetherCrownBasicAttackComponent::StartAttackBasic()
 {
 	if (!ensureAlways(IsValid(CachedCharacter)) || !CachedCharacter->HasAuthority())

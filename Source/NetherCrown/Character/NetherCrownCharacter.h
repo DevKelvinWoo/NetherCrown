@@ -93,7 +93,7 @@ public:
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	bool IsParrying() const;
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ReportHitBasicAttackByEnemy(ANetherCrownEnemy* HitCauserEnemy, const int32 EnemyAttackDamage);
 
 	UNetherCrownBasicAttackComponent* GetBasicAttackComponent() const { return NetherCrownBasicAttackComponent; }
@@ -129,7 +129,7 @@ protected:
 private:
 	void DestroyVisualOnlyComponentsOnDS();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SetPressedMoveKey(const bool bInPressedMoveKey, const FVector& InLastMoveDirection);
 
 	void SetUseControllerSettings();

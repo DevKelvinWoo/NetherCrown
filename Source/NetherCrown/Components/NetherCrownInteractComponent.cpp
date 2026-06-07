@@ -231,6 +231,23 @@ void UNetherCrownInteractComponent::Server_InteractToTarget_Implementation()
 	InteractActor->Interact();
 }
 
+bool UNetherCrownInteractComponent::Server_InteractToTarget_Validate()
+{
+	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!IsValid(OwnerCharacter) || !IsValid(TargetInteractActor))
+	{
+		return false;
+	}
+
+	if (!TargetInteractActor->GetClass()->ImplementsInterface(UNetherCrownInteract::StaticClass()))
+	{
+		return false;
+	}
+
+	constexpr float MaxInteractDistance{ 500.f };
+	return FVector::DistSquared(OwnerCharacter->GetActorLocation(), TargetInteractActor->GetActorLocation()) <= FMath::Square(MaxInteractDistance);
+}
+
 void UNetherCrownInteractComponent::Server_FinishInteract_Implementation()
 {
 	auto* InteractActor{ Cast<INetherCrownInteract>(TargetInteractActor) };
@@ -246,6 +263,23 @@ void UNetherCrownInteractComponent::Server_FinishInteract_Implementation()
 	}
 
 	InteractActor->FinishInteract(OwnerCharacter);
+}
+
+bool UNetherCrownInteractComponent::Server_FinishInteract_Validate()
+{
+	const ANetherCrownCharacter* OwnerCharacter{ Cast<ANetherCrownCharacter>(GetOwner()) };
+	if (!IsValid(OwnerCharacter) || !IsValid(TargetInteractActor))
+	{
+		return false;
+	}
+
+	if (!TargetInteractActor->GetClass()->ImplementsInterface(UNetherCrownInteract::StaticClass()))
+	{
+		return false;
+	}
+
+	constexpr float MaxInteractDistance{ 700.f };
+	return FVector::DistSquared(OwnerCharacter->GetActorLocation(), TargetInteractActor->GetActorLocation()) <= FMath::Square(MaxInteractDistance);
 }
 
 void UNetherCrownInteractComponent::SetTargetInteractActor(AActor* InTargetInteractActor)

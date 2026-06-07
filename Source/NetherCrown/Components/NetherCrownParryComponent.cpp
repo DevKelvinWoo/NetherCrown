@@ -376,7 +376,27 @@ void UNetherCrownParryComponent::Server_DeactivateParry_Implementation()
 	SetParryState(false);
 }
 
+bool UNetherCrownParryComponent::Server_DeactivateParry_Validate()
+{
+	if (!IsValid(CachedCharacter))
+	{
+		return false;
+	}
+
+	return IsValid(GetPlayerStatComponent());
+}
+
 void UNetherCrownParryComponent::Server_ActiveParry_Implementation()
 {
 	SetParryState(true);
+}
+
+bool UNetherCrownParryComponent::Server_ActiveParry_Validate()
+{
+	if (!IsValid(CachedCharacter))
+	{
+		return false;
+	}
+
+	return IsValid(GetPlayerStatComponent());
 }

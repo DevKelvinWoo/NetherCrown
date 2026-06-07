@@ -46,7 +46,7 @@ private:
 	void DetectWeaponSwingHit();
 	void DetectWeaponThrustHit();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ReportHit(ANetherCrownEnemy* HitEnemy, const FVector& HitLocation);
 
 	UPROPERTY(Replicated)

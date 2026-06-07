@@ -52,7 +52,7 @@ private:
 	void ConstructSkillObjects();
 	void CacheInitData();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_ActivateSkill(const ENetherCrownSkillKeyEnum SkillKeyEnum);
 
 	UFUNCTION(NetMulticast, Unreliable)

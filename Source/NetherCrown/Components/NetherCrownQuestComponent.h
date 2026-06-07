@@ -98,10 +98,10 @@ private:
 	void SetQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState);
 	void SetQuestPersistentData() const;
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_SetQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_GrantQuestReward(const FGameplayTag& QuestTag);
 
 	UFUNCTION()

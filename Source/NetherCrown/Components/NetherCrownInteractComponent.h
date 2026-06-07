@@ -33,13 +33,13 @@ private:
 	void RestoreCameraPosition();
 	void RestoreHiddenScreensAfterInteraction() const;
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_InteractToTarget();
 
 	UFUNCTION(Client, Reliable)
 	void Client_PlayInteractSound();
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_FinishInteract();
 
 	UPROPERTY(Transient, Replicated)

@@ -208,6 +208,27 @@ void UNetherCrownSkillComponent::Server_ActivateSkill_Implementation(const ENeth
 	Multicast_PlaySkillCosmetics(FoundSkillObject);
 }
 
+bool UNetherCrownSkillComponent::Server_ActivateSkill_Validate(const ENetherCrownSkillKeyEnum SkillKeyEnum)
+{
+	if (!IsValid(CachedCharacter))
+	{
+		return false;
+	}
+
+	if (SkillKeyEnum == ENetherCrownSkillKeyEnum::None)
+	{
+		return false;
+	}
+
+	UNetherCrownSkillObject* const* FoundSkillObjectPtr{ SkillObjectMap.Find(SkillKeyEnum) };
+	if (!FoundSkillObjectPtr || !IsValid(*FoundSkillObjectPtr))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void UNetherCrownSkillComponent::Multicast_PlaySkillCosmetics_Implementation(UNetherCrownSkillObject* FoundSkillObject)
 {
 	if (!IsValid(FoundSkillObject))

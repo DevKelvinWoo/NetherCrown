@@ -81,6 +81,26 @@ void UNetherCrownQuestComponent::Server_SetQuestState_Implementation(const FGame
 	SetQuestState(QuestTag, QuestState);
 }
 
+bool UNetherCrownQuestComponent::Server_SetQuestState_Validate(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState)
+{
+	if (!QuestTag.IsValid() || !IsValid(GetQuestDataByGameplayTag(QuestTag)))
+	{
+		return false;
+	}
+
+	if (QuestState == ENetherCrownQuestState::InProgress)
+	{
+		return GetQuestState(QuestTag) == ENetherCrownQuestState::None;
+	}
+
+	if (QuestState == ENetherCrownQuestState::Done)
+	{
+		return GetQuestState(QuestTag) == ENetherCrownQuestState::InProgress && CanCompleteQuest(QuestTag);
+	}
+
+	return false;
+}
+
 void UNetherCrownQuestComponent::RequestAcceptQuestState(const FGameplayTag& QuestTag, const ENetherCrownQuestState QuestState)
 {
 	Server_SetQuestState(QuestTag, QuestState);
@@ -100,6 +120,16 @@ void UNetherCrownQuestComponent::Server_GrantQuestReward_Implementation(const FG
 
 	TryGrantQuestReward(QuestTag);
 	SetQuestState(QuestTag, ENetherCrownQuestState::Rewarded);
+}
+
+bool UNetherCrownQuestComponent::Server_GrantQuestReward_Validate(const FGameplayTag& QuestTag)
+{
+	if (!QuestTag.IsValid() || !IsValid(GetQuestDataByGameplayTag(QuestTag)))
+	{
+		return false;
+	}
+
+	return GetQuestState(QuestTag) == ENetherCrownQuestState::Done;
 }
 
 const ENetherCrownQuestState UNetherCrownQuestComponent::GetQuestState(const FGameplayTag& QuestTag) const

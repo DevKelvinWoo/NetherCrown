@@ -97,7 +97,7 @@ private:
 	UFUNCTION(NetMulticast, Unreliable)
 	void Multicast_PlayHitImpactEffect(const FVector& HitLocation, const ANetherCrownEnemy* HitEnemy);
 
-	UFUNCTION(Server, Reliable)
+	UFUNCTION(Server, Reliable, WithValidation)
 	void Server_RequestBasicAttack();
 
 	void AutoTargetEnemy() const;

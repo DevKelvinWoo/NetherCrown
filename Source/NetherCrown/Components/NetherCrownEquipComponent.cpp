@@ -287,8 +287,33 @@ void UNetherCrownEquipComponent::Server_ChangeWeapon_Implementation()
 	ChangeWeaponInternal();
 }
 
+bool UNetherCrownEquipComponent::Server_ChangeWeapon_Validate()
+{
+	if (!IsValid(CachedCharacter))
+	{
+		return false;
+	}
+
+	return true;
+}
+
 void UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Implementation()
 {
+	if (EquipState == ENetherCrownEquipState::Equipping)
+	{
+		return;
+	}
+
+	ANetherCrownWeapon* EquipableWeapon{ EquipableWeaponWeak.Get() };
+	if (IsValid(EquipableWeapon))
+	{
+		constexpr float MaxEquipDistance{ 400.f };
+		if (FVector::DistSquared(CachedCharacter->GetActorLocation(), EquipableWeapon->GetActorLocation()) > FMath::Square(MaxEquipDistance))
+		{
+			return;
+		}
+	}
+
 	if (bCanEquip)
 	{
 		EquipOrStowWeaponInternal();
@@ -297,6 +322,16 @@ void UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Implementation()
 
 		OnEquipWeapon.Broadcast(true);
 	}
+}
+
+bool UNetherCrownEquipComponent::Server_EquipOrStowWeapon_Validate()
+{
+	if (!IsValid(CachedCharacter))
+	{
+		return false;
+	}
+
+	return true;
 }
 
 void UNetherCrownEquipComponent::Multicast_PlayEquipAnimationAndSound_Implementation()
